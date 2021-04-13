@@ -44,7 +44,7 @@ dependencies = {
             'Darwin': 'https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5-Darwin-x86_64.tar.gz',
         },
     },
-    'avr8-gnu-toolchain': {
+    'gcc-avr': {
         'version': '5.4.0',
         'url': {
             'Linux': 'https://xxxarmkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/7-2018q2/gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2',
