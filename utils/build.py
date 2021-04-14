@@ -140,7 +140,7 @@ class FirmwareBuildConfiguration(BuildConfiguration):
     @staticmethod
     def default_toolchain() -> Path:
         return Path(
-            __file__).resolve().parent.parent / 'cmake/GccArmNoneEabi.cmake'
+            __file__).resolve().parent.parent / 'cmake/AnyAvrGcc.cmake'
 
     def get_cmake_cache_entries(self):
         entries = []
