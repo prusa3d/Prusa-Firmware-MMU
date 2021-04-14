@@ -124,8 +124,10 @@ else()
 endif()
 
 if(CMAKE_CROSSCOMPILING)
-  # mcu related settings set(MCU_FLAGS -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16)
-  # add_compile_options(${MCU_FLAGS}) add_link_options(${MCU_FLAGS})
+  # mcu related settings
+  set(MCU_FLAGS -mmcu=atmega328)
+  add_compile_options(${MCU_FLAGS})
+  add_link_options(${MCU_FLAGS})
 
   # split and gc sections
   add_compile_options(-ffunction-sections -fdata-sections)
@@ -138,7 +140,7 @@ endif()
 
 # enable all warnings (well, not all, but some)
 add_compile_options(-Wall -Wsign-compare)
-add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wno-register> $<$<COMPILE_LANGUAGE:CXX>:-std=c++14>)
+add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++14>)
 
 # support _DEBUG macro (some code uses to recognize debug builds)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -164,7 +166,7 @@ add_executable(firmware)
 set_target_properties(firmware PROPERTIES CXX_STANDARD 14)
 
 # generate firmware.bin file
-objcopy(firmware "binary" ".bin")
+objcopy(firmware "ihex" ".hex")
 
 # generate linker map file
 target_link_options(firmware PUBLIC -Wl,-Map=firmware.map)
