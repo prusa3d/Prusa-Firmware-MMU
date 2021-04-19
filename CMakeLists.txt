@@ -1,12 +1,14 @@
 cmake_minimum_required(VERSION 3.15)
 include(cmake/Utilities.cmake)
-include(cmake/GetGitRevisionDescription.cmake)
-include(cmake/ProjectVersion.cmake)
 
+INCLUDE(3rdparty/gitversion/cmake.cmake)
+
+GET_GIT_SEMVER(PROJECT_GIT_VER)
+#message(STATUS "Semver is: ${PROJECT_GIT_VER}")
 project(
   MMU
   LANGUAGES C CXX ASM
-  VERSION ${PROJECT_VERSION}
+  VERSION "${PROJECT_GIT_VER}"
   )
 
 if(NOT CMAKE_CROSSCOMPILING)
@@ -32,22 +34,6 @@ set(PRINTER
       STRING
       "Select the MMU unit for which you want to compile the project (valid values are ${PRINTER_VALID_OPTS})."
     )
-set(PROJECT_VERSION_SUFFIX
-    "<auto>"
-    CACHE
-      STRING
-      "Full version suffix to be shown on the info screen in settings (e.g. full_version=4.0.3-BETA+1035.PR111.B4, suffix=-BETA+1035.PR111.B4). Defaults to '+<commit sha>.<dirty?>.<debug?>' if set to '<auto>'."
-    )
-set(PROJECT_VERSION_SUFFIX_SHORT
-    "<auto>"
-    CACHE
-      STRING
-      "Short version suffix to be shown on splash screen. Defaults to '+<BUILD_NUMBER>' if set to '<auto>'."
-    )
-set(BUILD_NUMBER
-    ""
-    CACHE STRING "Build number of the firmware. Resolved automatically if not specified."
-    )
 set(CUSTOM_COMPILE_OPTIONS
     ""
     CACHE STRING "Allows adding custom C/C++ flags"
@@ -60,8 +46,6 @@ foreach(OPTION "PRINTER")
   endif()
 endforeach()
 
-# Resolve BUILD_NUMBER and PROJECT_VERSION_* variables
-resolve_version_variables()
 
 # Check GCC Version
 get_recommended_gcc_version(RECOMMENDED_TOOLCHAIN_VERSION)
@@ -81,10 +65,6 @@ endif()
 
 # Inform user about the resolved settings
 message(STATUS "Project version: ${PROJECT_VERSION}")
-message(STATUS "Project version with full suffix: ${PROJECT_VERSION_FULL}")
-message(
-  STATUS "Project version with short suffix: ${PROJECT_VERSION}${PROJECT_VERSION_SUFFIX_SHORT}"
-  )
 message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}.")
 message(STATUS "Printer: ${PRINTER}")
 
@@ -163,6 +143,8 @@ endif()
 
 add_executable(firmware)
 
+TARGET_GIT_VERSION_INIT(firmware)
+
 set_target_properties(firmware PROPERTIES CXX_STANDARD 14)
 
 # generate firmware.bin file
@@ -183,17 +165,6 @@ target_compile_options(firmware PRIVATE -Wdouble-promotion)
 # target_link_libraries( firmware PRIVATE A3idesHeaders )
 
 target_sources(firmware PRIVATE src/main.cpp)
-
-set_property(
-  SOURCE src/version.c
-  APPEND
-  PROPERTY COMPILE_DEFINITIONS
-           FW_BUILD_NUMBER=${BUILD_NUMBER}
-           FW_VERSION_FULL=${PROJECT_VERSION_FULL}
-           FW_VERSION=${PROJECT_VERSION}
-           FW_VERSION_SUFFIX=${PROJECT_VERSION_SUFFIX}
-           FW_VERSION_SUFFIX_SHORT=${PROJECT_VERSION_SUFFIX_SHORT}
-  )
 
 if(NOT CMAKE_CROSSCOMPILING)
   enable_testing()

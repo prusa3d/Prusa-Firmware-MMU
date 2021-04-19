@@ -1,0 +1,3 @@
+[submodule "3rdparty/gitversion"]
+	path = 3rdparty/gitversion
+	url = https://github.com/vintagepc/gitversion.git
