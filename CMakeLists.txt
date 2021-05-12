@@ -155,7 +155,7 @@ endif()
 # Import definitions of all libraries
 #
 
-# add_subdirectory(lib)
+add_subdirectory(lib)
 
 #
 # MMU firmware
