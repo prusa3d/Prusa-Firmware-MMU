@@ -1,8 +1,11 @@
 #include "logic/mm_control.h"
+#include "hal/gpio.h"
 
 /// One-time setup of HW and SW components
 /// Called before entering the loop() function
 void setup(){
+    using namespace hal::gpio;
+    hal::gpio::Init(GPIOB, 1, GPIO_InitTypeDef(Mode::output, Level::low));
 
 }
 
@@ -27,6 +30,11 @@ void loop(){
 int main() {
     setup();
     for(;;){
+        using namespace hal::gpio;
+        WritePin(GPIOB, 5, Level::low);
+        TogglePin(GPIOB, 6);
+        if (hal::gpio::ReadPin(GPIOB, 7) == hal::gpio::Level::low)
+            break;
         loop();
     }
     return 0;
