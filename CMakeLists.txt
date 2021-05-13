@@ -168,11 +168,7 @@ set_target_properties(firmware PROPERTIES CXX_STANDARD 14)
 # generate firmware.bin file
 objcopy(firmware "ihex" ".hex")
 
-add_custom_command(
-    TARGET firmware
-    POST_BUILD
-    COMMAND avr-objdump ARGS -CSd firmware > firmware.txt
-)
+add_custom_command(TARGET firmware POST_BUILD COMMAND avr-objdump ARGS -CSd firmware > firmware.txt)
 
 # generate linker map file
 target_link_options(firmware PUBLIC -Wl,-Map=firmware.map)
@@ -188,10 +184,7 @@ target_compile_options(firmware PRIVATE -Wdouble-promotion)
 
 # target_link_libraries( firmware PRIVATE A3idesHeaders )
 
-target_sources(firmware PRIVATE
-  src/main.cpp
-  src/hal/avr/cpu.cpp
-)
+target_sources(firmware PRIVATE src/main.cpp src/hal/avr/cpu.cpp)
 
 set_property(
   SOURCE src/version.c
