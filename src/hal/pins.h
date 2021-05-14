@@ -5,9 +5,7 @@
 namespace hal {
 namespace pins {
 
-    /// pin access routines
-    void WritePin(uint8_t pin, uint8_t value);
-    uint8_t ReadPin(uint8_t pin);
+    /// pin definitions
 
 } // namespace pins
 } // namespace hal
