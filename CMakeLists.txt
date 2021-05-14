@@ -117,13 +117,13 @@ endif()
 add_compile_options(-g)
 
 # optimizations
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  add_compile_options(-Og)
-else()
-  add_compile_options(-Os)
-endif()
-
 if(CMAKE_CROSSCOMPILING)
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_options(-Og)
+  else()
+    add_compile_options(-Os)
+  endif()
+
   # mcu related settings
   set(MCU_FLAGS -mmcu=atmega32u4 -DF_CPU=16000000L)
   add_compile_options(${MCU_FLAGS})
@@ -136,6 +136,12 @@ if(CMAKE_CROSSCOMPILING)
   # disable exceptions and related metadata
   add_compile_options(-fno-exceptions -fno-unwind-tables)
   add_link_options(-Wl,--defsym,__exidx_start=0,--defsym,__exidx_end=0)
+else()
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_options(-O0)
+  else()
+    add_compile_options(-O2)
+  endif()
 endif()
 
 # enable all warnings (well, not all, but some)
@@ -165,10 +171,13 @@ add_executable(firmware)
 
 set_target_properties(firmware PROPERTIES CXX_STANDARD 14)
 
-# generate firmware.bin file
-objcopy(firmware "ihex" ".hex")
-
-add_custom_command(TARGET firmware POST_BUILD COMMAND avr-objdump ARGS -CSd firmware > firmware.txt)
+if(CMAKE_CROSSCOMPILING)
+  # generate firmware.bin file
+  objcopy(firmware "ihex" ".hex")
+  add_custom_command(
+    TARGET firmware POST_BUILD COMMAND avr-objdump ARGS -CSd firmware > firmware.txt
+    )
+endif()
 
 add_custom_command(TARGET firmware POST_BUILD COMMAND avr-size ARGS -C --mcu=atmega32u4 firmware)
 

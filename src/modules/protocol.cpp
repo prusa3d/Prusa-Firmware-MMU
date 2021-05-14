@@ -45,6 +45,7 @@ Protocol::DecodeStatus Protocol::DecodeRequest(uint8_t c) {
             rqState = RequestStates::Value;
             return DecodeStatus::NeedMoreData;
         default:
+            requestMsg.code = RequestMsgCodes::unknown;
             rqState = RequestStates::Error;
             return DecodeStatus::Error;
         }
@@ -57,6 +58,7 @@ Protocol::DecodeStatus Protocol::DecodeRequest(uint8_t c) {
             rqState = RequestStates::Code;
             return DecodeStatus::MessageCompleted;
         } else {
+            requestMsg.code = RequestMsgCodes::unknown;
             rqState = RequestStates::Error;
             return DecodeStatus::Error;
         }
@@ -65,6 +67,7 @@ Protocol::DecodeStatus Protocol::DecodeRequest(uint8_t c) {
             rqState = RequestStates::Code;
             return DecodeStatus::MessageCompleted;
         } else {
+            requestMsg.code = RequestMsgCodes::unknown;
             rqState = RequestStates::Error;
             return DecodeStatus::Error;
         }
@@ -108,17 +111,10 @@ Protocol::DecodeStatus Protocol::DecodeResponse(uint8_t c) {
             responseMsg.request.value += c - '0';
             return DecodeStatus::NeedMoreData;
         } else if (c == ' ') {
-            rspState = ResponseStates::Space;
-            return DecodeStatus::NeedMoreData;
-        } else {
-            rspState = ResponseStates::Error;
-            return DecodeStatus::Error;
-        }
-    case ResponseStates::Space:
-        if (c == ' ') {
             rspState = ResponseStates::ParamCode;
             return DecodeStatus::NeedMoreData;
         } else {
+            rspState = ResponseStates::Error;
             return DecodeStatus::Error;
         }
     case ResponseStates::ParamCode:
@@ -129,6 +125,7 @@ Protocol::DecodeStatus Protocol::DecodeResponse(uint8_t c) {
         case 'A':
         case 'R':
             rspState = ResponseStates::ParamValue;
+            responseMsg.params.code = (RequestMsgCodes)c; // @@TODO this is not clean
             responseMsg.params.value = 0;
             return DecodeStatus::NeedMoreData;
         default:

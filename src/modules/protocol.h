@@ -113,6 +113,12 @@ public:
     /// @returns number of bytes written into txbuff
     static uint8_t EncodeResponseQueryOperation(const RequestMsg &msg, ResponseMsgParamCodes code, uint8_t value, uint8_t *txbuff);
 
+    /// @returns the most recently lexed request message
+    inline const RequestMsg GetRequestMsg() const { return requestMsg; }
+
+    /// @returns the most recently lexed response message
+    inline const ResponseMsg GetResponseMsg() const { return responseMsg; }
+
 private:
     enum class RequestStates : uint8_t {
         Code, ///< starting state - expects message code
@@ -126,7 +132,6 @@ private:
     enum class ResponseStates : uint8_t {
         RequestCode, ///< starting state - expects message code
         RequestValue, ///< expecting code value
-        Space, ///< expecting space
         ParamCode, ///< expecting param code
         ParamValue, ///< expecting param value
         Error ///< automaton in error state

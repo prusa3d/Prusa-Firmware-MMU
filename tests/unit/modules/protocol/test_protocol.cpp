@@ -200,3 +200,157 @@ TEST_CASE("protocol::EncodeResponseQueryOperation", "[protocol]") {
         CHECK(txbuff[msglen - 1] == '\n');
     }
 }
+
+TEST_CASE("protocol::DecodeRequest", "[protocol]") {
+    using namespace modules;
+    Protocol p;
+    const char *rxbuff = GENERATE(
+        "B0\n", "B1\n", "B2\n",
+        "E0\n", "E1\n", "E2\n", "E3\n", "E4\n",
+        "K0\n",
+        "L0\n", "L1\n", "L2\n", "L3\n", "L4\n",
+        "M0\n", "M1\n",
+        "P0\n",
+        "Q0\n",
+        "S0\n", "S1\n", "S2\n", "S3\n",
+        "T0\n", "T1\n", "T2\n", "T3\n",
+        "U0\n",
+        "W0\n",
+        "X0\n");
+
+    const char *pc = rxbuff;
+    for (;;) {
+        uint8_t c = *pc++;
+        if (c == 0) {
+            // end of input test data
+            break;
+        } else if (c == '\n') {
+            // regular end of message line
+            CHECK(p.DecodeRequest(c) == Protocol::DecodeStatus::MessageCompleted);
+        } else {
+            CHECK(p.DecodeRequest(c) == Protocol::DecodeStatus::NeedMoreData);
+        }
+    }
+
+    // check the message type
+    const RequestMsg &rq = p.GetRequestMsg();
+    CHECK((uint8_t)rq.code == rxbuff[0]);
+    CHECK(rq.value == rxbuff[1] - '0');
+}
+
+TEST_CASE("protocol::DecodeResponseReadFinda", "[protocol]") {
+    using namespace modules;
+    Protocol p;
+    const char *rxbuff = GENERATE(
+        "P0 A0\n",
+        "P0 A1\n");
+
+    const char *pc = rxbuff;
+    for (;;) {
+        uint8_t c = *pc++;
+        if (c == 0) {
+            // end of input test data
+            break;
+        } else if (c == '\n') {
+            // regular end of message line
+            CHECK(p.DecodeResponse(c) == Protocol::DecodeStatus::MessageCompleted);
+        } else {
+            CHECK(p.DecodeResponse(c) == Protocol::DecodeStatus::NeedMoreData);
+        }
+    }
+
+    // check the message type
+    const ResponseMsg &rsp = p.GetResponseMsg();
+    CHECK((uint8_t)rsp.request.code == rxbuff[0]);
+    CHECK(rsp.request.value == rxbuff[1] - '0');
+    CHECK((uint8_t)rsp.params.code == rxbuff[3]);
+    CHECK((uint8_t)rsp.params.value == rxbuff[4] - '0');
+}
+
+TEST_CASE("protocol::DecodeResponseQueryOperation", "[protocol]") {
+    using namespace modules;
+    Protocol p;
+    const char *cmdReference = GENERATE(
+        "E0", "E1", "E2", "E3", "E4",
+        "K0",
+        "L0", "L1", "L2", "L3", "L4",
+        "T0", "T1", "T2", "T3",
+        "U0",
+        "W0");
+
+    const char *status = GENERATE(
+        "P0", "P1", "E0", "E1", "E9", "F");
+
+    std::string rxbuff(cmdReference);
+    rxbuff += ' ';
+    rxbuff += status;
+    rxbuff += '\n';
+
+    const char *pc = rxbuff.c_str();
+    for (;;) {
+        uint8_t c = *pc++;
+        if (c == 0) {
+            // end of input test data
+            break;
+        } else if (c == '\n') {
+            // regular end of message line
+            CHECK(p.DecodeResponse(c) == Protocol::DecodeStatus::MessageCompleted);
+        } else {
+            CHECK(p.DecodeResponse(c) == Protocol::DecodeStatus::NeedMoreData);
+        }
+    }
+
+    // check the message type
+    const ResponseMsg &rsp = p.GetResponseMsg();
+    CHECK((uint8_t)rsp.request.code == rxbuff[0]);
+    CHECK(rsp.request.value == rxbuff[1] - '0');
+    CHECK((uint8_t)rsp.params.code == rxbuff[3]);
+    if ((uint8_t)rsp.params.code != (uint8_t)ResponseMsgParamCodes::Finished) { //@@TODO again, not clean, need to define a separate msg struct for the params to make it type-safe and clean
+        CHECK((uint8_t)rsp.params.value == rxbuff[4] - '0');
+    }
+}
+
+TEST_CASE("protocol::DecodeRequestErrors", "[protocol]") {
+    using namespace modules;
+    Protocol p;
+    const char b0[] = "b0";
+    CHECK(p.DecodeRequest(b0[0]) == Protocol::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(b0[1]) == Protocol::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+
+    // reset protokol decoder
+    CHECK(p.DecodeRequest('\n') == Protocol::DecodeStatus::MessageCompleted);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+
+    const char B1_[] = "B1 \n";
+    CHECK(p.DecodeRequest(B1_[0]) == Protocol::DecodeStatus::NeedMoreData);
+    CHECK(p.DecodeRequest(B1_[1]) == Protocol::DecodeStatus::NeedMoreData);
+    CHECK(p.DecodeRequest(B1_[2]) == Protocol::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(B1_[3]) == Protocol::DecodeStatus::MessageCompleted);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+
+    const char _B2[] = " B2\n";
+    CHECK(p.DecodeRequest(_B2[0]) == Protocol::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(_B2[1]) == Protocol::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(_B2[2]) == Protocol::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(_B2[3]) == Protocol::DecodeStatus::MessageCompleted);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+
+    const char _B0_[] = " B0 ";
+    CHECK(p.DecodeRequest(_B0_[0]) == Protocol::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(_B0_[1]) == Protocol::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(_B0_[2]) == Protocol::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(_B0_[3]) == Protocol::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest('\n') == Protocol::DecodeStatus::MessageCompleted);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+}
