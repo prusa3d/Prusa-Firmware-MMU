@@ -4,12 +4,11 @@
 namespace hal {
 namespace gpio {
 
-    typedef struct
-    {
+    struct GPIO_TypeDef {
         volatile uint8_t PINx;
         volatile uint8_t DDRx;
         volatile uint8_t PORTx;
-    } GPIO_TypeDef;
+    };
 
     enum class Mode {
         input = 0,
