@@ -1,5 +1,5 @@
 # define the test executable
-add_executable(protocol_tests test_protocol.cpp)
+add_executable(protocol_tests ../../../../src/modules/protocol.cpp test_protocol.cpp)
 
 # define required search paths
 target_include_directories(protocol_tests PUBLIC ${CMAKE_SOURCE_DIR}/src/modules)
