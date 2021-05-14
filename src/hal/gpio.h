@@ -10,18 +10,18 @@ namespace gpio {
         volatile uint8_t PORTx;
     };
 
-    enum class Mode {
+    enum class Mode : uint8_t {
         input = 0,
         output,
     };
 
-    enum class Pull {
+    enum class Pull : uint8_t {
         none = 0,
         up,
         down, //not available on the AVR
     };
 
-    enum class Level {
+    enum class Level : uint8_t {
         low = 0,
         high,
     };
