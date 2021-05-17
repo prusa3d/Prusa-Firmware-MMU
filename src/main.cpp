@@ -1,6 +1,7 @@
 #include "logic/mm_control.h"
 #include "hal/gpio.h"
 #include "hal/spi.h"
+#include "pins.h"
 
 /// One-time setup of HW and SW components
 /// Called before entering the loop() function
@@ -8,10 +9,10 @@ void setup() {
     using namespace hal;
 
     spi::SPI_InitTypeDef spi_conf = {
-        .miso_pin = gpio::GPIO_pin(GPIOB, 3),
-        .mosi_pin = gpio::GPIO_pin(GPIOB, 2),
-        .sck_pin = gpio::GPIO_pin(GPIOB, 1),
-        .ss_pin = gpio::GPIO_pin(GPIOB, 0),
+        .miso_pin = gpio::GPIO_pin(TMC2130_SPI_MISO_PIN),
+        .mosi_pin = gpio::GPIO_pin(TMC2130_SPI_MOSI_PIN),
+        .sck_pin = gpio::GPIO_pin(TMC2130_SPI_SCK_PIN),
+        .ss_pin = gpio::GPIO_pin(TMC2130_SPI_SS_PIN),
         .prescaler = 2, //4mhz
     };
     spi::Init(SPI0, &spi_conf);
