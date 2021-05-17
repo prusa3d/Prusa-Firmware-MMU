@@ -18,6 +18,25 @@ void setup() {
         .cpol = 1,
     };
     spi::Init(SPI0, &spi_conf);
+
+    // SPI example
+    gpio::Init(gpio::GPIO_pin(GPIOC, 6), gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::high));
+    uint8_t dat[5];
+    gpio::WritePin(gpio::GPIO_pin(GPIOC, 6), gpio::Level::low);
+    spi::TxRx(SPI0, 0x01);
+    spi::TxRx(SPI0, 0x00);
+    spi::TxRx(SPI0, 0x00);
+    spi::TxRx(SPI0, 0x00);
+    spi::TxRx(SPI0, 0x00);
+    gpio::WritePin(gpio::GPIO_pin(GPIOC, 6), gpio::Level::high);
+    gpio::WritePin(gpio::GPIO_pin(GPIOC, 6), gpio::Level::low);
+    dat[0] = spi::TxRx(SPI0, 0x00);
+    dat[1] = spi::TxRx(SPI0, 0x00);
+    dat[2] = spi::TxRx(SPI0, 0x00);
+    dat[3] = spi::TxRx(SPI0, 0x00);
+    dat[4] = spi::TxRx(SPI0, 0x00);
+    gpio::WritePin(gpio::GPIO_pin(GPIOC, 6), gpio::Level::high);
+    (void)dat;
 }
 
 /// Main loop of the firmware
