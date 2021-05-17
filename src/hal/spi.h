@@ -25,7 +25,7 @@ namespace spi {
         gpio::Init(conf->miso_pin, gpio::GPIO_InitTypeDef(gpio::Mode::input, gpio::Pull::none));
         gpio::Init(conf->mosi_pin, gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::low));
         gpio::Init(conf->sck_pin, gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::low));
-        gpio::Init(conf->ss_pin, gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::high));
+        gpio::Init(conf->ss_pin, gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::high)); //the AVR requires this pin to be an output for SPI master mode to work properly.
 
         const uint8_t spi2x = (conf->prescaler == 7) ? 0 : (conf->prescaler & 0x01);
         const uint8_t spr = ((conf->prescaler - 1) >> 1) & 0x03;
