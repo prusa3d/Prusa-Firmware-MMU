@@ -33,28 +33,27 @@ enum class ResponseMsgParamCodes : uint8_t {
     Rejected = 'R'
 };
 
-/// A generic request message
-struct Msg {
-    RequestMsgCodes code;
-    uint8_t value;
-    inline Msg(RequestMsgCodes code, uint8_t value)
-        : code(code)
-        , value(value) {}
-};
-
 /// A request message
 /// Requests are being sent by the printer into the MMU
 /// It is the same structure as the generic Msg
-using RequestMsg = Msg;
+struct RequestMsg {
+    RequestMsgCodes code;
+    uint8_t value;
+    inline RequestMsg(RequestMsgCodes code, uint8_t value)
+        : code(code)
+        , value(value) {}
+};
 
 /// A response message
 /// Responses are being sent from the MMU into the printer as a response to a request message
 struct ResponseMsg {
     RequestMsg request; ///< response is always preceeded by the request message
-    Msg params; ///< parameters of reply
+    ResponseMsgParamCodes paramCode; ///< parameters of reply
+    uint8_t paramValue; ///< parameters of reply
     inline ResponseMsg(RequestMsg request, ResponseMsgParamCodes paramCode, uint8_t paramValue)
         : request(request)
-        , params((RequestMsgCodes)paramCode, paramValue) {}
+        , paramCode(paramCode)
+        , paramValue(paramValue) {}
 };
 
 /// Protocol class is responsible for creating/decoding messages in Rx/Tx buffer
@@ -63,7 +62,7 @@ struct ResponseMsg {
 class Protocol {
 public:
     /// Message decoding return value
-    enum class DecodeStatus : uint8_t {
+    enum class DecodeStatus : uint_fast8_t {
         MessageCompleted, ///< message completed and successfully lexed
         NeedMoreData, ///< message incomplete yet, waiting for another byte to come
         Error, ///< input character broke message decoding

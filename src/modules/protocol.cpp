@@ -125,22 +125,24 @@ Protocol::DecodeStatus Protocol::DecodeResponse(uint8_t c) {
         case 'A':
         case 'R':
             rspState = ResponseStates::ParamValue;
-            responseMsg.params.code = (RequestMsgCodes)c; // @@TODO this is not clean
-            responseMsg.params.value = 0;
+            responseMsg.paramCode = (ResponseMsgParamCodes)c;
+            responseMsg.paramValue = 0;
             return DecodeStatus::NeedMoreData;
         default:
+            responseMsg.paramCode = ResponseMsgParamCodes::unknown;
             rspState = ResponseStates::Error;
             return DecodeStatus::Error;
         }
     case ResponseStates::ParamValue:
         if (c >= '0' && c <= '9') {
-            responseMsg.params.value *= 10;
-            responseMsg.params.value += c - '0';
+            responseMsg.paramValue *= 10;
+            responseMsg.paramValue += c - '0';
             return DecodeStatus::NeedMoreData;
         } else if (c == '\n') {
             rspState = ResponseStates::RequestCode;
             return DecodeStatus::MessageCompleted;
         } else {
+            responseMsg.paramCode = ResponseMsgParamCodes::unknown;
             rspState = ResponseStates::Error;
             return DecodeStatus::Error;
         }
@@ -149,6 +151,7 @@ Protocol::DecodeStatus Protocol::DecodeResponse(uint8_t c) {
             rspState = ResponseStates::RequestCode;
             return DecodeStatus::MessageCompleted;
         } else {
+            responseMsg.paramCode = ResponseMsgParamCodes::unknown;
             return DecodeStatus::Error;
         }
     }

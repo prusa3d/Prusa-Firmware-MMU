@@ -263,8 +263,8 @@ TEST_CASE("protocol::DecodeResponseReadFinda", "[protocol]") {
     const ResponseMsg &rsp = p.GetResponseMsg();
     CHECK((uint8_t)rsp.request.code == rxbuff[0]);
     CHECK(rsp.request.value == rxbuff[1] - '0');
-    CHECK((uint8_t)rsp.params.code == rxbuff[3]);
-    CHECK((uint8_t)rsp.params.value == rxbuff[4] - '0');
+    CHECK((uint8_t)rsp.paramCode == rxbuff[3]);
+    CHECK((uint8_t)rsp.paramValue == rxbuff[4] - '0');
 }
 
 TEST_CASE("protocol::DecodeResponseQueryOperation", "[protocol]") {
@@ -304,9 +304,9 @@ TEST_CASE("protocol::DecodeResponseQueryOperation", "[protocol]") {
     const ResponseMsg &rsp = p.GetResponseMsg();
     CHECK((uint8_t)rsp.request.code == rxbuff[0]);
     CHECK(rsp.request.value == rxbuff[1] - '0');
-    CHECK((uint8_t)rsp.params.code == rxbuff[3]);
-    if ((uint8_t)rsp.params.code != (uint8_t)ResponseMsgParamCodes::Finished) { //@@TODO again, not clean, need to define a separate msg struct for the params to make it type-safe and clean
-        CHECK((uint8_t)rsp.params.value == rxbuff[4] - '0');
+    CHECK((uint8_t)rsp.paramCode == rxbuff[3]);
+    if ((uint8_t)rsp.paramCode != (uint8_t)ResponseMsgParamCodes::Finished) {
+        CHECK((uint8_t)rsp.paramValue == rxbuff[4] - '0');
     }
 }
 
@@ -353,4 +353,93 @@ TEST_CASE("protocol::DecodeRequestErrors", "[protocol]") {
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
     CHECK(p.DecodeRequest('\n') == Protocol::DecodeStatus::MessageCompleted);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+}
+
+TEST_CASE("protocol::DecodeResponseErrors", "[protocol]") {
+    using namespace modules;
+    Protocol p;
+
+    const char b0[] = "b0 A\n";
+    CHECK(p.DecodeRequest(b0[0]) == Protocol::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(b0[1]) == Protocol::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(b0[2]) == Protocol::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(b0[3]) == Protocol::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(b0[4]) == Protocol::DecodeStatus::MessageCompleted);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+
+    const char b1[] = "b0A\n";
+    CHECK(p.DecodeRequest(b1[0]) == Protocol::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(b1[1]) == Protocol::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(b1[2]) == Protocol::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(b1[3]) == Protocol::DecodeStatus::MessageCompleted);
+    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+}
+
+// Beware - this test makes 18M+ combinations, run only when changing the implementation of the codec
+// Therefore it is disabled [.] by default
+TEST_CASE("protocol::DecodeResponseErrorsCross", "[protocol][.]") {
+    using namespace modules;
+    Protocol p;
+
+    const char *validInitialSpaces = "";
+    const char *invalidInitialSpaces = GENERATE(" ", "  ");
+    bool viInitialSpace = GENERATE(true, false);
+
+    const char *validReqCode = GENERATE("B", "E", "K", "L", "M", "P", "Q", "S", "T", "U", "W", "X");
+    const char *invalidReqCode = GENERATE("A", "R", "F");
+    bool viReqCode = GENERATE(true, false);
+
+    const char *validReqValue = GENERATE("0", "1", "2", "3", "4");
+    // these are silently accepted
+    //    const char *invalidReqValue = GENERATE(/*"5", */"10", "100");
+    //    bool viReqValue = GENERATE(true, false);
+
+    const char *validSpace = " ";
+    const char *invalidSpace = GENERATE("", "  ");
+    bool viSpace = GENERATE(true, false);
+
+    const char *validRspCode = GENERATE("A", "R", "P", "E", "F");
+    const char *invalidRspCode = GENERATE("B", "K", "L", "M", "Q");
+    bool viRspCode = GENERATE(true, false);
+
+    const char *validRspValue = GENERATE("0", "1", "2", "3", "10", "11", "100", "255");
+
+    const char *validTerminatingSpaces = "";
+    const char *invalidTerminatingSpaces = GENERATE(" ", "  ");
+    bool viTerminatingSpaces = GENERATE(true, false);
+
+    // skip valid combinations
+    std::string msg;
+    msg += viInitialSpace ? validInitialSpaces : invalidInitialSpaces;
+    msg += viReqCode ? validReqCode : invalidReqCode;
+    msg += validReqValue; //viReqValue ? validReqValue : invalidReqValue;
+    msg += viSpace ? validSpace : invalidSpace;
+    const char *rspCode = viRspCode ? validRspCode : invalidRspCode;
+    msg += rspCode;
+    if (rspCode[0] == 'F') {
+        // this one doesn't have any value behind
+    } else {
+        msg += validRspValue;
+    }
+    msg += viTerminatingSpaces ? validTerminatingSpaces : invalidTerminatingSpaces;
+    msg += '\n';
+
+    bool shouldPass = viInitialSpace && viReqCode && /*viReqValue && */ viSpace && viRspCode && viTerminatingSpaces;
+    bool failed = false;
+    std::for_each(msg.cbegin(), msg.cend(), [&](uint8_t c) {
+        if (p.DecodeResponse(c) == Protocol::DecodeStatus::Error) {
+            failed = true;
+        }
+    });
+    CHECK(failed != shouldPass); // it must have failed!
+    if (failed) {
+        CHECK(p.GetResponseMsg().paramCode == ResponseMsgParamCodes::unknown);
+    }
 }
