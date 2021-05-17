@@ -1,3 +1,4 @@
+#pragma once
 #include <inttypes.h>
 #include <avr/io.h>
 
@@ -30,9 +31,6 @@ namespace gpio {
         Mode mode;
         Pull pull;
         Level level;
-        inline GPIO_InitTypeDef()
-            : mode(Mode::input)
-            , pull(Pull::none) {};
         inline GPIO_InitTypeDef(Mode mode, Pull pull)
             : mode(mode)
             , pull(pull) {};
@@ -41,28 +39,36 @@ namespace gpio {
             , level(level) {};
     };
 
-    inline void WritePin(GPIO_TypeDef *const port, const uint8_t pin, Level level) {
+    struct GPIO_pin {
+        GPIO_TypeDef *const port;
+        const uint8_t pin;
+        inline GPIO_pin(GPIO_TypeDef *const port, const uint8_t pin)
+            : port(port)
+            , pin(pin) {};
+    };
+
+    inline void WritePin(const GPIO_pin portPin, Level level) {
         if (level == Level::high)
-            port->PORTx |= (1 << pin);
+            portPin.port->PORTx |= (1 << portPin.pin);
         else
-            port->PORTx &= ~(1 << pin);
+            portPin.port->PORTx &= ~(1 << portPin.pin);
     }
 
-    inline Level ReadPin(GPIO_TypeDef *const port, const uint8_t pin) {
-        return (Level)(port->PINx & (1 << pin));
+    inline Level ReadPin(const GPIO_pin portPin) {
+        return (Level)(portPin.port->PINx & (1 << portPin.pin));
     }
 
-    inline void TogglePin(GPIO_TypeDef *const port, const uint8_t pin) {
-        port->PINx |= (1 << pin);
+    inline void TogglePin(const GPIO_pin portPin) {
+        portPin.port->PINx |= (1 << portPin.pin);
     }
 
-    inline void Init(GPIO_TypeDef *const port, const uint8_t pin, GPIO_InitTypeDef GPIO_Init) {
+    inline void Init(const GPIO_pin portPin, GPIO_InitTypeDef GPIO_Init) {
         if (GPIO_Init.mode == Mode::output) {
-            WritePin(port, pin, GPIO_Init.level);
-            port->DDRx |= (1 << pin);
+            WritePin(portPin, GPIO_Init.level);
+            portPin.port->DDRx |= (1 << portPin.pin);
         } else {
-            port->DDRx &= ~(1 << pin);
-            WritePin(port, pin, (Level)GPIO_Init.pull);
+            portPin.port->DDRx &= ~(1 << portPin.pin);
+            WritePin(portPin, (Level)GPIO_Init.pull);
         }
     }
 

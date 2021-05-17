@@ -170,6 +170,8 @@ objcopy(firmware "ihex" ".hex")
 
 add_custom_command(TARGET firmware POST_BUILD COMMAND avr-objdump ARGS -CSd firmware > firmware.txt)
 
+add_custom_command(TARGET firmware POST_BUILD COMMAND avr-size ARGS -C --mcu=atmega32u4 firmware)
+
 # generate linker map file
 target_link_options(firmware PUBLIC -Wl,-Map=firmware.map)
 
@@ -184,7 +186,7 @@ target_compile_options(firmware PRIVATE -Wdouble-promotion)
 
 # target_link_libraries( firmware PRIVATE A3idesHeaders )
 
-target_sources(firmware PRIVATE src/main.cpp src/hal/avr/cpu.cpp)
+target_sources(firmware PRIVATE src/main.cpp src/hal/avr/cpu.cpp src/hal/avr/spi.cpp)
 
 set_property(
   SOURCE src/version.c
