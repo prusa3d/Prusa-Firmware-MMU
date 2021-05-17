@@ -186,7 +186,7 @@ target_compile_options(firmware PRIVATE -Wdouble-promotion)
 
 # target_link_libraries( firmware PRIVATE A3idesHeaders )
 
-target_sources(firmware PRIVATE src/main.cpp src/hal/avr/cpu.cpp src/hal/avr/spi.cpp)
+target_sources(firmware PRIVATE src/main.cpp src/hal/avr/cpu.cpp)
 
 set_property(
   SOURCE src/version.c

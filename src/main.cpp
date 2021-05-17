@@ -4,18 +4,17 @@
 
 /// One-time setup of HW and SW components
 /// Called before entering the loop() function
-void setup(){
+void setup() {
     using namespace hal;
 
-    gpio::Init(gpio::GPIO_pin(GPIOB, 3), gpio::GPIO_InitTypeDef(gpio::Mode::input, gpio::Pull::none));
-    gpio::Init(gpio::GPIO_pin(GPIOB, 2), gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::low));
-    gpio::Init(gpio::GPIO_pin(GPIOB, 1), gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::low));
-    // gpio::Init(gpio::GPIO_pin(GPIOB, 0), gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::low));
-
-    // spi::SPI_InitTypeDef spi_conf = {
-    //     .prescaler = 2, //4mhz
-    // };
-    spi::Init(SPI0, 2);
+    spi::SPI_InitTypeDef spi_conf = {
+        .miso_pin = gpio::GPIO_pin(GPIOB, 3),
+        .mosi_pin = gpio::GPIO_pin(GPIOB, 2),
+        .sck_pin = gpio::GPIO_pin(GPIOB, 1),
+        .ss_pin = gpio::GPIO_pin(GPIOB, 0),
+        .prescaler = 2, //4mhz
+    };
+    spi::Init(SPI0, &spi_conf);
 }
 
 /// Main loop of the firmware
@@ -32,13 +31,12 @@ void setup(){
 ///   StepWhateverElseNeedsStepping();
 /// The idea behind the Step* routines is to keep each automaton non-blocking allowing for some “concurrency”.
 /// Some FW components will leverage ISR to do their stuff (UART, motor stepping?, etc.)
-void loop(){
-
+void loop() {
 }
 
 int main() {
     setup();
-    for(;;){
+    for (;;) {
         using namespace hal::gpio;
         WritePin(GPIO_pin(GPIOB, 5), Level::low);
         TogglePin(GPIO_pin(GPIOB, 6));

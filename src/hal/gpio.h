@@ -47,22 +47,22 @@ namespace gpio {
             , pin(pin) {};
     };
 
-    inline void WritePin(const GPIO_pin portPin, Level level) {
+    __attribute__((always_inline)) inline void WritePin(const GPIO_pin portPin, Level level) {
         if (level == Level::high)
             portPin.port->PORTx |= (1 << portPin.pin);
         else
             portPin.port->PORTx &= ~(1 << portPin.pin);
     }
 
-    inline Level ReadPin(const GPIO_pin portPin) {
+    __attribute__((always_inline)) inline Level ReadPin(const GPIO_pin portPin) {
         return (Level)(portPin.port->PINx & (1 << portPin.pin));
     }
 
-    inline void TogglePin(const GPIO_pin portPin) {
+    __attribute__((always_inline)) inline void TogglePin(const GPIO_pin portPin) {
         portPin.port->PINx |= (1 << portPin.pin);
     }
 
-    inline void Init(const GPIO_pin portPin, GPIO_InitTypeDef GPIO_Init) {
+    __attribute__((always_inline)) inline void Init(const GPIO_pin portPin, GPIO_InitTypeDef GPIO_Init) {
         if (GPIO_Init.mode == Mode::output) {
             WritePin(portPin, GPIO_Init.level);
             portPin.port->DDRx |= (1 << portPin.pin);
