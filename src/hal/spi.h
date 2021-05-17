@@ -33,6 +33,13 @@ namespace spi {
         hspi->SPCRx = (0 << SPIE) | (1 << SPE) | (0 << DORD) | (1 << MSTR) | (0 << CPOL) | (0 << CPHA) | (spr << SPR0);
         hspi->SPSRx = (spi2x << SPI2X);
     }
+
+    __attribute__((always_inline)) inline uint8_t TxRx(SPI_TypeDef *const hspi, uint8_t val) {
+        hspi->SPDRx = val;
+        while (!(hspi->SPSRx & (1 << SPIF)))
+            ;
+        return hspi->SPDRx;
+    }
 }
 }
 
