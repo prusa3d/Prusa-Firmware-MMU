@@ -75,8 +75,14 @@ namespace gpio {
 }
 }
 
+#define GPIOA ((hal::gpio::GPIO_TypeDef *)&PINA)
 #define GPIOB ((hal::gpio::GPIO_TypeDef *)&PINB)
 #define GPIOC ((hal::gpio::GPIO_TypeDef *)&PINC)
 #define GPIOD ((hal::gpio::GPIO_TypeDef *)&PIND)
 #define GPIOE ((hal::gpio::GPIO_TypeDef *)&PINE)
 #define GPIOF ((hal::gpio::GPIO_TypeDef *)&PINF)
+#define GPIOG ((hal::gpio::GPIO_TypeDef *)&PING)
+#define GPIOH ((hal::gpio::GPIO_TypeDef *)&PINH)
+#define GPIOJ ((hal::gpio::GPIO_TypeDef *)&PINJ)
+#define GPIOK ((hal::gpio::GPIO_TypeDef *)&PINK)
+#define GPIOL ((hal::gpio::GPIO_TypeDef *)&PINL)
