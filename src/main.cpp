@@ -14,6 +14,8 @@ void setup() {
         .sck_pin = gpio::GPIO_pin(TMC2130_SPI_SCK_PIN),
         .ss_pin = gpio::GPIO_pin(TMC2130_SPI_SS_PIN),
         .prescaler = 2, //4mhz
+        .cpha = 1,
+        .cpol = 1,
     };
     spi::Init(SPI0, &spi_conf);
 }
