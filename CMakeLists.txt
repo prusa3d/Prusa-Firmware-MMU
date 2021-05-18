@@ -99,17 +99,6 @@ if(CUSTOM_COMPILE_OPTIONS)
 endif()
 
 #
-# MMUHeaders
-#
-
-# add_library(MMUHeaders INTERFACE) target_include_directories( MMUHeaders INTERFACE include
-# include/stm32f4_hal include/usb_host include/usb_device include/marlin include/freertos )
-
-# target_link_libraries(A3idesHeaders INTERFACE STM32F4::HAL FreeRTOS::FreeRTOS)
-
-# target_compile_definitions( A3idesHeaders INTERFACE PRINTER_TYPE=PRINTER_PRUSA_${PRINTER} )
-
-#
 # Global Compiler & Linker Configuration
 #
 
@@ -174,28 +163,37 @@ set_target_properties(firmware PROPERTIES CXX_STANDARD 14)
 if(CMAKE_CROSSCOMPILING)
   # generate firmware.bin file
   objcopy(firmware "ihex" ".hex")
+
+  # produce ASM listing
   add_custom_command(
-    TARGET firmware POST_BUILD COMMAND avr-objdump ARGS -CSd firmware > firmware.txt
+    TARGET firmware POST_BUILD COMMAND avr-objdump ARGS -CSd firmware > firmware.asm
     )
+
+  # inform about the firmware's size in terminal
+  add_custom_command(TARGET firmware POST_BUILD COMMAND avr-size ARGS -C --mcu=atmega32u4 firmware)
+  report_size(firmware)
+
+  # generate linker map file
+  target_link_options(firmware PUBLIC -Wl,-Map=firmware.map)
+
+  target_sources(firmware PRIVATE src/main.cpp src/hal/avr/cpu.cpp src/modules/protocol.cpp)
+
+else()
+  enable_testing()
+  add_subdirectory(tests)
+  # TODO - still need to decide about the dummy_main.cpp - for unit tests it should not be necessary
+  # to make a separate main.cpp file
+  target_sources(
+    firmware PRIVATE tests/unit/dummy_main.cpp src/hal/avr/cpu.cpp src/modules/protocol.cpp
+    )
+
 endif()
-
-add_custom_command(TARGET firmware POST_BUILD COMMAND avr-size ARGS -C --mcu=atmega32u4 firmware)
-
-# generate linker map file
-target_link_options(firmware PUBLIC -Wl,-Map=firmware.map)
-
-# inform about the firmware's size in terminal
-report_size(firmware)
 
 # add_link_dependency(firmware "${LINKER_SCRIPT}")
 
 target_include_directories(firmware PRIVATE include src)
 
 target_compile_options(firmware PRIVATE -Wdouble-promotion)
-
-# target_link_libraries( firmware PRIVATE A3idesHeaders )
-
-target_sources(firmware PRIVATE src/main.cpp src/hal/avr/cpu.cpp src/modules/protocol.cpp)
 
 set_property(
   SOURCE src/version.c
@@ -207,8 +205,3 @@ set_property(
            FW_VERSION_SUFFIX=${PROJECT_VERSION_SUFFIX}
            FW_VERSION_SUFFIX_SHORT=${PROJECT_VERSION_SUFFIX_SHORT}
   )
-
-if(NOT CMAKE_CROSSCOMPILING)
-  enable_testing()
-  add_subdirectory(tests)
-endif()
