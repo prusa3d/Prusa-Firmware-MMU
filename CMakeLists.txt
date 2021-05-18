@@ -125,7 +125,7 @@ endif()
 
 if(CMAKE_CROSSCOMPILING)
   # mcu related settings
-  set(MCU_FLAGS -mmcu=atmega32u4)
+  set(MCU_FLAGS -mmcu=atmega32u4 -DF_CPU=16000000L)
   add_compile_options(${MCU_FLAGS})
   add_link_options(${MCU_FLAGS})
 
@@ -169,6 +169,8 @@ set_target_properties(firmware PROPERTIES CXX_STANDARD 14)
 objcopy(firmware "ihex" ".hex")
 
 add_custom_command(TARGET firmware POST_BUILD COMMAND avr-objdump ARGS -CSd firmware > firmware.txt)
+
+add_custom_command(TARGET firmware POST_BUILD COMMAND avr-size ARGS -C --mcu=atmega32u4 firmware)
 
 # generate linker map file
 target_link_options(firmware PUBLIC -Wl,-Map=firmware.map)
