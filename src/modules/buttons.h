@@ -10,33 +10,47 @@ namespace modules {
 
 struct Button {
     inline constexpr Button()
-        : state(State::Waiting)
-        , tmp(false)
-        , pressed(false)
-        , timeLastChange(0) {}
+        : timeLastChange(0) {}
 
     /// @returns true if button is currently considered as pressed
-    inline bool Pressed() const { return pressed; }
+    inline bool Pressed() const { return f.state == State::WaitForRelease; }
 
     /// State machine stepping routine
     void Step(uint16_t time, bool press);
 
 private:
-    constexpr static const uint16_t debounce = 100; ///< time interval for debouncing @@TODO specify units
-    enum class State : uint_fast8_t { Waiting = 0,
+    /// time interval for debouncing @@TODO specify units
+    constexpr static const uint16_t debounce = 100;
+
+    /// States of the debouncing automaton
+    /// Intentionally not modeled as an enum class
+    /// as it would impose additional casts which do not play well with the struct Flags
+    /// and would make the code less readable
+    enum State { Waiting = 0,
         Detected,
         WaitForRelease,
         Update };
-    State state;
-    bool tmp; ///< temporary state of button before the debouncing state machine finishes
-    bool pressed; ///< real state of button after debouncing
+
+    /// The sole purpose of this data struct is to save RAM by compressing several flags into one byte on the AVR
+    struct Flags {
+        uint8_t state : 2; ///< state of the button
+        uint8_t tmp : 1; ///< temporary state of button before the debouncing state machine finishes
+        inline constexpr Flags()
+            : state(State::Waiting)
+            , tmp(false) {}
+    };
+
+    /// Flags and state of the debouncing automaton
+    Flags f;
+
+    /// Timestamp of the last change of ADC state for this button
     uint16_t timeLastChange;
 };
 
 class Buttons {
     constexpr static const uint8_t N = 3; ///< number of buttons currently supported
     constexpr static const uint8_t adc = 1; ///< ADC index - will be some define or other constant later on
-    static uint16_t tmpTiming;
+    static uint16_t tmpTiming; ///< subject to removal when we have timers implemented - now used for the unit tests
 
 public:
     inline constexpr Buttons() = default;
@@ -50,6 +64,9 @@ public:
 
 private:
     Button buttons[N];
+
+    /// Call to the ADC and decode its output into a button index
+    /// @returns index of the button pressed or -1 in case no button is pressed
     static int8_t Sample();
 };
 

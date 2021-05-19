@@ -7,39 +7,37 @@ uint16_t Buttons::tmpTiming = 0;
 
 // original idea from: https://www.eeweb.com/debouncing-push-buttons-using-a-state-machine-approach
 void Button::Step(uint16_t time, bool press) {
-    switch (state) {
+    switch (f.state) {
     case State::Waiting:
         if (press) {
-            state = State::Detected;
+            f.state = State::Detected;
             timeLastChange = time;
-            tmp = press;
+            f.tmp = press;
         }
         break;
     case State::Detected:
-        if (tmp == press) {
+        if (f.tmp == press) {
             if (time - timeLastChange > debounce) {
-                state = State::WaitForRelease;
+                f.state = State::WaitForRelease;
             }
         } else {
-            state = State::Waiting;
+            f.state = State::Waiting;
         }
         break;
     case State::WaitForRelease:
         if (!press) {
-            state = State::Update;
+            f.state = State::Update;
         }
         break;
     case State::Update:
-        pressed = tmp;
-        state = State::Waiting;
+        f.state = State::Waiting;
         timeLastChange = time;
-        tmp = false;
+        f.tmp = false;
         break;
     default:
-        state = State::Waiting;
+        f.state = State::Waiting;
         timeLastChange = time;
-        tmp = false;
-        pressed = false;
+        f.tmp = false;
     }
 }
 
