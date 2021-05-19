@@ -175,21 +175,6 @@ if(CMAKE_CROSSCOMPILING)
 
   # generate linker map file
   target_link_options(firmware PUBLIC -Wl,-Map=firmware.map)
-
-  target_sources(
-    firmware PRIVATE src/main.cpp src/hal/avr/cpu.cpp src/modules/protocol.cpp
-                     src/hal/avr/usart.cpp
-    )
-
-else()
-  enable_testing()
-  add_subdirectory(tests)
-  # TODO - still need to decide about the dummy_main.cpp - for unit tests it should not be necessary
-  # to make a separate main.cpp file
-  target_sources(
-    firmware PRIVATE tests/unit/dummy_main.cpp src/hal/avr/cpu.cpp src/modules/protocol.cpp
-    )
-
 endif()
 
 # add_link_dependency(firmware "${LINKER_SCRIPT}")
@@ -197,6 +182,10 @@ endif()
 target_include_directories(firmware PRIVATE include src)
 
 target_compile_options(firmware PRIVATE -Wdouble-promotion)
+target_sources(
+  firmware PRIVATE src/main.cpp src/hal/avr/cpu.cpp src/hal/avr/usart.cpp src/modules/protocol.cpp
+                   src/modules/buttons.cpp
+  )
 
 set_property(
   SOURCE src/version.c
@@ -208,3 +197,7 @@ set_property(
            FW_VERSION_SUFFIX=${PROJECT_VERSION_SUFFIX}
            FW_VERSION_SUFFIX_SHORT=${PROJECT_VERSION_SUFFIX_SHORT}
   )
+if(NOT CMAKE_CROSSCOMPILING)
+  enable_testing()
+  add_subdirectory(tests)
+endif()
