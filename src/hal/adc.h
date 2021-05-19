@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 
 /// Hardware Abstraction Layer for the ADC's
 
