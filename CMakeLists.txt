@@ -176,7 +176,10 @@ if(CMAKE_CROSSCOMPILING)
   # generate linker map file
   target_link_options(firmware PUBLIC -Wl,-Map=firmware.map)
 
-  target_sources(firmware PRIVATE src/main.cpp src/hal/avr/cpu.cpp src/modules/protocol.cpp)
+  target_sources(
+    firmware PRIVATE src/main.cpp src/hal/avr/cpu.cpp src/modules/protocol.cpp
+                     src/hal/avr/usart.cpp
+    )
 
 else()
   enable_testing()
