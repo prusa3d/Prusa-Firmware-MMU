@@ -184,7 +184,7 @@ target_include_directories(firmware PRIVATE include src)
 target_compile_options(firmware PRIVATE -Wdouble-promotion)
 target_sources(
   firmware PRIVATE src/main.cpp src/hal/avr/cpu.cpp src/hal/avr/usart.cpp src/modules/protocol.cpp
-                   src/modules/buttons.cpp
+                   src/modules/buttons.cpp src/modules/leds.cpp
   )
 
 set_property(

@@ -4,7 +4,7 @@
 using Catch::Matchers::Equals;
 
 TEST_CASE("protocol::EncodeRequests", "[protocol]") {
-    using namespace modules;
+    using namespace modules::protocol;
 
     RequestMsgCodes code;
     uint8_t value;
@@ -45,7 +45,7 @@ TEST_CASE("protocol::EncodeRequests", "[protocol]") {
 }
 
 TEST_CASE("protocol::EncodeResponseCmdAR", "[protocol]") {
-    using namespace modules;
+    using namespace modules::protocol;
 
     auto requestMsg = GENERATE(
         RequestMsg(RequestMsgCodes::Button, 0),
@@ -93,7 +93,7 @@ TEST_CASE("protocol::EncodeResponseCmdAR", "[protocol]") {
 }
 
 TEST_CASE("protocol::EncodeResponseReadFINDA", "[protocol]") {
-    using namespace modules;
+    using namespace modules::protocol;
     auto requestMsg = RequestMsg(RequestMsgCodes::Finda, 0);
 
     uint8_t findaStatus = GENERATE(0, 1);
@@ -111,7 +111,7 @@ TEST_CASE("protocol::EncodeResponseReadFINDA", "[protocol]") {
 }
 
 TEST_CASE("protocol::EncodeResponseVersion", "[protocol]") {
-    using namespace modules;
+    using namespace modules::protocol;
 
     std::uint8_t versionQueryType = GENERATE(0, 1, 2, 3);
     auto requestMsg = RequestMsg(RequestMsgCodes::Version, versionQueryType);
@@ -142,7 +142,7 @@ TEST_CASE("protocol::EncodeResponseVersion", "[protocol]") {
 }
 
 TEST_CASE("protocol::EncodeResponseQueryOperation", "[protocol]") {
-    using namespace modules;
+    using namespace modules::protocol;
 
     auto requestMsg = GENERATE(
         RequestMsg(RequestMsgCodes::Cut, 0),
@@ -202,7 +202,7 @@ TEST_CASE("protocol::EncodeResponseQueryOperation", "[protocol]") {
 }
 
 TEST_CASE("protocol::DecodeRequest", "[protocol]") {
-    using namespace modules;
+    using namespace modules::protocol;
     Protocol p;
     const char *rxbuff = GENERATE(
         "B0\n", "B1\n", "B2\n",
@@ -226,9 +226,9 @@ TEST_CASE("protocol::DecodeRequest", "[protocol]") {
             break;
         } else if (c == '\n') {
             // regular end of message line
-            CHECK(p.DecodeRequest(c) == Protocol::DecodeStatus::MessageCompleted);
+            CHECK(p.DecodeRequest(c) == DecodeStatus::MessageCompleted);
         } else {
-            CHECK(p.DecodeRequest(c) == Protocol::DecodeStatus::NeedMoreData);
+            CHECK(p.DecodeRequest(c) == DecodeStatus::NeedMoreData);
         }
     }
 
@@ -239,7 +239,7 @@ TEST_CASE("protocol::DecodeRequest", "[protocol]") {
 }
 
 TEST_CASE("protocol::DecodeResponseReadFinda", "[protocol]") {
-    using namespace modules;
+    using namespace modules::protocol;
     Protocol p;
     const char *rxbuff = GENERATE(
         "P0 A0\n",
@@ -253,9 +253,9 @@ TEST_CASE("protocol::DecodeResponseReadFinda", "[protocol]") {
             break;
         } else if (c == '\n') {
             // regular end of message line
-            CHECK(p.DecodeResponse(c) == Protocol::DecodeStatus::MessageCompleted);
+            CHECK(p.DecodeResponse(c) == DecodeStatus::MessageCompleted);
         } else {
-            CHECK(p.DecodeResponse(c) == Protocol::DecodeStatus::NeedMoreData);
+            CHECK(p.DecodeResponse(c) == DecodeStatus::NeedMoreData);
         }
     }
 
@@ -268,7 +268,7 @@ TEST_CASE("protocol::DecodeResponseReadFinda", "[protocol]") {
 }
 
 TEST_CASE("protocol::DecodeResponseQueryOperation", "[protocol]") {
-    using namespace modules;
+    using namespace modules::protocol;
     Protocol p;
     const char *cmdReference = GENERATE(
         "E0", "E1", "E2", "E3", "E4",
@@ -294,9 +294,9 @@ TEST_CASE("protocol::DecodeResponseQueryOperation", "[protocol]") {
             break;
         } else if (c == '\n') {
             // regular end of message line
-            CHECK(p.DecodeResponse(c) == Protocol::DecodeStatus::MessageCompleted);
+            CHECK(p.DecodeResponse(c) == DecodeStatus::MessageCompleted);
         } else {
-            CHECK(p.DecodeResponse(c) == Protocol::DecodeStatus::NeedMoreData);
+            CHECK(p.DecodeResponse(c) == DecodeStatus::NeedMoreData);
         }
     }
 
@@ -311,81 +311,81 @@ TEST_CASE("protocol::DecodeResponseQueryOperation", "[protocol]") {
 }
 
 TEST_CASE("protocol::DecodeRequestErrors", "[protocol]") {
-    using namespace modules;
+    using namespace modules::protocol;
     Protocol p;
     const char b0[] = "b0";
-    CHECK(p.DecodeRequest(b0[0]) == Protocol::DecodeStatus::Error);
+    CHECK(p.DecodeRequest(b0[0]) == DecodeStatus::Error);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(b0[1]) == Protocol::DecodeStatus::Error);
+    CHECK(p.DecodeRequest(b0[1]) == DecodeStatus::Error);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
 
     // reset protokol decoder
-    CHECK(p.DecodeRequest('\n') == Protocol::DecodeStatus::MessageCompleted);
+    CHECK(p.DecodeRequest('\n') == DecodeStatus::MessageCompleted);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
 
     const char B1_[] = "B1 \n";
-    CHECK(p.DecodeRequest(B1_[0]) == Protocol::DecodeStatus::NeedMoreData);
-    CHECK(p.DecodeRequest(B1_[1]) == Protocol::DecodeStatus::NeedMoreData);
-    CHECK(p.DecodeRequest(B1_[2]) == Protocol::DecodeStatus::Error);
+    CHECK(p.DecodeRequest(B1_[0]) == DecodeStatus::NeedMoreData);
+    CHECK(p.DecodeRequest(B1_[1]) == DecodeStatus::NeedMoreData);
+    CHECK(p.DecodeRequest(B1_[2]) == DecodeStatus::Error);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(B1_[3]) == Protocol::DecodeStatus::MessageCompleted);
+    CHECK(p.DecodeRequest(B1_[3]) == DecodeStatus::MessageCompleted);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
 
     const char _B2[] = " B2\n";
-    CHECK(p.DecodeRequest(_B2[0]) == Protocol::DecodeStatus::Error);
+    CHECK(p.DecodeRequest(_B2[0]) == DecodeStatus::Error);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(_B2[1]) == Protocol::DecodeStatus::Error);
+    CHECK(p.DecodeRequest(_B2[1]) == DecodeStatus::Error);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(_B2[2]) == Protocol::DecodeStatus::Error);
+    CHECK(p.DecodeRequest(_B2[2]) == DecodeStatus::Error);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(_B2[3]) == Protocol::DecodeStatus::MessageCompleted);
+    CHECK(p.DecodeRequest(_B2[3]) == DecodeStatus::MessageCompleted);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
 
     const char _B0_[] = " B0 ";
-    CHECK(p.DecodeRequest(_B0_[0]) == Protocol::DecodeStatus::Error);
+    CHECK(p.DecodeRequest(_B0_[0]) == DecodeStatus::Error);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(_B0_[1]) == Protocol::DecodeStatus::Error);
+    CHECK(p.DecodeRequest(_B0_[1]) == DecodeStatus::Error);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(_B0_[2]) == Protocol::DecodeStatus::Error);
+    CHECK(p.DecodeRequest(_B0_[2]) == DecodeStatus::Error);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(_B0_[3]) == Protocol::DecodeStatus::Error);
+    CHECK(p.DecodeRequest(_B0_[3]) == DecodeStatus::Error);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest('\n') == Protocol::DecodeStatus::MessageCompleted);
+    CHECK(p.DecodeRequest('\n') == DecodeStatus::MessageCompleted);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
 }
 
 TEST_CASE("protocol::DecodeResponseErrors", "[protocol]") {
-    using namespace modules;
+    using namespace modules::protocol;
     Protocol p;
 
     const char b0[] = "b0 A\n";
-    CHECK(p.DecodeRequest(b0[0]) == Protocol::DecodeStatus::Error);
+    CHECK(p.DecodeRequest(b0[0]) == DecodeStatus::Error);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(b0[1]) == Protocol::DecodeStatus::Error);
+    CHECK(p.DecodeRequest(b0[1]) == DecodeStatus::Error);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(b0[2]) == Protocol::DecodeStatus::Error);
+    CHECK(p.DecodeRequest(b0[2]) == DecodeStatus::Error);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(b0[3]) == Protocol::DecodeStatus::Error);
+    CHECK(p.DecodeRequest(b0[3]) == DecodeStatus::Error);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(b0[4]) == Protocol::DecodeStatus::MessageCompleted);
+    CHECK(p.DecodeRequest(b0[4]) == DecodeStatus::MessageCompleted);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
 
     const char b1[] = "b0A\n";
-    CHECK(p.DecodeRequest(b1[0]) == Protocol::DecodeStatus::Error);
+    CHECK(p.DecodeRequest(b1[0]) == DecodeStatus::Error);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(b1[1]) == Protocol::DecodeStatus::Error);
+    CHECK(p.DecodeRequest(b1[1]) == DecodeStatus::Error);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(b1[2]) == Protocol::DecodeStatus::Error);
+    CHECK(p.DecodeRequest(b1[2]) == DecodeStatus::Error);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(b1[3]) == Protocol::DecodeStatus::MessageCompleted);
+    CHECK(p.DecodeRequest(b1[3]) == DecodeStatus::MessageCompleted);
     CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
 }
 
 // Beware - this test makes 18M+ combinations, run only when changing the implementation of the codec
 // Therefore it is disabled [.] by default
 TEST_CASE("protocol::DecodeResponseErrorsCross", "[protocol][.]") {
-    using namespace modules;
+    using namespace modules::protocol;
     Protocol p;
 
     const char *validInitialSpaces = "";
@@ -434,7 +434,7 @@ TEST_CASE("protocol::DecodeResponseErrorsCross", "[protocol][.]") {
     bool shouldPass = viInitialSpace && viReqCode && /*viReqValue && */ viSpace && viRspCode && viTerminatingSpaces;
     bool failed = false;
     std::for_each(msg.cbegin(), msg.cend(), [&](uint8_t c) {
-        if (p.DecodeResponse(c) == Protocol::DecodeStatus::Error) {
+        if (p.DecodeResponse(c) == DecodeStatus::Error) {
             failed = true;
         }
     });

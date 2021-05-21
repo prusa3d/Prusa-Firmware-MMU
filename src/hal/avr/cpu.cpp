@@ -1,7 +1,7 @@
 #include "../cpu.h"
 
 namespace hal {
-namespace CPU {
+namespace cpu {
 
     void Init() {
     }

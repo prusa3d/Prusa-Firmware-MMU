@@ -3,7 +3,7 @@
 #include <vector>
 
 namespace hal {
-namespace ADC {
+namespace adc {
 
     static TADCData values2Return;
     static TADCData::const_iterator rdptr = values2Return.cbegin();
@@ -28,5 +28,5 @@ namespace ADC {
         return rdptr != values2Return.end() ? *rdptr : 1023;
     }
 
-} // namespace ADC
+} // namespace adc
 } // namespace hal

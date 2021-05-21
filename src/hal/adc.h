@@ -4,10 +4,10 @@
 /// Hardware Abstraction Layer for the ADC's
 
 namespace hal {
-namespace ADC {
+namespace adc {
 
     /// ADC access routines
     uint16_t ReadADC(uint8_t adc);
 
-} // namespace ADC
+} // namespace adc
 } // namespace hal
