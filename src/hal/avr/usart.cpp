@@ -8,7 +8,7 @@ USART usart1(USART1);
 
 uint8_t USART::Read() {
     uint8_t c = 0;
-    rx_buf.ConsumeFirst(c);
+    rx_buf.pop(c);
     return c;
 }
 
@@ -18,7 +18,7 @@ void USART::Write(uint8_t c) {
     // to the data register and be done. This shortcut helps
     // significantly improve the effective datarate at high (>
     // 500kbit/s) bitrates, where interrupt overhead becomes a slowdown.
-    if (tx_buf.IsEmpty() && (husart->UCSRxA & (1 << 5))) {
+    if (tx_buf.empty() && (husart->UCSRxA & (1 << 5))) {
         husart->UDRx = c;
         husart->UCSRxA |= (1 << 6);
         return;
@@ -26,7 +26,7 @@ void USART::Write(uint8_t c) {
 
     // If the output buffer is full, there's nothing for it other than to
     // wait for the interrupt handler to empty it a bit
-    while (!tx_buf.push_back_DontRewrite(c)) {
+    while (!tx_buf.push(c)) {
         if (bit_is_clear(SREG, SREG_I)) {
             // Interrupts are disabled, so we'll have to poll the data
             // register empty flag ourselves. If it is set, pretend an
