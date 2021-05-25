@@ -3,8 +3,8 @@
 namespace hal {
 namespace cpu {
 
-    void Init() {
-    }
+void Init() {
+}
 
 } // namespace CPU
 } // namespace hal
