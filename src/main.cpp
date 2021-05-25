@@ -13,8 +13,6 @@
 
 #include "logic/mm_control.h"
 
-static hal::UART uart;
-
 static modules::protocol::Protocol protocol;
 static modules::buttons::Buttons buttons;
 static modules::leds::LEDs leds;
@@ -48,18 +46,18 @@ void TmpPlayground() {
     //    if (hal::gpio::ReadPin(GPIO_pin(GPIOB, 7)) == hal::gpio::Level::low)
     //        break;
 
-       sei();
-    usart1.puts("1234567890\n");
-    usart1.puts("1234567890\n");
-    usart1.puts("1234567890\n");
-    usart1.puts("1234567890\n");
-    usart1.puts("1234567890\n");
-    usart1.puts("1234567890\n");
-    usart1.puts("1234567890\n");
-    usart1.puts("1234567890\n");
-    usart1.puts("1234567890\n");
-    usart1.puts("1234567890\n");
-    usart1.puts("1234567890\n");
+    sei();
+    hal::usart::usart1.puts("1234567890\n");
+    hal::usart::usart1.puts("1234567890\n");
+    hal::usart::usart1.puts("1234567890\n");
+    hal::usart::usart1.puts("1234567890\n");
+    hal::usart::usart1.puts("1234567890\n");
+    hal::usart::usart1.puts("1234567890\n");
+    hal::usart::usart1.puts("1234567890\n");
+    hal::usart::usart1.puts("1234567890\n");
+    hal::usart::usart1.puts("1234567890\n");
+    hal::usart::usart1.puts("1234567890\n");
+    hal::usart::usart1.puts("1234567890\n");
 }
 
 /// One-time setup of HW and SW components
@@ -76,12 +74,12 @@ void setup() {
 
     // @@TODO if the shift register doesn't work we really can't signalize anything, only internal variables will be accessible if the UART works
 
-   USART::USART_InitTypeDef usart_conf = {
+    hal::usart::USART::USART_InitTypeDef usart_conf = {
         .rx_pin = gpio::GPIO_pin(GPIOD, 2),
         .tx_pin = gpio::GPIO_pin(GPIOD, 3),
         .baudrate = 115200,
-    usart1.Init(&usart_conf);
-
+    };
+    hal::usart::usart1.Init(&usart_conf);
     leds.SetMode(3, false, modules::leds::Mode::on);
     //    shr::Send(leds.Step(0));
 
@@ -115,8 +113,8 @@ void ProcessRequestMsg(const modules::protocol::RequestMsg &rq) {
 /// @returns true if a request was successfully finished
 bool CheckMsgs() {
     using mpd = modules::protocol::DecodeStatus;
-    while (!uart.ReadEmpty()) {
-        switch (protocol.DecodeRequest(uart.Read())) {
+    while (!hal::usart::usart1.ReadEmpty()) {
+        switch (protocol.DecodeRequest(hal::usart::usart1.Read())) {
         case mpd::MessageCompleted:
             // process the input message
             return true;
