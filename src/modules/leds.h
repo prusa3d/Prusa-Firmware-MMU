@@ -51,8 +51,7 @@ public:
         : ms(0) {};
 
     /// step LED automaton
-    /// @returns statuses of LEDs - one bit per LED and 1 = on, 0 = off
-    uint16_t Step(uint8_t delta_ms);
+    void Step(uint8_t delta_ms);
 
     inline constexpr uint8_t LedPairsCount() const { return ledPairs; }
 

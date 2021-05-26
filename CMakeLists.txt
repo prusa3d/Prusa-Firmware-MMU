@@ -187,6 +187,7 @@ target_sources(
   PRIVATE src/main.cpp
           src/hal/avr/cpu.cpp
           src/hal/avr/usart.cpp
+          src/hal/avr/shr16.cpp
           src/hal/adc.cpp
           src/modules/protocol.cpp
           src/modules/buttons.cpp

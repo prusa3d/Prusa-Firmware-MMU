@@ -3,6 +3,7 @@
 #include "hal/gpio.h"
 #include "hal/spi.h"
 #include "hal/usart.h"
+#include "hal/shr16.h"
 
 #include "pins.h"
 #include <avr/interrupt.h>
@@ -22,23 +23,23 @@ void TmpPlayground() {
     using namespace hal;
 
     // SPI example
-    gpio::Init(gpio::GPIO_pin(GPIOC, 6), gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::high));
-    uint8_t dat[5];
-    gpio::WritePin(gpio::GPIO_pin(GPIOC, 6), gpio::Level::low);
-    spi::TxRx(SPI0, 0x01);
-    spi::TxRx(SPI0, 0x00);
-    spi::TxRx(SPI0, 0x00);
-    spi::TxRx(SPI0, 0x00);
-    spi::TxRx(SPI0, 0x00);
-    gpio::WritePin(gpio::GPIO_pin(GPIOC, 6), gpio::Level::high);
-    gpio::WritePin(gpio::GPIO_pin(GPIOC, 6), gpio::Level::low);
-    dat[0] = spi::TxRx(SPI0, 0x00);
-    dat[1] = spi::TxRx(SPI0, 0x00);
-    dat[2] = spi::TxRx(SPI0, 0x00);
-    dat[3] = spi::TxRx(SPI0, 0x00);
-    dat[4] = spi::TxRx(SPI0, 0x00);
-    gpio::WritePin(gpio::GPIO_pin(GPIOC, 6), gpio::Level::high);
-    (void)dat;
+    //    gpio::Init(gpio::GPIO_pin(GPIOC, 6), gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::high));
+    //    uint8_t dat[5];
+    //    gpio::WritePin(gpio::GPIO_pin(GPIOC, 6), gpio::Level::low);
+    //    spi::TxRx(SPI0, 0x01);
+    //    spi::TxRx(SPI0, 0x00);
+    //    spi::TxRx(SPI0, 0x00);
+    //    spi::TxRx(SPI0, 0x00);
+    //    spi::TxRx(SPI0, 0x00);
+    //    gpio::WritePin(gpio::GPIO_pin(GPIOC, 6), gpio::Level::high);
+    //    gpio::WritePin(gpio::GPIO_pin(GPIOC, 6), gpio::Level::low);
+    //    dat[0] = spi::TxRx(SPI0, 0x00);
+    //    dat[1] = spi::TxRx(SPI0, 0x00);
+    //    dat[2] = spi::TxRx(SPI0, 0x00);
+    //    dat[3] = spi::TxRx(SPI0, 0x00);
+    //    dat[4] = spi::TxRx(SPI0, 0x00);
+    //    gpio::WritePin(gpio::GPIO_pin(GPIOC, 6), gpio::Level::high);
+    //    (void)dat;
 
     //    using namespace hal::gpio;
     //    WritePin(GPIO_pin(GPIOB, 5), Level::low);
@@ -68,9 +69,9 @@ void setup() {
 
     cpu::Init();
 
-    // shr::Init()
+    shr16::shr16.Init();
     leds.SetMode(4, false, modules::leds::Mode::blink0);
-    //    shr::Send(leds.Step(0));
+    leds.Step(0);
 
     // @@TODO if the shift register doesn't work we really can't signalize anything, only internal variables will be accessible if the UART works
 
@@ -81,7 +82,7 @@ void setup() {
     };
     hal::usart::usart1.Init(&usart_conf);
     leds.SetMode(3, false, modules::leds::Mode::on);
-    //    shr::Send(leds.Step(0));
+    leds.Step(0);
 
     // @@TODO if both shift register and the UART are dead, we are sitting ducks :(
 
@@ -96,15 +97,15 @@ void setup() {
     };
     spi::Init(SPI0, &spi_conf);
     leds.SetMode(2, false, modules::leds::Mode::on);
-    //shr::Send(leds.Step(0));
+    leds.Step(0);
 
     // tmc::Init()
     leds.SetMode(1, false, modules::leds::Mode::on);
-    //shr::Send(leds.Step(0));
+    leds.Step(0);
 
     // adc::Init();
     leds.SetMode(0, false, modules::leds::Mode::on);
-    //shr::Send(leds.Step(0));
+    leds.Step(0);
 }
 
 void ProcessRequestMsg(const modules::protocol::RequestMsg &rq) {
@@ -149,7 +150,7 @@ void loop() {
         ProcessRequestMsg(protocol.GetRequestMsg());
     }
     buttons.Step(hal::adc::ReadADC(0));
-    // shr.Send(leds.Step(0));
+    leds.Step(0);
 }
 
 int main() {
