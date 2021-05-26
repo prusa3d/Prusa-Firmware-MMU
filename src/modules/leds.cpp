@@ -1,5 +1,5 @@
 #include "leds.h"
-#include "hal/shr16.h"
+#include "../hal/shr16.h"
 
 namespace modules {
 namespace leds {
@@ -34,16 +34,18 @@ bool LED::Step(bool oddPeriod) {
     default: // do nothing
         break;
     }
+    return state.on;
 }
 
-void LEDs::Step(uint8_t delta_ms) {
+void LEDs::Step(uint16_t delta_ms) {
     ms += delta_ms;
     bool oddPeriod = ((ms / 1000U) & 0x01U) != 0;
     uint16_t result = 0;
-    for (uint8_t i = 0; i < ledPairs * 2; ++i) {
+    for (int8_t i = ledPairs * 2 - 1; i >= 0; --i) {
         result <<= 1;
         result |= leds[i].Step(oddPeriod);
     }
+
     hal::shr16::shr16.SetLED(result);
 }
 

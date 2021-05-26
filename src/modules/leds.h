@@ -22,6 +22,11 @@ enum Mode {
     blink1 ///< start blinking at odd periods
 };
 
+enum Color {
+    green = 0,
+    red = 1
+};
+
 /// a single LED
 class LED {
 public:
@@ -51,12 +56,12 @@ public:
         : ms(0) {};
 
     /// step LED automaton
-    void Step(uint8_t delta_ms);
+    void Step(uint16_t delta_ms);
 
     inline constexpr uint8_t LedPairsCount() const { return ledPairs; }
 
-    inline void SetMode(uint8_t slot, bool red, Mode mode) {
-        SetMode(slot * 2 + red, mode);
+    inline void SetMode(uint8_t slot, Color color, Mode mode) {
+        SetMode(slot * 2 + color, mode);
     }
     inline void SetMode(uint8_t index, Mode mode) {
         leds[index].SetMode(mode);
@@ -65,12 +70,23 @@ public:
     inline bool LedOn(uint8_t index) const {
         return leds[index].On();
     }
-    inline bool LedOn(uint8_t slot, bool red) const {
-        return leds[slot * 2 + red].On();
+    inline bool LedOn(uint8_t slot, Color color) const {
+        return leds[slot * 2 + color].On();
     }
 
 private:
     constexpr static const uint8_t ledPairs = 5;
+    /// pairs of LEDs:
+    /// [0] - green LED slot 0
+    /// [1] - red LED slot 0
+    /// [2] - green LED slot 1
+    /// [3] - red LED slot 1
+    /// [4] - green LED slot 2
+    /// [5] - red LED slot 2
+    /// [6] - green LED slot 3
+    /// [7] - red LED slot 3
+    /// [8] - green LED slot 4
+    /// [9] - red LED slot 4
     LED leds[ledPairs * 2];
     uint16_t ms;
 };
