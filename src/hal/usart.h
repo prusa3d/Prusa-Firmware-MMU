@@ -8,6 +8,8 @@
 /// for >1 USART interfaces
 
 namespace hal {
+namespace usart {
+
 class USART {
 public:
     struct USART_TypeDef {
@@ -81,8 +83,10 @@ public:
             husart->UCSRxB &= ~(1 << 5); // disable UDRE interrupt
     }
 
-    USART(USART_TypeDef *husart)
-        : husart(husart) {};
+    USART() = default;
+    void Init(USART_TypeDef *conf) {
+        husart = conf;
+    }
 
 private:
     // IO base address
@@ -93,7 +97,10 @@ private:
     CircleBuffer<uint8_t, 32> rx_buf;
 };
 
+/// beware - normally we'd make a singleton, but avr-gcc generates suboptimal code for them, therefore we only keep this extern variable
+extern USART usart1;
+
+} // namespace usart
 } // namespace hal
 
 #define USART1 ((hal::USART::USART_TypeDef *)&UCSR1A)
-extern hal::USART usart1;

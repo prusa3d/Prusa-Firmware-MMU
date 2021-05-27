@@ -11,6 +11,7 @@
 //  <OID> F           : operation finished - will be repeated to "Q" messages until a new command is issued
 
 namespace modules {
+namespace protocol {
 
 // decoding automaton
 // states:  input -> transition into state
@@ -24,7 +25,7 @@ namespace modules {
 // msgvalue  0-9 ->msgvalue
 //           \n ->start successfully accepted command
 
-Protocol::DecodeStatus Protocol::DecodeRequest(uint8_t c) {
+DecodeStatus Protocol::DecodeRequest(uint8_t c) {
     switch (rqState) {
     case RequestStates::Code:
         switch (c) {
@@ -81,7 +82,7 @@ uint8_t Protocol::EncodeRequest(const RequestMsg &msg, uint8_t *txbuff) {
     return 3;
 }
 
-Protocol::DecodeStatus Protocol::DecodeResponse(uint8_t c) {
+DecodeStatus Protocol::DecodeResponse(uint8_t c) {
     switch (rspState) {
     case ResponseStates::RequestCode:
         switch (c) {
@@ -218,4 +219,5 @@ uint8_t Protocol::EncodeResponseQueryOperation(const RequestMsg &msg, ResponseMs
     return dst - txbuff + 1;
 }
 
+} // namespace protocol
 } // namespace modules

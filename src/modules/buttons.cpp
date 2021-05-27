@@ -1,7 +1,7 @@
 #include "buttons.h"
-#include "../hal/adc.h"
 
 namespace modules {
+namespace buttons {
 
 uint16_t Buttons::tmpTiming = 0;
 
@@ -41,32 +41,31 @@ void Button::Step(uint16_t time, bool press) {
     }
 }
 
-int8_t Buttons::Sample() {
+int8_t Buttons::Sample(uint16_t rawADC) {
     // decode 3 buttons' levels from one ADC
-    uint16_t raw = hal::ADC::ReadADC(0);
-
     // Button 1 - 0
     // Button 2 - 344
     // Button 3 - 516
     // Doesn't handle multiple pressed buttons at once
 
-    if (raw < 10)
+    if (rawADC < 10)
         return 0;
-    else if (raw > 320 && raw < 360)
+    else if (rawADC > 320 && rawADC < 360)
         return 1;
-    else if (raw > 500 && raw < 530)
+    else if (rawADC > 500 && rawADC < 530)
         return 2;
     return -1;
 }
 
-void Buttons::Step() {
+void Buttons::Step(uint16_t rawADC) {
     // @@TODO temporary timing
     ++tmpTiming;
-    int8_t currentState = Sample();
+    int8_t currentState = Sample(rawADC);
     for (uint_fast8_t b = 0; b < N; ++b) {
         // this button was pressed if b == currentState, released otherwise
         buttons[b].Step(tmpTiming, b == currentState);
     }
 }
 
+} // namespace buttons
 } // namespace modules

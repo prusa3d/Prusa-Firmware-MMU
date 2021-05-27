@@ -3,10 +3,10 @@
 /// Hardware Abstraction Layer for the CPU
 
 namespace hal {
-namespace CPU {
+namespace cpu {
 
-    /// CPU init routines (not really necessary for the AVR)
-    void Init();
+/// CPU init routines (not really necessary for the AVR)
+void Init();
 
-} // namespace CPU
+} // namespace cpu
 } // namespace hal

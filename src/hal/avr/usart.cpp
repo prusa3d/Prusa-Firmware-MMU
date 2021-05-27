@@ -1,13 +1,18 @@
 #include "../usart.h"
 #include <avr/interrupt.h>
 
-uint8_t hal::USART::Read() {
+namespace hal {
+namespace usart {
+
+USART usart1;
+
+uint8_t USART::Read() {
     uint8_t c = 0;
-    this->rx_buf.ConsumeFirst(c);
+    rx_buf.ConsumeFirst(c);
     return c;
 }
 
-void hal::USART::Write(uint8_t c) {
+void USART::Write(uint8_t c) {
     _written = true;
     // If the buffer and the data register is empty, just write the byte
     // to the data register and be done. This shortcut helps
@@ -27,8 +32,9 @@ void hal::USART::Write(uint8_t c) {
             // register empty flag ourselves. If it is set, pretend an
             // interrupt has happened and call the handler to free up
             // space for us.
-            if (husart->UCSRxA & (1 << 5))
+            if (husart->UCSRxA & (1 << 5)) {
                 ISR_UDRE();
+            }
         } else {
             // nop, the interrupt handler will free up space for us
         }
@@ -37,36 +43,40 @@ void hal::USART::Write(uint8_t c) {
     husart->UCSRxB |= (1 << 5); //enable UDRE interrupt
 }
 
-void hal::USART::Flush() {
+void USART::Flush() {
     // If we have never written a byte, no need to flush. This special
     // case is needed since there is no way to force the TXC (transmit
     // complete) bit to 1 during initialization
-    if (!_written)
+    if (!_written) {
         return;
+    }
 
     while ((husart->UCSRxB & (1 << 5)) || ~(husart->UCSRxA & (1 << 6))) {
         if (bit_is_clear(SREG, SREG_I) && (husart->UCSRxB & (1 << 5)))
             // Interrupts are globally disabled, but the DR empty
             // interrupt should be enabled, so poll the DR empty flag to
             // prevent deadlock
-            if (husart->UCSRxA & (1 << 5))
+            if (husart->UCSRxA & (1 << 5)) {
                 ISR_UDRE();
+            }
     }
     // If we get here, nothing is queued anymore (DRIE is disabled) and
     // the hardware finished tranmission (TXC is set).
 }
 
-void hal::USART::puts(const char *str) {
-    while (*str)
-        this->Write(*str++);
+void USART::puts(const char *str) {
+    while (*str) {
+        Write(*str++);
+    }
 }
 
-hal::USART usart1(USART1);
+} // namespace usart
+} // namespace hal
 
 ISR(USART1_RX_vect) {
-    usart1.ISR_RX();
+    hal::usart::usart1.ISR_RX();
 }
 
 ISR(USART1_UDRE_vect) {
-    usart1.ISR_UDRE();
+    hal::usart::usart1.ISR_UDRE();
 }

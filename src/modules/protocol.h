@@ -7,6 +7,7 @@
 /// @@TODO possibly add some checksum to verify the correctness of messages
 
 namespace modules {
+namespace protocol {
 
 enum class RequestMsgCodes : uint8_t {
     unknown = 0,
@@ -56,18 +57,18 @@ struct ResponseMsg {
         , paramValue(paramValue) {}
 };
 
+/// Message decoding return value
+enum class DecodeStatus : uint_fast8_t {
+    MessageCompleted, ///< message completed and successfully lexed
+    NeedMoreData, ///< message incomplete yet, waiting for another byte to come
+    Error, ///< input character broke message decoding
+};
+
 /// Protocol class is responsible for creating/decoding messages in Rx/Tx buffer
 /// Beware - in the decoding more, it is meant to be a statefull instance which works through public methods
 /// processing one input byte per call
 class Protocol {
 public:
-    /// Message decoding return value
-    enum class DecodeStatus : uint_fast8_t {
-        MessageCompleted, ///< message completed and successfully lexed
-        NeedMoreData, ///< message incomplete yet, waiting for another byte to come
-        Error, ///< input character broke message decoding
-    };
-
     inline Protocol()
         : rqState(RequestStates::Code)
         , requestMsg(RequestMsgCodes::unknown, 0)
@@ -140,4 +141,5 @@ private:
     ResponseMsg responseMsg;
 };
 
+} // namespace protocol
 } // namespace modules

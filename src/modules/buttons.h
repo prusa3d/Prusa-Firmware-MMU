@@ -7,6 +7,7 @@
 /// This layer should contain debouncing of buttons and their logical interpretation
 
 namespace modules {
+namespace buttons {
 
 struct Button {
     inline constexpr Button()
@@ -56,7 +57,7 @@ public:
     inline constexpr Buttons() = default;
 
     /// State machine step - reads the ADC, processes debouncing, updates states of individual buttons
-    void Step();
+    void Step(uint16_t rawADC);
 
     /// @return true if button at index is pressed
     /// @@TODO add range checking if necessary
@@ -67,7 +68,8 @@ private:
 
     /// Call to the ADC and decode its output into a button index
     /// @returns index of the button pressed or -1 in case no button is pressed
-    static int8_t Sample();
+    static int8_t Sample(uint16_t rawADC);
 };
 
+} // namespace buttons
 } // namespace modules

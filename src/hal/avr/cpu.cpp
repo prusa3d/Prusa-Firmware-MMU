@@ -1,10 +1,10 @@
 #include "../cpu.h"
 
 namespace hal {
-namespace CPU {
+namespace cpu {
 
-    void Init() {
-    }
+void Init() {
+}
 
 } // namespace CPU
 } // namespace hal
