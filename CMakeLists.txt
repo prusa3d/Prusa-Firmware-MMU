@@ -192,6 +192,7 @@ target_sources(
           src/modules/protocol.cpp
           src/modules/buttons.cpp
           src/modules/leds.cpp
+          src/modules/motion.cpp
   )
 
 set_property(
