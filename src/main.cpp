@@ -70,7 +70,7 @@ void setup() {
     cpu::Init();
 
     shr16::shr16.Init();
-    leds.SetMode(4, false, modules::leds::Mode::blink0);
+    leds.SetMode(4, modules::leds::Color::green, modules::leds::Mode::blink0);
     leds.Step(0);
 
     // @@TODO if the shift register doesn't work we really can't signalize anything, only internal variables will be accessible if the UART works
@@ -81,7 +81,7 @@ void setup() {
         .baudrate = 115200,
     };
     hal::usart::usart1.Init(&usart_conf);
-    leds.SetMode(3, false, modules::leds::Mode::on);
+    leds.SetMode(3, modules::leds::Color::green, modules::leds::Mode::on);
     leds.Step(0);
 
     // @@TODO if both shift register and the UART are dead, we are sitting ducks :(
@@ -96,15 +96,15 @@ void setup() {
         .cpol = 1,
     };
     spi::Init(SPI0, &spi_conf);
-    leds.SetMode(2, false, modules::leds::Mode::on);
+    leds.SetMode(2, modules::leds::Color::green, modules::leds::Mode::on);
     leds.Step(0);
 
     // tmc::Init()
-    leds.SetMode(1, false, modules::leds::Mode::on);
+    leds.SetMode(1, modules::leds::Color::green, modules::leds::Mode::on);
     leds.Step(0);
 
     // adc::Init();
-    leds.SetMode(0, false, modules::leds::Mode::on);
+    leds.SetMode(0, modules::leds::Color::green, modules::leds::Mode::on);
     leds.Step(0);
 }
 
