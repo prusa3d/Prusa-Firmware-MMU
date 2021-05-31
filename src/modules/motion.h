@@ -37,6 +37,12 @@ enum Mode {
 
 class Motion {
 public:
+    /// Init axis driver
+    void InitAxis(Axis axis) {}
+
+    /// Disable axis motor
+    void DisableAxis(Axis axis) {}
+
     /// Enqueue move of a specific motor/axis into planner buffer
     void PlanMove(Axis axis, float targetPosition, uint16_t feedrate);
 
@@ -49,6 +55,11 @@ public:
 
     /// State machine doing all the planning and stepping preparation based on received commands
     void Step();
+
+    /// probably higher-level operations knowing the semantic meaning of axes
+    enum IdlerMode { Engage,
+        Disengage };
+    void Idler(IdlerMode im) {}
 
 private:
 };

@@ -6,4 +6,14 @@
 
 namespace logic {
 
+// schvalne zkusime udelat operaci unload filament
+
+class Logic {
+
+public:
+    inline Logic() = default;
+
+    void UnloadFilament();
+};
+
 } // namespace logic
