@@ -91,5 +91,7 @@ private:
     uint16_t ms;
 };
 
+extern LEDs leds;
+
 } // namespace LEDs
 } // namespace modules

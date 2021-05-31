@@ -19,6 +19,12 @@ private:
     constexpr static const uint16_t debounce = 100;
 };
 
+enum {
+    Left = 0,
+    Middle,
+    Right
+};
+
 class Buttons {
     constexpr static const uint8_t N = 3; ///< number of buttons currently supported
     constexpr static const uint8_t adc = 1; ///< ADC index - will be some define or other constant later on
