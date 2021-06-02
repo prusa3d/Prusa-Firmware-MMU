@@ -1,22 +1,28 @@
 #include "hal/cpu.h"
 #include "hal/adc.h"
 #include "hal/gpio.h"
+#include "hal/shr16.h"
 #include "hal/spi.h"
 #include "hal/usart.h"
-#include "hal/shr16.h"
 
 #include "pins.h"
 #include <avr/interrupt.h>
 
 #include "modules/buttons.h"
+#include "modules/finda.h"
 #include "modules/leds.h"
 #include "modules/protocol.h"
 
 #include "logic/mm_control.h"
 
 static modules::protocol::Protocol protocol;
-static modules::buttons::Buttons buttons;
-static modules::leds::LEDs leds;
+//static modules::buttons::Buttons buttons;
+//static modules::leds::LEDs leds;
+
+// @@TODO we need a dummy noCommand to init the pointer with ... makes the rest of the code much better and safer
+logic::TaskBase *currentCommand = nullptr;
+/// remember the request message that started the currently running command
+modules::protocol::RequestMsg currentCommandRq(modules::protocol::RequestMsgCodes::unknown, 0);
 
 // examples and test code shall be located here
 void TmpPlayground() {
@@ -70,8 +76,8 @@ void setup() {
     cpu::Init();
 
     shr16::shr16.Init();
-    leds.SetMode(4, modules::leds::Color::green, modules::leds::Mode::blink0);
-    leds.Step(0);
+    modules::leds::leds.SetMode(4, modules::leds::Color::green, modules::leds::Mode::blink0);
+    modules::leds::leds.Step(0);
 
     // @@TODO if the shift register doesn't work we really can't signalize anything, only internal variables will be accessible if the UART works
 
@@ -81,8 +87,8 @@ void setup() {
         .baudrate = 115200,
     };
     hal::usart::usart1.Init(&usart_conf);
-    leds.SetMode(3, modules::leds::Color::green, modules::leds::Mode::on);
-    leds.Step(0);
+    modules::leds::leds.SetMode(3, modules::leds::Color::green, modules::leds::Mode::on);
+    modules::leds::leds.Step(0);
 
     // @@TODO if both shift register and the UART are dead, we are sitting ducks :(
 
@@ -96,19 +102,109 @@ void setup() {
         .cpol = 1,
     };
     spi::Init(SPI0, &spi_conf);
-    leds.SetMode(2, modules::leds::Color::green, modules::leds::Mode::on);
-    leds.Step(0);
+    modules::leds::leds.SetMode(2, modules::leds::Color::green, modules::leds::Mode::on);
+    modules::leds::leds.Step(0);
 
     // tmc::Init()
-    leds.SetMode(1, modules::leds::Color::green, modules::leds::Mode::on);
-    leds.Step(0);
+    modules::leds::leds.SetMode(1, modules::leds::Color::green, modules::leds::Mode::on);
+    modules::leds::leds.Step(0);
 
     // adc::Init();
-    leds.SetMode(0, modules::leds::Color::green, modules::leds::Mode::on);
-    leds.Step(0);
+    modules::leds::leds.SetMode(0, modules::leds::Color::green, modules::leds::Mode::on);
+    modules::leds::leds.Step(0);
+}
+
+void SendMessage(const modules::protocol::ResponseMsg &msg) {
+}
+
+void PlanCommand(const modules::protocol::RequestMsg &rq) {
+    namespace mp = modules::protocol;
+    if ((currentCommand == nullptr) || (currentCommand->Status() == 1)) {
+        // we are allowed to start a new command
+        switch (rq.code) {
+        case mp::RequestMsgCodes::Cut:
+            //currentCommand = &cutCommand;
+            break;
+        case mp::RequestMsgCodes::Eject:
+            //currentCommand = &ejectCommand;
+            break;
+        case mp::RequestMsgCodes::Load:
+            // currentCommand = &loadCommand;
+            break;
+        case mp::RequestMsgCodes::Tool:
+            // currentCommand = &toolCommand;
+            break;
+        case mp::RequestMsgCodes::Unload:
+            // currentCommand = &unloadCommand;
+            break;
+        default:
+            // currentCommand = &noCommand;
+            break;
+        }
+        currentCommand->Reset();
+    }
+}
+
+void ReportRunningCommand() {
+    namespace mp = modules::protocol;
+    if (!currentCommand) {
+        // @@TODO what to report after startup?
+    } else {
+        mp::ResponseMsgParamCodes commandStatus;
+        uint8_t value = 0;
+        switch (currentCommand->Status()) {
+        case 0:
+            commandStatus = mp::ResponseMsgParamCodes::Processing;
+            value = currentCommand->Progress();
+            break;
+        case 1:
+            commandStatus = mp::ResponseMsgParamCodes::Finished;
+            break;
+        default:
+            commandStatus = mp::ResponseMsgParamCodes::Error;
+            value = currentCommand->Status() - 2; // @@TODO cleanup
+            break;
+        }
+        SendMessage(mp::ResponseMsg(currentCommandRq, commandStatus, value));
+    }
 }
 
 void ProcessRequestMsg(const modules::protocol::RequestMsg &rq) {
+    namespace mp = modules::protocol;
+    switch (rq.code) {
+    case mp::RequestMsgCodes::Button:
+        // behave just like if the user pressed a button
+        break;
+    case mp::RequestMsgCodes::Finda:
+        // immediately report FINDA status
+        SendMessage(mp::ResponseMsg(rq, mp::ResponseMsgParamCodes::Accepted, modules::finda::finda.Status()));
+        break;
+    case mp::RequestMsgCodes::Mode:
+        // immediately switch to normal/stealth as requested
+        // modules::motion::SetMode();
+        break;
+    case mp::RequestMsgCodes::Query:
+        // immediately report progress of currently running command
+        ReportRunningCommand();
+        break;
+    case mp::RequestMsgCodes::Reset:
+        // immediately reset the board - there is no response in this case
+        break; // @@TODO
+    case mp::RequestMsgCodes::Version:
+        SendMessage(mp::ResponseMsg(rq, mp::ResponseMsgParamCodes::Accepted, 1)); // @@TODO
+    case mp::RequestMsgCodes::Wait:
+        break; // @@TODO
+    case mp::RequestMsgCodes::Cut:
+    case mp::RequestMsgCodes::Eject:
+    case mp::RequestMsgCodes::Load:
+    case mp::RequestMsgCodes::Tool:
+    case mp::RequestMsgCodes::Unload:
+        PlanCommand(rq);
+        break;
+    default:
+        // respond with an error message
+        break;
+    }
 }
 
 /// @returns true if a request was successfully finished
@@ -124,7 +220,7 @@ bool CheckMsgs() {
             // just continue reading
             break;
         case mpd::Error:
-            // what shall we do? Start some watchdog?
+            // @@TODO what shall we do? Start some watchdog? We cannot send anything spontaneously
             break;
         }
     }
@@ -149,8 +245,10 @@ void loop() {
     if (CheckMsgs()) {
         ProcessRequestMsg(protocol.GetRequestMsg());
     }
-    buttons.Step(hal::adc::ReadADC(0));
-    leds.Step(0);
+    modules::buttons::buttons.Step(hal::adc::ReadADC(0));
+    modules::leds::leds.Step(0);
+    modules::finda::finda.Step();
+    currentCommand->Step();
 }
 
 int main() {

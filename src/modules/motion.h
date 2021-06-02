@@ -25,14 +25,37 @@ namespace modules {
 namespace motion {
 
 enum Axis {
-    Idler,
+    Pulley,
     Selector,
-    Pulley
+    Idler,
 };
 
-enum Mode {
+enum MotorMode {
     Stealth,
     Normal
+};
+
+enum IdlerMode {
+    Engage,
+    Disengage
+};
+
+/// As step and dir pins are randomly scattered on the board for each of the axes/motors
+/// it is convenient to make a common interface for them
+class StepDirPins {
+public:
+    static void SetIdlerDirUp();
+    static void SetIdlerDirDown();
+
+    static void SetSelectorDirLeft();
+    static void SetSelectorDirRight();
+
+    static void SetPulleyDirPull();
+    static void SetPulleyDirPush();
+
+    static void StepIdler(uint8_t on);
+    static void StepSelector(uint8_t on);
+    static void StepPulley(uint8_t on);
 };
 
 class Motion {
@@ -51,14 +74,18 @@ public:
 
     /// Set mode of TMC/motors operation
     /// Common for all axes/motors
-    void SetMode(Mode mode);
+    void SetMode(MotorMode mode);
 
     /// State machine doing all the planning and stepping preparation based on received commands
     void Step();
 
+    /// @returns true if all planned moves have been finished
+    bool QueueEmpty() const;
+
+    /// stop whatever moves are being done
+    void AbortPlannedMoves() {}
+
     /// probably higher-level operations knowing the semantic meaning of axes
-    enum IdlerMode { Engage,
-        Disengage };
     void Idler(IdlerMode im) {}
 
 private:
