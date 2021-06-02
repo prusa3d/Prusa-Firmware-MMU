@@ -3,43 +3,9 @@
 namespace modules {
 namespace buttons {
 
-uint16_t Buttons::tmpTiming = 0;
+Buttons buttons;
 
-// original idea from: https://www.eeweb.com/debouncing-push-buttons-using-a-state-machine-approach
-void Button::Step(uint16_t time, bool press) {
-    switch (f.state) {
-    case State::Waiting:
-        if (press) {
-            f.state = State::Detected;
-            timeLastChange = time;
-            f.tmp = press;
-        }
-        break;
-    case State::Detected:
-        if (f.tmp == press) {
-            if (time - timeLastChange > debounce) {
-                f.state = State::WaitForRelease;
-            }
-        } else {
-            f.state = State::Waiting;
-        }
-        break;
-    case State::WaitForRelease:
-        if (!press) {
-            f.state = State::Update;
-        }
-        break;
-    case State::Update:
-        f.state = State::Waiting;
-        timeLastChange = time;
-        f.tmp = false;
-        break;
-    default:
-        f.state = State::Waiting;
-        timeLastChange = time;
-        f.tmp = false;
-    }
-}
+uint16_t Buttons::tmpTiming = 0;
 
 int8_t Buttons::Sample(uint16_t rawADC) {
     // decode 3 buttons' levels from one ADC

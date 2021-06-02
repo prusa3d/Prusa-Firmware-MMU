@@ -191,6 +191,7 @@ target_sources(
           src/hal/adc.cpp
           src/modules/protocol.cpp
           src/modules/buttons.cpp
+          src/modules/debouncer.cpp
           src/modules/finda.cpp
           src/modules/leds.cpp
           src/modules/motion.cpp
