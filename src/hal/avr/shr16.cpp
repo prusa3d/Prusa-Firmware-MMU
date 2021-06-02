@@ -42,13 +42,13 @@ void SHR16::SetLED(uint16_t led) {
     //	Write((shr16_v & ~SHR16_LED_MSK) | led);
 }
 
-void SHR16::SetTMCEnabled(uint8_t ena) {
+void SHR16::SetTMCEnabled(uint8_t index, bool ena) {
     //    ena ^= 7;
     //	ena = ((ena & 1) << 1) | ((ena & 2) << 2) | ((ena & 4) << 3); // 0. << 1 == 1., 1. << 2 == 3., 2. << 3 == 5.
     //	Write((shr16_v & ~SHR16_ENA_MSK) | ena);
 }
 
-void SHR16::SetTMCDir(uint8_t dir) {
+void SHR16::SetTMCDir(uint8_t index, bool dir) {
     //    dir = (dir & 1) | ((dir & 2) << 1) | ((dir & 4) << 2); // 0., 1. << 1 == 2., 2. << 2 == 4.
     //	Write((shr16_v & ~SHR16_DIR_MSK) | dir);
 }

@@ -41,8 +41,10 @@ class SHR16 {
 public:
     void Init();
     void SetLED(uint16_t led);
-    void SetTMCEnabled(uint8_t ena);
-    void SetTMCDir(uint8_t dir);
+
+    /// indices: PULLEY = 0, SELECTOR = 1, IDLER = 2
+    void SetTMCEnabled(uint8_t index, bool ena);
+    void SetTMCDir(uint8_t index, bool dir);
 
 private:
     uint16_t shr16_v;
