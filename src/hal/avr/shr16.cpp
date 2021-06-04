@@ -1,5 +1,6 @@
 #include "../shr16.h"
 #include "../gpio.h"
+#include "../../pins.h"
 
 namespace hal {
 namespace shr16 {
@@ -7,34 +8,24 @@ namespace shr16 {
 SHR16 shr16;
 
 void SHR16::Init() {
-    //    DDRC |= 0x80;
-    //	DDRB |= 0x40;
-    //	DDRB |= 0x20;
-    //	PORTC &= ~0x80;
-    //	PORTB &= ~0x40;
-    //	PORTB &= ~0x20;
-    //	shr16_v = 0;
-    //	Write(shr16_v);
-    //	Write(shr16_v);
+    using namespace hal::gpio;
+    gpio::Init(GPIO_pin(SHR16_DATA), GPIO_InitTypeDef(Mode::output, Level::low));
+    gpio::Init(GPIO_pin(SHR16_LATCH), GPIO_InitTypeDef(Mode::output, Level::high));
+    gpio::Init(GPIO_pin(SHR16_CLOCK), GPIO_InitTypeDef(Mode::output, Level::low));
+    Write(0);
 }
 
 void SHR16::Write(uint16_t v) {
-    //    PORTB &= ~0x40;
-    //	asm("nop");
-    //	for (uint16_t m = 0x8000; m; m >>= 1)
-    //	{
-    //		if (m & v)
-    //			PORTB |= 0x20;
-    //		else
-    //			PORTB &= ~0x20;
-    //		PORTC |= 0x80;
-    //		asm("nop");
-    //		PORTC &= ~0x80;
-    //		asm("nop");
-    //	}
-    //	PORTB |= 0x40;
-    //	asm("nop");
-    //	shr16_v = v;
+    using namespace hal::gpio;
+    WritePin(GPIO_pin(SHR16_LATCH), Level::low);
+    for (uint16_t m = 0x8000; m; m >>= 1)
+    {
+        WritePin(GPIO_pin(SHR16_DATA), (Level)((m & v) != 0));
+        WritePin(GPIO_pin(SHR16_CLOCK), Level::high);
+        WritePin(GPIO_pin(SHR16_CLOCK), Level::low);
+    }
+    WritePin(GPIO_pin(SHR16_LATCH), Level::high);
+    shr16_v = v;
 }
 
 void SHR16::SetLED(uint16_t led) {
