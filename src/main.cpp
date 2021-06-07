@@ -75,6 +75,8 @@ void setup() {
 
     cpu::Init();
 
+    // watchdog init
+
     shr16::shr16.Init();
     modules::leds::leds.SetMode(4, modules::leds::Color::green, modules::leds::Mode::blink0);
     modules::leds::leds.Step(0);
@@ -249,6 +251,7 @@ void loop() {
     modules::leds::leds.Step(0);
     modules::finda::finda.Step();
     currentCommand->Step();
+    // add a watchdog reset
 }
 
 int main() {
