@@ -195,6 +195,7 @@ target_sources(
           src/modules/finda.cpp
           src/modules/leds.cpp
           src/modules/motion.cpp
+          src/logic/mm_control.cpp
   )
 
 set_property(

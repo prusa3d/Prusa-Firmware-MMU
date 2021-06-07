@@ -58,6 +58,7 @@ public:
     static void StepPulley(uint8_t on);
 };
 
+/// @@TODO this is subject of discussion and change in the future
 class Motion {
 public:
     /// Init axis driver
@@ -67,10 +68,12 @@ public:
     void DisableAxis(Axis axis) {}
 
     /// Enqueue move of a specific motor/axis into planner buffer
-    void PlanMove(Axis axis, float targetPosition, uint16_t feedrate);
+    /// @param pulley, idler, selector - target coords
+    void PlanMove(uint16_t pulley, uint16_t idler, uint16_t selector, uint16_t feedrate, uint16_t starting_speed, uint16_t ending_speed);
 
     /// Enqueue performing of homing of an axis
-    void Home(Axis axis);
+    /// @@TODO
+    void Home(Axis axis, bool direction);
 
     /// Set mode of TMC/motors operation
     /// Common for all axes/motors
@@ -87,6 +90,9 @@ public:
 
     /// probably higher-level operations knowing the semantic meaning of axes
     void Idler(IdlerMode im) {}
+
+    bool IdlerDisengaged() const;
+    bool IdlerEngaged() const;
 
 private:
 };

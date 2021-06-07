@@ -6,13 +6,17 @@ namespace motion {
 
 Motion motion;
 
-void Motion::PlanMove(Axis axis, float targetPosition, uint16_t feedrate) {}
+void Motion::PlanMove(uint16_t pulley, uint16_t idler, uint16_t selector, uint16_t feedrate, uint16_t starting_speed, uint16_t ending_speed) {}
 
-void Motion::Home(Axis axis) {}
+void Motion::Home(Axis axis, bool direction) {}
 
 void Motion::SetMode(MotorMode mode) {}
 
 void Motion::Step() {}
+
+bool Motion::IdlerDisengaged() const { return true; }
+
+bool Motion::IdlerEngaged() const { return true; }
 
 void ISR() {}
 
