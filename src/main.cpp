@@ -13,14 +13,14 @@
 #include "modules/leds.h"
 #include "modules/protocol.h"
 
-#include "logic/mm_control.h"
+#include "logic/command_base.h"
+#include "logic/no_command.h"
+#include "logic/unload_filament.h"
 
 static modules::protocol::Protocol protocol;
-//static modules::buttons::Buttons buttons;
-//static modules::leds::LEDs leds;
 
-// @@TODO we need a dummy noCommand to init the pointer with ... makes the rest of the code much better and safer
-logic::TaskBase *currentCommand = nullptr;
+logic::CommandBase *currentCommand = &logic::noCommand;
+
 /// remember the request message that started the currently running command
 modules::protocol::RequestMsg currentCommandRq(modules::protocol::RequestMsgCodes::unknown, 0);
 
@@ -121,7 +121,7 @@ void SendMessage(const modules::protocol::ResponseMsg &msg) {
 
 void PlanCommand(const modules::protocol::RequestMsg &rq) {
     namespace mp = modules::protocol;
-    if ((currentCommand == nullptr) || (currentCommand->Status() == 1)) {
+    if (currentCommand->Error() == ErrorCode::OK) {
         // we are allowed to start a new command
         switch (rq.code) {
         case mp::RequestMsgCodes::Cut:
@@ -137,7 +137,7 @@ void PlanCommand(const modules::protocol::RequestMsg &rq) {
             // currentCommand = &toolCommand;
             break;
         case mp::RequestMsgCodes::Unload:
-            // currentCommand = &unloadCommand;
+            currentCommand = &logic::unloadFilament;
             break;
         default:
             // currentCommand = &noCommand;
@@ -149,26 +149,22 @@ void PlanCommand(const modules::protocol::RequestMsg &rq) {
 
 void ReportRunningCommand() {
     namespace mp = modules::protocol;
-    if (!currentCommand) {
-        // @@TODO what to report after startup?
-    } else {
-        mp::ResponseMsgParamCodes commandStatus;
-        uint8_t value = 0;
-        switch (currentCommand->Status()) {
-        case 0:
-            commandStatus = mp::ResponseMsgParamCodes::Processing;
-            value = currentCommand->Progress();
-            break;
-        case 1:
-            commandStatus = mp::ResponseMsgParamCodes::Finished;
-            break;
-        default:
-            commandStatus = mp::ResponseMsgParamCodes::Error;
-            value = currentCommand->Status() - 2; // @@TODO cleanup
-            break;
-        }
-        SendMessage(mp::ResponseMsg(currentCommandRq, commandStatus, value));
+    mp::ResponseMsgParamCodes commandStatus;
+    uint8_t value = 0;
+    switch (currentCommand->Error()) {
+    case ErrorCode::RUNNING:
+        commandStatus = mp::ResponseMsgParamCodes::Processing;
+        value = (uint8_t)currentCommand->State();
+        break;
+    case ErrorCode::OK:
+        commandStatus = mp::ResponseMsgParamCodes::Finished;
+        break;
+    default:
+        commandStatus = mp::ResponseMsgParamCodes::Error;
+        value = (uint8_t)currentCommand->Error();
+        break;
     }
+    SendMessage(mp::ResponseMsg(currentCommandRq, commandStatus, value));
 }
 
 void ProcessRequestMsg(const modules::protocol::RequestMsg &rq) {

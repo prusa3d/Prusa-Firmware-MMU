@@ -195,7 +195,10 @@ target_sources(
           src/modules/finda.cpp
           src/modules/leds.cpp
           src/modules/motion.cpp
-          src/logic/mm_control.cpp
+          src/logic/command_base.cpp
+          src/logic/no_command.cpp
+          src/logic/unload_filament.cpp
+          src/logic/unload_to_finda.cpp
   )
 
 set_property(
