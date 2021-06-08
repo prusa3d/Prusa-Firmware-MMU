@@ -179,7 +179,7 @@ void ProcessRequestMsg(const modules::protocol::RequestMsg &rq) {
         break;
     case mp::RequestMsgCodes::Finda:
         // immediately report FINDA status
-        SendMessage(mp::ResponseMsg(rq, mp::ResponseMsgParamCodes::Accepted, modules::finda::finda.Status()));
+        SendMessage(mp::ResponseMsg(rq, mp::ResponseMsgParamCodes::Accepted, modules::finda::finda.Pressed()));
         break;
     case mp::RequestMsgCodes::Mode:
         // immediately switch to normal/stealth as requested
@@ -249,7 +249,7 @@ void loop() {
     }
     modules::buttons::buttons.Step(hal::adc::ReadADC(0));
     modules::leds::leds.Step(0);
-    modules::finda::finda.Step();
+    modules::finda::finda.Step(0);
     currentCommand->Step();
     // add a watchdog reset
 }
