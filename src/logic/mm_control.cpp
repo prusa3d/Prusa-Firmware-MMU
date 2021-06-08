@@ -43,7 +43,7 @@ struct UnloadToFinda {
         namespace mm = modules::motion;
         namespace mf = modules::finda;
         // check the inital state of FINDA and plan the moves
-        if (mf::finda.Status() == mf::Off) {
+        if (mf::finda.Pressed()) {
             state = OK; // FINDA is already off, we assume the fillament is not there, i.e. already unloaded
         } else {
             // FINDA is sensing the filament, plan moves to unload it
@@ -62,7 +62,7 @@ struct UnloadToFinda {
         namespace mf = modules::finda;
         switch (state) {
         case WaitingForFINDA:
-            if (modules::finda::finda.Status() == modules::finda::Off) {
+            if (modules::finda::finda.Pressed()) {
                 // detected end of filament
                 state = OK;
             } else if (/*tmc2130_read_gstat() &&*/ mm::motion.QueueEmpty()) {
