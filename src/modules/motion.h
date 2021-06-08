@@ -83,7 +83,7 @@ public:
     void Step();
 
     /// @returns true if all planned moves have been finished
-    bool QueueEmpty() const;
+    bool QueueEmpty() const { return false; }
 
     /// stop whatever moves are being done
     void AbortPlannedMoves() {}
