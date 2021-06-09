@@ -39,6 +39,13 @@ public:
     /// @return true if button at index is pressed
     /// @@TODO add range checking if necessary
     inline bool ButtonPressed(uint8_t index) const { return buttons[index].Pressed(); }
+    inline bool AnyButtonPressed() const {
+        for (uint8_t i = 0; i < N; ++i) {
+            if (ButtonPressed(i))
+                return true;
+        }
+        return false;
+    }
 
 private:
     Button buttons[N];
