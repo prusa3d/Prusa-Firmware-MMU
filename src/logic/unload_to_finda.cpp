@@ -1,15 +1,16 @@
 #include "unload_to_finda.h"
-#include "../modules/motion.h"
-#include "../modules/leds.h"
 #include "../modules/buttons.h"
 #include "../modules/finda.h"
+#include "../modules/leds.h"
+#include "../modules/motion.h"
 #include "../modules/permanent_storage.h"
 
 namespace logic {
 
+namespace mm = modules::motion;
+namespace mf = modules::finda;
+
 void UnloadToFinda::Reset() {
-    namespace mm = modules::motion;
-    namespace mf = modules::finda;
     // check the inital state of FINDA and plan the moves
     if (mf::finda.Pressed()) {
         state = OK; // FINDA is already off, we assume the fillament is not there, i.e. already unloaded
@@ -25,8 +26,6 @@ void UnloadToFinda::Reset() {
 }
 
 bool UnloadToFinda::Step() {
-    namespace mm = modules::motion;
-    namespace mf = modules::finda;
     switch (state) {
     case WaitingForFINDA:
         if (modules::finda::finda.Pressed()) {

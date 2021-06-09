@@ -16,6 +16,11 @@ public:
         Failed
     };
 
+    inline Selector()
+        : state(Ready)
+        , currentSlot(0)
+        , plannedSlot(0) {}
+
     // public operations on the selector
 
     /// @retuns false in case an operation is already underway
@@ -40,11 +45,6 @@ private:
 
     /// current state
     uint8_t currentSlot;
-
-    inline Selector()
-        : state(Ready)
-        , currentSlot(0)
-        , plannedSlot(0) {}
 };
 
 extern Selector selector;

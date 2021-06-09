@@ -16,6 +16,13 @@ public:
         Failed
     };
 
+    inline Idler()
+        : plannedEngage(false)
+        , plannedSlot(0)
+        , state(Ready)
+        , currentSlot(0)
+        , currentlyEngaged(false) {}
+
     // public operations on the idler
 
     /// @retuns false in case an operation is already underway
@@ -47,13 +54,6 @@ private:
     /// current state
     uint8_t currentSlot;
     bool currentlyEngaged;
-
-    inline Idler()
-        : plannedEngage(false)
-        , plannedSlot(0)
-        , state(Ready)
-        , currentSlot(0)
-        , currentlyEngaged(false) {}
 };
 
 extern Idler idler;

@@ -193,11 +193,14 @@ target_sources(
           src/modules/buttons.cpp
           src/modules/debouncer.cpp
           src/modules/finda.cpp
+          src/modules/idler.cpp
           src/modules/leds.cpp
           src/modules/motion.cpp
+          src/modules/selector.cpp
           src/logic/command_base.cpp
           src/logic/cut_filament.cpp
           src/logic/eject_filament.cpp
+          src/logic/feed_to_finda.cpp
           src/logic/load_filament.cpp
           src/logic/no_command.cpp
           src/logic/tool_change.cpp

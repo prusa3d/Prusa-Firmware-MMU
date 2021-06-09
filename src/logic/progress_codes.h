@@ -15,5 +15,13 @@ enum class ProgressCode : uint_fast8_t {
     AvoidingGrind,
     FinishingMoves,
     ERR1DisengagingIdler,
-    ERR1WaitingForUser
+    ERR1WaitingForUser,
+
+    CutUnloadingFilament,
+    SelectingFilamentSlot,
+    FeedingToFINDA,
+    PreparingBlade,
+    PushingFilament,
+    PerformingCut,
+    ReturningSelector,
 };
