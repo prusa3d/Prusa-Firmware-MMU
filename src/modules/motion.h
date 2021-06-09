@@ -89,10 +89,6 @@ public:
     void AbortPlannedMoves() {}
 
     /// probably higher-level operations knowing the semantic meaning of axes
-    void Idler(IdlerMode im) {}
-
-    bool IdlerDisengaged() const;
-    bool IdlerEngaged() const;
 
 private:
 };
