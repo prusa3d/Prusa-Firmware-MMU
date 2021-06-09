@@ -10,8 +10,10 @@
 
 #include "modules/buttons.h"
 #include "modules/finda.h"
+#include "modules/idler.h"
 #include "modules/leds.h"
 #include "modules/protocol.h"
+#include "modules/selector.h"
 
 #include "logic/command_base.h"
 #include "logic/cut_filament.h"
@@ -250,6 +252,8 @@ void loop() {
     modules::buttons::buttons.Step(hal::adc::ReadADC(0));
     modules::leds::leds.Step(0);
     modules::finda::finda.Step(0);
+    modules::idler::idler.Step();
+    modules::selector::selector.Step();
     currentCommand->Step();
     // add a watchdog reset
 }
