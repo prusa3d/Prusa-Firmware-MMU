@@ -3,6 +3,7 @@
 #include "../modules/finda.h"
 #include "../modules/leds.h"
 #include "../modules/motion.h"
+#include "../modules/idler.h"
 #include "../modules/permanent_storage.h"
 
 namespace logic {
@@ -15,14 +16,15 @@ void UnloadFilament::Reset() {
     mm::motion.InitAxis(mm::Pulley);
     state = ProgressCode::EngagingIdler;
     error = ErrorCode::OK;
-    mm::motion.Idler(mm::Engage);
+    modules::idler::idler.Engage(0); //@@TODO
 }
 
 bool UnloadFilament::Step() {
     namespace mm = modules::motion;
+    namespace mi = modules::idler;
     switch (state) {
     case ProgressCode::EngagingIdler: // state 1 engage idler
-        if (mm::motion.IdlerEngaged()) { // if idler is in parked position un-park it get in contact with filament
+        if (mi::idler.Engaged()) { // if idler is in parked position un-park it get in contact with filament
             state = ProgressCode::UnloadingToFinda;
             unl.Reset();
         }
@@ -37,11 +39,11 @@ bool UnloadFilament::Step() {
                 state = ProgressCode::DisengagingIdler;
             }
             // in all cases disengage the idler
-            mm::motion.Idler(mm::Disengage);
+            mi::idler.Disengage();
         }
         return false;
     case ProgressCode::DisengagingIdler:
-        if (mm::motion.IdlerDisengaged()) {
+        if (!mi::idler.Engaged()) {
             state = ProgressCode::AvoidingGrind;
             //                mm::motion.PlanMove(mm::Pulley, -100, 10); // @@TODO constants
         }
@@ -49,7 +51,7 @@ bool UnloadFilament::Step() {
     case ProgressCode::AvoidingGrind: // state 3 move a little bit so it is not a grinded hole in filament
         if (mm::motion.QueueEmpty()) {
             state = ProgressCode::FinishingMoves;
-            mm::motion.Idler(mm::Disengage);
+            mi::idler.Disengage();
             return true;
         }
         return false;
@@ -61,7 +63,7 @@ bool UnloadFilament::Step() {
         return false;
     case ProgressCode::ERR1DisengagingIdler: // couldn't unload to FINDA
         error = ErrorCode::UNLOAD_FINDA_DIDNT_TRIGGER;
-        if (mm::motion.IdlerDisengaged()) {
+        if (!mi::idler.Engaged()) {
             state = ProgressCode::ERR1WaitingForUser;
         }
         return false;
