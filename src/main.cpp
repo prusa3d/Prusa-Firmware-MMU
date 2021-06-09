@@ -14,7 +14,11 @@
 #include "modules/protocol.h"
 
 #include "logic/command_base.h"
+#include "logic/cut_filament.h"
+#include "logic/eject_filament.h"
+#include "logic/load_filament.h"
 #include "logic/no_command.h"
+#include "logic/tool_change.h"
 #include "logic/unload_filament.h"
 
 static modules::protocol::Protocol protocol;
@@ -122,25 +126,25 @@ void SendMessage(const modules::protocol::ResponseMsg &msg) {
 void PlanCommand(const modules::protocol::RequestMsg &rq) {
     namespace mp = modules::protocol;
     if (currentCommand->Error() == ErrorCode::OK) {
-        // we are allowed to start a new command
+        // we are allowed to start a new command as the previous one is in the OK finished state
         switch (rq.code) {
         case mp::RequestMsgCodes::Cut:
-            //currentCommand = &cutCommand;
+            currentCommand = &logic::cutFilament;
             break;
         case mp::RequestMsgCodes::Eject:
-            //currentCommand = &ejectCommand;
+            currentCommand = &logic::ejectFilament;
             break;
         case mp::RequestMsgCodes::Load:
-            // currentCommand = &loadCommand;
+            currentCommand = &logic::loadFilament;
             break;
         case mp::RequestMsgCodes::Tool:
-            // currentCommand = &toolCommand;
+            currentCommand = &logic::toolChange;
             break;
         case mp::RequestMsgCodes::Unload:
             currentCommand = &logic::unloadFilament;
             break;
         default:
-            // currentCommand = &noCommand;
+            currentCommand = &logic::noCommand;
             break;
         }
         currentCommand->Reset();
