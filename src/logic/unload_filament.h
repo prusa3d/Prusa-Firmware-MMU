@@ -11,7 +11,7 @@ class UnloadFilament : public CommandBase {
 public:
     inline UnloadFilament()
         : CommandBase()
-        , unl(3) { Reset(); }
+        , unl(3) {}
 
     /// Restart the automaton
     void Reset() override;

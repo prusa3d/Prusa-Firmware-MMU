@@ -10,8 +10,10 @@ namespace logic {
 
 UnloadFilament unloadFilament;
 
+namespace mm = modules::motion;
+namespace mi = modules::idler;
+
 void UnloadFilament::Reset() {
-    namespace mm = modules::motion;
     // unloads filament from extruder - filament is above Bondtech gears
     mm::motion.InitAxis(mm::Pulley);
     state = ProgressCode::EngagingIdler;
@@ -20,8 +22,6 @@ void UnloadFilament::Reset() {
 }
 
 bool UnloadFilament::Step() {
-    namespace mm = modules::motion;
-    namespace mi = modules::idler;
     switch (state) {
     case ProgressCode::EngagingIdler: // state 1 engage idler
         if (mi::idler.Engaged()) { // if idler is in parked position un-park it get in contact with filament

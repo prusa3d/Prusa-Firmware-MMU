@@ -1,7 +1,8 @@
 #pragma once
 #include <stdint.h>
 #include "command_base.h"
-#include "unload_to_finda.h"
+#include "unload_filament.h"
+#include "feed_to_finda.h"
 
 namespace logic {
 
@@ -19,6 +20,10 @@ public:
     bool Step() override;
 
 private:
+    UnloadFilament unl; ///< a high-level command/operation may be used as a building block of other operations as well
+    FeedToFinda feed;
+
+    void SelectFilamentSlot();
 };
 
 extern CutFilament cutFilament;
