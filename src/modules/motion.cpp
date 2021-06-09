@@ -14,10 +14,6 @@ void Motion::SetMode(MotorMode mode) {}
 
 void Motion::Step() {}
 
-bool Motion::IdlerDisengaged() const { return true; }
-
-bool Motion::IdlerEngaged() const { return true; }
-
 void ISR() {}
 
 //@@TODO check the directions
