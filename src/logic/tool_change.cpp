@@ -9,7 +9,7 @@ namespace logic {
 
 ToolChange toolChange;
 
-void ToolChange::Reset() {
+void ToolChange::Reset(uint8_t param) {
     namespace mm = modules::motion;
     state = ProgressCode::EngagingIdler;
     error = ErrorCode::OK;

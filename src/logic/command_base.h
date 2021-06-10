@@ -26,7 +26,8 @@ public:
     // virtual ~CommandBase() = default;
 
     /// resets the automaton
-    virtual void Reset() = 0;
+    /// @param param numerical parameter that comes with some commands (e.g. T1 for tool change 1)
+    virtual void Reset(uint8_t param) = 0;
 
     /// steps the state machine
     /// @returns true if the automaton finished its work

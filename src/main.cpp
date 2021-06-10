@@ -149,7 +149,7 @@ void PlanCommand(const modules::protocol::RequestMsg &rq) {
             currentCommand = &logic::noCommand;
             break;
         }
-        currentCommand->Reset();
+        currentCommand->Reset(rq.value);
     }
 }
 

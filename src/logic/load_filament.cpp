@@ -9,14 +9,14 @@ namespace logic {
 
 LoadFilament loadFilament;
 
-void LoadFilament::Reset() {
-    namespace mm = modules::motion;
+namespace mm = modules::motion;
+
+void LoadFilament::Reset(uint8_t param) {
     state = ProgressCode::EngagingIdler;
     error = ErrorCode::OK;
 }
 
 bool LoadFilament::Step() {
-    namespace mm = modules::motion;
     switch (state) {
     }
     return false;
