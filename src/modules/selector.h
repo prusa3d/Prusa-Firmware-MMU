@@ -18,8 +18,8 @@ public:
 
     inline Selector()
         : state(Ready)
-        , currentSlot(0)
-        , plannedSlot(0) {}
+        , plannedSlot(0)
+        , currentSlot(0) {}
 
     // public operations on the selector
 

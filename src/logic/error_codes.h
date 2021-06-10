@@ -10,6 +10,7 @@ enum class ErrorCode : int_fast8_t {
     OK, ///< the operation finished OK
 
     /// Unload Filament related error codes
-    UNLOAD_FINDA_DIDNT_TRIGGER = -1, ///< FINDA didn't trigger while unloading filament - either there is something blocking the metal ball or a cable is broken/disconnected
+    FINDA_DIDNT_TRIGGER = -1, ///< FINDA didn't trigger while unloading filament - either there is something blocking the metal ball or a cable is broken/disconnected
     UNLOAD_ERROR2 = -2,
+
 };

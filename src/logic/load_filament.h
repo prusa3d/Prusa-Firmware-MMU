@@ -1,7 +1,8 @@
 #pragma once
 #include <stdint.h>
 #include "command_base.h"
-#include "unload_to_finda.h"
+#include "feed_to_finda.h"
+#include "feed_to_bondtech.h"
 
 namespace logic {
 
@@ -19,6 +20,8 @@ public:
     bool Step() override;
 
 private:
+    FeedToFinda feed;
+    FeedToBondtech james; // bond ;)
 };
 
 extern LoadFilament loadFilament;

@@ -43,7 +43,7 @@ bool ToolChange::Step() {
                 load.Reset(plannedSlot);
                 break;
             case ErrorCode::UNLOAD_ERROR2: // @@TODO what shall we do in case of this error?
-            case ErrorCode::UNLOAD_FINDA_DIDNT_TRIGGER:
+            case ErrorCode::FINDA_DIDNT_TRIGGER:
                 break;
             }
         }

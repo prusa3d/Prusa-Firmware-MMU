@@ -17,9 +17,9 @@ public:
     };
 
     inline Idler()
-        : plannedEngage(false)
+        : state(Ready)
+        , plannedEngage(false)
         , plannedSlot(0)
-        , state(Ready)
         , currentSlot(0)
         , currentlyEngaged(false) {}
 

@@ -46,7 +46,7 @@ bool CutFilament::Step() {
             switch (unl.Error()) {
             case ErrorCode::OK: // finished successfully
             case ErrorCode::UNLOAD_ERROR2: // @@TODO what shall we do in case of this error?
-            case ErrorCode::UNLOAD_FINDA_DIDNT_TRIGGER:
+            case ErrorCode::FINDA_DIDNT_TRIGGER:
                 break;
             }
         }
@@ -54,10 +54,10 @@ bool CutFilament::Step() {
     case ProgressCode::SelectingFilamentSlot:
         if (mm::motion.QueueEmpty()) { // idler and selector finished their moves
             feed.Reset(true);
-            state = ProgressCode::FeedingToFINDA;
+            state = ProgressCode::FeedingToFinda;
         }
         break;
-    case ProgressCode::FeedingToFINDA: // @@TODO this state will be reused for repeated cutting of filament ... probably there will be multiple attempts, not sure
+    case ProgressCode::FeedingToFinda: // @@TODO this state will be reused for repeated cutting of filament ... probably there will be multiple attempts, not sure
         if (feed.Step()) {
             if (feed.State() == FeedToFinda::Failed) {
                 // @@TODO
@@ -97,7 +97,7 @@ bool CutFilament::Step() {
         break;
     case ProgressCode::ReturningSelector:
         if (mm::motion.QueueEmpty()) { // selector returned to position, feed the filament back to FINDA
-            state = ProgressCode::FeedingToFINDA;
+            state = ProgressCode::FeedingToFinda;
             feed.Reset(true);
         }
         break;

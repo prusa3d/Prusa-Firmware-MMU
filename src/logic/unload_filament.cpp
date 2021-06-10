@@ -62,7 +62,7 @@ bool UnloadFilament::Step() {
         }
         return false;
     case ProgressCode::ERR1DisengagingIdler: // couldn't unload to FINDA
-        error = ErrorCode::UNLOAD_FINDA_DIDNT_TRIGGER;
+        error = ErrorCode::FINDA_DIDNT_TRIGGER;
         if (!mi::idler.Engaged()) {
             state = ProgressCode::ERR1WaitingForUser;
         }

@@ -68,6 +68,12 @@ public:
     /// Disable axis motor
     void DisableAxis(Axis axis) {}
 
+    /// @returns true if a stall guard event occurred recently on the axis
+    bool StallGuard(Axis axis) { return false; }
+
+    /// clear stall guard flag reported on an axis
+    void ClearStallGuardFlag(Axis axis) {}
+
     /// Enqueue move of a specific motor/axis into planner buffer
     /// @param pulley, idler, selector - target coords
     void PlanMove(uint16_t pulley, uint16_t idler, uint16_t selector, uint16_t feedrate, uint16_t starting_speed, uint16_t ending_speed);
