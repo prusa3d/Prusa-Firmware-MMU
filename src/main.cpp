@@ -10,6 +10,7 @@
 
 #include "modules/buttons.h"
 #include "modules/finda.h"
+#include "modules/fsensor.h"
 #include "modules/idler.h"
 #include "modules/leds.h"
 #include "modules/protocol.h"
@@ -205,6 +206,9 @@ void ProcessRequestMsg(const modules::protocol::RequestMsg &rq) {
     case mp::RequestMsgCodes::Unload:
         PlanCommand(rq);
         break;
+        //    case mp::RequestMsgCodes::SetVar: //@@TODO - this is where e.g. printer's fsensor gets updated
+        //        SetVar(rq);
+        //        break;
     default:
         // respond with an error message
         break;
@@ -252,6 +256,7 @@ void loop() {
     modules::buttons::buttons.Step(hal::adc::ReadADC(0));
     modules::leds::leds.Step(0);
     modules::finda::finda.Step(0);
+    modules::fsensor::fsensor.Step(0);
     modules::idler::idler.Step();
     modules::selector::selector.Step();
     currentCommand->Step();

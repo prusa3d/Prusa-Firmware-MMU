@@ -8,19 +8,20 @@
 enum class ProgressCode : uint_fast8_t {
     OK = 0, ///< finished ok
 
-    /// Unload Filament related progress codes
     EngagingIdler,
-    UnloadingToFinda,
     DisengagingIdler,
+    UnloadingToFinda,
+    FeedingToFinda,
+    FeedingToBondtech,
     AvoidingGrind,
     FinishingMoves,
+
     ERR1DisengagingIdler,
     ERR1WaitingForUser,
 
     UnloadingFilament,
     LoadingFilament,
     SelectingFilamentSlot,
-    FeedingToFINDA,
     PreparingBlade,
     PushingFilament,
     PerformingCut,

@@ -45,7 +45,7 @@ bool EjectFilament::Step() {
             switch (unl.Error()) {
             case ErrorCode::OK: // finished successfully
             case ErrorCode::UNLOAD_ERROR2: // @@TODO what shall we do in case of this error?
-            case ErrorCode::UNLOAD_FINDA_DIDNT_TRIGGER:
+            case ErrorCode::FINDA_DIDNT_TRIGGER:
                 break;
             }
         }
