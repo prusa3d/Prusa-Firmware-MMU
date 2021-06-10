@@ -1,11 +1,11 @@
 #include "eject_filament.h"
 #include "../modules/buttons.h"
 #include "../modules/finda.h"
+#include "../modules/idler.h"
 #include "../modules/leds.h"
 #include "../modules/motion.h"
-#include "../modules/selector.h"
-#include "../modules/idler.h"
 #include "../modules/permanent_storage.h"
+#include "../modules/selector.h"
 
 namespace logic {
 

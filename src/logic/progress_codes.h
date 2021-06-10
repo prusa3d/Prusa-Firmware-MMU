@@ -18,6 +18,7 @@ enum class ProgressCode : uint_fast8_t {
     ERR1WaitingForUser,
 
     UnloadingFilament,
+    LoadingFilament,
     SelectingFilamentSlot,
     FeedingToFINDA,
     PreparingBlade,
