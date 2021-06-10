@@ -14,7 +14,7 @@ public:
         , unl(3) {}
 
     /// Restart the automaton
-    void Reset() override;
+    void Reset(uint8_t param) override;
 
     /// @returns true if the state machine finished its job, false otherwise
     bool Step() override;

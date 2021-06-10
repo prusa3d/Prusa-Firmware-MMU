@@ -10,10 +10,10 @@ namespace logic {
 class ToolChange : public CommandBase {
 public:
     inline ToolChange()
-        : CommandBase() { Reset(); }
+        : CommandBase() {}
 
     /// Restart the automaton
-    void Reset() override;
+    void Reset(uint8_t param) override;
 
     /// @returns true if the state machine finished its job, false otherwise
     bool Step() override;

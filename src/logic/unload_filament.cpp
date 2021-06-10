@@ -13,7 +13,7 @@ UnloadFilament unloadFilament;
 namespace mm = modules::motion;
 namespace mi = modules::idler;
 
-void UnloadFilament::Reset() {
+void UnloadFilament::Reset(uint8_t param) {
     // unloads filament from extruder - filament is above Bondtech gears
     mm::motion.InitAxis(mm::Pulley);
     state = ProgressCode::EngagingIdler;
@@ -77,7 +77,7 @@ bool UnloadFilament::Step() {
             //@@TODO
         } else if (tryAgain) {
             // try again the whole sequence
-            Reset();
+            Reset(0); // @@TODO param
         } else if (userResolved) {
             // problem resolved - the user pulled the fillament by hand
             //                modules::leds::leds.SetMode(active_extruder, modules::leds::red, modules::leds::off);

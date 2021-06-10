@@ -15,14 +15,14 @@ namespace mm = modules::motion;
 namespace mi = modules::idler;
 namespace ms = modules::selector;
 
-void CutFilament::Reset() {
+void CutFilament::Reset(uint8_t param) {
     error = ErrorCode::OK;
 
     bool isFilamentLoaded = true; //@@TODO
 
     if (isFilamentLoaded) {
-        state = ProgressCode::CutUnloadingFilament;
-        unl.Reset();
+        state = ProgressCode::UnloadingFilament;
+        unl.Reset(param); //@@TODO probably only act on active_extruder
     } else {
         SelectFilamentSlot();
     }
@@ -40,7 +40,7 @@ bool CutFilament::Step() {
     const int cut_steps_post = 150;
 
     switch (state) {
-    case ProgressCode::CutUnloadingFilament:
+    case ProgressCode::UnloadingFilament:
         if (unl.Step()) {
             // unloading sequence finished
             switch (unl.Error()) {
