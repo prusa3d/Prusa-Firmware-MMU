@@ -188,6 +188,7 @@ target_sources(
           src/hal/avr/cpu.cpp
           src/hal/avr/usart.cpp
           src/hal/avr/shr16.cpp
+          src/hal/avr/eeprom.cpp
           src/hal/adc.cpp
           src/modules/protocol.cpp
           src/modules/buttons.cpp
@@ -197,6 +198,7 @@ target_sources(
           src/modules/idler.cpp
           src/modules/leds.cpp
           src/modules/motion.cpp
+          src/modules/permanent_storage.cpp
           src/modules/selector.cpp
           src/logic/command_base.cpp
           src/logic/cut_filament.cpp
