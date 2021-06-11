@@ -23,7 +23,7 @@ set(TOOLCHAIN_PREFIX avr-)
 # Looking up the toolchain
 #
 
-if(GCC_TOOLCHAIN_DIR)
+if(AVR_TOOLCHAIN_DIR)
   # using toolchain set by AvrGcc.cmake (locked version)
   set(BINUTILS_PATH "${AVR_TOOLCHAIN_DIR}/bin")
 else()
@@ -80,7 +80,7 @@ set(CMAKE_SIZE_UTIL
     CACHE INTERNAL "size tool"
     )
 
-set(CMAKE_FIND_ROOT_PATH "${ARM_TOOLCHAIN_DIR}")
+set(CMAKE_FIND_ROOT_PATH "${AVR_TOOLCHAIN_DIR}")
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
