@@ -1,6 +1,7 @@
 #include "feed_to_bondtech.h"
 #include "../modules/buttons.h"
 #include "../modules/fsensor.h"
+#include "../modules/globals.h"
 #include "../modules/idler.h"
 #include "../modules/leds.h"
 #include "../modules/motion.h"
@@ -13,11 +14,12 @@ namespace mfs = modules::fsensor;
 namespace mi = modules::idler;
 namespace ml = modules::leds;
 namespace mp = modules::permanent_storage;
+namespace mg = modules::globals;
 
 void FeedToBondtech::Reset(uint8_t maxRetries) {
     state = EngagingIdler;
     this->maxRetries = maxRetries;
-    mi::idler.Engage(0 /*active_extruder*/); // @@TODO
+    mi::idler.Engage(mg::globals.ActiveSlot());
 }
 
 bool FeedToBondtech::Step() {
@@ -27,7 +29,7 @@ bool FeedToBondtech::Step() {
     case EngagingIdler:
         if (mi::idler.Engaged()) {
             state = PushingFilament;
-            ml::leds.SetMode(0, ml::Color::green, ml::blink0); //@@TODO active slot index
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::blink0);
             mm::motion.PlanMove(steps, 0, 0, 4500, 0, 0); //@@TODO constants - there was some strange acceleration sequence in the original FW,
             // we can probably hand over some array of constants for hand-tuned acceleration + leverage some smoothing in the stepper as well
         }
@@ -46,7 +48,7 @@ bool FeedToBondtech::Step() {
     case DisengagingIdler:
         if (!mi::idler.Engaged()) {
             state = OK;
-            ml::leds.SetMode(0, ml::Color::green, ml::on); //@@TODO active slot index
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::on);
         }
         return false;
     case OK:

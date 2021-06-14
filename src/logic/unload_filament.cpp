@@ -1,9 +1,10 @@
 #include "unload_filament.h"
 #include "../modules/buttons.h"
 #include "../modules/finda.h"
+#include "../modules/globals.h"
+#include "../modules/idler.h"
 #include "../modules/leds.h"
 #include "../modules/motion.h"
-#include "../modules/idler.h"
 #include "../modules/permanent_storage.h"
 
 namespace logic {
@@ -12,13 +13,14 @@ UnloadFilament unloadFilament;
 
 namespace mm = modules::motion;
 namespace mi = modules::idler;
+namespace mg = modules::globals;
 
 void UnloadFilament::Reset(uint8_t param) {
     // unloads filament from extruder - filament is above Bondtech gears
     mm::motion.InitAxis(mm::Pulley);
     state = ProgressCode::EngagingIdler;
     error = ErrorCode::OK;
-    modules::idler::idler.Engage(0); //@@TODO
+    modules::idler::idler.Engage(mg::globals.ActiveSlot());
 }
 
 bool UnloadFilament::Step() {
@@ -34,7 +36,7 @@ bool UnloadFilament::Step() {
             if (unl.state == UnloadToFinda::Failed) {
                 // couldn't unload to FINDA, report error and wait for user to resolve it
                 state = ProgressCode::ERR1DisengagingIdler;
-                //                    modules::leds::leds.SetMode(active_extruder, modules::leds::red, modules::leds::blink0);
+                modules::leds::leds.SetMode(mg::globals.ActiveSlot(), modules::leds::red, modules::leds::blink0);
             } else {
                 state = ProgressCode::DisengagingIdler;
             }
@@ -80,15 +82,15 @@ bool UnloadFilament::Step() {
             Reset(0); // @@TODO param
         } else if (userResolved) {
             // problem resolved - the user pulled the fillament by hand
-            //                modules::leds::leds.SetMode(active_extruder, modules::leds::red, modules::leds::off);
-            //                modules::leds::leds.SetMode(active_extruder, modules::leds::green, modules::leds::on);
+            modules::leds::leds.SetMode(mg::globals.ActiveSlot(), modules::leds::red, modules::leds::off);
+            modules::leds::leds.SetMode(mg::globals.ActiveSlot(), modules::leds::green, modules::leds::on);
             //                mm::motion.PlanMove(mm::Pulley, 450, 5000); // @@TODO constants
             state = ProgressCode::AvoidingGrind;
         }
         return false;
     }
     case ProgressCode::OK:
-        //            isFilamentLoaded = false; // filament unloaded
+        mg::globals.SetFilamentLoaded(false); // filament unloaded
         return true; // successfully finished
     }
     return false;

@@ -1,6 +1,7 @@
 #include "tool_change.h"
 #include "../modules/buttons.h"
 #include "../modules/finda.h"
+#include "../modules/globals.h"
 #include "../modules/idler.h"
 #include "../modules/leds.h"
 #include "../modules/motion.h"
@@ -14,18 +15,17 @@ ToolChange toolChange;
 namespace mm = modules::motion;
 namespace mi = modules::idler;
 namespace ms = modules::selector;
+namespace mg = modules::globals;
 
 void ToolChange::Reset(uint8_t param) {
-    //    if( param == active_extruder ) // @@TODO
-    //        return true;
+    if (param == mg::globals.ActiveSlot())
+        return;
 
     plannedSlot = param;
 
-    bool isFilamentLoaded = true; //@@TODO
-
-    if (isFilamentLoaded) {
+    if (mg::globals.FilamentLoaded()) {
         state = ProgressCode::UnloadingFilament;
-        unl.Reset(0); //@@TODO act on active extruder only
+        unl.Reset(mg::globals.ActiveSlot());
     } else {
         state = ProgressCode::LoadingFilament;
         load.Reset(plannedSlot);

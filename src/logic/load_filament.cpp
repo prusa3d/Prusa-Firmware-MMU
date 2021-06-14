@@ -1,6 +1,7 @@
 #include "load_filament.h"
 #include "../modules/buttons.h"
 #include "../modules/finda.h"
+#include "../modules/globals.h"
 #include "../modules/idler.h"
 #include "../modules/leds.h"
 #include "../modules/motion.h"
@@ -16,11 +17,13 @@ namespace mi = modules::idler;
 namespace ms = modules::selector;
 namespace mf = modules::finda;
 namespace ml = modules::leds;
+namespace mg = modules::globals;
 
 void LoadFilament::Reset(uint8_t param) {
     state = ProgressCode::EngagingIdler;
     error = ErrorCode::OK;
-    mi::idler.Engage(param); // @@TODO
+    mg::globals.SetActiveSlot(param);
+    mi::idler.Engage(mg::globals.ActiveSlot());
 }
 
 bool LoadFilament::Step() {
@@ -38,7 +41,7 @@ bool LoadFilament::Step() {
                 // @@TODO - try to repeat 6x - push/pull sequence - probably something to put into feed_to_finda as an option
                 state = ProgressCode::ERR1DisengagingIdler;
                 mi::idler.Disengage();
-                ml::leds.SetMode(0, ml::Color::red, ml::Mode::blink0); // signal loading error //@@TODO slot index
+                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::red, ml::Mode::blink0); // signal loading error
             } else {
                 state = ProgressCode::FeedingToBondtech;
                 james.Reset(2);
@@ -46,7 +49,7 @@ bool LoadFilament::Step() {
         }
         break;
     case ProgressCode::FeedingToBondtech:
-        if (james.Step()) {
+        if (james.Step()) { // No, Mr. Bond, I expect you to FEED
             switch (james.State()) {
             case FeedToBondtech::Failed:
 
@@ -62,6 +65,7 @@ bool LoadFilament::Step() {
         }
         break;
     case ProgressCode::OK:
+        mg::globals.SetFilamentLoaded(true);
         return true;
     case ProgressCode::ERR1DisengagingIdler: // couldn't unload to FINDA
         error = ErrorCode::FINDA_DIDNT_TRIGGER;
@@ -82,8 +86,8 @@ bool LoadFilament::Step() {
             Reset(0); // @@TODO param
         } else if (userResolved) {
             // problem resolved - the user pulled the fillament by hand
-            //                modules::leds::leds.SetMode(active_extruder, modules::leds::red, modules::leds::off);
-            //                modules::leds::leds.SetMode(active_extruder, modules::leds::green, modules::leds::on);
+            modules::leds::leds.SetMode(mg::globals.ActiveSlot(), modules::leds::red, modules::leds::off);
+            modules::leds::leds.SetMode(mg::globals.ActiveSlot(), modules::leds::green, modules::leds::on);
             //                mm::motion.PlanMove(mm::Pulley, 450, 5000); // @@TODO constants
             state = ProgressCode::AvoidingGrind;
         }

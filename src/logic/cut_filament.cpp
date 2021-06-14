@@ -1,6 +1,7 @@
 #include "cut_filament.h"
 #include "../modules/buttons.h"
 #include "../modules/finda.h"
+#include "../modules/globals.h"
 #include "../modules/idler.h"
 #include "../modules/leds.h"
 #include "../modules/motion.h"
@@ -14,15 +15,14 @@ CutFilament cutFilament;
 namespace mm = modules::motion;
 namespace mi = modules::idler;
 namespace ms = modules::selector;
+namespace mg = modules::globals;
 
 void CutFilament::Reset(uint8_t param) {
     error = ErrorCode::OK;
 
-    bool isFilamentLoaded = true; //@@TODO
-
-    if (isFilamentLoaded) {
+    if (mg::globals.FilamentLoaded()) {
         state = ProgressCode::UnloadingFilament;
-        unl.Reset(param); //@@TODO probably only act on active_extruder
+        unl.Reset(mg::globals.ActiveSlot());
     } else {
         SelectFilamentSlot();
     }
@@ -30,8 +30,8 @@ void CutFilament::Reset(uint8_t param) {
 
 void CutFilament::SelectFilamentSlot() {
     state = ProgressCode::SelectingFilamentSlot;
-    uint8_t newFilamentSlot = 0; //@@TODO
-    mi::idler.Engage(newFilamentSlot);
+    uint8_t newFilamentSlot = mg::globals.ActiveSlot() + 1; // move 1 slot aside
+    mi::idler.Engage(newFilamentSlot); //@@TODO does this make sense?
     ms::selector.MoveToSlot(newFilamentSlot);
 }
 
@@ -64,16 +64,14 @@ bool CutFilament::Step() {
             } else {
                 // move selector aside - prepare the blade into active position
                 state = ProgressCode::PreparingBlade;
-                uint8_t newFilamentSlot = 1; //@@TODO
-                ms::selector.MoveToSlot(newFilamentSlot + 1);
+                ms::selector.MoveToSlot(mg::globals.ActiveSlot());
             }
         }
         break;
     case ProgressCode::PreparingBlade:
         if (mm::motion.QueueEmpty()) {
             state = ProgressCode::EngagingIdler;
-            uint8_t newFilamentSlot = 0; //@@TODO
-            mi::idler.Engage(newFilamentSlot);
+            mi::idler.Engage(mg::globals.ActiveSlot());
         }
         break;
     case ProgressCode::EngagingIdler:
@@ -91,8 +89,7 @@ bool CutFilament::Step() {
     case ProgressCode::PerformingCut:
         if (mm::motion.QueueEmpty()) { // this may not be necessary if we want the selector and pulley move at once
             state = ProgressCode::ReturningSelector;
-            uint8_t newFilamentSlot = 0; //@@TODO
-            ms::selector.MoveToSlot(newFilamentSlot); // return selector back
+            ms::selector.MoveToSlot(mg::globals.ActiveSlot()); // return selector back
         }
         break;
     case ProgressCode::ReturningSelector:
