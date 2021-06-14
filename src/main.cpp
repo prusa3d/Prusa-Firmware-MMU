@@ -11,6 +11,7 @@
 #include "modules/buttons.h"
 #include "modules/finda.h"
 #include "modules/fsensor.h"
+#include "modules/globals.h"
 #include "modules/idler.h"
 #include "modules/leds.h"
 #include "modules/protocol.h"
@@ -24,12 +25,25 @@
 #include "logic/tool_change.h"
 #include "logic/unload_filament.h"
 
-static modules::protocol::Protocol protocol;
+namespace mb = modules::buttons;
+namespace mp = modules::protocol;
+namespace mf = modules::finda;
+namespace mfs = modules::fsensor;
+namespace mi = modules::idler;
+namespace ml = modules::leds;
+namespace ms = modules::selector;
+namespace mg = modules::globals;
 
+namespace hu = hal::usart;
+
+/// Global instance of the protocol codec
+static mp::Protocol protocol;
+
+/// A command that resulted in the currently on-going operation
 logic::CommandBase *currentCommand = &logic::noCommand;
 
 /// remember the request message that started the currently running command
-modules::protocol::RequestMsg currentCommandRq(modules::protocol::RequestMsgCodes::unknown, 0);
+mp::RequestMsg currentCommandRq(mp::RequestMsgCodes::unknown, 0);
 
 // examples and test code shall be located here
 void TmpPlayground() {
@@ -61,17 +75,17 @@ void TmpPlayground() {
     //        break;
 
     sei();
-    hal::usart::usart1.puts("1234567890\n");
-    hal::usart::usart1.puts("1234567890\n");
-    hal::usart::usart1.puts("1234567890\n");
-    hal::usart::usart1.puts("1234567890\n");
-    hal::usart::usart1.puts("1234567890\n");
-    hal::usart::usart1.puts("1234567890\n");
-    hal::usart::usart1.puts("1234567890\n");
-    hal::usart::usart1.puts("1234567890\n");
-    hal::usart::usart1.puts("1234567890\n");
-    hal::usart::usart1.puts("1234567890\n");
-    hal::usart::usart1.puts("1234567890\n");
+    hu::usart1.puts("1234567890\n");
+    hu::usart1.puts("1234567890\n");
+    hu::usart1.puts("1234567890\n");
+    hu::usart1.puts("1234567890\n");
+    hu::usart1.puts("1234567890\n");
+    hu::usart1.puts("1234567890\n");
+    hu::usart1.puts("1234567890\n");
+    hu::usart1.puts("1234567890\n");
+    hu::usart1.puts("1234567890\n");
+    hu::usart1.puts("1234567890\n");
+    hu::usart1.puts("1234567890\n");
 }
 
 /// One-time setup of HW and SW components
@@ -82,22 +96,24 @@ void setup() {
 
     cpu::Init();
 
+    mg::globals.Init();
+
     // watchdog init
 
     shr16::shr16.Init();
-    modules::leds::leds.SetMode(4, modules::leds::Color::green, modules::leds::Mode::blink0);
-    modules::leds::leds.Step(0);
+    ml::leds.SetMode(4, ml::Color::green, ml::Mode::blink0);
+    ml::leds.Step(0);
 
     // @@TODO if the shift register doesn't work we really can't signalize anything, only internal variables will be accessible if the UART works
 
-    hal::usart::USART::USART_InitTypeDef usart_conf = {
+    hu::USART::USART_InitTypeDef usart_conf = {
         .rx_pin = gpio::GPIO_pin(GPIOD, 2),
         .tx_pin = gpio::GPIO_pin(GPIOD, 3),
         .baudrate = 115200,
     };
-    hal::usart::usart1.Init(&usart_conf);
-    modules::leds::leds.SetMode(3, modules::leds::Color::green, modules::leds::Mode::on);
-    modules::leds::leds.Step(0);
+    hu::usart1.Init(&usart_conf);
+    ml::leds.SetMode(3, ml::Color::green, ml::Mode::on);
+    ml::leds.Step(0);
 
     // @@TODO if both shift register and the UART are dead, we are sitting ducks :(
 
@@ -111,23 +127,22 @@ void setup() {
         .cpol = 1,
     };
     spi::Init(SPI0, &spi_conf);
-    modules::leds::leds.SetMode(2, modules::leds::Color::green, modules::leds::Mode::on);
-    modules::leds::leds.Step(0);
+    ml::leds.SetMode(2, ml::Color::green, ml::Mode::on);
+    ml::leds.Step(0);
 
     // tmc::Init()
-    modules::leds::leds.SetMode(1, modules::leds::Color::green, modules::leds::Mode::on);
-    modules::leds::leds.Step(0);
+    ml::leds.SetMode(1, ml::Color::green, ml::Mode::on);
+    ml::leds.Step(0);
 
     // adc::Init();
-    modules::leds::leds.SetMode(0, modules::leds::Color::green, modules::leds::Mode::on);
-    modules::leds::leds.Step(0);
+    ml::leds.SetMode(0, ml::Color::green, ml::Mode::on);
+    ml::leds.Step(0);
 }
 
-void SendMessage(const modules::protocol::ResponseMsg &msg) {
+void SendMessage(const mp::ResponseMsg &msg) {
 }
 
-void PlanCommand(const modules::protocol::RequestMsg &rq) {
-    namespace mp = modules::protocol;
+void PlanCommand(const mp::RequestMsg &rq) {
     if (currentCommand->Error() == ErrorCode::OK) {
         // we are allowed to start a new command as the previous one is in the OK finished state
         switch (rq.code) {
@@ -155,7 +170,6 @@ void PlanCommand(const modules::protocol::RequestMsg &rq) {
 }
 
 void ReportRunningCommand() {
-    namespace mp = modules::protocol;
     mp::ResponseMsgParamCodes commandStatus;
     uint8_t value = 0;
     switch (currentCommand->Error()) {
@@ -174,15 +188,14 @@ void ReportRunningCommand() {
     SendMessage(mp::ResponseMsg(currentCommandRq, commandStatus, value));
 }
 
-void ProcessRequestMsg(const modules::protocol::RequestMsg &rq) {
-    namespace mp = modules::protocol;
+void ProcessRequestMsg(const mp::RequestMsg &rq) {
     switch (rq.code) {
     case mp::RequestMsgCodes::Button:
         // behave just like if the user pressed a button
         break;
     case mp::RequestMsgCodes::Finda:
         // immediately report FINDA status
-        SendMessage(mp::ResponseMsg(rq, mp::ResponseMsgParamCodes::Accepted, modules::finda::finda.Pressed()));
+        SendMessage(mp::ResponseMsg(rq, mp::ResponseMsgParamCodes::Accepted, mf::finda.Pressed()));
         break;
     case mp::RequestMsgCodes::Mode:
         // immediately switch to normal/stealth as requested
@@ -217,9 +230,9 @@ void ProcessRequestMsg(const modules::protocol::RequestMsg &rq) {
 
 /// @returns true if a request was successfully finished
 bool CheckMsgs() {
-    using mpd = modules::protocol::DecodeStatus;
-    while (!hal::usart::usart1.ReadEmpty()) {
-        switch (protocol.DecodeRequest(hal::usart::usart1.Read())) {
+    using mpd = mp::DecodeStatus;
+    while (!hu::usart1.ReadEmpty()) {
+        switch (protocol.DecodeRequest(hu::usart1.Read())) {
         case mpd::MessageCompleted:
             // process the input message
             return true;
@@ -253,12 +266,12 @@ void loop() {
     if (CheckMsgs()) {
         ProcessRequestMsg(protocol.GetRequestMsg());
     }
-    modules::buttons::buttons.Step(hal::adc::ReadADC(0));
-    modules::leds::leds.Step(0);
-    modules::finda::finda.Step(0);
-    modules::fsensor::fsensor.Step(0);
-    modules::idler::idler.Step();
-    modules::selector::selector.Step();
+    mb::buttons.Step(hal::adc::ReadADC(0));
+    ml::leds.Step(0);
+    mf::finda.Step(0);
+    mfs::fsensor.Step(0);
+    mi::idler.Step();
+    ms::selector.Step();
     currentCommand->Step();
     // add a watchdog reset
 }

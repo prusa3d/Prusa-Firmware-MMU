@@ -4,6 +4,8 @@
 namespace modules {
 namespace globals {
 
+Globals globals;
+
 void Globals::Init() {
     modules::permanent_storage::FilamentLoaded::get(activeSlot); //@@TODO check for errors
     // @@TODO where to obtain information whether a slot is loaded with a filament?
