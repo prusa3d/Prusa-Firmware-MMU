@@ -1,6 +1,7 @@
 #include "eject_filament.h"
 #include "../modules/buttons.h"
 #include "../modules/finda.h"
+#include "../modules/globals.h"
 #include "../modules/idler.h"
 #include "../modules/leds.h"
 #include "../modules/motion.h"
@@ -14,14 +15,13 @@ EjectFilament ejectFilament;
 namespace mm = modules::motion;
 namespace mi = modules::idler;
 namespace ms = modules::selector;
+namespace mg = modules::globals;
 
 void EjectFilament::Reset(uint8_t param) {
     error = ErrorCode::OK;
     slot = param;
 
-    bool isFilamentLoaded = true; //@@TODO
-
-    if (isFilamentLoaded) {
+    if (mg::globals.FilamentLoaded()) {
         state = ProgressCode::UnloadingFilament;
         unl.Reset(param); //@@TODO probably act on active extruder only
     } else {

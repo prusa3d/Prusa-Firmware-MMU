@@ -1,6 +1,7 @@
 #include "feed_to_finda.h"
 #include "../modules/buttons.h"
 #include "../modules/finda.h"
+#include "../modules/globals.h"
 #include "../modules/idler.h"
 #include "../modules/leds.h"
 #include "../modules/motion.h"
@@ -13,11 +14,12 @@ namespace mf = modules::finda;
 namespace mi = modules::idler;
 namespace ml = modules::leds;
 namespace mb = modules::buttons;
+namespace mg = modules::globals;
 
 void FeedToFinda::Reset(bool feedPhaseLimited) {
     state = EngagingIdler;
     this->feedPhaseLimited = feedPhaseLimited;
-    mi::idler.Engage(0 /*active_extruder*/); // @@TODO
+    mi::idler.Engage(mg::globals.ActiveSlot());
 }
 
 bool FeedToFinda::Step() {
@@ -25,7 +27,7 @@ bool FeedToFinda::Step() {
     case EngagingIdler:
         if (mi::idler.Engaged()) {
             state = PushingFilament;
-            ml::leds.SetMode(0, ml::Color::green, ml::blink0); //@@TODO active slot index
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::blink0);
             mm::motion.PlanMove(feedPhaseLimited ? 1500 : 65535, 0, 0, 4000, 0, 0); //@@TODO constants
         }
         return false;
@@ -48,7 +50,7 @@ bool FeedToFinda::Step() {
     case DisengagingIdler:
         if (!mi::idler.Engaged()) {
             state = OK;
-            ml::leds.SetMode(0, ml::Color::green, ml::on); //@@TODO active slot index
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::on);
         }
         return false;
     case OK:
