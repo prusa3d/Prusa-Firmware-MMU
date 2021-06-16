@@ -13,10 +13,11 @@ logic::CommandBase *currentCommand = nullptr;
 // just like in the real FW, step all the known automata
 void main_loop() {
     modules::buttons::buttons.Step(hal::adc::ReadADC(0));
-    modules::leds::leds.Step(0);
-    modules::finda::finda.Step(0);
-    modules::fsensor::fsensor.Step(0);
+    modules::leds::leds.Step(1);
+    modules::finda::finda.Step(1);
+    modules::fsensor::fsensor.Step(1);
     modules::idler::idler.Step();
     modules::selector::selector.Step();
-    currentCommand->Step();
+    if (currentCommand)
+        currentCommand->Step();
 }

@@ -1,6 +1,6 @@
 add_subdirectory(cut_filament)
 
-# add_subdirectory(feed_to_finda)
+add_subdirectory(feed_to_finda)
 
 # add_subdirectory(feed_to_bondtech)
 

@@ -6,6 +6,14 @@ namespace motion {
 
 Motion motion;
 
+void Motion::InitAxis(Axis axis) {}
+
+void Motion::DisableAxis(Axis axis) {}
+
+bool Motion::StallGuard(Axis axis) { return false; }
+
+void Motion::ClearStallGuardFlag(Axis axis) {}
+
 void Motion::PlanMove(uint16_t pulley, uint16_t idler, uint16_t selector, uint16_t feedrate, uint16_t starting_speed, uint16_t ending_speed) {}
 
 void Motion::Home(Axis axis, bool direction) {}
@@ -13,6 +21,10 @@ void Motion::Home(Axis axis, bool direction) {}
 void Motion::SetMode(MotorMode mode) {}
 
 void Motion::Step() {}
+
+bool Motion::QueueEmpty() const { return false; }
+
+void Motion::AbortPlannedMoves() {}
 
 void ISR() {}
 

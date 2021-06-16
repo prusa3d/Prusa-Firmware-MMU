@@ -39,6 +39,9 @@ bool FeedToFinda::Step() {
             mm::motion.PlanMove(-600, 0, 0, 4000, 0, 0); //@@TODO constants
         } else if (mm::motion.QueueEmpty()) { // all moves have been finished and FINDA didn't switch on
             state = Failed;
+            // @@TODO - shall we disengage the idler?
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::off);
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::red, ml::blink0);
         }
         return false;
     case UnloadBackToPTFE:
@@ -52,6 +55,7 @@ bool FeedToFinda::Step() {
             state = OK;
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::on);
         }
+        // @@TODO FINDA must be reported as OFF again as we are pulling the filament from it - is this correct?
         return false;
     case OK:
     case Failed:
