@@ -76,7 +76,13 @@ public:
 
     /// Enqueue move of a specific motor/axis into planner buffer
     /// @param pulley, idler, selector - target coords
-    void PlanMove(uint16_t pulley, uint16_t idler, uint16_t selector, uint16_t feedrate, uint16_t starting_speed, uint16_t ending_speed);
+    void PlanMove(int16_t pulley, int16_t idler, int16_t selector, uint16_t feedrate, uint16_t starting_speed, uint16_t ending_speed);
+
+    /// Enqueue a single axis move in steps starting and ending at zero speed with maximum feedrate
+    /// @param axis axis affected
+    /// @param delta number of steps in either direction
+    /// @param feedrate maximum feedrate/speed after acceleration
+    void PlanMove(Axis axis, int16_t delta, uint16_t feedrate);
 
     /// Enqueue performing of homing of an axis
     /// @@TODO

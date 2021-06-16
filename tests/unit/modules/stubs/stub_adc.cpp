@@ -20,7 +20,8 @@ void ReinitADC(uint8_t channel, TADCData &&d, uint8_t ovsmpl) {
 /// ADC access routines
 uint16_t ReadADC(uint8_t adc) {
     if (!oversample) {
-        ++rdptr[adc];
+        if (rdptr[adc] != values2Return[adc].end())
+            ++rdptr[adc];
         oversample = oversampleFactor;
     } else {
         --oversample;

@@ -30,12 +30,21 @@ bool WhileCondition(logic::FeedToFinda &ff, COND cond, uint32_t maxLoops = 5000)
 
 TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
     using namespace logic;
-    FeedToFinda ff;
-    main_loop();
+
+    // no buttons involved ;)
+    hal::adc::TADCData noButtons({ 0 });
+    hal::adc::ReinitADC(0, std::move(noButtons), 1);
+
+    // finda OFF
+    hal::adc::TADCData findaOFF({ 0 });
+    hal::adc::ReinitADC(1, std::move(findaOFF), 1);
 
     // let's assume we have the filament NOT loaded and active slot 0
     modules::globals::globals.SetFilamentLoaded(false);
     modules::globals::globals.SetActiveSlot(0);
+
+    FeedToFinda ff;
+    main_loop();
 
     // restart the automaton
     ff.Reset(false);
@@ -46,6 +55,8 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
     // check if the idler and selector have the right command
     CHECK(modules::motion::axes[modules::motion::Idler].targetPos == 0); // @@TODO constants
     CHECK(modules::motion::axes[modules::motion::Selector].targetPos == 0); // @@TODO constants
+    CHECK(modules::motion::axes[modules::motion::Idler].enabled == true); // @@TODO constants
+    CHECK(modules::motion::axes[modules::motion::Selector].enabled == true); // @@TODO constants
 
     // engaging idler
     REQUIRE(WhileCondition(
@@ -53,15 +64,15 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
         [&]() { return !modules::idler::idler.Engaged(); },
         5000));
 
-    // idler engaged, we'll start pushing filament
+    // idler engaged, selector in position, we'll start pushing filament
     REQUIRE(ff.State() == FeedToFinda::PushingFilament);
     // at least at the beginning the LED should shine green (it should be blinking, but this mode has been already verified in the LED's unit test)
     REQUIRE(modules::leds::leds.LedOn(modules::globals::globals.ActiveSlot(), modules::leds::Color::green));
 
     // now let the filament be pushed into the FINDA - do 500 steps without triggering the condition
     // and then let the simulated ADC channel 1 create a FINDA switch
-    hal::adc::TADCData switchFindaOn({ 0, 600, 700, 800, 900 });
-    hal::adc::ReinitADC(1, std::move(switchFindaOn), 100);
+    hal::adc::TADCData switchFindaOn({ 600, 700, 800, 900 });
+    hal::adc::ReinitADC(1, std::move(switchFindaOn), 1);
     REQUIRE(WhileCondition(
         ff,
         [&]() { return ff.State() == FeedToFinda::PushingFilament; },
@@ -91,12 +102,24 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
 
 TEST_CASE("feed_to_finda::FINDA_failed", "[feed_to_finda]") {
     using namespace logic;
-    FeedToFinda ff;
-    main_loop();
+
+    // This is a problem - how to reset all the state machines at once?
+    // May be add an #ifdef unit_tests and a reset function for each of the automatons
+
+    // no buttons involved ;)
+    hal::adc::TADCData noButtons({ 0 });
+    hal::adc::ReinitADC(0, std::move(noButtons), 1);
+
+    // finda OFF
+    hal::adc::TADCData findaOFF({ 0 });
+    hal::adc::ReinitADC(1, std::move(findaOFF), 1);
 
     // let's assume we have the filament NOT loaded and active slot 0
     modules::globals::globals.SetFilamentLoaded(false);
     modules::globals::globals.SetActiveSlot(0);
+
+    FeedToFinda ff;
+    main_loop();
 
     // restart the automaton - we want the limited version of the feed
     ff.Reset(true);
