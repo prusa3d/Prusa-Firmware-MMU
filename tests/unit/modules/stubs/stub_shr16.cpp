@@ -14,10 +14,10 @@ void SHR16::Init() {
 void SHR16::SetLED(uint16_t led) {
     shr16_v_copy = ((led & 0x00ff) << 8) | ((led & 0x0300) >> 2);
 }
-void SHR16::SetTMCEnabled(uint8_t ena) {
+void SHR16::SetTMCEnabled(uint8_t index, bool ena) {
     // do nothing right now
 }
-void SHR16::SetTMCDir(uint8_t dir) {
+void SHR16::SetTMCDir(uint8_t index, bool dir) {
     // do nothing right now
 }
 void SHR16::Write(uint16_t v) {
