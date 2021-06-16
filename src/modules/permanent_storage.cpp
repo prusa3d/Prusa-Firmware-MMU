@@ -1,6 +1,9 @@
 /// @author Marek Bel
 #include "permanent_storage.h"
 #include "../hal/eeprom.h"
+#include "globals.h"
+
+#include <stddef.h>
 
 namespace modules {
 namespace permanent_storage {
@@ -23,7 +26,7 @@ struct eeprom_t {
     uint8_t eepromDriveErrorCountL[2];
 } __attribute__((packed));
 
-// @@TODO static_assert(sizeof(eeprom_t) - 2 <= hal::EEPROM::End(), "eeprom_t doesn't fit into EEPROM available.");
+static_assert(sizeof(eeprom_t) - 2 <= hal::eeprom::EEPROM::End(), "eeprom_t doesn't fit into EEPROM available.");
 
 /// @brief EEPROM layout version
 static const uint8_t layoutVersion = 0xff;
@@ -36,25 +39,30 @@ static const uint8_t layoutVersion = 0xff;
 //mres = 16         idler microstep resolution (uint8_t __res(AX_IDL))
 //1 pulley ustep = (d*pi)/(mres*FSPR) = 49.48 um
 
+// ideally, this would have been a nice constexpr (since it is a compile time constant), but the C++ standard prohibits reinterpret_casts in constexpr
 static eeprom_t *const eepromBase = reinterpret_cast<eeprom_t *>(0); ///< First EEPROM address
-static const uint16_t eepromEmpty = 0xffff; ///< EEPROM content when erased
-static const uint16_t eepromLengthCorrectionBase = 7900u; ///< legacy bowden length correction base (~391mm)
-static const uint16_t eepromBowdenLenDefault = 8900u; ///< Default bowden length (~427 mm)
-static const uint16_t eepromBowdenLenMinimum = 6900u; ///< Minimum bowden length (~341 mm)
-static const uint16_t eepromBowdenLenMaximum = 16000u; ///< Maximum bowden length (~792 mm)
+constexpr const uint16_t eepromEmpty = 0xffffU; ///< EEPROM content when erased
+constexpr const uint16_t eepromLengthCorrectionBase = 7900U; ///< legacy bowden length correction base (~391mm)
+constexpr const uint16_t eepromBowdenLenDefault = 8900U; ///< Default bowden length (~427 mm)
+constexpr const uint16_t eepromBowdenLenMinimum = 6900U; ///< Minimum bowden length (~341 mm)
+constexpr const uint16_t eepromBowdenLenMaximum = 16000U; ///< Maximum bowden length (~792 mm)
+
+namespace ee = hal::eeprom;
+
+#define EEOFFSET(x) reinterpret_cast<size_t>(&(x))
 
 void Init() {
-    if (hal::eeprom::ReadByte((const uint8_t *)hal::eeprom::End()) != layoutVersion) {
+    if (ee::EEPROM::ReadByte(ee::EEPROM::End()) != layoutVersion) {
         EraseAll();
     }
 }
 
 /// @brief Erase the whole EEPROM
 void EraseAll() {
-    for (uint16_t i = 0; i < hal::eeprom::End(); i++) {
-        hal::eeprom::UpdateByte((uint8_t *)i, static_cast<uint8_t>(eepromEmpty));
+    for (uint16_t i = 0; i < ee::EEPROM::End(); i++) {
+        ee::EEPROM::UpdateByte(i, static_cast<uint8_t>(eepromEmpty));
     }
-    hal::eeprom::UpdateByte((const uint8_t *)hal::eeprom::End(), layoutVersion);
+    ee::EEPROM::UpdateByte(ee::EEPROM::End(), layoutVersion);
 }
 
 /// @brief Is filament number valid?
@@ -81,12 +89,13 @@ static bool validBowdenLen(const uint16_t BowdenLength) {
 /// Returns stored value, doesn't return actual value when it is edited by increase() / decrease() unless it is stored.
 /// @return stored bowden length
 uint16_t BowdenLength::get() {
-    uint8_t filament = 0 /*active_extruder*/; //@@TODO
+    uint8_t filament = modules::globals::globals.ActiveSlot();
     if (validFilament(filament)) {
-        uint16_t bowdenLength = hal::eeprom::ReadByte((const uint8_t *)&(eepromBase->eepromBowdenLen[filament]));
+        // @@TODO these reinterpret_cast expressions look horrible but I'm keeping them almost intact to respect the original code from MM_control_01
+        uint16_t bowdenLength = ee::EEPROM::ReadByte(reinterpret_cast<size_t>(&(eepromBase->eepromBowdenLen[filament])));
 
         if (eepromEmpty == bowdenLength) {
-            const uint8_t LengthCorrectionLegacy = hal::eeprom::ReadByte(&(eepromBase->eepromLengthCorrection));
+            const uint8_t LengthCorrectionLegacy = ee::EEPROM::ReadByte(reinterpret_cast<size_t>(&(eepromBase->eepromLengthCorrection)));
             if (LengthCorrectionLegacy <= 200) {
                 bowdenLength = eepromLengthCorrectionBase + LengthCorrectionLegacy * 10;
             }
@@ -103,7 +112,7 @@ uint16_t BowdenLength::get() {
 /// To be created on stack, new value is permanently stored when object goes out of scope.
 /// Active filament and associated bowden length is stored in member variables.
 BowdenLength::BowdenLength()
-    : filament(/*active_extruder*/ 0)
+    : filament(modules::globals::globals.ActiveSlot()) // @@TODO - verify correct initialization order
     , length(BowdenLength::get()) // @@TODO
 {
 }
@@ -137,7 +146,7 @@ bool BowdenLength::decrease() {
 /// @brief Store bowden length permanently.
 BowdenLength::~BowdenLength() {
     if (validFilament(filament))
-        hal::eeprom::UpdateWord((const uint8_t *)&(eepromBase->eepromBowdenLen[filament]), length);
+        ee::EEPROM::UpdateWord(EEOFFSET(eepromBase->eepromBowdenLen[filament]), length);
 }
 
 /// @brief Get filament storage status
@@ -148,12 +157,12 @@ BowdenLength::~BowdenLength() {
 /// @retval 0xff Uninitialized EEPROM or no 2 values agrees
 
 uint8_t FilamentLoaded::getStatus() {
-    if (hal::eeprom::ReadByte(&(eepromBase->eepromFilamentStatus[0])) == hal::eeprom::ReadByte(&(eepromBase->eepromFilamentStatus[1])))
-        return hal::eeprom::ReadByte(&(eepromBase->eepromFilamentStatus[0]));
-    if (hal::eeprom::ReadByte(&(eepromBase->eepromFilamentStatus[0])) == hal::eeprom::ReadByte(&(eepromBase->eepromFilamentStatus[2])))
-        return hal::eeprom::ReadByte(&(eepromBase->eepromFilamentStatus[0]));
-    if (hal::eeprom::ReadByte(&(eepromBase->eepromFilamentStatus[1])) == hal::eeprom::ReadByte(&(eepromBase->eepromFilamentStatus[2])))
-        return hal::eeprom::ReadByte(&(eepromBase->eepromFilamentStatus[1]));
+    if (ee::EEPROM::ReadByte(EEOFFSET(eepromBase->eepromFilamentStatus[0])) == ee::EEPROM::ReadByte(EEOFFSET(eepromBase->eepromFilamentStatus[1])))
+        return ee::EEPROM::ReadByte(EEOFFSET(eepromBase->eepromFilamentStatus[0]));
+    if (ee::EEPROM::ReadByte(EEOFFSET(eepromBase->eepromFilamentStatus[0])) == ee::EEPROM::ReadByte(EEOFFSET(eepromBase->eepromFilamentStatus[2])))
+        return ee::EEPROM::ReadByte(EEOFFSET(eepromBase->eepromFilamentStatus[0]));
+    if (ee::EEPROM::ReadByte(EEOFFSET(eepromBase->eepromFilamentStatus[1])) == ee::EEPROM::ReadByte(EEOFFSET(eepromBase->eepromFilamentStatus[2])))
+        return ee::EEPROM::ReadByte(EEOFFSET(eepromBase->eepromFilamentStatus[1]));
     return 0xff;
 }
 
@@ -163,7 +172,7 @@ uint8_t FilamentLoaded::getStatus() {
 /// @retval false Failed
 bool FilamentLoaded::setStatus(uint8_t status) {
     for (uint8_t i = 0; i < ARR_SIZE(eeprom_t::eepromFilamentStatus); ++i) {
-        hal::eeprom::UpdateByte(&(eepromBase->eepromFilamentStatus[i]), status);
+        ee::EEPROM::UpdateByte(EEOFFSET(eepromBase->eepromFilamentStatus[i]), status);
     }
     if (getStatus() == status)
         return true;
@@ -187,7 +196,7 @@ int16_t FilamentLoaded::getIndex() {
     case KeyFront2:
         index = ARR_SIZE(eeprom_t::eepromFilament) - 1; // It is the last one, if no dirty index found
         for (uint16_t i = 0; i < ARR_SIZE(eeprom_t::eepromFilament); ++i) {
-            if (status != (hal::eeprom::ReadByte(&(eepromBase->eepromFilament[i])) >> 4)) {
+            if (status != (ee::EEPROM::ReadByte(EEOFFSET(eepromBase->eepromFilament[i])) >> 4)) {
                 index = i - 1;
                 break;
             }
@@ -197,7 +206,7 @@ int16_t FilamentLoaded::getIndex() {
     case KeyReverse2:
         index = 0; // It is the last one, if no dirty index found
         for (int16_t i = (ARR_SIZE(eeprom_t::eepromFilament) - 1); i >= 0; --i) {
-            if (status != (hal::eeprom::ReadByte(&(eepromBase->eepromFilament[i])) >> 4)) {
+            if (status != (ee::EEPROM::ReadByte(EEOFFSET(eepromBase->eepromFilament[i])) >> 4)) {
                 index = i + 1;
                 break;
             }
@@ -217,7 +226,7 @@ bool FilamentLoaded::get(uint8_t &filament) {
     int16_t index = getIndex();
     if ((index < 0) || (static_cast<uint16_t>(index) >= ARR_SIZE(eeprom_t::eepromFilament)))
         return false;
-    const uint8_t rawFilament = hal::eeprom::ReadByte(&(eepromBase->eepromFilament[index]));
+    const uint8_t rawFilament = ee::EEPROM::ReadByte(EEOFFSET(eepromBase->eepromFilament[index]));
     filament = 0x0f & rawFilament;
     if (filament > 4)
         return false;
@@ -250,8 +259,8 @@ bool FilamentLoaded::set(uint8_t filament) {
         if (!setStatus(status))
             return false;
         uint8_t filamentRaw = ((status << 4) & 0xf0) + (filament & 0x0f);
-        hal::eeprom::UpdateByte(&(eepromBase->eepromFilament[index]), filamentRaw);
-        if (filamentRaw == hal::eeprom::ReadByte(&(eepromBase->eepromFilament[index])))
+        ee::EEPROM::UpdateByte(EEOFFSET(eepromBase->eepromFilament[index]), filamentRaw);
+        if (filamentRaw == ee::EEPROM::ReadByte(EEOFFSET(eepromBase->eepromFilament[index])))
             return true;
         getNext(status);
         if (!setStatus(status))
@@ -330,8 +339,8 @@ void DriveError::increment() {
 }
 
 uint8_t DriveError::getL() {
-    uint8_t first = hal::eeprom::ReadByte(&(eepromBase->eepromDriveErrorCountL[0]));
-    uint8_t second = hal::eeprom::ReadByte(&(eepromBase->eepromDriveErrorCountL[1]));
+    uint8_t first = ee::EEPROM::ReadByte(EEOFFSET(eepromBase->eepromDriveErrorCountL[0]));
+    uint8_t second = ee::EEPROM::ReadByte(EEOFFSET(eepromBase->eepromDriveErrorCountL[1]));
 
     if (0xff == first && 0 == second)
         return 1;
@@ -339,15 +348,15 @@ uint8_t DriveError::getL() {
 }
 
 void DriveError::setL(uint8_t lowByte) {
-    hal::eeprom::UpdateByte(&(eepromBase->eepromDriveErrorCountL[lowByte % 2]), lowByte - 1);
+    ee::EEPROM::UpdateByte(EEOFFSET(eepromBase->eepromDriveErrorCountL[lowByte % 2]), lowByte - 1);
 }
 
 uint8_t DriveError::getH() {
-    return (hal::eeprom::ReadByte(&(eepromBase->eepromDriveErrorCountH)) + 1);
+    return (ee::EEPROM::ReadByte(EEOFFSET(eepromBase->eepromDriveErrorCountH)) + 1);
 }
 
 void DriveError::setH(uint8_t highByte) {
-    hal::eeprom::UpdateByte(&(eepromBase->eepromDriveErrorCountH), highByte - 1);
+    ee::EEPROM::UpdateByte(EEOFFSET(eepromBase->eepromDriveErrorCountH), highByte - 1);
 }
 
 } // namespace permanent_storage

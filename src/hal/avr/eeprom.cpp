@@ -3,11 +3,13 @@
 namespace hal {
 namespace eeprom {
 
-uint8_t ReadByte(const uint8_t *addr) {
+EEPROM eeprom;
+
+uint8_t EEPROM::ReadByte(EEPROM::addr_t /*addr*/) {
     return 0;
 }
 
-void UpdateByte(const uint8_t *addr, uint8_t value) {
+void EEPROM::UpdateByte(EEPROM::addr_t /*addr*/, uint8_t /*value*/) {
 }
 
 } // namespace eeprom

@@ -1,6 +1,6 @@
 #include "catch2/catch.hpp"
 #include "buttons.h"
-#include "stub_adc.h"
+#include "../stubs/stub_adc.h"
 
 using Catch::Matchers::Equals;
 

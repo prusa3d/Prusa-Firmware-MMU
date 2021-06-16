@@ -5,16 +5,24 @@ namespace hal {
 namespace eeprom {
 
 /// EEPROM interface
-extern void WriteByte(const uint8_t *addr, uint8_t value);
-extern void UpdateByte(const uint8_t *addr, uint8_t value);
-extern uint8_t ReadByte(const uint8_t *addr);
+class EEPROM {
+public:
+    using addr_t = uint16_t;
 
-extern void WriteWord(const uint8_t *addr, uint16_t value);
-extern void UpdateWord(const uint8_t *addr, uint16_t value);
-extern uint16_t ReadWord(const uint8_t *addr);
+    static void WriteByte(addr_t addr, uint8_t value);
+    static void UpdateByte(addr_t addr, uint8_t value);
+    static uint8_t ReadByte(addr_t addr);
 
-/// @returns physical end address of EEPROM memory end
-extern constexpr const uint16_t End();
+    static void WriteWord(addr_t addr, uint16_t value);
+    static void UpdateWord(addr_t addr, uint16_t value);
+    static uint16_t ReadWord(addr_t addr);
+
+    /// @returns physical end address of EEPROM memory end
+    /// @@TODO this is sad - the constexpr must be inline... find a way around in the future
+    constexpr static addr_t End() { return 2048; }
+};
+
+extern EEPROM eeprom;
 
 } // namespace EEPROM
 } // namespace hal
