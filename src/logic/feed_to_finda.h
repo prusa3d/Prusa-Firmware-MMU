@@ -26,6 +26,7 @@ struct FeedToFinda {
     /// @param feedPhaseLimited
     ///  * true feed phase is limited, doesn't react on button press
     ///  * false feed phase is unlimited, can be interrupted by any button press after blanking time
+    ///  Beware: the function returns immediately without actually doing anything if the FINDA is "pressed", i.e. the filament is already at the FINDA
     void Reset(bool feedPhaseLimited);
 
     /// @returns true if the state machine finished its job, false otherwise

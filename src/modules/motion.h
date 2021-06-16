@@ -63,16 +63,16 @@ class Motion {
 public:
     /// Init axis driver - @@TODO this should be probably hidden somewhere deeper ... something should manage the axes and their state
     /// especially when the TMC may get randomly reset (deinited)
-    void InitAxis(Axis axis) {}
+    void InitAxis(Axis axis);
 
     /// Disable axis motor
-    void DisableAxis(Axis axis) {}
+    void DisableAxis(Axis axis);
 
     /// @returns true if a stall guard event occurred recently on the axis
-    bool StallGuard(Axis axis) { return false; }
+    bool StallGuard(Axis axis);
 
     /// clear stall guard flag reported on an axis
-    void ClearStallGuardFlag(Axis axis) {}
+    void ClearStallGuardFlag(Axis axis);
 
     /// Enqueue move of a specific motor/axis into planner buffer
     /// @param pulley, idler, selector - target coords
@@ -90,10 +90,10 @@ public:
     void Step();
 
     /// @returns true if all planned moves have been finished
-    bool QueueEmpty() const { return false; }
+    bool QueueEmpty() const;
 
     /// stop whatever moves are being done
-    void AbortPlannedMoves() {}
+    void AbortPlannedMoves();
 
     /// probably higher-level operations knowing the semantic meaning of axes
 
