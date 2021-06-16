@@ -5,7 +5,11 @@ namespace modules {
 namespace motion {
 
 Motion motion;
-AxisSim axes[3];
+AxisSim axes[3] = {
+    { 0, 0, false, false, false },
+    { 0, 0, false, false, false },
+    { 0, 0, false, false, false },
+};
 
 void Motion::InitAxis(Axis axis) {
     axes[axis].enabled = true;
@@ -23,11 +27,15 @@ void Motion::ClearStallGuardFlag(Axis axis) {
     axes[axis].stallGuard = false;
 }
 
-void Motion::PlanMove(uint16_t pulley, uint16_t idler, uint16_t selector, uint16_t feedrate, uint16_t starting_speed, uint16_t ending_speed) {
+void Motion::PlanMove(int16_t pulley, int16_t idler, int16_t selector, uint16_t feedrate, uint16_t starting_speed, uint16_t ending_speed) {
     axes[Pulley].targetPos = axes[Pulley].pos + pulley;
-    axes[Idler].targetPos = axes[Idler].pos + pulley;
-    axes[Selector].targetPos = axes[Selector].pos + pulley;
+    axes[Idler].targetPos = axes[Idler].pos + idler;
+    axes[Selector].targetPos = axes[Selector].pos + selector;
     // speeds and feedrates are not simulated yet
+}
+
+void Motion::PlanMove(Axis axis, int16_t delta, uint16_t feedrate) {
+    axes[axis].targetPos = axes[axis].pos + delta;
 }
 
 void Motion::Home(Axis axis, bool direction) {

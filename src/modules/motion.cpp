@@ -14,7 +14,9 @@ bool Motion::StallGuard(Axis axis) { return false; }
 
 void Motion::ClearStallGuardFlag(Axis axis) {}
 
-void Motion::PlanMove(uint16_t pulley, uint16_t idler, uint16_t selector, uint16_t feedrate, uint16_t starting_speed, uint16_t ending_speed) {}
+void Motion::PlanMove(int16_t pulley, int16_t idler, int16_t selector, uint16_t feedrate, uint16_t starting_speed, uint16_t ending_speed) {}
+
+void Motion::PlanMove(Axis axis, int16_t delta, uint16_t feedrate) {}
 
 void Motion::Home(Axis axis, bool direction) {}
 

@@ -3,6 +3,7 @@
 #include "../modules/finda.h"
 #include "../modules/globals.h"
 #include "../modules/idler.h"
+#include "../modules/selector.h"
 #include "../modules/leds.h"
 #include "../modules/motion.h"
 #include "../modules/permanent_storage.h"
@@ -15,20 +16,23 @@ namespace mi = modules::idler;
 namespace ml = modules::leds;
 namespace mb = modules::buttons;
 namespace mg = modules::globals;
+namespace ms = modules::selector;
 
 void FeedToFinda::Reset(bool feedPhaseLimited) {
     state = EngagingIdler;
     this->feedPhaseLimited = feedPhaseLimited;
     mi::idler.Engage(mg::globals.ActiveSlot());
+    // We can't get any FINDA readings if the selector is at the wrong spot - move it accordingly if necessary
+    ms::selector.MoveToSlot(mg::globals.ActiveSlot());
 }
 
 bool FeedToFinda::Step() {
     switch (state) {
     case EngagingIdler:
-        if (mi::idler.Engaged()) {
+        if (mi::idler.Engaged() && ms::selector.Slot() == mg::globals.ActiveSlot()) {
             state = PushingFilament;
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::blink0);
-            mm::motion.PlanMove(feedPhaseLimited ? 1500 : 65535, 0, 0, 4000, 0, 0); //@@TODO constants
+            mm::motion.PlanMove(feedPhaseLimited ? 1500 : 32767, 0, 0, 4000, 0, 0); //@@TODO constants
         }
         return false;
     case PushingFilament:
