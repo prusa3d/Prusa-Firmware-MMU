@@ -280,6 +280,7 @@ void loop() {
 
 int main() {
     setup();
+    sei(); ///enable interrupts
     for (;;) {
         loop();
     }

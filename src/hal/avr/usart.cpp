@@ -4,7 +4,7 @@
 namespace hal {
 namespace usart {
 
-USART usart1;
+USART usart1(USART1);
 
 uint8_t USART::Read() {
     uint8_t c = 0;
