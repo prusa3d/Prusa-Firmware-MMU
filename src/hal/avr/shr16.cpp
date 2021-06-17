@@ -2,6 +2,10 @@
 #include "../gpio.h"
 #include "../../pins.h"
 
+#define SHR16_LED_MSK 0xffc0
+#define SHR16_DIR_MSK 0x0015
+#define SHR16_ENA_MSK 0x002A
+
 namespace hal {
 namespace shr16 {
 
@@ -29,8 +33,8 @@ void SHR16::Write(uint16_t v) {
 }
 
 void SHR16::SetLED(uint16_t led) {
-    //    led = ((led & 0x00ff) << 8) | ((led & 0x0300) >> 2);
-    //	Write((shr16_v & ~SHR16_LED_MSK) | led);
+    led = ((led & 0x00ff) << 8) | ((led & 0x0300) >> 2);
+    Write((shr16_v & ~SHR16_LED_MSK) | led);
 }
 
 void SHR16::SetTMCEnabled(uint8_t index, bool ena) {

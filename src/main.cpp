@@ -7,6 +7,7 @@
 
 #include "pins.h"
 #include <avr/interrupt.h>
+#include <util/delay.h>
 
 #include "modules/buttons.h"
 #include "modules/finda.h"
@@ -267,13 +268,14 @@ void loop() {
         ProcessRequestMsg(protocol.GetRequestMsg());
     }
     mb::buttons.Step(hal::adc::ReadADC(0));
-    ml::leds.Step(0);
+    ml::leds.Step(10);
     mf::finda.Step(0);
     mfs::fsensor.Step(0);
     mi::idler.Step();
     ms::selector.Step();
     currentCommand->Step();
     // add a watchdog reset
+    _delay_ms(10)
 }
 
 int main() {

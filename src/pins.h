@@ -10,4 +10,4 @@
 
 #define SHR16_DATA GPIOB, 5 ///DS
 #define SHR16_LATCH GPIOB, 6 ///STCP
-#define SHR16_CLOCK GPIOB, 7 ///SHCP
+#define SHR16_CLOCK GPIOC, 7 ///SHCP
