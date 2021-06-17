@@ -11,8 +11,9 @@ namespace fsensor {
 
 class FSensor : protected debounce::Debouncer {
 public:
-    inline FSensor()
-        : debounce::Debouncer(debounce) {};
+    inline constexpr FSensor()
+        : debounce::Debouncer(debounce)
+        , reportedFSensorState(false) {};
     void Step(uint16_t time);
     using debounce::Debouncer::Pressed;
 

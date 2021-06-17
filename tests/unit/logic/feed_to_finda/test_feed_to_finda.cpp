@@ -31,17 +31,7 @@ bool WhileCondition(logic::FeedToFinda &ff, COND cond, uint32_t maxLoops = 5000)
 TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
     using namespace logic;
 
-    // no buttons involved ;)
-    hal::adc::TADCData noButtons({ 0 });
-    hal::adc::ReinitADC(0, std::move(noButtons), 1);
-
-    // finda OFF
-    hal::adc::TADCData findaOFF({ 0 });
-    hal::adc::ReinitADC(1, std::move(findaOFF), 1);
-
-    // let's assume we have the filament NOT loaded and active slot 0
-    modules::globals::globals.SetFilamentLoaded(false);
-    modules::globals::globals.SetActiveSlot(0);
+    ForceReinitAllAutomata();
 
     FeedToFinda ff;
     main_loop();
@@ -103,20 +93,7 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
 TEST_CASE("feed_to_finda::FINDA_failed", "[feed_to_finda]") {
     using namespace logic;
 
-    // This is a problem - how to reset all the state machines at once?
-    // May be add an #ifdef unit_tests and a reset function for each of the automatons
-
-    // no buttons involved ;)
-    hal::adc::TADCData noButtons({ 0 });
-    hal::adc::ReinitADC(0, std::move(noButtons), 1);
-
-    // finda OFF
-    hal::adc::TADCData findaOFF({ 0 });
-    hal::adc::ReinitADC(1, std::move(findaOFF), 1);
-
-    // let's assume we have the filament NOT loaded and active slot 0
-    modules::globals::globals.SetFilamentLoaded(false);
-    modules::globals::globals.SetActiveSlot(0);
+    ForceReinitAllAutomata();
 
     FeedToFinda ff;
     main_loop();

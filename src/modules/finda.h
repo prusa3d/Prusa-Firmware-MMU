@@ -7,7 +7,7 @@ namespace finda {
 
 class FINDA : protected debounce::Debouncer {
 public:
-    inline FINDA()
+    inline constexpr FINDA()
         : debounce::Debouncer(debounce) {};
     void Step(uint16_t time);
     using debounce::Debouncer::Pressed;

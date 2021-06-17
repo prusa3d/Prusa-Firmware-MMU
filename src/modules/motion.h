@@ -61,6 +61,8 @@ public:
 /// @@TODO this is subject of discussion and change in the future
 class Motion {
 public:
+    inline constexpr Motion() = default;
+
     /// Init axis driver - @@TODO this should be probably hidden somewhere deeper ... something should manage the axes and their state
     /// especially when the TMC may get randomly reset (deinited)
     void InitAxis(Axis axis);

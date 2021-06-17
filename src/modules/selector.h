@@ -16,7 +16,7 @@ public:
         Failed
     };
 
-    inline Selector()
+    inline constexpr Selector()
         : state(Ready)
         , plannedSlot(0)
         , currentSlot(0) {}

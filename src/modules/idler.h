@@ -11,12 +11,12 @@ namespace idler {
 class Idler {
 public:
     enum {
-        Ready = 0,
+        Ready = 0, // intentionally set as zero in order to allow zeroing the Idler structure upon startup -> avoid explicit initialization code
         Moving,
         Failed
     };
 
-    inline Idler()
+    inline constexpr Idler()
         : state(Ready)
         , plannedEngage(false)
         , plannedSlot(0)
