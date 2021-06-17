@@ -275,7 +275,7 @@ void loop() {
     ms::selector.Step();
     currentCommand->Step();
     // add a watchdog reset
-    _delay_ms(10)
+    _delay_ms(10);
 }
 
 int main() {
