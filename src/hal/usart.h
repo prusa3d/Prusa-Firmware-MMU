@@ -10,6 +10,10 @@
 namespace hal {
 namespace usart {
 
+constexpr uint16_t UART_BAUD_SELECT(uint32_t baudRate, uint32_t xtalCpu) {
+    return (((double)(xtalCpu))/(((double)(baudRate))*8.0)-1.0+0.5);
+}
+
 class USART {
 public:
     struct USART_TypeDef {
@@ -53,10 +57,10 @@ public:
     __attribute__((always_inline)) inline void Init(USART_InitTypeDef *const conf) {
         gpio::Init(conf->rx_pin, gpio::GPIO_InitTypeDef(gpio::Mode::input, gpio::Level::low));
         gpio::Init(conf->tx_pin, gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::low));
-        husart->UBRRx = (((double)(F_CPU)) / (((double)(conf->baudrate)) * 8.0) - 1.0 + 0.5);
-        husart->UCSRxA = (1 << 1); // Set double baudrate setting. Clear all other status bits/flags
+        husart->UBRRx = UART_BAUD_SELECT(conf->baudrate, F_CPU);
+        husart->UCSRxA |= (1 << 1); // Set double baudrate setting. Clear all other status bits/flags
         // husart->UCSRxC |= (1 << 3); // 2 stop bits. Preserve data size setting
-        husart->UCSRxD = 0; //disable hardware flow control. This register is reserved on all AVR devides with USART.
+        husart->UCSRxD = 0; // disable hardware flow control. Few avr MCUs have this feature, but this register is reserved on all AVR devices with USART, so we can disable it without consequences.
         husart->UCSRxB = (1 << 3) | (1 << 4) | (1 << 7); // Turn on the transmission and reception circuitry and enable the RX interrupt
     }
 
@@ -83,10 +87,7 @@ public:
             husart->UCSRxB &= ~(1 << 5); // disable UDRE interrupt
     }
 
-    USART() = default;
-    void Init(USART_TypeDef *conf) {
-        husart = conf;
-    }
+    USART(hal::usart::USART::USART_TypeDef *husart) : husart(husart) {};
 
 private:
     // IO base address
@@ -103,4 +104,4 @@ extern USART usart1;
 } // namespace usart
 } // namespace hal
 
-#define USART1 ((hal::USART::USART_TypeDef *)&UCSR1A)
+#define USART1 ((hal::usart::USART::USART_TypeDef *)&UCSR1A)
