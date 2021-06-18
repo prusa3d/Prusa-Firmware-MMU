@@ -17,19 +17,19 @@
 logic::CommandBase *currentCommand = nullptr;
 
 // just like in the real FW, step all the known automata
-uint16_t tmpTiming = 0;
+uint16_t millis = 0;
 
 void main_loop() {
-    modules::buttons::buttons.Step(hal::adc::ReadADC(0));
-    modules::leds::leds.Step(tmpTiming);
-    modules::finda::finda.Step(tmpTiming);
-    modules::fsensor::fsensor.Step(tmpTiming);
+    modules::buttons::buttons.Step(millis);
+    modules::leds::leds.Step(millis);
+    modules::finda::finda.Step(millis);
+    modules::fsensor::fsensor.Step(millis);
     modules::idler::idler.Step();
     modules::selector::selector.Step();
     modules::motion::motion.Step();
     if (currentCommand)
         currentCommand->Step();
-    ++tmpTiming;
+    ++millis;
 }
 
 void ForceReinitAllAutomata() {

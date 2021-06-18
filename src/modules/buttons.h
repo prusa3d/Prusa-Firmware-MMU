@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdint.h>
-#include "../hal/adc.h"
 #include "debouncer.h"
 
 /// Buttons are built on top of the raw ADC API
@@ -28,17 +27,18 @@ enum {
 class Buttons {
     constexpr static const uint8_t N = 3; ///< number of buttons currently supported
     constexpr static const uint8_t adc = 1; ///< ADC index - will be some define or other constant later on
-    static uint16_t tmpTiming; ///< subject to removal when we have timers implemented - now used for the unit tests
 
 public:
     inline constexpr Buttons() = default;
 
     /// State machine step - reads the ADC, processes debouncing, updates states of individual buttons
-    void Step(uint16_t rawADC);
+    void Step(uint16_t millis);
 
-    /// @return true if button at index is pressed
+    /// @returns true if button at index is pressed
     /// @@TODO add range checking if necessary
     inline bool ButtonPressed(uint8_t index) const { return buttons[index].Pressed(); }
+
+    /// @returns true if any of the button is pressed
     inline bool AnyButtonPressed() const {
         for (uint8_t i = 0; i < N; ++i) {
             if (ButtonPressed(i))
@@ -50,9 +50,9 @@ public:
 private:
     Button buttons[N];
 
-    /// Call to the ADC and decode its output into a button index
+    /// Decode ADC output into a button index
     /// @returns index of the button pressed or -1 in case no button is pressed
-    static int8_t Sample(uint16_t rawADC);
+    static int8_t DecodeADC(uint16_t rawADC);
 };
 
 extern Buttons buttons;
