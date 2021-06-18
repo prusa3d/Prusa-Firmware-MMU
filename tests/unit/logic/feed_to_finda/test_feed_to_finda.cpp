@@ -53,15 +53,18 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
 
     // it should have instructed the selector and idler to move to slot 1
     // check if the idler and selector have the right command
-    CHECK(mm::axes[mm::Idler].targetPos == 0); // @@TODO constants
-    CHECK(mm::axes[mm::Selector].targetPos == 0); // @@TODO constants
-    CHECK(mm::axes[mm::Idler].enabled == true); // @@TODO constants
+    CHECK(mm::axes[mm::Idler].targetPos == mi::Idler::SlotPosition(0));
+    CHECK(mm::axes[mm::Selector].targetPos == ms::Selector::SlotPosition(0));
+    CHECK(mm::axes[mm::Idler].enabled == true);
 
     // engaging idler
     REQUIRE(WhileCondition(
         ff,
         [&]() { return !mi::idler.Engaged(); },
         5000));
+
+    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(0));
+    CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(0));
 
     // idler engaged, selector in position, we'll start pushing filament
     REQUIRE(ff.State() == FeedToFinda::PushingFilament);
@@ -92,6 +95,9 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
         [&]() { return mi::idler.Engaged(); },
         5000));
 
+    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5)); // @@TODO constants
+    CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(0));
+
     // state machine finished ok, the green LED should be on
     REQUIRE(ff.State() == FeedToFinda::OK);
     REQUIRE(ml::leds.LedOn(mg::globals.ActiveSlot(), ml::Color::green));
@@ -114,14 +120,17 @@ TEST_CASE("feed_to_finda::FINDA_failed", "[feed_to_finda]") {
 
     // it should have instructed the selector and idler to move to slot 1
     // check if the idler and selector have the right command
-    CHECK(mm::axes[mm::Idler].targetPos == 0); // @@TODO constants
-    CHECK(mm::axes[mm::Selector].targetPos == 0); // @@TODO constants
+    CHECK(mm::axes[mm::Idler].targetPos == mi::Idler::SlotPosition(0));
+    CHECK(mm::axes[mm::Selector].targetPos == ms::Selector::SlotPosition(0));
 
     // engaging idler
     REQUIRE(WhileCondition(
         ff,
         [&]() { return !mi::idler.Engaged(); },
         5000));
+
+    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(0));
+    CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(0));
 
     // idler engaged, we'll start pushing filament
     REQUIRE(ff.State() == FeedToFinda::PushingFilament);

@@ -86,6 +86,10 @@ public:
     /// @param feedrate maximum feedrate/speed after acceleration
     void PlanMove(Axis axis, int16_t delta, uint16_t feedrate);
 
+    /// @returns current position of an axis
+    /// @param axis axis affected
+    uint16_t CurrentPos(Axis axis) const;
+
     /// Enqueue performing of homing of an axis
     /// @@TODO
     void Home(Axis axis, bool direction);

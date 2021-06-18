@@ -6,9 +6,9 @@ namespace motion {
 
 Motion motion;
 AxisSim axes[3] = {
-    { 0, 0, false, false, false },
-    { 0, 0, false, false, false },
-    { 0, 0, false, false, false },
+    { 0, 0, false, false, false }, // pulley
+    { 1, 1, false, false, false }, // selector //@@TODO proper selector positions once defined
+    { 0, 0, false, false, false }, // idler
 };
 
 void Motion::InitAxis(Axis axis) {
@@ -36,6 +36,10 @@ void Motion::PlanMove(int16_t pulley, int16_t idler, int16_t selector, uint16_t 
 
 void Motion::PlanMove(Axis axis, int16_t delta, uint16_t feedrate) {
     axes[axis].targetPos = axes[axis].pos + delta;
+}
+
+uint16_t Motion::CurrentPos(Axis axis) const {
+    return axes[axis].pos;
 }
 
 void Motion::Home(Axis axis, bool direction) {

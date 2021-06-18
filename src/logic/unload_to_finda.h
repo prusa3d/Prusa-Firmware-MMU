@@ -21,20 +21,25 @@ namespace logic {
 ///\enddot
 struct UnloadToFinda {
     enum {
+        EngagingIdler,
         WaitingForFINDA,
         OK,
         Failed
     };
-    uint8_t state;
-    uint8_t maxTries;
-    inline UnloadToFinda(uint8_t maxTries)
-        : maxTries(maxTries) { Reset(); }
+    inline UnloadToFinda()
+        : maxTries(3) {}
 
     /// Restart the automaton
-    void Reset();
+    void Reset(uint8_t maxTries);
 
     /// @returns true if the state machine finished its job, false otherwise
     bool Step();
+
+    inline uint8_t State() const { return state; }
+
+private:
+    uint8_t state;
+    uint8_t maxTries;
 };
 
 } // namespace logic

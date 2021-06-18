@@ -10,8 +10,7 @@ namespace logic {
 class UnloadFilament : public CommandBase {
 public:
     inline UnloadFilament()
-        : CommandBase()
-        , unl(3) {}
+        : CommandBase() {}
 
     /// Restart the automaton
     void Reset(uint8_t param) override;
@@ -20,6 +19,7 @@ public:
     bool Step() override;
 
 private:
+    constexpr static const uint8_t maxRetries = 3;
     UnloadToFinda unl;
 };
 

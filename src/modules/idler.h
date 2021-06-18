@@ -39,10 +39,16 @@ public:
     /// this state is updated only when a planned move is successfully finished, so it is safe for higher-level
     /// state machines to use this call as a waiting condition for the desired state of the idler
     inline bool Engaged() const { return currentlyEngaged; }
+
+    /// @returns currently active slot
     inline uint8_t Slot() const { return currentSlot; }
 
+    /// @returns predefined positions of individual slots
+    inline static uint16_t SlotPosition(uint8_t slot) { return slotPositions[slot]; }
+
 private:
-    constexpr static const uint16_t slotPositions[5] = { 1, 2, 3, 4, 5 }; // @@TODO
+    /// slots 0-4 are the real ones, the 5th is the idle position
+    static const uint16_t slotPositions[6];
 
     /// internal state of the automaton
     uint8_t state;
