@@ -49,10 +49,15 @@ TEST_CASE("cut_filament::cut0", "[cut_filament]") {
 
     // idler and selector reached their target positions and the CF automaton will start feeding to FINDA as the next step
     REQUIRE(cf.State() == ProgressCode::FeedingToFinda);
+    // prepare for simulated finda trigger
+    hal::adc::ReinitADC(1, hal::adc::TADCData({ 0, 0, 0, 0, 600, 700, 800, 900 }), 10);
     REQUIRE(WhileCondition([&]() { return cf.State() == ProgressCode::FeedingToFinda; }, 50000));
 
     // filament fed into FINDA, cutting...
     REQUIRE(cf.State() == ProgressCode::PreparingBlade);
+    REQUIRE(WhileCondition([&]() { return cf.State() == ProgressCode::PreparingBlade; }, 5000));
+
+    REQUIRE(cf.State() == ProgressCode::EngagingIdler);
     REQUIRE(WhileCondition([&]() { return cf.State() == ProgressCode::EngagingIdler; }, 5000));
 
     // the idler should be at the active slot @@TODO
