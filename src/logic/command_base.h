@@ -36,9 +36,20 @@ public:
     /// @returns progress of operation - each automaton consists of several internal states
     /// which should be reported to the user via the printer's LCD
     /// E.g. Tool change: first tries to unload filament, then selects another slot and then tries to load filament
+    ///
+    /// Beware - derived automata report detailed states of underlying state machines if any
+    /// E.g. Eject filament first tries to unload filament, which is a standalone automaton.
+    /// Therefore until the unload is finished, this method will report the internal state of Unload filament.
+    /// The reason for this is to be able to report exactly what is happening to the printer, especially loading and unloading sequences (and errors)
     virtual ProgressCode State() const { return state; }
 
-    /// @returns status of the operation - e.g. RUNNING, OK, or an error code if the operation failed
+    /// @returns progress of operation of only this state machine - regardless of any underlying automata (if any)
+    /// Therefore it is not a vitual method.
+    ProgressCode TopLevelState() const { return state; }
+
+    /// @returns status of the operation - e.g. RUNNING, OK, or an error code if the operation failed.
+    ///
+    /// Beware - the same rule about composite operations as with State() applies to Error() as well.
     /// Please see @ErrorCode for more details
     virtual ErrorCode Error() const { return error; }
 

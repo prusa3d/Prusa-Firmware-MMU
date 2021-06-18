@@ -36,8 +36,12 @@ public:
     /// state machines to use this call as a waiting condition for the desired state of the selector
     inline uint8_t Slot() const { return currentSlot; }
 
+    /// @returns predefined positions of individual slots
+    inline static uint16_t SlotPosition(uint8_t slot) { return slotPositions[slot]; }
+
 private:
-    constexpr static const uint16_t slotPositions[5] = { 1, 2, 3, 4, 5 }; // @@TODO
+    /// slots 0-4 are the real ones, the 5th is the farthest parking positions
+    static const uint16_t slotPositions[6];
 
     /// internal state of the automaton
     uint8_t state;

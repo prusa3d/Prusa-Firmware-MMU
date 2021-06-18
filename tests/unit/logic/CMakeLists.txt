@@ -4,7 +4,7 @@ add_subdirectory(feed_to_finda)
 
 # add_subdirectory(feed_to_bondtech)
 
-# add_subdirectory(unload_to_finda)
+add_subdirectory(unload_to_finda)
 
 add_subdirectory(eject_filament)
 
@@ -14,4 +14,4 @@ add_subdirectory(eject_filament)
 
 # add_subdirectory(cut_filament)
 
-# add_subdirectory(unload_filament)
+add_subdirectory(unload_filament)

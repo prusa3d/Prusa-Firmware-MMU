@@ -36,22 +36,13 @@ void CutFilament::SelectFilamentSlot() {
 }
 
 bool CutFilament::Step() {
-    const int cut_steps_pre = 700;
-    const int cut_steps_post = 150;
-
     switch (state) {
     case ProgressCode::UnloadingFilament:
         if (unl.Step()) {
-            // unloading sequence finished
-            switch (unl.Error()) {
-            case ErrorCode::OK: // finished successfully
-            case ErrorCode::UNLOAD_ERROR2: // @@TODO what shall we do in case of this error?
-            case ErrorCode::FINDA_DIDNT_TRIGGER:
-                break;
-            default:
-                state = ProgressCode::ERRInternal;
-                break;
-            }
+            // unloading sequence finished - basically, no errors can occurr here
+            // as UnloadFilament should handle all the possible error states on its own
+            // There is no way the UnloadFilament to finish in an error state
+            SelectFilamentSlot();
         }
         break;
     case ProgressCode::SelectingFilamentSlot:
@@ -61,6 +52,8 @@ bool CutFilament::Step() {
         }
         break;
     case ProgressCode::FeedingToFinda: // @@TODO this state will be reused for repeated cutting of filament ... probably there will be multiple attempts, not sure
+        //@@TODO - this is not correct - when the active slot is +1, the FINDA cannot detect the incoming filament - we can only pray that the filament moves
+        //idler should hold slot 0, while the selector is at slot 1
         if (feed.Step()) {
             if (feed.State() == FeedToFinda::Failed) {
                 // @@TODO
@@ -80,7 +73,7 @@ bool CutFilament::Step() {
     case ProgressCode::EngagingIdler:
         if (mi::idler.Engaged()) {
             state = ProgressCode::PushingFilament;
-            mm::motion.PlanMove(cut_steps_pre, 0, 0, 1500, 0, 0); //@@TODO
+            mm::motion.PlanMove(cutStepsPre, 0, 0, 1500, 0, 0); //@@TODO
         }
         break;
     case ProgressCode::PushingFilament:
@@ -107,6 +100,24 @@ bool CutFilament::Step() {
         return true;
     }
     return false;
+}
+
+ProgressCode CutFilament::State() const {
+    switch (state) {
+    case ProgressCode::UnloadingFilament:
+        return unl.State(); // report sub-automaton states properly
+    default:
+        return state;
+    }
+}
+
+ErrorCode CutFilament::Error() const {
+    switch (state) {
+    case ProgressCode::UnloadingFilament:
+        return unl.Error(); // report sub-automaton errors properly
+    default:
+        return error;
+    }
 }
 
 } // namespace logic

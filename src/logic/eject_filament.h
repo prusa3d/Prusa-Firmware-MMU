@@ -27,9 +27,9 @@ public:
     /// @returns true if the state machine finished its job, false otherwise
     bool Step() override;
 
-    virtual ProgressCode State() const override;
+    ProgressCode State() const override;
 
-    virtual ErrorCode Error() const override;
+    ErrorCode Error() const override;
 
 private:
     constexpr static const uint16_t ejectSteps = 500; //@@TODO
