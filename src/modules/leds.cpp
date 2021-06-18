@@ -6,7 +6,7 @@ namespace leds {
 
 LEDs leds;
 
-void LED::SetMode(Mode mode) {
+void LED::SetMode(leds::Mode mode) {
     state.mode = mode;
     // set initial state of LEDs correctly - transition from one mode to another
     switch (state.mode) {

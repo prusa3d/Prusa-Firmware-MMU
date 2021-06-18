@@ -32,6 +32,7 @@ class LED {
 public:
     constexpr inline LED() = default;
     void SetMode(Mode mode);
+    inline leds::Mode Mode() const { return (leds::Mode)state.mode; }
 
     /// @returns true if the LED shines
     bool Step(bool oddPeriod);
@@ -65,6 +66,13 @@ public:
     }
     inline void SetMode(uint8_t index, Mode mode) {
         leds[index].SetMode(mode);
+    }
+
+    inline leds::Mode Mode(uint8_t slot, Color color) {
+        return Mode(slot * 2 + color);
+    }
+    inline leds::Mode Mode(uint8_t index) {
+        return leds[index].Mode();
     }
 
     inline bool LedOn(uint8_t index) const {
