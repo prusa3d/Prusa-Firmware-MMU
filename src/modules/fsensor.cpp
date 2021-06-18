@@ -1,17 +1,18 @@
 #include "fsensor.h"
+#include "timebase.h"
 
 namespace modules {
 namespace fsensor {
 
 FSensor fsensor;
 
-void FSensor::Step(uint16_t time) {
-    debounce::Debouncer::Step(time, reportedFSensorState);
+void FSensor::Step() {
+    debounce::Debouncer::Step(modules::time::timebase.Millis(), reportedFSensorState);
 }
 
 void FSensor::ProcessMessage(bool on) {
     reportedFSensorState = on;
 }
 
-} // namespace finda
+} // namespace fsensor
 } // namespace modules

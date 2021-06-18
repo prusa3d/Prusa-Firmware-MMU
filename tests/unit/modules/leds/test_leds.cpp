@@ -1,8 +1,11 @@
 #include "catch2/catch.hpp"
 #include "leds.h"
 #include "shr16.h"
+#include "../stubs/stub_timebase.h"
 
 using Catch::Matchers::Equals;
+
+uint16_t millis = 0;
 
 namespace hal {
 namespace shr16 {
@@ -25,6 +28,7 @@ extern uint16_t shr16_v_copy;
 TEST_CASE("leds::single", "[leds]") {
     using namespace modules::leds;
     using namespace hal::shr16;
+    modules::time::ReinitTimebase(); // reset timing
 
     LEDs leds;
 
@@ -47,13 +51,15 @@ TEST_CASE("leds::single", "[leds]") {
 
     // turn LED on
     leds.SetMode(index, color, on);
-    leds.Step(0);
+    leds.Step();
+    modules::time::IncMillis();
     CHECK(leds.LedOn(index, color) == true);
     CHECK(shr16_v_copy == shr16_register);
 
     // turn LED off
     leds.SetMode(index, color, off);
-    leds.Step(0);
+    leds.Step();
+    modules::time::IncMillis();
     CHECK(leds.LedOn(index, color) == false);
     CHECK(shr16_v_copy == 0);
 }
@@ -61,10 +67,12 @@ TEST_CASE("leds::single", "[leds]") {
 void TestBlink(uint8_t index, modules::leds::Color color, uint16_t shr16_register, bool shouldBeOn, modules::leds::Mode blinkMode) {
     using namespace modules::leds;
     using namespace hal::shr16;
+    modules::time::ReinitTimebase(); // reset timing
     LEDs leds;
 
     leds.SetMode(index, color, blinkMode);
-    leds.Step(1);
+    leds.Step();
+    modules::time::IncMillis();
 
     REQUIRE(leds.LedOn(index, color) == shouldBeOn);
     CHECK(shr16_v_copy == (shouldBeOn ? shr16_register : 0));
@@ -72,7 +80,8 @@ void TestBlink(uint8_t index, modules::leds::Color color, uint16_t shr16_registe
     // test 4 seconds of blinking
     for (uint8_t s = 1; s < 4; ++s) {
         // one second elapsed ;)
-        leds.Step(1000);
+        modules::time::IncMillis(1000);
+        leds.Step();
         shouldBeOn = !shouldBeOn;
         CHECK(leds.LedOn(index, color) == shouldBeOn);
         CHECK(shr16_v_copy == (shouldBeOn ? shr16_register : 0));
@@ -80,7 +89,8 @@ void TestBlink(uint8_t index, modules::leds::Color color, uint16_t shr16_registe
 
     // turn LED off
     leds.SetMode(index, color, off);
-    leds.Step(0);
+    leds.Step();
+    modules::time::IncMillis();
     CHECK(leds.LedOn(index, color) == false);
     CHECK(shr16_v_copy == 0);
 }
@@ -88,7 +98,6 @@ void TestBlink(uint8_t index, modules::leds::Color color, uint16_t shr16_registe
 TEST_CASE("leds::blink0-single", "[leds]") {
     using namespace modules::leds;
     using namespace hal::shr16;
-
     uint8_t index;
     Color color;
     uint16_t shr16_register;

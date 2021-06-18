@@ -1,5 +1,8 @@
 # define the test executable
-add_executable(leds_tests ../../../../src/modules/leds.cpp ../stubs/stub_shr16.cpp test_leds.cpp)
+add_executable(
+  leds_tests ../../../../src/modules/leds.cpp ../stubs/stub_shr16.cpp ../stubs/stub_timebase.cpp
+             test_leds.cpp
+  )
 
 # define required search paths
 target_include_directories(

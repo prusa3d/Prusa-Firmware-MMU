@@ -203,6 +203,7 @@ target_sources(
           src/modules/motion.cpp
           src/modules/permanent_storage.cpp
           src/modules/selector.cpp
+          src/modules/timebase.cpp
           src/logic/command_base.cpp
           src/logic/cut_filament.cpp
           src/logic/eject_filament.cpp

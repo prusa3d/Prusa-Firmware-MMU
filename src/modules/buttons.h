@@ -32,7 +32,7 @@ public:
     inline constexpr Buttons() = default;
 
     /// State machine step - reads the ADC, processes debouncing, updates states of individual buttons
-    void Step(uint16_t millis);
+    void Step();
 
     /// @returns true if button at index is pressed
     /// @@TODO add range checking if necessary

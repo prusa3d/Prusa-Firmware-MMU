@@ -53,11 +53,10 @@ private:
 /// main LED API
 class LEDs {
 public:
-    constexpr inline LEDs()
-        : ms(0) {};
+    constexpr inline LEDs() = default;
 
     /// step LED automaton
-    void Step(uint16_t delta_ms);
+    void Step();
 
     inline constexpr uint8_t LedPairsCount() const { return ledPairs; }
 
@@ -96,7 +95,6 @@ private:
     /// [8] - green LED slot 4
     /// [9] - red LED slot 4
     LED leds[ledPairs * 2];
-    uint16_t ms;
 };
 
 extern LEDs leds;

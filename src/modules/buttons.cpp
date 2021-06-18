@@ -1,5 +1,6 @@
 #include "buttons.h"
 #include "../hal/adc.h"
+#include "timebase.h"
 
 namespace modules {
 namespace buttons {
@@ -22,7 +23,8 @@ int8_t Buttons::DecodeADC(uint16_t rawADC) {
     return -1;
 }
 
-void Buttons::Step(uint16_t millis) {
+void Buttons::Step() {
+    uint16_t millis = modules::time::timebase.Millis();
     int8_t currentState = DecodeADC(hal::adc::ReadADC(0));
     for (uint_fast8_t b = 0; b < N; ++b) {
         // this button was pressed if b == currentState, released otherwise

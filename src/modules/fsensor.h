@@ -14,7 +14,7 @@ public:
     inline constexpr FSensor()
         : debounce::Debouncer(debounce)
         , reportedFSensorState(false) {};
-    void Step(uint16_t time);
+    void Step();
     using debounce::Debouncer::Pressed;
 
     void ProcessMessage(bool on);

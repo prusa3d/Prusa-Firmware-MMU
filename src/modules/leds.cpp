@@ -1,5 +1,6 @@
 #include "leds.h"
 #include "../hal/shr16.h"
+#include "timebase.h"
 
 namespace modules {
 namespace leds {
@@ -39,9 +40,9 @@ bool LED::Step(bool oddPeriod) {
     return state.on;
 }
 
-void LEDs::Step(uint16_t delta_ms) {
-    ms += delta_ms;
-    bool oddPeriod = ((ms / 1000U) & 0x01U) != 0;
+void LEDs::Step() {
+    uint16_t millis = modules::time::timebase.Millis();
+    bool oddPeriod = ((millis / 1000U) & 0x01U) != 0;
     uint16_t result = 0;
     for (int8_t i = ledPairs * 2 - 1; i >= 0; --i) {
         result <<= 1;

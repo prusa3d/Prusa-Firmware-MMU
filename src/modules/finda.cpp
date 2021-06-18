@@ -1,13 +1,14 @@
 #include "finda.h"
 #include "../hal/adc.h"
+#include "timebase.h"
 
 namespace modules {
 namespace finda {
 
 FINDA finda;
 
-void FINDA::Step(uint16_t time) {
-    debounce::Debouncer::Step(time, hal::adc::ReadADC(1) > adcDecisionLevel);
+void FINDA::Step() {
+    debounce::Debouncer::Step(modules::time::timebase.Millis(), hal::adc::ReadADC(1) > adcDecisionLevel);
 }
 
 } // namespace finda

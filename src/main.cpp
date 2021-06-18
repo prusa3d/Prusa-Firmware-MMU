@@ -267,15 +267,14 @@ void loop() {
     if (CheckMsgs()) {
         ProcessRequestMsg(protocol.GetRequestMsg());
     }
-    mb::buttons.Step(hal::adc::ReadADC(0));
-    ml::leds.Step(10);
-    mf::finda.Step(0);
-    mfs::fsensor.Step(0);
+    mb::buttons.Step();
+    ml::leds.Step();
+    mf::finda.Step();
+    mfs::fsensor.Step();
     mi::idler.Step();
     ms::selector.Step();
     currentCommand->Step();
     // add a watchdog reset
-    _delay_ms(10);
 }
 
 int main() {
