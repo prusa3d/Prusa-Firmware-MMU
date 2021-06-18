@@ -19,6 +19,16 @@
 
 using Catch::Matchers::Equals;
 
+namespace mm = modules::motion;
+namespace mf = modules::finda;
+namespace mi = modules::idler;
+namespace ml = modules::leds;
+namespace mb = modules::buttons;
+namespace mg = modules::globals;
+namespace ms = modules::selector;
+
+namespace ha = hal::adc;
+
 template <typename COND>
 bool WhileCondition(logic::FeedToFinda &ff, COND cond, uint32_t maxLoops = 5000) {
     while (cond() && --maxLoops) {
@@ -43,25 +53,24 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
 
     // it should have instructed the selector and idler to move to slot 1
     // check if the idler and selector have the right command
-    CHECK(modules::motion::axes[modules::motion::Idler].targetPos == 0); // @@TODO constants
-    CHECK(modules::motion::axes[modules::motion::Selector].targetPos == 0); // @@TODO constants
-    CHECK(modules::motion::axes[modules::motion::Idler].enabled == true); // @@TODO constants
-    CHECK(modules::motion::axes[modules::motion::Selector].enabled == true); // @@TODO constants
+    CHECK(mm::axes[mm::Idler].targetPos == 0); // @@TODO constants
+    CHECK(mm::axes[mm::Selector].targetPos == 0); // @@TODO constants
+    CHECK(mm::axes[mm::Idler].enabled == true); // @@TODO constants
 
     // engaging idler
     REQUIRE(WhileCondition(
         ff,
-        [&]() { return !modules::idler::idler.Engaged(); },
+        [&]() { return !mi::idler.Engaged(); },
         5000));
 
     // idler engaged, selector in position, we'll start pushing filament
     REQUIRE(ff.State() == FeedToFinda::PushingFilament);
     // at least at the beginning the LED should shine green (it should be blinking, but this mode has been already verified in the LED's unit test)
-    REQUIRE(modules::leds::leds.LedOn(modules::globals::globals.ActiveSlot(), modules::leds::Color::green));
+    REQUIRE(ml::leds.LedOn(mg::globals.ActiveSlot(), ml::Color::green));
 
     // now let the filament be pushed into the FINDA - do 500 steps without triggering the condition
     // and then let the simulated ADC channel 1 create a FINDA switch
-    hal::adc::ReinitADC(1, hal::adc::TADCData({ 600, 700, 800, 900 }), 1);
+    ha::ReinitADC(1, ha::TADCData({ 600, 700, 800, 900 }), 1);
 
     REQUIRE(WhileCondition(
         ff,
@@ -80,12 +89,12 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
     REQUIRE(ff.State() == FeedToFinda::DisengagingIdler);
     REQUIRE(WhileCondition(
         ff,
-        [&]() { return modules::idler::idler.Engaged(); },
+        [&]() { return mi::idler.Engaged(); },
         5000));
 
     // state machine finished ok, the green LED should be on
     REQUIRE(ff.State() == FeedToFinda::OK);
-    REQUIRE(modules::leds::leds.LedOn(modules::globals::globals.ActiveSlot(), modules::leds::Color::green));
+    REQUIRE(ml::leds.LedOn(mg::globals.ActiveSlot(), ml::Color::green));
 
     REQUIRE(ff.Step() == true); // the automaton finished its work, any consecutive calls to Step must return true
 }
@@ -105,22 +114,22 @@ TEST_CASE("feed_to_finda::FINDA_failed", "[feed_to_finda]") {
 
     // it should have instructed the selector and idler to move to slot 1
     // check if the idler and selector have the right command
-    CHECK(modules::motion::axes[modules::motion::Idler].targetPos == 0); // @@TODO constants
-    CHECK(modules::motion::axes[modules::motion::Selector].targetPos == 0); // @@TODO constants
+    CHECK(mm::axes[mm::Idler].targetPos == 0); // @@TODO constants
+    CHECK(mm::axes[mm::Selector].targetPos == 0); // @@TODO constants
 
     // engaging idler
     REQUIRE(WhileCondition(
         ff,
-        [&]() { return !modules::idler::idler.Engaged(); },
+        [&]() { return !mi::idler.Engaged(); },
         5000));
 
     // idler engaged, we'll start pushing filament
     REQUIRE(ff.State() == FeedToFinda::PushingFilament);
     // at least at the beginning the LED should shine green (it should be blinking, but this mode has been already verified in the LED's unit test)
-    REQUIRE(modules::leds::leds.LedOn(modules::globals::globals.ActiveSlot(), modules::leds::Color::green));
+    REQUIRE(ml::leds.Mode(mg::globals.ActiveSlot(), ml::Color::green) == ml::blink0);
 
     // now let the filament be pushed into the FINDA - but we make sure the FINDA doesn't trigger at all
-    hal::adc::ReinitADC(1, hal::adc::TADCData({ 0 }), 100);
+    ha::ReinitADC(1, ha::TADCData({ 0 }), 100);
 
     REQUIRE(WhileCondition(
         ff, // boo, this formatting is UGLY!
@@ -129,6 +138,8 @@ TEST_CASE("feed_to_finda::FINDA_failed", "[feed_to_finda]") {
 
     // the FINDA didn't trigger, we should be in the Failed state
     REQUIRE(ff.State() == FeedToFinda::Failed);
+    REQUIRE(ml::leds.Mode(mg::globals.ActiveSlot(), ml::Color::green) == ml::off);
+    REQUIRE(ml::leds.Mode(mg::globals.ActiveSlot(), ml::Color::red) == ml::blink0);
 
     REQUIRE(ff.Step() == true); // the automaton finished its work, any consecutive calls to Step must return true
 }

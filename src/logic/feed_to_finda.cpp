@@ -36,9 +36,7 @@ bool FeedToFinda::Step() {
         }
         return false;
     case PushingFilament: {
-        bool fp = mf::finda.Pressed();
-        bool abp = mb::buttons.AnyButtonPressed();
-        if (fp || (feedPhaseLimited && abp)) { // @@TODO probably also a command from the printer
+        if (mf::finda.Pressed() || (feedPhaseLimited && mb::buttons.AnyButtonPressed())) { // @@TODO probably also a command from the printer
             mm::motion.AbortPlannedMoves(); // stop pushing filament
             // FINDA triggered - that means it works and detected the filament tip
             state = UnloadBackToPTFE;
