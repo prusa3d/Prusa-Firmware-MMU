@@ -53,7 +53,7 @@ void ForceReinitAllAutomata() {
     new (&modules::motion::motion) modules::motion::Motion();
 
     // no buttons involved ;)
-    hal::adc::ReinitADC(0, hal::adc::TADCData({ 0 }), 1);
+    hal::adc::ReinitADC(0, hal::adc::TADCData({ 1023 }), 1);
 
     // finda OFF
     hal::adc::ReinitADC(1, hal::adc::TADCData({ 0 }), 1);
