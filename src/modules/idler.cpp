@@ -15,10 +15,11 @@ bool Idler::Disengage() {
     if (state == Moving)
         return false;
 
+    plannedEngage = false;
+
     if (!Engaged())
         return true;
 
-    plannedEngage = false;
     mm::motion.InitAxis(mm::Idler);
     // plan move to idle position
     // mm::motion.PlanMove(0, idle_position, 0, 1000, 0, 0); // @@TODO
@@ -30,11 +31,12 @@ bool Idler::Engage(uint8_t slot) {
     if (state == Moving)
         return false;
 
+    plannedSlot = slot;
+    plannedEngage = true;
+
     if (Engaged())
         return true;
 
-    plannedSlot = slot;
-    plannedEngage = true;
     mm::motion.InitAxis(mm::Idler);
     // mm::motion.PlanMove(0, slotPositions[slot], 0, 1000, 0, 0); // @@TODO
     state = Moving;

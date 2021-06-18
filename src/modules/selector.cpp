@@ -15,10 +15,11 @@ bool Selector::MoveToSlot(uint8_t slot) {
     if (state == Moving)
         return false;
 
+    plannedSlot = slot;
+
     if (currentSlot == slot)
         return true;
 
-    plannedSlot = slot;
     mm::motion.InitAxis(mm::Selector);
     // mm::motion.PlanMove(1, slotPositions[slot], 0, 1000, 0, 0); // @@TODO
     state = Moving;
