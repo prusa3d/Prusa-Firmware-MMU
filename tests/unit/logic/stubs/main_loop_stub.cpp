@@ -1,6 +1,7 @@
 #include "main_loop_stub.h"
 
 #include "../../modules/stubs/stub_adc.h"
+#include "../../modules/stubs/stub_timebase.h"
 
 #include "../../../../src/modules/buttons.h"
 #include "../../../../src/modules/finda.h"
@@ -16,20 +17,18 @@
 
 logic::CommandBase *currentCommand = nullptr;
 
-// just like in the real FW, step all the known automata
-uint16_t millis = 0;
-
 void main_loop() {
-    modules::buttons::buttons.Step(millis);
-    modules::leds::leds.Step(millis);
-    modules::finda::finda.Step(millis);
-    modules::fsensor::fsensor.Step(millis);
+    modules::buttons::buttons.Step();
+    modules::leds::leds.Step();
+    modules::finda::finda.Step();
+    modules::fsensor::fsensor.Step();
     modules::idler::idler.Step();
     modules::selector::selector.Step();
     modules::motion::motion.Step();
     if (currentCommand)
         currentCommand->Step();
-    ++millis;
+
+    modules::time::IncMillis();
 }
 
 void ForceReinitAllAutomata() {
@@ -57,6 +56,8 @@ void ForceReinitAllAutomata() {
 
     // finda OFF
     hal::adc::ReinitADC(1, hal::adc::TADCData({ 0 }), 1);
+
+    modules::time::ReinitTimebase();
 
     // let's assume we have the filament NOT loaded and active slot 0
     modules::globals::globals.SetFilamentLoaded(false);

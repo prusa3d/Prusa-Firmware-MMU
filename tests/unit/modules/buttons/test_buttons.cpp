@@ -1,26 +1,33 @@
 #include "catch2/catch.hpp"
 #include "buttons.h"
 #include "../stubs/stub_adc.h"
+#include "../stubs/stub_timebase.h"
 
 using Catch::Matchers::Equals;
 
 uint16_t millis = 0;
 
 bool Step_Basic_One_Button_Test(modules::buttons::Buttons &b, uint8_t oversampleFactor, uint8_t testedButtonIndex, uint8_t otherButton1, uint8_t otherButton2) {
-    for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(++millis); // should detect the press but remain in detected state - wait for debounce
+    for (uint8_t i = 0; i < oversampleFactor; ++i) {
+        b.Step(); // should detect the press but remain in detected state - wait for debounce
+        modules::time::IncMillis();
+    }
     CHECK(!b.ButtonPressed(testedButtonIndex));
     CHECK(!b.ButtonPressed(otherButton1));
     CHECK(!b.ButtonPressed(otherButton2));
 
-    for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(++millis); // reset to waiting
+    for (uint8_t i = 0; i < oversampleFactor; ++i) {
+        b.Step(); // reset to waiting
+        modules::time::IncMillis();
+    }
     CHECK(b.ButtonPressed(testedButtonIndex));
     CHECK(!b.ButtonPressed(otherButton1));
     CHECK(!b.ButtonPressed(otherButton2));
 
-    for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(++millis); // pressed again, still in debouncing state
+    for (uint8_t i = 0; i < oversampleFactor; ++i) {
+        b.Step(); // pressed again, still in debouncing state
+        modules::time::IncMillis();
+    }
     CHECK(!b.ButtonPressed(testedButtonIndex));
     CHECK(!b.ButtonPressed(otherButton1));
     CHECK(!b.ButtonPressed(otherButton2));
@@ -31,7 +38,7 @@ bool Step_Basic_One_Button_Test(modules::buttons::Buttons &b, uint8_t oversample
 /// This test verifies the behaviour of a single button. The other buttons must remain intact.
 bool Step_Basic_One_Button(hal::adc::TADCData &&d, uint8_t testedButtonIndex) {
     using namespace modules::buttons;
-    millis = 0;
+    modules::time::ReinitTimebase();
     Buttons b;
 
     // need to oversample the data as debouncing takes 100 cycles to accept a pressed button
@@ -95,68 +102,87 @@ TEST_CASE("buttons::Step-debounce-one-button", "[buttons]") {
     // need to oversample the data as debouncing takes 100 cycles to accept a pressed button
     constexpr uint8_t oversampleFactor = 25;
     hal::adc::ReinitADC(0, std::move(d), oversampleFactor);
+    modules::time::ReinitTimebase();
 
     Buttons b;
 
     // 5
-    for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(++millis); // should detect the press but remain in detected state - wait for debounce
+    for (uint8_t i = 0; i < oversampleFactor; ++i) {
+        b.Step(); // should detect the press but remain in detected state - wait for debounce
+        modules::time::IncMillis();
+    }
     CHECK(!b.ButtonPressed(0));
     CHECK(!b.ButtonPressed(1));
     CHECK(!b.ButtonPressed(2));
 
     // 1023
-    for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(++millis); // reset to waiting
+    for (uint8_t i = 0; i < oversampleFactor; ++i) {
+        b.Step(); // reset to waiting
+        modules::time::IncMillis();
+    }
     CHECK(!b.ButtonPressed(0));
     CHECK(!b.ButtonPressed(1));
     CHECK(!b.ButtonPressed(2));
 
     // 5
-    for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(++millis); // pressed again, still in debouncing state
+    for (uint8_t i = 0; i < oversampleFactor; ++i) {
+        b.Step(); // pressed again, still in debouncing state
+        modules::time::IncMillis();
+    }
     CHECK(!b.ButtonPressed(0));
     CHECK(!b.ButtonPressed(1));
     CHECK(!b.ButtonPressed(2));
 
     // 9
-    for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(++millis); // no change
+    for (uint8_t i = 0; i < oversampleFactor; ++i) {
+        b.Step(); // no change
+        modules::time::IncMillis();
+    }
     CHECK(!b.ButtonPressed(0));
     CHECK(!b.ButtonPressed(1));
     CHECK(!b.ButtonPressed(2));
 
     // 6
-    for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(++millis); // no change
+    for (uint8_t i = 0; i < oversampleFactor; ++i) {
+        b.Step(); // no change
+        modules::time::IncMillis();
+    }
     CHECK(!b.ButtonPressed(0));
     CHECK(!b.ButtonPressed(1));
     CHECK(!b.ButtonPressed(2));
 
     // 7
-    for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(++millis); // one step from "pressed"
+    for (uint8_t i = 0; i < oversampleFactor; ++i) {
+        b.Step(); // one step from "pressed"
+        modules::time::IncMillis();
+    }
     CHECK(!b.ButtonPressed(0));
     CHECK(!b.ButtonPressed(1));
     CHECK(!b.ButtonPressed(2));
 
     // 8
-    for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(++millis); // fifth set of samples - should report "pressed" finally
+    for (uint8_t i = 0; i < oversampleFactor; ++i) {
+        b.Step(); // fifth set of samples - should report "pressed" finally
+        modules::time::IncMillis();
+    }
     CHECK(b.ButtonPressed(0));
     CHECK(!b.ButtonPressed(1));
     CHECK(!b.ButtonPressed(2));
 
     // 1023
-    for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(++millis); // sixth set of samples - button released (no debouncing on release)
+    for (uint8_t i = 0; i < oversampleFactor; ++i) {
+        b.Step(); // sixth set of samples - button released (no debouncing on release)
+        modules::time::IncMillis();
+    }
     CHECK(!b.ButtonPressed(0));
     CHECK(!b.ButtonPressed(1));
     CHECK(!b.ButtonPressed(2));
 
     // 1023
-    for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(++millis); // seventh set of samples - still released
+    for (uint8_t i = 0; i < oversampleFactor; ++i) {
+        b.Step(); // seventh set of samples - still released
+        modules::time::IncMillis();
+    }
     CHECK(!b.ButtonPressed(0));
     CHECK(!b.ButtonPressed(1));
     CHECK(!b.ButtonPressed(2));

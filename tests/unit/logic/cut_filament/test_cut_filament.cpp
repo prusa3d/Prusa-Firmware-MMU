@@ -29,15 +29,15 @@ bool WhileCondition(COND cond, uint32_t maxLoops = 5000) {
 
 TEST_CASE("cut_filament::cut0", "[cut_filament]") {
     using namespace logic;
+
+    ForceReinitAllAutomata();
+
     CutFilament cf;
-    main_loop();
-
-    // let's assume we have the filament NOT loaded
-    modules::globals::globals.SetFilamentLoaded(false);
-
     // restart the automaton
     currentCommand = &cf;
     cf.Reset(0);
+
+    main_loop();
 
     // it should have instructed the selector and idler to move to slot 1
     // check if the idler and selector have the right command
@@ -49,7 +49,7 @@ TEST_CASE("cut_filament::cut0", "[cut_filament]") {
 
     // idler and selector reached their target positions and the CF automaton will start feeding to FINDA as the next step
     REQUIRE(cf.State() == ProgressCode::FeedingToFinda);
-    REQUIRE(WhileCondition([&]() { return cf.State() == ProgressCode::FeedingToFinda; }, 5000));
+    REQUIRE(WhileCondition([&]() { return cf.State() == ProgressCode::FeedingToFinda; }, 50000));
 
     // filament fed into FINDA, cutting...
     REQUIRE(cf.State() == ProgressCode::PreparingBlade);

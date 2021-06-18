@@ -9,7 +9,7 @@ class FINDA : protected debounce::Debouncer {
 public:
     inline constexpr FINDA()
         : debounce::Debouncer(debounce) {};
-    void Step(uint16_t time);
+    void Step();
     using debounce::Debouncer::Pressed;
 
 private:
