@@ -18,6 +18,7 @@ enum class ProgressCode : uint_fast8_t {
 
     ERR1DisengagingIdler,
     ERR1WaitingForUser,
+    ERRInternal,
 
     UnloadingFilament,
     LoadingFilament,
