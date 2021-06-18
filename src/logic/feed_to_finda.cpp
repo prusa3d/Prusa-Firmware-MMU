@@ -35,8 +35,10 @@ bool FeedToFinda::Step() {
             mm::motion.PlanMove(feedPhaseLimited ? 1500 : 32767, 0, 0, 4000, 0, 0); //@@TODO constants
         }
         return false;
-    case PushingFilament:
-        if (mf::finda.Pressed() || (feedPhaseLimited && mb::buttons.AnyButtonPressed())) { // @@TODO probably also a command from the printer
+    case PushingFilament: {
+        bool fp = mf::finda.Pressed();
+        bool abp = mb::buttons.AnyButtonPressed();
+        if (fp || (feedPhaseLimited && abp)) { // @@TODO probably also a command from the printer
             mm::motion.AbortPlannedMoves(); // stop pushing filament
             // FINDA triggered - that means it works and detected the filament tip
             state = UnloadBackToPTFE;
@@ -47,6 +49,7 @@ bool FeedToFinda::Step() {
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::off);
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::red, ml::blink0);
         }
+    }
         return false;
     case UnloadBackToPTFE:
         if (mm::motion.QueueEmpty()) { // all moves have been finished

@@ -4,21 +4,23 @@
 
 using Catch::Matchers::Equals;
 
+uint16_t millis = 0;
+
 bool Step_Basic_One_Button_Test(modules::buttons::Buttons &b, uint8_t oversampleFactor, uint8_t testedButtonIndex, uint8_t otherButton1, uint8_t otherButton2) {
     for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(hal::adc::ReadADC(0)); // should detect the press but remain in detected state - wait for debounce
+        b.Step(++millis); // should detect the press but remain in detected state - wait for debounce
     CHECK(!b.ButtonPressed(testedButtonIndex));
     CHECK(!b.ButtonPressed(otherButton1));
     CHECK(!b.ButtonPressed(otherButton2));
 
     for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(hal::adc::ReadADC(0)); // reset to waiting
+        b.Step(++millis); // reset to waiting
     CHECK(b.ButtonPressed(testedButtonIndex));
     CHECK(!b.ButtonPressed(otherButton1));
     CHECK(!b.ButtonPressed(otherButton2));
 
     for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(hal::adc::ReadADC(0)); // pressed again, still in debouncing state
+        b.Step(++millis); // pressed again, still in debouncing state
     CHECK(!b.ButtonPressed(testedButtonIndex));
     CHECK(!b.ButtonPressed(otherButton1));
     CHECK(!b.ButtonPressed(otherButton2));
@@ -29,7 +31,7 @@ bool Step_Basic_One_Button_Test(modules::buttons::Buttons &b, uint8_t oversample
 /// This test verifies the behaviour of a single button. The other buttons must remain intact.
 bool Step_Basic_One_Button(hal::adc::TADCData &&d, uint8_t testedButtonIndex) {
     using namespace modules::buttons;
-
+    millis = 0;
     Buttons b;
 
     // need to oversample the data as debouncing takes 100 cycles to accept a pressed button
@@ -98,63 +100,63 @@ TEST_CASE("buttons::Step-debounce-one-button", "[buttons]") {
 
     // 5
     for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(hal::adc::ReadADC(0)); // should detect the press but remain in detected state - wait for debounce
+        b.Step(++millis); // should detect the press but remain in detected state - wait for debounce
     CHECK(!b.ButtonPressed(0));
     CHECK(!b.ButtonPressed(1));
     CHECK(!b.ButtonPressed(2));
 
     // 1023
     for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(hal::adc::ReadADC(0)); // reset to waiting
+        b.Step(++millis); // reset to waiting
     CHECK(!b.ButtonPressed(0));
     CHECK(!b.ButtonPressed(1));
     CHECK(!b.ButtonPressed(2));
 
     // 5
     for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(hal::adc::ReadADC(0)); // pressed again, still in debouncing state
+        b.Step(++millis); // pressed again, still in debouncing state
     CHECK(!b.ButtonPressed(0));
     CHECK(!b.ButtonPressed(1));
     CHECK(!b.ButtonPressed(2));
 
     // 9
     for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(hal::adc::ReadADC(0)); // no change
+        b.Step(++millis); // no change
     CHECK(!b.ButtonPressed(0));
     CHECK(!b.ButtonPressed(1));
     CHECK(!b.ButtonPressed(2));
 
     // 6
     for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(hal::adc::ReadADC(0)); // no change
+        b.Step(++millis); // no change
     CHECK(!b.ButtonPressed(0));
     CHECK(!b.ButtonPressed(1));
     CHECK(!b.ButtonPressed(2));
 
     // 7
     for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(hal::adc::ReadADC(0)); // one step from "pressed"
+        b.Step(++millis); // one step from "pressed"
     CHECK(!b.ButtonPressed(0));
     CHECK(!b.ButtonPressed(1));
     CHECK(!b.ButtonPressed(2));
 
     // 8
     for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(hal::adc::ReadADC(0)); // fifth set of samples - should report "pressed" finally
+        b.Step(++millis); // fifth set of samples - should report "pressed" finally
     CHECK(b.ButtonPressed(0));
     CHECK(!b.ButtonPressed(1));
     CHECK(!b.ButtonPressed(2));
 
     // 1023
     for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(hal::adc::ReadADC(0)); // sixth set of samples - button released (no debouncing on release)
+        b.Step(++millis); // sixth set of samples - button released (no debouncing on release)
     CHECK(!b.ButtonPressed(0));
     CHECK(!b.ButtonPressed(1));
     CHECK(!b.ButtonPressed(2));
 
     // 1023
     for (uint8_t i = 0; i < oversampleFactor; ++i)
-        b.Step(hal::adc::ReadADC(0)); // seventh set of samples - still released
+        b.Step(++millis); // seventh set of samples - still released
     CHECK(!b.ButtonPressed(0));
     CHECK(!b.ButtonPressed(1));
     CHECK(!b.ButtonPressed(2));
