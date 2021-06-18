@@ -61,8 +61,8 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
 
     // now let the filament be pushed into the FINDA - do 500 steps without triggering the condition
     // and then let the simulated ADC channel 1 create a FINDA switch
-    hal::adc::TADCData switchFindaOn({ 600, 700, 800, 900 });
-    hal::adc::ReinitADC(1, std::move(switchFindaOn), 1);
+    hal::adc::ReinitADC(1, hal::adc::TADCData({ 600, 700, 800, 900 }), 1);
+
     REQUIRE(WhileCondition(
         ff,
         [&]() { return ff.State() == FeedToFinda::PushingFilament; },
@@ -120,8 +120,8 @@ TEST_CASE("feed_to_finda::FINDA_failed", "[feed_to_finda]") {
     REQUIRE(modules::leds::leds.LedOn(modules::globals::globals.ActiveSlot(), modules::leds::Color::green));
 
     // now let the filament be pushed into the FINDA - but we make sure the FINDA doesn't trigger at all
-    hal::adc::TADCData switchFindaOff({ 0 });
-    hal::adc::ReinitADC(1, std::move(switchFindaOff), 100);
+    hal::adc::ReinitADC(1, hal::adc::TADCData({ 0 }), 100);
+
     REQUIRE(!WhileCondition(
         ff, // boo, this formatting is UGLY!
         [&]() { return ff.State() == FeedToFinda::PushingFilament; },
