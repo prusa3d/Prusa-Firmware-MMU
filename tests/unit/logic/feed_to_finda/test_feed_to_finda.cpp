@@ -122,7 +122,7 @@ TEST_CASE("feed_to_finda::FINDA_failed", "[feed_to_finda]") {
     // now let the filament be pushed into the FINDA - but we make sure the FINDA doesn't trigger at all
     hal::adc::ReinitADC(1, hal::adc::TADCData({ 0 }), 100);
 
-    REQUIRE(!WhileCondition(
+    REQUIRE(WhileCondition(
         ff, // boo, this formatting is UGLY!
         [&]() { return ff.State() == FeedToFinda::PushingFilament; },
         5000));
