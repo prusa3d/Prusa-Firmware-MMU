@@ -48,6 +48,9 @@ bool CutFilament::Step() {
             case ErrorCode::UNLOAD_ERROR2: // @@TODO what shall we do in case of this error?
             case ErrorCode::FINDA_DIDNT_TRIGGER:
                 break;
+            default:
+                state = ProgressCode::ERRInternal;
+                break;
             }
         }
         break;
@@ -98,6 +101,10 @@ bool CutFilament::Step() {
             feed.Reset(true);
         }
         break;
+    default: // we got into an unhandled state, better report it
+        state = ProgressCode::ERRInternal;
+        error = ErrorCode::INTERNAL;
+        return true;
     }
     return false;
 }

@@ -37,24 +37,20 @@ void EjectFilament::MoveSelectorAside() {
 }
 
 bool EjectFilament::Step() {
-    constexpr const uint16_t eject_steps = 500; //@@TODO
     switch (state) {
     case ProgressCode::UnloadingFilament:
         if (unl.Step()) {
-            // unloading sequence finished
-            switch (unl.Error()) {
-            case ErrorCode::OK: // finished successfully
-            case ErrorCode::UNLOAD_ERROR2: // @@TODO what shall we do in case of this error?
-            case ErrorCode::FINDA_DIDNT_TRIGGER:
-                break;
-            }
+            // unloading sequence finished - basically, no errors can occurr here
+            // as UnloadFilament should handle all the possible error states on its own
+            // There is no way the UnloadFilament to finish in an error state
+            MoveSelectorAside();
         }
         break;
     case ProgressCode::ParkingSelector:
         if (mm::motion.QueueEmpty()) { // selector parked aside
             state = ProgressCode::EjectingFilament;
             mm::motion.InitAxis(mm::Pulley);
-            mm::motion.PlanMove(eject_steps, 0, 0, 1500, 0, 0);
+            mm::motion.PlanMove(ejectSteps, 0, 0, 1500, 0, 0);
         }
         break;
     case ProgressCode::EjectingFilament:
@@ -64,15 +60,37 @@ bool EjectFilament::Step() {
         }
         break;
     case ProgressCode::DisengagingIdler:
-        if (mm::motion.QueueEmpty()) { // idler disengaged
+        if (!mi::idler.Engaged()) { // idler disengaged
             mm::motion.DisableAxis(mm::Pulley);
             state = ProgressCode::OK;
         }
         break;
     case ProgressCode::OK:
         return true;
+    default: // we got into an unhandled state, better report it
+        state = ProgressCode::ERRInternal;
+        error = ErrorCode::INTERNAL;
+        return true;
     }
     return false;
+}
+
+ProgressCode EjectFilament::State() const {
+    switch (state) {
+    case ProgressCode::UnloadingFilament:
+        return unl.State(); // report sub-automaton states properly
+    default:
+        return state;
+    }
+}
+
+ErrorCode EjectFilament::Error() const {
+    switch (state) {
+    case ProgressCode::UnloadingFilament:
+        return unl.Error(); // report sub-automaton errors properly
+    default:
+        return error;
+    }
 }
 
 } // namespace logic

@@ -13,4 +13,5 @@ enum class ErrorCode : int_fast8_t {
     FINDA_DIDNT_TRIGGER = -1, ///< FINDA didn't trigger while unloading filament - either there is something blocking the metal ball or a cable is broken/disconnected
     UNLOAD_ERROR2 = -2,
 
+    INTERNAL = -127, ///< internal runtime error (software)
 };
