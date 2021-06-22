@@ -12,9 +12,6 @@ namespace logic {
 
 ToolChange toolChange;
 
-namespace mm = modules::motion;
-namespace mi = modules::idler;
-namespace ms = modules::selector;
 namespace mg = modules::globals;
 
 void ToolChange::Reset(uint8_t param) {
@@ -36,35 +33,51 @@ bool ToolChange::Step() {
     switch (state) {
     case ProgressCode::UnloadingFilament:
         if (unl.Step()) {
-            // unloading sequence finished
-            switch (unl.Error()) {
-            case ErrorCode::OK: // finished successfully
-                state = ProgressCode::LoadingFilament;
-                load.Reset(plannedSlot);
-                break;
-            case ErrorCode::UNLOAD_ERROR2: // @@TODO what shall we do in case of this error?
-            case ErrorCode::FINDA_DIDNT_TRIGGER:
-                break;
-            }
+            // unloading sequence finished - basically, no errors can occurr here
+            // as UnloadFilament should handle all the possible error states on its own
+            // There is no way the UnloadFilament to finish in an error state
+            state = ProgressCode::LoadingFilament;
+            load.Reset(plannedSlot);
         }
         break;
     case ProgressCode::LoadingFilament:
         if (load.Step()) {
-            // unloading sequence finished
-            switch (load.Error()) {
-            case ErrorCode::OK: // finished successfully
-                state = ProgressCode::OK;
-                break;
-                //            case ErrorCode::LOAD_ERROR2: // @@TODO load errors?
-                //            case ErrorCode::LOAD_FINDA_DIDNT_TRIGGER:
-                break;
-            }
+            // loading sequence finished - basically, no errors can occurr here
+            // as LoadFilament should handle all the possible error states on its own
+            // There is no way the LoadFilament to finish in an error state
+            state = ProgressCode::OK;
         }
         break;
     case ProgressCode::OK:
         return true;
+    default: // we got into an unhandled state, better report it
+        state = ProgressCode::ERRInternal;
+        error = ErrorCode::INTERNAL;
+        return true;
     }
     return false;
+}
+
+ProgressCode ToolChange::State() const {
+    switch (state) {
+    case ProgressCode::UnloadingFilament:
+        return unl.State(); // report sub-automaton states properly
+    case ProgressCode::LoadingFilament:
+        return load.State(); // report sub-automaton states properly
+    default:
+        return state;
+    }
+}
+
+ErrorCode ToolChange::Error() const {
+    switch (state) {
+    case ProgressCode::UnloadingFilament:
+        return unl.Error(); // report sub-automaton errors properly
+    case ProgressCode::LoadingFilament:
+        return load.Error(); // report sub-automaton errors properly
+    default:
+        return error;
+    }
 }
 
 } // namespace logic

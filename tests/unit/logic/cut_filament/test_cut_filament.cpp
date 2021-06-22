@@ -34,7 +34,6 @@ TEST_CASE("cut_filament::cut0", "[cut_filament]") {
 
     CutFilament cf;
     // restart the automaton
-    currentCommand = &cf;
     cf.Reset(0);
 
     main_loop();
@@ -45,7 +44,7 @@ TEST_CASE("cut_filament::cut0", "[cut_filament]") {
     CHECK(modules::motion::axes[modules::motion::Selector].targetPos == ms::Selector::SlotPosition(0));
 
     // now cycle at most some number of cycles (to be determined yet) and then verify, that the idler and selector reached their target positions
-    REQUIRE(WhileCondition([&]() { return cf.TopLevelState() == ProgressCode::SelectingFilamentSlot; }, 5000));
+    REQUIRE(WhileTopState(cf, ProgressCode::SelectingFilamentSlot, 5000));
 
     CHECK(modules::motion::axes[modules::motion::Idler].pos == mi::Idler::SlotPosition(0));
     CHECK(modules::motion::axes[modules::motion::Selector].pos == ms::Selector::SlotPosition(0));
@@ -53,27 +52,32 @@ TEST_CASE("cut_filament::cut0", "[cut_filament]") {
     // idler and selector reached their target positions and the CF automaton will start feeding to FINDA as the next step
     REQUIRE(cf.TopLevelState() == ProgressCode::FeedingToFinda);
     // prepare for simulated finda trigger
-    hal::adc::ReinitADC(1, hal::adc::TADCData({ 0, 0, 0, 0, 600, 700, 800, 900 }), 10);
-    REQUIRE(WhileCondition([&]() { return cf.TopLevelState() == ProgressCode::FeedingToFinda; }, 5000));
+    REQUIRE(WhileCondition(
+        cf,
+        [&](int step) -> bool {
+        if( step == 1000 ){ // simulate FINDA trigger - will get pressed in 100 steps (due to debouncing)
+            hal::adc::SetADC(1, 900);
+        }
+        return cf.TopLevelState() == ProgressCode::FeedingToFinda; }, 5000));
 
     // filament fed into FINDA, cutting...
     REQUIRE(cf.TopLevelState() == ProgressCode::PreparingBlade);
-    REQUIRE(WhileCondition([&]() { return cf.TopLevelState() == ProgressCode::PreparingBlade; }, 5000));
+    REQUIRE(WhileTopState(cf, ProgressCode::PreparingBlade, 5000));
 
     REQUIRE(cf.TopLevelState() == ProgressCode::EngagingIdler);
-    REQUIRE(WhileCondition([&]() { return cf.TopLevelState() == ProgressCode::EngagingIdler; }, 5000));
+    REQUIRE(WhileTopState(cf, ProgressCode::EngagingIdler, 5000));
 
     // the idler should be at the active slot @@TODO
     REQUIRE(cf.TopLevelState() == ProgressCode::PushingFilament);
-    REQUIRE(WhileCondition([&]() { return cf.TopLevelState() == ProgressCode::PushingFilament; }, 5000));
+    REQUIRE(WhileTopState(cf, ProgressCode::PushingFilament, 5000));
 
     // filament pushed - performing cut
     REQUIRE(cf.TopLevelState() == ProgressCode::PerformingCut);
-    REQUIRE(WhileCondition([&]() { return cf.TopLevelState() == ProgressCode::PerformingCut; }, 5000));
+    REQUIRE(WhileTopState(cf, ProgressCode::PerformingCut, 5000));
 
     // returning selector
     REQUIRE(cf.TopLevelState() == ProgressCode::ReturningSelector);
-    REQUIRE(WhileCondition([&]() { return cf.TopLevelState() == ProgressCode::ReturningSelector; }, 5000));
+    REQUIRE(WhileTopState(cf, ProgressCode::ReturningSelector, 5000));
 
     // the next states are still @@TODO
 }

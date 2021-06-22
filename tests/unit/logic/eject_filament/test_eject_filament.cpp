@@ -34,7 +34,6 @@ TEST_CASE("eject_filament::eject0", "[eject_filament]") {
 
     EjectFilament ef;
     // restart the automaton
-    currentCommand = &ef;
     ef.Reset(0);
 
     main_loop();
@@ -45,32 +44,32 @@ TEST_CASE("eject_filament::eject0", "[eject_filament]") {
     CHECK(modules::motion::axes[modules::motion::Selector].targetPos == ms::Selector::SlotPosition(4));
 
     // now cycle at most some number of cycles (to be determined yet) and then verify, that the idler and selector reached their target positions
-    REQUIRE(WhileCondition([&]() { return ef.TopLevelState() == ProgressCode::SelectingFilamentSlot; }, 5000));
+    REQUIRE(WhileTopState(ef, ProgressCode::SelectingFilamentSlot, 5000));
 
     // idler and selector reached their target positions and the CF automaton will start feeding to FINDA as the next step
     REQUIRE(ef.TopLevelState() == ProgressCode::FeedingToFinda);
     // prepare for simulated finda trigger
     hal::adc::ReinitADC(1, hal::adc::TADCData({ 0, 0, 0, 0, 600, 700, 800, 900 }), 10);
-    REQUIRE(WhileCondition([&]() { return ef.TopLevelState() == ProgressCode::FeedingToFinda; }, 50000));
+    REQUIRE(WhileTopState(ef, ProgressCode::FeedingToFinda, 50000));
 
     // filament fed into FINDA, cutting...
     REQUIRE(ef.TopLevelState() == ProgressCode::PreparingBlade);
-    REQUIRE(WhileCondition([&]() { return ef.TopLevelState() == ProgressCode::PreparingBlade; }, 5000));
+    REQUIRE(WhileTopState(ef, ProgressCode::PreparingBlade, 5000));
 
     REQUIRE(ef.TopLevelState() == ProgressCode::EngagingIdler);
-    REQUIRE(WhileCondition([&]() { return ef.TopLevelState() == ProgressCode::EngagingIdler; }, 5000));
+    REQUIRE(WhileTopState(ef, ProgressCode::EngagingIdler, 5000));
 
     // the idler should be at the active slot @@TODO
     REQUIRE(ef.TopLevelState() == ProgressCode::PushingFilament);
-    REQUIRE(WhileCondition([&]() { return ef.TopLevelState() == ProgressCode::PushingFilament; }, 5000));
+    REQUIRE(WhileTopState(ef, ProgressCode::PushingFilament, 5000));
 
     // filament pushed - performing cut
     REQUIRE(ef.TopLevelState() == ProgressCode::PerformingCut);
-    REQUIRE(WhileCondition([&]() { return ef.TopLevelState() == ProgressCode::PerformingCut; }, 5000));
+    REQUIRE(WhileTopState(ef, ProgressCode::PerformingCut, 5000));
 
     // returning selector
     REQUIRE(ef.TopLevelState() == ProgressCode::ReturningSelector);
-    REQUIRE(WhileCondition([&]() { return ef.TopLevelState() == ProgressCode::ReturningSelector; }, 5000));
+    REQUIRE(WhileTopState(ef, ProgressCode::ReturningSelector, 5000));
 
     // the next states are still @@TODO
 }

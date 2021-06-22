@@ -13,7 +13,8 @@ public:
         : CommandBase() {}
 
     /// Restart the automaton
-    void Reset(uint8_t param) override;
+    /// @param param is not used, always unloads from the active slot
+    void Reset(uint8_t /*param*/) override;
 
     /// @returns true if the state machine finished its job, false otherwise
     bool Step() override;

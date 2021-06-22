@@ -29,5 +29,9 @@ uint16_t ReadADC(uint8_t adc) {
     return rdptr[adc] != values2Return[adc].end() ? *rdptr[adc] : values2Return[adc].back();
 }
 
+void SetADC(uint8_t channel, uint16_t value) {
+    ReinitADC(channel, TADCData({ value }), 1);
+}
+
 } // namespace adc
 } // namespace hal

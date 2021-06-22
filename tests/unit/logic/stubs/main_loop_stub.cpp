@@ -13,9 +13,9 @@
 #include "../../../../src/modules/permanent_storage.h"
 #include "../../../../src/modules/selector.h"
 
-#include <new> // bring in placement new
+#include "../stubs/stub_motion.h"
 
-logic::CommandBase *currentCommand = nullptr;
+#include <new> // bring in placement new
 
 void main_loop() {
     modules::buttons::buttons.Step();
@@ -25,8 +25,6 @@ void main_loop() {
     modules::idler::idler.Step();
     modules::selector::selector.Step();
     modules::motion::motion.Step();
-    if (currentCommand)
-        currentCommand->Step();
 
     modules::time::IncMillis();
 }
@@ -57,7 +55,11 @@ void ForceReinitAllAutomata() {
     // finda OFF
     hal::adc::ReinitADC(1, hal::adc::TADCData({ 0 }), 1);
 
+    // reinit timing
     modules::time::ReinitTimebase();
+
+    // reinit axes positions
+    modules::motion::ReinitMotion();
 
     // let's assume we have the filament NOT loaded and active slot 0
     modules::globals::globals.SetFilamentLoaded(false);

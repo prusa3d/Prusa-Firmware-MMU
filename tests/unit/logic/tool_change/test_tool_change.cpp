@@ -34,23 +34,16 @@ TEST_CASE("tool_change::test0", "[tool_change]") {
 
     ToolChange tc;
     // restart the automaton
-    currentCommand = &tc;
     tc.Reset(0);
 
     main_loop();
 
-    //    REQUIRE(WhileCondition([&]() { return uf.TopLevelState() == ProgressCode::UnloadingToFinda; }, 5000));
+    REQUIRE(WhileTopState(tc, ProgressCode::UnloadingFilament, 5000));
+    REQUIRE(modules::globals::globals.FilamentLoaded() == false);
 
-    //    REQUIRE(uf.TopLevelState() == ProgressCode::DisengagingIdler);
-    //    REQUIRE(WhileCondition([&]() { return uf.TopLevelState() == ProgressCode::DisengagingIdler; }, 5000));
+    REQUIRE(tc.TopLevelState() == ProgressCode::LoadingFilament);
+    REQUIRE(WhileTopState(tc, ProgressCode::LoadingFilament, 5000));
 
-    //    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5));
-
-    //    REQUIRE(uf.TopLevelState() == ProgressCode::AvoidingGrind);
-    //    REQUIRE(WhileCondition([&]() { return uf.TopLevelState() == ProgressCode::AvoidingGrind; }, 5000));
-
-    //    REQUIRE(uf.TopLevelState() == ProgressCode::FinishingMoves);
-    //    REQUIRE(WhileCondition([&]() { return uf.TopLevelState() == ProgressCode::FinishingMoves; }, 5000));
-
-    //    REQUIRE(uf.TopLevelState() == ProgressCode::OK);
+    REQUIRE(tc.TopLevelState() == ProgressCode::OK);
+    REQUIRE(modules::globals::globals.FilamentLoaded() == true);
 }

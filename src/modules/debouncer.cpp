@@ -15,7 +15,7 @@ void Debouncer::Step(uint16_t time, bool press) {
         break;
     case State::Detected:
         if (f.tmp == press) {
-            if (time - timeLastChange > debounceTimeout) {
+            if (time - timeLastChange >= debounceTimeout) {
                 f.state = State::WaitForRelease;
             }
         } else {
