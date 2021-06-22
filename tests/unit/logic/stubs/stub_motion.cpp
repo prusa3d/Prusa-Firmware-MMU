@@ -5,10 +5,13 @@ namespace modules {
 namespace motion {
 
 Motion motion;
+
+// Intentionally inited with strange values
+// Need to call ReinitMotion() each time we start some unit test
 AxisSim axes[3] = {
-    { 0, 0, false, false, false }, // pulley
-    { 1, 1, false, false, false }, // selector //@@TODO proper selector positions once defined
-    { 0, 0, false, false, false }, // idler
+    { -32767, -32767, false, false, false }, // pulley
+    { -32767, -32767, false, false, false }, // selector //@@TODO proper selector positions once defined
+    { -32767, -32767, false, false, false }, // idler
 };
 
 void Motion::InitAxis(Axis axis) {
@@ -70,6 +73,13 @@ void Motion::AbortPlannedMoves() {
     for (uint8_t i = 0; i < 3; ++i) {
         axes[i].targetPos = axes[i].pos; // leave the axis where it was at the time of abort
     }
+}
+
+void ReinitMotion() {
+    // reset the simulation data to defaults
+    axes[0] = AxisSim({ 0, 0, false, false, false }); // pulley
+    axes[1] = AxisSim({ 1, 1, false, false, false }); // selector //@@TODO proper selector positions once defined
+    axes[2] = AxisSim({ 0, 0, false, false, false }); // idler
 }
 
 /// probably higher-level operations knowing the semantic meaning of axes

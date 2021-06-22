@@ -27,30 +27,198 @@ namespace mb = modules::buttons;
 namespace mg = modules::globals;
 namespace ms = modules::selector;
 
-TEST_CASE("unload_filament::unload0", "[unload_filament]") {
-    using namespace logic;
-
+void RegularUnloadFromSlot04(uint8_t slot) {
+    // prepare startup conditions
     ForceReinitAllAutomata();
 
-    UnloadFilament uf;
+    // change the startup to what we need here
+    // move selector to the right spot
+    ms::selector.MoveToSlot(slot);
+    while (ms::selector.Slot() != slot)
+        main_loop();
+
+    mg::globals.SetActiveSlot(slot);
+    mg::globals.SetFilamentLoaded(true);
+
+    // set FINDA ON + debounce
+    hal::adc::SetADC(1, mf::FINDA::adcDecisionLevel + 1);
+    for (size_t i = 0; i < mf::FINDA::debounce + 1; ++i)
+        main_loop();
+
+    // verify startup conditions
+    REQUIRE(mg::globals.FilamentLoaded() == true);
+    REQUIRE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5));
+    REQUIRE(!mi::idler.Engaged());
+    REQUIRE(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(slot));
+    REQUIRE(ms::selector.Slot() == slot);
+    REQUIRE(mf::finda.Pressed() == true);
+
     // restart the automaton
-    currentCommand = &uf;
-    uf.Reset(0);
+    logic::UnloadFilament uf;
+    uf.Reset(slot);
 
-    main_loop();
+    // Stage 0 - verify state just after Reset()
+    REQUIRE(mg::globals.FilamentLoaded() == true); // we still think we have filament loaded at this stage
+    REQUIRE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5)); // idler should have been activated by the underlying automaton
+    REQUIRE(!mi::idler.Engaged());
+    REQUIRE(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(slot)); // no change in selector's position
+    REQUIRE(ms::selector.Slot() == slot);
+    REQUIRE(mf::finda.Pressed() == true); // FINDA triggered off
+    REQUIRE(ml::leds.Mode(slot, ml::green) == ml::blink0); // green LED should blink
+    REQUIRE(uf.Error() == ErrorCode::OK); // no error so far
 
-    REQUIRE(WhileCondition([&]() { return uf.TopLevelState() == ProgressCode::UnloadingToFinda; }, 5000));
+    // run the automaton
+    // Stage 1 - unloading to FINDA
+    REQUIRE(WhileCondition(
+        uf,
+        [&](int step) -> bool {
+        if(step == 100){ // on 100th step make FINDA trigger
+            hal::adc::SetADC(1, 0);
+        }
+        return uf.TopLevelState() == ProgressCode::UnloadingToFinda; },
+        5000));
 
+    REQUIRE(mg::globals.FilamentLoaded() == true); // we still think we have filament loaded at this stage
+    REQUIRE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(slot)); // idler should have been activated by the underlying automaton
+    REQUIRE(mi::idler.Engaged());
+    REQUIRE(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(slot)); // no change in selector's position
+    REQUIRE(ms::selector.Slot() == slot);
+    REQUIRE(mf::finda.Pressed() == false); // FINDA triggered off
+    REQUIRE(ml::leds.Mode(slot, ml::green) == ml::blink0); // green LED should blink
+    REQUIRE(uf.Error() == ErrorCode::OK); // no error so far
+
+    // Stage 2 - idler was engaged, disengage it
     REQUIRE(uf.TopLevelState() == ProgressCode::DisengagingIdler);
-    REQUIRE(WhileCondition([&]() { return uf.TopLevelState() == ProgressCode::DisengagingIdler; }, 5000));
+    REQUIRE(WhileTopState(uf, ProgressCode::DisengagingIdler, 5000));
 
-    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5));
+    REQUIRE(mg::globals.FilamentLoaded() == true); // we still think we have filament loaded at this stage
+    REQUIRE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5)); // idler should have been disengaged
+    REQUIRE(!mi::idler.Engaged());
+    REQUIRE(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(slot)); // no change in selector's position
+    REQUIRE(ms::selector.Slot() == slot);
+    REQUIRE(mf::finda.Pressed() == false); // FINDA still triggered off
+    REQUIRE(ml::leds.Mode(slot, ml::green) == ml::blink0); // green LED should blink
+    REQUIRE(uf.Error() == ErrorCode::OK); // no error so far
 
+    // Stage 3 - avoiding grind (whatever is that @@TODO)
     REQUIRE(uf.TopLevelState() == ProgressCode::AvoidingGrind);
-    REQUIRE(WhileCondition([&]() { return uf.TopLevelState() == ProgressCode::AvoidingGrind; }, 5000));
+    REQUIRE(WhileTopState(uf, ProgressCode::AvoidingGrind, 5000));
 
+    REQUIRE(mg::globals.FilamentLoaded() == true); // we still think we have filament loaded at this stage
+    REQUIRE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5)); // idler should have been disengaged
+    REQUIRE(!mi::idler.Engaged());
+    REQUIRE(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(slot)); // no change in selector's position
+    REQUIRE(ms::selector.Slot() == slot);
+    REQUIRE(mf::finda.Pressed() == false); // FINDA still triggered off
+    REQUIRE(ml::leds.Mode(slot, ml::green) == ml::blink0); // green LED should blink
+    REQUIRE(uf.Error() == ErrorCode::OK); // no error so far
+
+    // Stage 4 - finishing moves and setting global state correctly
     REQUIRE(uf.TopLevelState() == ProgressCode::FinishingMoves);
-    REQUIRE(WhileCondition([&]() { return uf.TopLevelState() == ProgressCode::FinishingMoves; }, 5000));
+    REQUIRE(WhileTopState(uf, ProgressCode::FinishingMoves, 5000));
 
+    REQUIRE(mg::globals.FilamentLoaded() == false); // filament unloaded
+    REQUIRE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5)); // idler should have been disengaged
+    REQUIRE(!mi::idler.Engaged());
+    REQUIRE(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(slot)); // no change in selector's position
+    REQUIRE(ms::selector.Slot() == slot);
+    REQUIRE(mf::finda.Pressed() == false); // FINDA still triggered off
+    REQUIRE(ml::leds.Mode(slot, ml::green) == ml::on); // green LED should be ON
+    REQUIRE(uf.Error() == ErrorCode::OK); // no error so far
+
+    // Stage 5 - repeated calls to TopLevelState should return "OK"
     REQUIRE(uf.TopLevelState() == ProgressCode::OK);
+    REQUIRE(mg::globals.FilamentLoaded() == false);
+    REQUIRE(mf::finda.Pressed() == false);
+    REQUIRE(uf.Error() == ErrorCode::OK); // no error
+}
+
+TEST_CASE("unload_filament::regular_unload_from_slot_0-4", "[unload_filament]") {
+    for (uint8_t slot = 0; slot < 5; ++slot) {
+        RegularUnloadFromSlot04(slot);
+    }
+}
+
+void FindaDidntTrigger(uint8_t slot) {
+    // prepare startup conditions
+    ForceReinitAllAutomata();
+
+    // change the startup to what we need here
+
+    // move selector to the right spot
+    ms::selector.MoveToSlot(slot);
+    while (ms::selector.Slot() != slot)
+        main_loop();
+
+    // set FINDA ON + debounce
+    hal::adc::SetADC(1, mf::FINDA::adcDecisionLevel + 1);
+    for (size_t i = 0; i < mf::FINDA::debounce + 1; ++i)
+        main_loop();
+
+    mg::globals.SetActiveSlot(slot);
+    mg::globals.SetFilamentLoaded(true);
+
+    // verify startup conditions
+    REQUIRE(mg::globals.FilamentLoaded() == true);
+    REQUIRE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5));
+    REQUIRE(!mi::idler.Engaged());
+    REQUIRE(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(slot));
+    REQUIRE(ms::selector.Slot() == slot);
+    REQUIRE(mf::finda.Pressed() == true);
+
+    // restart the automaton
+    logic::UnloadFilament uf;
+    uf.Reset(slot);
+
+    // Stage 0 - verify state just after Reset()
+    REQUIRE(mg::globals.FilamentLoaded() == true); // we still think we have filament loaded at this stage
+    REQUIRE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5)); // idler should have been activated by the underlying automaton
+    REQUIRE(!mi::idler.Engaged());
+    REQUIRE(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(slot)); // no change in selector's position
+    REQUIRE(ms::selector.Slot() == slot);
+    REQUIRE(mf::finda.Pressed() == true); // FINDA triggered off
+    REQUIRE(ml::leds.Mode(slot, ml::green) == ml::blink0); // green LED should blink
+    REQUIRE(uf.Error() == ErrorCode::OK); // no error so far
+
+    // run the automaton
+    // Stage 1 - unloading to FINDA - do NOT let it trigger - keep it pressed, the automaton should finish all moves with the pulley
+    // without reaching the FINDA and report an error
+    REQUIRE(WhileTopState(uf, ProgressCode::UnloadingToFinda, 50000));
+
+    REQUIRE(mg::globals.FilamentLoaded() == true); // we still think we have filament loaded at this stage
+    REQUIRE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(slot)); // idler should have been activated by the underlying automaton
+    REQUIRE(mi::idler.Engaged());
+    REQUIRE(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(slot)); // no change in selector's position
+    REQUIRE(ms::selector.Slot() == slot);
+    REQUIRE(mf::finda.Pressed() == true); // FINDA still on
+    REQUIRE(ml::leds.Mode(slot, ml::red) == ml::blink0); // red LED should blink
+    REQUIRE(ml::leds.Mode(slot, ml::green) == ml::off); // green LED should be off
+    REQUIRE(uf.Error() == ErrorCode::FINDA_DIDNT_TRIGGER); // didn't get any response from FINDA
+    REQUIRE(uf.TopLevelState() == ProgressCode::ERR1DisengagingIdler);
+
+    // Stage 2 - idler should get disengaged
+    REQUIRE(WhileTopState(uf, ProgressCode::ERR1DisengagingIdler, 5000));
+
+    REQUIRE(mg::globals.FilamentLoaded() == true); // we still think we have filament loaded at this stage
+    REQUIRE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5)); // idler should have been disengaged
+    REQUIRE(!mi::idler.Engaged());
+    REQUIRE(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(slot)); // no change in selector's position
+    REQUIRE(ms::selector.Slot() == slot);
+    REQUIRE(mf::finda.Pressed() == true); // FINDA still on
+    REQUIRE(ml::leds.Mode(slot, ml::red) == ml::blink0); // red LED should blink
+    REQUIRE(ml::leds.Mode(slot, ml::green) == ml::off); // green LED should be off
+    REQUIRE(uf.Error() == ErrorCode::FINDA_DIDNT_TRIGGER);
+    REQUIRE(uf.TopLevelState() == ProgressCode::ERR1WaitingForUser);
+
+    // Stage 3 - the user has to do something
+    // there are 3 options:
+    // - help the filament a bit
+    // - try again the whole sequence
+    // - resolve the problem by hand - after pressing the button we shall check, that FINDA is off and we should do what?
+}
+
+TEST_CASE("unload_filament::finda_didnt_trigger", "[unload_filament]") {
+    for (uint8_t slot = 0; slot < 5; ++slot) {
+        FindaDidntTrigger(slot);
+    }
 }

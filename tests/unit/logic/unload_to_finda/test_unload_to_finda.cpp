@@ -29,15 +29,6 @@ namespace ms = modules::selector;
 
 namespace ha = hal::adc;
 
-template <typename COND>
-bool WhileConditionFF(logic::UnloadToFinda &ff, COND cond, uint32_t maxLoops = 5000) {
-    while (cond() && --maxLoops) {
-        main_loop();
-        ff.Step();
-    }
-    return maxLoops > 0;
-}
-
 TEST_CASE("unload_to_finda::regular_unload", "[unload_to_finda]") {
     using namespace logic;
 
@@ -50,7 +41,8 @@ TEST_CASE("unload_to_finda::regular_unload", "[unload_to_finda]") {
 
     // wait for FINDA to debounce
     REQUIRE(WhileCondition(
-        [&]() { return !mf::finda.Pressed(); },
+        ff,
+        [&](int) { return !mf::finda.Pressed(); },
         5000));
 
     // restart the automaton - just 1 attempt
@@ -65,17 +57,17 @@ TEST_CASE("unload_to_finda::regular_unload", "[unload_to_finda]") {
     CHECK(mm::axes[mm::Idler].enabled == true);
 
     // engaging idler
-    REQUIRE(WhileConditionFF(
+    REQUIRE(WhileCondition(
         ff,
-        [&]() { return !mi::idler.Engaged(); },
+        [&](int) { return !mi::idler.Engaged(); },
         5000));
 
     // now pulling the filament until finda triggers
     REQUIRE(ff.State() == UnloadToFinda::WaitingForFINDA);
     hal::adc::ReinitADC(1, hal::adc::TADCData({ 1023, 900, 800, 500, 0 }), 10);
-    REQUIRE(WhileConditionFF(
+    REQUIRE(WhileCondition(
         ff,
-        [&]() { return mf::finda.Pressed(); },
+        [&](int) { return mf::finda.Pressed(); },
         50000));
 
     REQUIRE(ff.State() == UnloadToFinda::OK);
@@ -108,7 +100,8 @@ TEST_CASE("unload_to_finda::unload_without_FINDA_trigger", "[unload_to_finda]") 
 
     // wait for FINDA to debounce
     REQUIRE(WhileCondition(
-        [&]() { return !mf::finda.Pressed(); },
+        ff,
+        [&](int) { return !mf::finda.Pressed(); },
         5000));
 
     // restart the automaton - just 1 attempt
@@ -123,18 +116,18 @@ TEST_CASE("unload_to_finda::unload_without_FINDA_trigger", "[unload_to_finda]") 
     CHECK(mm::axes[mm::Idler].enabled == true);
 
     // engaging idler
-    REQUIRE(WhileConditionFF(
+    REQUIRE(WhileCondition(
         ff,
-        [&]() { return !mi::idler.Engaged(); },
+        [&](int) { return !mi::idler.Engaged(); },
         5000));
 
     // now pulling the filament until finda triggers
     REQUIRE(ff.State() == UnloadToFinda::WaitingForFINDA);
 
     // no changes to FINDA during unload - we'll pretend it never triggers
-    REQUIRE(!WhileConditionFF(
+    REQUIRE(!WhileCondition(
         ff,
-        [&]() { return mf::finda.Pressed(); },
+        [&](int) { return mf::finda.Pressed(); },
         50000));
 
     REQUIRE(ff.State() == UnloadToFinda::Failed);

@@ -29,15 +29,6 @@ namespace ms = modules::selector;
 
 namespace ha = hal::adc;
 
-template <typename COND>
-bool WhileCondition(logic::FeedToFinda &ff, COND cond, uint32_t maxLoops = 5000) {
-    while (cond() && --maxLoops) {
-        main_loop();
-        ff.Step();
-    }
-    return maxLoops > 0;
-}
-
 TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
     using namespace logic;
 
@@ -60,7 +51,7 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
     // engaging idler
     REQUIRE(WhileCondition(
         ff,
-        [&]() { return !mi::idler.Engaged(); },
+        [&](int) { return !mi::idler.Engaged(); },
         5000));
 
     CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(0));
@@ -77,7 +68,7 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
 
     REQUIRE(WhileCondition(
         ff,
-        [&]() { return ff.State() == FeedToFinda::PushingFilament; },
+        [&](int) { return ff.State() == FeedToFinda::PushingFilament; },
         1500));
     // From now on the FINDA is reported as ON
 
@@ -85,14 +76,14 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
     REQUIRE(ff.State() == FeedToFinda::UnloadBackToPTFE);
     REQUIRE(WhileCondition(
         ff,
-        [&]() { return ff.State() == FeedToFinda::UnloadBackToPTFE; },
+        [&](int) { return ff.State() == FeedToFinda::UnloadBackToPTFE; },
         5000));
 
     // disengaging idler
     REQUIRE(ff.State() == FeedToFinda::DisengagingIdler);
     REQUIRE(WhileCondition(
         ff,
-        [&]() { return mi::idler.Engaged(); },
+        [&](int) { return mi::idler.Engaged(); },
         5000));
 
     CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5)); // @@TODO constants
@@ -126,7 +117,7 @@ TEST_CASE("feed_to_finda::FINDA_failed", "[feed_to_finda]") {
     // engaging idler
     REQUIRE(WhileCondition(
         ff,
-        [&]() { return !mi::idler.Engaged(); },
+        [&](int) { return !mi::idler.Engaged(); },
         5000));
 
     CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(0));
@@ -141,8 +132,8 @@ TEST_CASE("feed_to_finda::FINDA_failed", "[feed_to_finda]") {
     ha::ReinitADC(1, ha::TADCData({ 0 }), 100);
 
     REQUIRE(WhileCondition(
-        ff, // boo, this formatting is UGLY!
-        [&]() { return ff.State() == FeedToFinda::PushingFilament; },
+        ff,
+        [&](int) { return ff.State() == FeedToFinda::PushingFilament; },
         5000));
 
     // the FINDA didn't trigger, we should be in the Failed state

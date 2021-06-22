@@ -34,7 +34,6 @@ TEST_CASE("unload_filament::unload0", "[unload_filament]") {
 
     LoadFilament lf;
     // restart the automaton
-    currentCommand = &lf;
     lf.Reset(0);
 
     main_loop();
@@ -53,4 +52,5 @@ TEST_CASE("unload_filament::unload0", "[unload_filament]") {
     //    REQUIRE(WhileCondition([&]() { return uf.TopLevelState() == ProgressCode::FinishingMoves; }, 5000));
 
     //    REQUIRE(uf.TopLevelState() == ProgressCode::OK);
+    REQUIRE(modules::globals::globals.FilamentLoaded() == true);
 }

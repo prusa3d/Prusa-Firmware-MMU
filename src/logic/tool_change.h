@@ -19,6 +19,10 @@ public:
     /// @returns true if the state machine finished its job, false otherwise
     bool Step() override;
 
+    ProgressCode State() const override;
+
+    ErrorCode Error() const override;
+
 private:
     UnloadFilament unl; ///< a high-level command/operation may be used as a building block of other operations as well
     LoadFilament load;

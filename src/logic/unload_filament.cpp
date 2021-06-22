@@ -17,12 +17,14 @@ namespace mi = modules::idler;
 namespace ml = modules::leds;
 namespace mg = modules::globals;
 
-void UnloadFilament::Reset(uint8_t param) {
+void UnloadFilament::Reset(uint8_t /*param*/) {
     // unloads filament from extruder - filament is above Bondtech gears
     mm::motion.InitAxis(mm::Pulley);
     state = ProgressCode::UnloadingToFinda;
     error = ErrorCode::OK;
     unl.Reset(maxRetries);
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
 }
 
 bool UnloadFilament::Step() {
@@ -33,7 +35,9 @@ bool UnloadFilament::Step() {
             if (unl.State() == UnloadToFinda::Failed) {
                 // couldn't unload to FINDA, report error and wait for user to resolve it
                 state = ProgressCode::ERR1DisengagingIdler;
+                error = ErrorCode::FINDA_DIDNT_TRIGGER;
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0);
+                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
             } else {
                 state = ProgressCode::DisengagingIdler;
             }
@@ -59,10 +63,11 @@ bool UnloadFilament::Step() {
         if (mm::motion.QueueEmpty()) {
             state = ProgressCode::OK;
             mm::motion.DisableAxis(mm::Pulley);
+            mg::globals.SetFilamentLoaded(false); // filament unloaded
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
         }
         return false;
     case ProgressCode::ERR1DisengagingIdler: // couldn't unload to FINDA
-        error = ErrorCode::FINDA_DIDNT_TRIGGER;
         if (!mi::idler.Engaged()) {
             state = ProgressCode::ERR1WaitingForUser;
         }
@@ -88,7 +93,6 @@ bool UnloadFilament::Step() {
         return false;
     }
     case ProgressCode::OK:
-        mg::globals.SetFilamentLoaded(false); // filament unloaded
         return true; // successfully finished
     default: // we got into an unhandled state, better report it
         state = ProgressCode::ERRInternal;
