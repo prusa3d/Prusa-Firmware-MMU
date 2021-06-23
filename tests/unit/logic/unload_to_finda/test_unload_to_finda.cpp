@@ -30,25 +30,17 @@ namespace ms = modules::selector;
 namespace ha = hal::adc;
 
 TEST_CASE("unload_to_finda::regular_unload", "[unload_to_finda]") {
-    using namespace logic;
-
     ForceReinitAllAutomata();
 
     // we need finda ON
-    hal::adc::ReinitADC(1, hal::adc::TADCData({ 1023 }), 1);
+    SetFINDAStateAndDebounce(true);
 
-    UnloadToFinda ff;
-
-    // wait for FINDA to debounce
-    REQUIRE(WhileCondition(
-        ff,
-        [&](int) { return !mf::finda.Pressed(); },
-        5000));
+    logic::UnloadToFinda ff;
 
     // restart the automaton - just 1 attempt
     ff.Reset(1);
 
-    REQUIRE(ff.State() == UnloadToFinda::EngagingIdler);
+    REQUIRE(ff.State() == logic::UnloadToFinda::EngagingIdler);
 
     // it should have instructed the selector and idler to move to slot 1
     // check if the idler and selector have the right command
@@ -63,51 +55,41 @@ TEST_CASE("unload_to_finda::regular_unload", "[unload_to_finda]") {
         5000));
 
     // now pulling the filament until finda triggers
-    REQUIRE(ff.State() == UnloadToFinda::WaitingForFINDA);
+    REQUIRE(ff.State() == logic::UnloadToFinda::WaitingForFINDA);
     hal::adc::ReinitADC(1, hal::adc::TADCData({ 1023, 900, 800, 500, 0 }), 10);
     REQUIRE(WhileCondition(
         ff,
         [&](int) { return mf::finda.Pressed(); },
         50000));
 
-    REQUIRE(ff.State() == UnloadToFinda::OK);
+    REQUIRE(ff.State() == logic::UnloadToFinda::OK);
 }
 
 TEST_CASE("unload_to_finda::no_sense_FINDA_upon_start", "[unload_to_finda]") {
-    using namespace logic;
-
     ForceReinitAllAutomata(); // that implies FINDA OFF which should really not happen for an unload call
 
-    UnloadToFinda ff;
+    logic::UnloadToFinda ff;
 
     // restart the automaton - just 1 attempt
     ff.Reset(1);
 
     // the state machine should accept the unpressed FINDA as no-fillament-loaded
     // thus should immediately end in the OK state
-    REQUIRE(ff.State() == UnloadToFinda::OK);
+    REQUIRE(ff.State() == logic::UnloadToFinda::OK);
 }
 
 TEST_CASE("unload_to_finda::unload_without_FINDA_trigger", "[unload_to_finda]") {
-    using namespace logic;
-
     ForceReinitAllAutomata();
 
     // we need finda ON
-    hal::adc::ReinitADC(1, hal::adc::TADCData({ 1023 }), 1);
+    SetFINDAStateAndDebounce(true);
 
-    UnloadToFinda ff;
-
-    // wait for FINDA to debounce
-    REQUIRE(WhileCondition(
-        ff,
-        [&](int) { return !mf::finda.Pressed(); },
-        5000));
+    logic::UnloadToFinda ff;
 
     // restart the automaton - just 1 attempt
     ff.Reset(1);
 
-    REQUIRE(ff.State() == UnloadToFinda::EngagingIdler);
+    REQUIRE(ff.State() == logic::UnloadToFinda::EngagingIdler);
 
     // it should have instructed the selector and idler to move to slot 1
     // check if the idler and selector have the right command
@@ -122,7 +104,7 @@ TEST_CASE("unload_to_finda::unload_without_FINDA_trigger", "[unload_to_finda]") 
         5000));
 
     // now pulling the filament until finda triggers
-    REQUIRE(ff.State() == UnloadToFinda::WaitingForFINDA);
+    REQUIRE(ff.State() == logic::UnloadToFinda::WaitingForFINDA);
 
     // no changes to FINDA during unload - we'll pretend it never triggers
     REQUIRE(!WhileCondition(
@@ -130,5 +112,5 @@ TEST_CASE("unload_to_finda::unload_without_FINDA_trigger", "[unload_to_finda]") 
         [&](int) { return mf::finda.Pressed(); },
         50000));
 
-    REQUIRE(ff.State() == UnloadToFinda::Failed);
+    REQUIRE(ff.State() == logic::UnloadToFinda::Failed);
 }

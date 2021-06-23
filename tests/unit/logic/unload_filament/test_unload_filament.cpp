@@ -27,20 +27,7 @@ namespace mb = modules::buttons;
 namespace mg = modules::globals;
 namespace ms = modules::selector;
 
-bool VerifyState(logic::UnloadFilament &uf, bool filamentLoaded, uint8_t idlerSlotIndex, uint8_t selectorSlotIndex,
-    bool findaPressed, ml::Mode greenLEDMode, ml::Mode redLEDMode, ErrorCode err, ProgressCode topLevelProgress) {
-    CHECKED_ELSE(mg::globals.FilamentLoaded() == filamentLoaded) { return false; }
-    CHECKED_ELSE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(idlerSlotIndex)) { return false; }
-    CHECKED_ELSE(mi::idler.Engaged() == (idlerSlotIndex < 5)) { return false; }
-    CHECKED_ELSE(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(selectorSlotIndex)) { return false; }
-    CHECKED_ELSE(ms::selector.Slot() == selectorSlotIndex) { return false; }
-    CHECKED_ELSE(mf::finda.Pressed() == findaPressed) { return false; }
-    CHECKED_ELSE(ml::leds.Mode(selectorSlotIndex, ml::red) == redLEDMode) { return false; }
-    CHECKED_ELSE(ml::leds.Mode(selectorSlotIndex, ml::green) == greenLEDMode) { return false; }
-    CHECKED_ELSE(uf.Error() == err) { return false; }
-    CHECKED_ELSE(uf.TopLevelState() == topLevelProgress) { return false; }
-    return true;
-}
+#include "../helpers/helpers.ipp"
 
 void RegularUnloadFromSlot04Init(uint8_t slot, logic::UnloadFilament &uf) {
     // prepare startup conditions
@@ -251,14 +238,16 @@ void FindaDidntTriggerResolveHelpFindaDidntTrigger(uint8_t slot, logic::UnloadFi
     REQUIRE(VerifyState(uf, true, slot, slot, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_TRIGGER, ProgressCode::ERR1DisengagingIdler));
 }
 
-TEST_CASE("unload_filament::finda_didnt_trigger_resolve_help", "[unload_filament]") {
+TEST_CASE("unload_filament::finda_didnt_trigger_resolve_help_second_ok", "[unload_filament]") {
     for (uint8_t slot = 0; slot < 5; ++slot) {
         logic::UnloadFilament uf;
         FindaDidntTriggerCommonSetup(slot, uf);
         FindaDidntTriggerResolveHelp(slot, uf);
         FindaDidntTriggerResolveHelpFindaTriggered(slot, uf);
     }
+}
 
+TEST_CASE("unload_filament::finda_didnt_trigger_resolve_help_second_fail", "[unload_filament]") {
     // the same with different end scenario
     for (uint8_t slot = 0; slot < 5; ++slot) {
         logic::UnloadFilament uf;

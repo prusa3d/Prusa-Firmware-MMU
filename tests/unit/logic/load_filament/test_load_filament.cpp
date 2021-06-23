@@ -27,30 +27,143 @@ namespace mb = modules::buttons;
 namespace mg = modules::globals;
 namespace ms = modules::selector;
 
-TEST_CASE("unload_filament::unload0", "[unload_filament]") {
-    using namespace logic;
+#include "../helpers/helpers.ipp"
 
+void LoadFilamentCommonSetup(uint8_t slot, logic::LoadFilament &lf) {
     ForceReinitAllAutomata();
 
-    LoadFilament lf;
+    // change the startup to what we need here
+    EnsureActiveSlotIndex(slot);
+
+    // verify startup conditions
+    REQUIRE(VerifyState(lf, false, 5, slot, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+
     // restart the automaton
-    lf.Reset(0);
+    lf.Reset(slot);
 
-    main_loop();
+    // Stage 0 - verify state just after Reset()
+    // we assume the filament is not loaded
+    // idler should have been activated by the underlying automaton
+    // no change in selector's position
+    // FINDA off
+    // green LED should blink, red off
+    REQUIRE(VerifyState(lf, false, 5, slot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::EngagingIdler));
 
-    //    REQUIRE(WhileCondition([&]() { return uf.TopLevelState() == ProgressCode::UnloadingToFinda; }, 5000));
+    // Stage 1 - engaging idler
+    REQUIRE(WhileTopState(lf, ProgressCode::EngagingIdler, 5000));
+    REQUIRE(VerifyState(lf, false, slot, slot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::FeedingToFinda));
+}
 
-    //    REQUIRE(uf.TopLevelState() == ProgressCode::DisengagingIdler);
-    //    REQUIRE(WhileCondition([&]() { return uf.TopLevelState() == ProgressCode::DisengagingIdler; }, 5000));
+void LoadFilamentSuccessful(uint8_t slot, logic::LoadFilament &lf) {
+    // Stage 2 - feeding to finda
+    // we'll assume the finda is working correctly here
+    REQUIRE(WhileCondition(
+        lf,
+        [&](int step) -> bool {
+        if(step == 100){ // on 100th step make FINDA trigger
+            hal::adc::SetADC(1, 1023);
+        }
+        return lf.TopLevelState() == ProgressCode::FeedingToFinda; },
+        5000));
+    REQUIRE(VerifyState(lf, false, slot, slot, true, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::FeedingToBondtech));
 
-    //    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5));
+    // Stage 3 - feeding to bondtech
+    // we'll make a fsensor switch during the process
+    REQUIRE(WhileCondition(
+        lf,
+        [&](int step) -> bool {
+        if(step == 100){ // on 100th step make fsensor trigger
+            modules::fsensor::fsensor.ProcessMessage(true);
+        }
+        return lf.TopLevelState() == ProgressCode::FeedingToBondtech; },
+        5000));
+    REQUIRE(VerifyState(lf, false, slot, slot, true, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::DisengagingIdler));
 
-    //    REQUIRE(uf.TopLevelState() == ProgressCode::AvoidingGrind);
-    //    REQUIRE(WhileCondition([&]() { return uf.TopLevelState() == ProgressCode::AvoidingGrind; }, 5000));
+    // Stage 4 - disengaging idler
+    REQUIRE(WhileTopState(lf, ProgressCode::DisengagingIdler, 5000));
+    REQUIRE(VerifyState(lf, true, 5, slot, true, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
+}
 
-    //    REQUIRE(uf.TopLevelState() == ProgressCode::FinishingMoves);
-    //    REQUIRE(WhileCondition([&]() { return uf.TopLevelState() == ProgressCode::FinishingMoves; }, 5000));
+TEST_CASE("load_filament::regular_load_to_slot_0-4", "[load_filament]") {
+    for (uint8_t slot = 0; slot < 5; ++slot) {
+        logic::LoadFilament lf;
+        LoadFilamentCommonSetup(slot, lf);
+        LoadFilamentSuccessful(slot, lf);
+    }
+}
 
-    //    REQUIRE(uf.TopLevelState() == ProgressCode::OK);
-    REQUIRE(modules::globals::globals.FilamentLoaded() == true);
+void FailedLoadToFinda(uint8_t slot, logic::LoadFilament &lf) {
+    // Stage 2 - feeding to finda
+    // we'll assume the finda is defective here and does not trigger
+    REQUIRE(WhileTopState(lf, ProgressCode::FeedingToFinda, 5000));
+    REQUIRE(VerifyState(lf, false, slot, slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_TRIGGER, ProgressCode::ERR1DisengagingIdler));
+
+    // Stage 3 - disengaging idler in error mode
+    REQUIRE(WhileTopState(lf, ProgressCode::ERR1DisengagingIdler, 5000));
+    REQUIRE(VerifyState(lf, false, 5, slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_TRIGGER, ProgressCode::ERR1WaitingForUser));
+}
+
+void FailedLoadToFindaResolveHelp(uint8_t slot, logic::LoadFilament &lf) {
+    // Stage 3 - the user has to do something
+    // there are 3 options:
+    // - help the filament a bit
+    // - try again the whole sequence
+    // - resolve the problem by hand - after pressing the button we shall check, that FINDA is off and we should do what?
+
+    // In this case we check the first option
+
+    // Perform press on button 1 + debounce
+    hal::adc::SetADC(0, 0);
+    while (!mb::buttons.ButtonPressed(0)) {
+        main_loop();
+        lf.Step();
+    }
+
+    REQUIRE(VerifyState(lf, false, 5, slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_TRIGGER, ProgressCode::ERR1EngagingIdler));
+
+    // Stage 4 - engage the idler
+    REQUIRE(WhileTopState(lf, ProgressCode::ERR1EngagingIdler, 5000));
+
+    REQUIRE(VerifyState(lf, false, slot, slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_TRIGGER, ProgressCode::ERR1HelpingFilament));
+}
+
+void FailedLoadToFindaResolveHelpFindaTriggered(uint8_t slot, logic::LoadFilament &lf) {
+    // Stage 5 - move the pulley a bit - simulate FINDA depress
+    REQUIRE(WhileCondition(
+        lf,
+        [&](int step) -> bool {
+        if(step == 100){ // on 100th step make FINDA trigger
+            hal::adc::SetADC(1, 1023);
+        }
+        return lf.TopLevelState() == ProgressCode::ERR1HelpingFilament; },
+        5000));
+
+    REQUIRE(VerifyState(lf, false, slot, slot, true, ml::off, ml::blink0, ErrorCode::OK, ProgressCode::FeedingToBondtech));
+}
+
+void FailedLoadToFindaResolveHelpFindaDidntTrigger(uint8_t slot, logic::LoadFilament &lf) {
+    // Stage 5 - move the pulley a bit - no FINDA change
+    REQUIRE(WhileTopState(lf, ProgressCode::ERR1HelpingFilament, 5000));
+
+    REQUIRE(VerifyState(lf, false, slot, slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_TRIGGER, ProgressCode::ERR1DisengagingIdler));
+}
+
+TEST_CASE("load_filament::failed_load_to_finda_0-4_resolve_help_second_ok", "[load_filament]") {
+    for (uint8_t slot = 0; slot < 5; ++slot) {
+        logic::LoadFilament lf;
+        LoadFilamentCommonSetup(slot, lf);
+        FailedLoadToFinda(slot, lf);
+        FailedLoadToFindaResolveHelp(slot, lf);
+        FailedLoadToFindaResolveHelpFindaTriggered(slot, lf);
+    }
+}
+
+TEST_CASE("load_filament::failed_load_to_finda_0-4_resolve_help_second_fail", "[load_filament]") {
+    for (uint8_t slot = 0; slot < 5; ++slot) {
+        logic::LoadFilament lf;
+        LoadFilamentCommonSetup(slot, lf);
+        FailedLoadToFinda(slot, lf);
+        FailedLoadToFindaResolveHelp(slot, lf);
+        FailedLoadToFindaResolveHelpFindaDidntTrigger(slot, lf);
+    }
 }

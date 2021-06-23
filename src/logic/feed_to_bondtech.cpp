@@ -37,7 +37,8 @@ bool FeedToBondtech::Step() {
     case PushingFilament:
         if (mfs::fsensor.Pressed()) {
             mm::motion.AbortPlannedMoves(); // stop pushing filament
-            state = DisengagingIdler;
+            //            mi::idler.Disengage();
+            state = OK;
         } else if (mm::motion.StallGuard(mm::Pulley)) {
             // stall guard occurred during movement - the filament got stuck
             state = Failed; // @@TODO may be even report why it failed
@@ -45,12 +46,12 @@ bool FeedToBondtech::Step() {
             state = Failed;
         }
         return false;
-    case DisengagingIdler:
-        if (!mi::idler.Engaged()) {
-            state = OK;
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::on);
-        }
-        return false;
+        //    case DisengagingIdler:
+        //        if (!mi::idler.Engaged()) {
+        //            state = OK;
+        //            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::on);
+        //        }
+        //        return false;
     case OK:
     case Failed:
     default:
