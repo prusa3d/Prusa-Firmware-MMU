@@ -16,6 +16,7 @@
 #include "../stubs/stub_motion.h"
 
 #include <new> // bring in placement new
+#include <stddef.h>
 
 void main_loop() {
     modules::buttons::buttons.Step();
@@ -64,4 +65,19 @@ void ForceReinitAllAutomata() {
     // let's assume we have the filament NOT loaded and active slot 0
     modules::globals::globals.SetFilamentLoaded(false);
     modules::globals::globals.SetActiveSlot(0);
+}
+
+void EnsureActiveSlotIndex(uint8_t slot) {
+    // move selector to the right spot
+    modules::selector::selector.MoveToSlot(slot);
+    while (modules::selector::selector.Slot() != slot)
+        main_loop();
+
+    modules::globals::globals.SetActiveSlot(slot);
+}
+
+void SetFINDAStateAndDebounce(bool press) {
+    hal::adc::SetADC(1, press ? modules::finda::FINDA::adcDecisionLevel + 1 : modules::finda::FINDA::adcDecisionLevel - 1);
+    for (size_t i = 0; i < modules::finda::FINDA::debounce + 1; ++i)
+        main_loop();
 }

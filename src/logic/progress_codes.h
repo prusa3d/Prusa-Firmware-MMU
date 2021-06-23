@@ -17,8 +17,10 @@ enum class ProgressCode : uint_fast8_t {
     FinishingMoves,
 
     ERR1DisengagingIdler,
+    ERR1EngagingIdler,
     ERR1WaitingForUser,
     ERRInternal,
+    ERR1HelpingFilament,
 
     UnloadingFilament,
     LoadingFilament,
