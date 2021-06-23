@@ -13,6 +13,7 @@ UnloadFilament unloadFilament;
 
 namespace mb = modules::buttons;
 namespace mm = modules::motion;
+namespace mf = modules::finda;
 namespace mi = modules::idler;
 namespace ml = modules::leds;
 namespace mg = modules::globals;
@@ -79,7 +80,8 @@ bool UnloadFilament::Step() {
         bool userResolved = mb::buttons.ButtonPressed(mb::Right) /*|| command_userResolved()*/;
         if (help) {
             // try to manually unload just a tiny bit - help the filament with the pulley
-            //@@TODO
+            state = ProgressCode::ERR1EngagingIdler;
+            mi::idler.Engage(mg::globals.ActiveSlot());
         } else if (tryAgain) {
             // try again the whole sequence
             Reset(0);
@@ -92,6 +94,22 @@ bool UnloadFilament::Step() {
         }
         return false;
     }
+    case ProgressCode::ERR1EngagingIdler:
+        if (mi::idler.Engaged()) {
+            state = ProgressCode::ERR1HelpingFilament;
+            mm::motion.PlanMove(mm::Pulley, 450, 5000);
+        }
+        return false;
+    case ProgressCode::ERR1HelpingFilament:
+        if (!mf::finda.Pressed()) {
+            // the help was enough to depress the FINDA, we are ok, continue normally
+            state = ProgressCode::DisengagingIdler;
+            error = ErrorCode::OK;
+        } else if (mm::motion.QueueEmpty()) {
+            // helped a bit, but FINDA didn't trigger, return to the main error state
+            state = ProgressCode::ERR1DisengagingIdler;
+        }
+        return false;
     case ProgressCode::OK:
         return true; // successfully finished
     default: // we got into an unhandled state, better report it
