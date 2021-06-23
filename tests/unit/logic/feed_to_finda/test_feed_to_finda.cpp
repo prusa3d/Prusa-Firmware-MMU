@@ -79,19 +79,19 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
         [&](int) { return ff.State() == FeedToFinda::UnloadBackToPTFE; },
         5000));
 
-    // disengaging idler
-    REQUIRE(ff.State() == FeedToFinda::DisengagingIdler);
-    REQUIRE(WhileCondition(
-        ff,
-        [&](int) { return mi::idler.Engaged(); },
-        5000));
+    //    // disengaging idler
+    //    REQUIRE(ff.State() == FeedToFinda::DisengagingIdler);
+    //    REQUIRE(WhileCondition(
+    //        ff,
+    //        [&](int) { return mi::idler.Engaged(); },
+    //        5000));
 
-    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5)); // @@TODO constants
+    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(0)); // @@TODO constants
     CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(0));
 
     // state machine finished ok, the green LED should be on
     REQUIRE(ff.State() == FeedToFinda::OK);
-    REQUIRE(ml::leds.LedOn(mg::globals.ActiveSlot(), ml::Color::green));
+    REQUIRE(ml::leds.Mode(mg::globals.ActiveSlot(), ml::green) == ml::blink0);
 
     REQUIRE(ff.Step() == true); // the automaton finished its work, any consecutive calls to Step must return true
 }

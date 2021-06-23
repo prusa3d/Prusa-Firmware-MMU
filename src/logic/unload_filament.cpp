@@ -84,7 +84,7 @@ bool UnloadFilament::Step() {
             mi::idler.Engage(mg::globals.ActiveSlot());
         } else if (tryAgain) {
             // try again the whole sequence
-            Reset(0);
+            Reset(0); //@@TODO validate the reset parameter
         } else if (userResolved) {
             // problem resolved - the user pulled the fillament by hand
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);

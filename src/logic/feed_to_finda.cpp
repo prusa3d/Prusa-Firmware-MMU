@@ -51,14 +51,14 @@ bool FeedToFinda::Step() {
         return false;
     case UnloadBackToPTFE:
         if (mm::motion.QueueEmpty()) { // all moves have been finished
-            state = DisengagingIdler;
-            mi::idler.Disengage();
-        }
-        return false;
-    case DisengagingIdler:
-        if (!mi::idler.Engaged()) {
+            //            state = DisengagingIdler;
+            //            mi::idler.Disengage();
+            //        }
+            //        return false;
+            //    case DisengagingIdler:
+            //        if (!mi::idler.Engaged()) {
             state = OK;
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::on);
+            //            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::on);
         }
         // @@TODO FINDA must be reported as OFF again as we are pulling the filament from it - is this correct?
         return false;

@@ -24,6 +24,8 @@ void LoadFilament::Reset(uint8_t param) {
     error = ErrorCode::OK;
     mg::globals.SetActiveSlot(param);
     mi::idler.Engage(mg::globals.ActiveSlot());
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
 }
 
 bool LoadFilament::Step() {
@@ -40,7 +42,9 @@ bool LoadFilament::Step() {
             if (feed.State() == FeedToFinda::Failed) {
                 // @@TODO - try to repeat 6x - push/pull sequence - probably something to put into feed_to_finda as an option
                 state = ProgressCode::ERR1DisengagingIdler;
+                error = ErrorCode::FINDA_DIDNT_TRIGGER;
                 mi::idler.Disengage();
+                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::Mode::off);
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::red, ml::Mode::blink0); // signal loading error
             } else {
                 state = ProgressCode::FeedingToBondtech;
@@ -62,13 +66,14 @@ bool LoadFilament::Step() {
     case ProgressCode::DisengagingIdler:
         if (!mi::idler.Engaged()) {
             state = ProgressCode::OK;
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
+            mg::globals.SetFilamentLoaded(true);
         }
         break;
     case ProgressCode::OK:
-        mg::globals.SetFilamentLoaded(true);
         return true;
     case ProgressCode::ERR1DisengagingIdler: // couldn't unload to FINDA
-        error = ErrorCode::FINDA_DIDNT_TRIGGER;
         if (!mi::idler.Engaged()) {
             state = ProgressCode::ERR1WaitingForUser;
         }
@@ -80,12 +85,13 @@ bool LoadFilament::Step() {
         bool userResolved = modules::buttons::buttons.ButtonPressed(modules::buttons::Right) /*|| command_userResolved()*/;
         if (help) {
             // try to manually load just a tiny bit - help the filament with the pulley
-            //@@TODO
+            state = ProgressCode::ERR1EngagingIdler;
+            mi::idler.Engage(mg::globals.ActiveSlot());
         } else if (tryAgain) {
             // try again the whole sequence
-            Reset(0); // @@TODO param
+            Reset(mg::globals.ActiveSlot());
         } else if (userResolved) {
-            // problem resolved - the user pulled the fillament by hand
+            // problem resolved - the user pushed the fillament by hand?
             modules::leds::leds.SetMode(mg::globals.ActiveSlot(), modules::leds::red, modules::leds::off);
             modules::leds::leds.SetMode(mg::globals.ActiveSlot(), modules::leds::green, modules::leds::on);
             //                mm::motion.PlanMove(mm::Pulley, 450, 5000); // @@TODO constants
@@ -93,6 +99,26 @@ bool LoadFilament::Step() {
         }
         return false;
     }
+    case ProgressCode::ERR1EngagingIdler:
+        if (mi::idler.Engaged()) {
+            state = ProgressCode::ERR1HelpingFilament;
+            mm::motion.PlanMove(mm::Pulley, 450, 5000); //@@TODO constants
+        }
+        return false;
+    case ProgressCode::ERR1HelpingFilament:
+        if (mf::finda.Pressed()) {
+            // the help was enough to press the FINDA, we are ok, continue normally
+            state = ProgressCode::FeedingToBondtech;
+            error = ErrorCode::OK;
+        } else if (mm::motion.QueueEmpty()) {
+            // helped a bit, but FINDA didn't trigger, return to the main error state
+            state = ProgressCode::ERR1DisengagingIdler;
+        }
+        return false;
+    default: // we got into an unhandled state, better report it
+        state = ProgressCode::ERRInternal;
+        error = ErrorCode::INTERNAL;
+        return true;
     }
     return false;
 }
