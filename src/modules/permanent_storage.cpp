@@ -1,4 +1,3 @@
-/// @author Marek Bel
 #include "permanent_storage.h"
 #include "../hal/eeprom.h"
 #include "globals.h"
@@ -57,7 +56,6 @@ void Init() {
     }
 }
 
-/// @brief Erase the whole EEPROM
 void EraseAll() {
     for (uint16_t i = 0; i < ee::EEPROM::End(); i++) {
         ee::EEPROM::UpdateByte(i, static_cast<uint8_t>(eepromEmpty));

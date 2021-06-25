@@ -3,12 +3,12 @@
 #include <stdint.h>
 #include "debouncer.h"
 
-/// Buttons are built on top of the raw ADC API
-/// This layer should contain debouncing of buttons and their logical interpretation
-
 namespace modules {
+
+/// The buttons namespace provides all necessary facilities related to the logical model of the physical buttons device the MMU unit.
 namespace buttons {
 
+/// A model of a single button, performs automatic debouncing on top of the raw ADC API
 struct Button : public debounce::Debouncer {
     inline constexpr Button()
         : debounce::Debouncer(debounce) {}
@@ -18,12 +18,14 @@ private:
     constexpr static const uint16_t debounce = 100;
 };
 
+/// Enum of buttons - used also as indices in an array of buttons to keep the code size tight.
 enum {
     Left = 0,
     Middle,
     Right
 };
 
+/// A model of the 3 buttons on the MMU unit
 class Buttons {
     constexpr static const uint8_t N = 3; ///< number of buttons currently supported
     constexpr static const uint8_t adc = 1; ///< ADC index - will be some define or other constant later on
@@ -31,11 +33,11 @@ class Buttons {
 public:
     inline constexpr Buttons() = default;
 
-    /// State machine step - reads the ADC, processes debouncing, updates states of individual buttons
+    /// Performs one step of the state machine - reads the ADC, processes debouncing, updates states of individual buttons
     void Step();
 
     /// @returns true if button at index is pressed
-    /// @@TODO add range checking if necessary
+    /// @param index of the button to check
     inline bool ButtonPressed(uint8_t index) const { return buttons[index].Pressed(); }
 
     /// @returns true if any of the button is pressed
@@ -55,6 +57,7 @@ private:
     static int8_t DecodeADC(uint16_t rawADC);
 };
 
+/// The one and only instance of Buttons in the FW
 extern Buttons buttons;
 
 } // namespace buttons

@@ -7,7 +7,7 @@
 ///
 /// Which state machines are high-level? Those which are being initiated either by a command over the serial line or from a button
 /// - they report their progress to the printer
-/// - they can be composed of other sub automatons
+/// - they can be composed of other sub automata
 
 namespace logic {
 
