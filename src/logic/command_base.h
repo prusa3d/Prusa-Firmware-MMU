@@ -3,14 +3,15 @@
 #include "error_codes.h"
 #include "progress_codes.h"
 
-/// Base class defining common API for high-level operations/commands/state machines
+/// The logic namespace handles the application logic on top of the modules.
+namespace logic {
+
+/// @brief Base class defining common API for high-level operations/commands/state machines
 ///
 /// Which state machines are high-level? Those which are being initiated either by a command over the serial line or from a button
 /// - they report their progress to the printer
 /// - they can be composed of other sub automata
-
-namespace logic {
-
+///
 /// Tasks derived from this base class are the top-level operations inhibited by the printer.
 /// These tasks report their progress and only one of these tasks is allowed to run at once.
 class CommandBase {
@@ -50,12 +51,12 @@ public:
     /// @returns status of the operation - e.g. RUNNING, OK, or an error code if the operation failed.
     ///
     /// Beware - the same rule about composite operations as with State() applies to Error() as well.
-    /// Please see @ErrorCode for more details
+    /// Please see ErrorCode for more details
     virtual ErrorCode Error() const { return error; }
 
 protected:
-    ProgressCode state;
-    ErrorCode error;
+    ProgressCode state; ///< current progress state of the state machine
+    ErrorCode error; ///< current error code
 };
 
 } // namespace logic

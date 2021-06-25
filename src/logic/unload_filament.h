@@ -5,8 +5,7 @@
 
 namespace logic {
 
-/// A high-level command state machine
-/// Handles the complex logic of unloading filament
+/// @brief A high-level command state machine - handles the complex logic of unloading filament
 class UnloadFilament : public CommandBase {
 public:
     inline UnloadFilament()
@@ -14,7 +13,7 @@ public:
 
     /// Restart the automaton
     /// @param param is not used, always unloads from the active slot
-    void Reset(uint8_t /*param*/) override;
+    void Reset(uint8_t param) override;
 
     /// @returns true if the state machine finished its job, false otherwise
     bool Step() override;
@@ -24,6 +23,7 @@ private:
     UnloadToFinda unl;
 };
 
+/// The one and only instance of UnloadFilament state machine in the FW
 extern UnloadFilament unloadFilament;
 
 } // namespace logic

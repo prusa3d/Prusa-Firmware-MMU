@@ -1,14 +1,14 @@
 #pragma once
 #include <stdint.h>
 
+namespace logic {
+
 /// @brief Feed filament to FINDA
 ///
 /// Continuously feed filament until FINDA is not switched ON
 /// and than retract to align filament 600 steps away from FINDA.
-
-namespace logic {
-
 struct FeedToFinda {
+    /// internal states of the state machine
     enum {
         EngagingIdler,
         PushingFilament,
