@@ -1,0 +1,77 @@
+///@mainpage Prusa Multi Material Unit for the MK4
+///@section intro_sec Introduction
+///
+/// This is the introduction.
+///
+///@section architecture_sec Firmware architecture
+///
+///@dot
+///digraph architecture {
+///    node [shape=record, fontname=Helvetica, fontsize=10];
+///    subgraph cluster_main { label="main"
+///         main [ URL="\ref main"];
+///     }
+///    subgraph cluster_logic { label="logic"
+///         logic [ URL="\ref logic"];
+///     }
+///
+///    subgraph cluster_modules { label="modules"
+///         buttons [ URL="\ref buttons"];
+///         debouncer [ URL="\ref debouncer"];
+///         finda [ URL="\ref finda"];
+///         fsensor [ URL="\ref fsensor"];
+///         globals [ URL="\ref globals"];
+///         idler [ URL="\ref idler"];
+///         leds [ URL="\ref leds"];
+///         selector [ URL="\ref selector"];
+///         motion [ URL="\ref motion"];
+///         permanent_storage [ URL="\ref permanent_storage"];
+///         protocol [ URL="\ref protocol"];
+///         timebase [ URL="\ref timebase"];
+///     }
+///    subgraph cluster_hal { label="hal"
+///         adc [ URL="\ref adc"];
+///         cpu [ URL="\ref cpu"];
+///         eeprom [ URL="\ref eeprom"];
+///         gpio [ URL="\ref gpio"];
+///         shr16 [ URL="\ref shr16"];
+///         spi [ URL="\ref spi"];
+///         timers [ URL="\ref timers"];
+///         tmc2130 [ URL="\ref tmc2130"];
+///         usart [ URL="\ref usart"];
+///         watchdog [ URL="\ref watchdog"];
+///     }
+///    main -> logic [ arrowhead="open" ];
+///
+///    logic -> buttons [ arrowhead="open" ];
+///    logic -> finda [ arrowhead="open" ];
+///    logic -> fsensor [ arrowhead="open" ];
+///    logic -> globals [ arrowhead="open" ];
+///    logic -> idler [ arrowhead="open" ];
+///    logic -> leds [ arrowhead="open" ];
+///    logic -> motion [ arrowhead="open" ];
+///    logic -> permanent_storage [ arrowhead="open" ];
+///    logic -> protocol [ arrowhead="open" ];
+///    logic -> selector [ arrowhead="open" ];
+///    logic -> timebase [ arrowhead="open" ];
+///
+///    selector -> motion [ arrowhead="open" ];
+///    idler -> motion [ arrowhead="open" ];
+///    buttons -> debouncer [ arrowhead="open" ];
+///    finda -> debouncer [ arrowhead="open" ];
+///    fsensor -> debouncer [ arrowhead="open" ];
+///
+///    buttons -> adc [ arrowhead="open" ];
+///    finda -> adc [ arrowhead="open" ];
+///    fsensor [ arrowhead="open" ];
+///    globals -> permanent_storage [ arrowhead="open" ];
+///    leds -> shr16 [ arrowhead="open" ];
+///    motion -> tmc2130 [ arrowhead="open" ];
+///    permanent_storage -> eeprom [ arrowhead="open" ];
+///    protocol -> usart [ arrowhead="open" ];
+///    timebase -> timers [ arrowhead="open" ];
+///}
+///@enddot
+///
+///@section protocol_sec Protocol description
+///

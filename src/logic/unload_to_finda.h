@@ -10,15 +10,6 @@ namespace logic {
 /// - rotate pulley to some direction as long as the FINDA is on/off
 /// - rotate some axis to some fixed direction
 /// - load/unload to finda
-/// A "small" automaton example - Try to unload filament to FINDA and if it fails try to recover several times.
-/// \dot
-/// digraph example {
-///    node [shape=record, fontname=Helvetica, fontsize=10];
-///    b [ label="class B" URL="\ref B"];
-///    c [ label="class C" URL="\ref C"];
-///    b -> c [ arrowhead="open", style="dashed" ];
-///}
-///\enddot
 struct UnloadToFinda {
     /// internal states of the state machine
     enum {
