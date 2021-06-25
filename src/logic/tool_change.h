@@ -6,14 +6,14 @@
 
 namespace logic {
 
-/// A high-level command state machine
-/// Handles the complex logic of tool change
+/// @brief  A high-level command state machine - handles the complex logic of tool change - which is basically a chain of an Unload and a Load operation.
 class ToolChange : public CommandBase {
 public:
     inline ToolChange()
         : CommandBase() {}
 
     /// Restart the automaton
+    /// @param param index of filament slot to change to - i.e. to load
     void Reset(uint8_t param) override;
 
     /// @returns true if the state machine finished its job, false otherwise
@@ -29,6 +29,7 @@ private:
     uint8_t plannedSlot;
 };
 
+/// The one and only instance of ToolChange state machine in the FW
 extern ToolChange toolChange;
 
 } // namespace logic

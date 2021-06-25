@@ -6,14 +6,14 @@
 
 namespace logic {
 
-/// A high-level command state machine
-/// Handles the complex logic of cutting filament
+/// @brief  A high-level command state machine - handles the complex logic of cutting filament
 class CutFilament : public CommandBase {
 public:
     inline CutFilament()
         : CommandBase() {}
 
     /// Restart the automaton
+    /// @param param index of filament slot to perform cut onto
     void Reset(uint8_t param) override;
 
     /// @returns true if the state machine finished its job, false otherwise
@@ -32,6 +32,7 @@ private:
     void SelectFilamentSlot();
 };
 
+/// The one and only instance of CutFilament state machine in the FW
 extern CutFilament cutFilament;
 
 } // namespace logic

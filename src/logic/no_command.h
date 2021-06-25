@@ -5,7 +5,7 @@
 
 namespace logic {
 
-/// A dummy No-command operation just to make the init of the firmware consistent (and cleaner code during processing)
+/// @brief A dummy No-command operation just to make the init of the firmware consistent (and cleaner code during processing).
 class NoCommand : public CommandBase {
 public:
     inline NoCommand()
@@ -18,6 +18,7 @@ public:
     bool Step() override { return true; }
 };
 
+/// The one and only instance of NoCommand state machine in the FW
 extern NoCommand noCommand;
 
 } // namespace logic

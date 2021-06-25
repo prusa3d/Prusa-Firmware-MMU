@@ -5,23 +5,22 @@
 
 namespace logic {
 
-/// A high-level command state machine
-/// Handles the complex logic of ejecting filament:
+/// @brief  A high-level command state machine - handles the complex logic of ejecting filament
 ///
+/// The eject operation consists of:
 /// - Move selector sideways and push filament forward a little bit, so that the user can catch it
 /// - Unpark idler at the end so that the user can pull filament out.
 /// - If there is still some filament detected by PINDA unload it first.
 /// - If we want to eject fil 0-2, move selector to position 4 (right).
 /// - If we want to eject fil 3-4, move selector to position 0 (left)
 /// Optionally, we can also move the selector to its service position in the future.
-/// @param filament filament 0 to 4
-
 class EjectFilament : public CommandBase {
 public:
     inline EjectFilament()
         : CommandBase() {}
 
     /// Restart the automaton
+    /// @param param index of filament slot to eject
     void Reset(uint8_t param) override;
 
     /// @returns true if the state machine finished its job, false otherwise
@@ -38,6 +37,7 @@ private:
     void MoveSelectorAside();
 };
 
+/// The one and only instance of EjectFilament state machine in the FW
 extern EjectFilament ejectFilament;
 
 } // namespace logic
