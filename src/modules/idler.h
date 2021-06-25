@@ -1,15 +1,15 @@
 #pragma once
 #include <stdint.h>
 
-/// Idler model
-/// Handles asynchronnous Engaging / Disengaging operations
-/// Keeps track of idler's current state
-
 namespace modules {
+
+/// The idler namespace provides all necessary facilities related to the logical model of the idler device of the MMU unit.
 namespace idler {
 
+/// The Idler model handles asynchronnous Engaging / Disengaging operations and keeps track of idler's current state.
 class Idler {
 public:
+    /// Internal states of idler's state machine
     enum {
         Ready = 0, // intentionally set as zero in order to allow zeroing the Idler structure upon startup -> avoid explicit initialization code
         Moving,
@@ -23,15 +23,20 @@ public:
         , currentSlot(0)
         , currentlyEngaged(false) {}
 
-    // public operations on the idler
-
-    /// @retuns false in case an operation is already underway
+    /// Plan engaging of the idler to a specific filament slot
+    /// @param slot index to be activated
+    /// @returns false in case an operation is already underway
     bool Engage(uint8_t slot);
-    /// @retuns false in case an operation is already underway
+
+    /// Plan disengaging of the idler, i.e. parking the idler
+    /// @returns false in case an operation is already underway
     bool Disengage();
-    /// @retuns false in case an operation is already underway
+
+    /// Plan homing of the idler axis
+    /// @returns false in case an operation is already underway
     bool Home();
 
+    /// Performs one step of the state machine according to currently planned operation
     /// @returns true if the idler is ready to accept new commands (i.e. it has finished the last operation)
     bool Step();
 
@@ -62,6 +67,7 @@ private:
     bool currentlyEngaged;
 };
 
+/// The one and only instance of Idler in the FW
 extern Idler idler;
 
 } // namespace idler

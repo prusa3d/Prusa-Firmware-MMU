@@ -1,14 +1,15 @@
 #pragma once
-
 #include <stdint.h>
 
-/// MMU protocol implementation
+namespace modules {
+
+/// @brief The MMU communication protocol implementation and related stuff.
+///
 /// See description of the new protocol in the MMU 2021 doc
 /// @@TODO possibly add some checksum to verify the correctness of messages
-
-namespace modules {
 namespace protocol {
 
+/// Definition of request message codes
 enum class RequestMsgCodes : uint8_t {
     unknown = 0,
     Query = 'Q',
@@ -25,6 +26,7 @@ enum class RequestMsgCodes : uint8_t {
     Cut = 'K'
 };
 
+/// Definition of response message parameter codes
 enum class ResponseMsgParamCodes : uint8_t {
     unknown = 0,
     Processing = 'P',
@@ -34,30 +36,34 @@ enum class ResponseMsgParamCodes : uint8_t {
     Rejected = 'R'
 };
 
-/// A request message
-/// Requests are being sent by the printer into the MMU
-/// It is the same structure as the generic Msg
+/// A request message - requests are being sent by the printer into the MMU.
 struct RequestMsg {
-    RequestMsgCodes code;
-    uint8_t value;
+    RequestMsgCodes code; ///< code of the request message
+    uint8_t value; ///< value of the request message
+
+    /// @param code of the request message
+    /// @param value of the request message
     inline RequestMsg(RequestMsgCodes code, uint8_t value)
         : code(code)
         , value(value) {}
 };
 
-/// A response message
-/// Responses are being sent from the MMU into the printer as a response to a request message
+/// A response message - responses are being sent from the MMU into the printer as a response to a request message.
 struct ResponseMsg {
     RequestMsg request; ///< response is always preceeded by the request message
-    ResponseMsgParamCodes paramCode; ///< parameters of reply
-    uint8_t paramValue; ///< parameters of reply
+    ResponseMsgParamCodes paramCode; ///< code of the parameter
+    uint8_t paramValue; ///< value of the parameter
+
+    /// @param request the source request message this response is a reply to
+    /// @param paramCode code of the parameter
+    /// @param paramValue value of the parameter
     inline ResponseMsg(RequestMsg request, ResponseMsgParamCodes paramCode, uint8_t paramValue)
         : request(request)
         , paramCode(paramCode)
         , paramValue(paramValue) {}
 };
 
-/// Message decoding return value
+/// Message decoding return values
 enum class DecodeStatus : uint_fast8_t {
     MessageCompleted, ///< message completed and successfully lexed
     NeedMoreData, ///< message incomplete yet, waiting for another byte to come
@@ -65,8 +71,9 @@ enum class DecodeStatus : uint_fast8_t {
 };
 
 /// Protocol class is responsible for creating/decoding messages in Rx/Tx buffer
+///
 /// Beware - in the decoding more, it is meant to be a statefull instance which works through public methods
-/// processing one input byte per call
+/// processing one input byte per call.
 class Protocol {
 public:
     inline Protocol()
@@ -91,18 +98,22 @@ public:
 
     /// Encode generic response Command Accepted or Rejected
     /// @param msg source request message for this response
+    /// @param ar code of response parameter
+    /// @param txbuff where to format the message
     /// @returns number of bytes written into txbuff
     static uint8_t EncodeResponseCmdAR(const RequestMsg &msg, ResponseMsgParamCodes ar, uint8_t *txbuff);
 
     /// Encode response to Read FINDA query
     /// @param msg source request message for this response
     /// @param findaValue 1/0 (on/off) status of FINDA
+    /// @param txbuff where to format the message
     /// @returns number of bytes written into txbuff
     static uint8_t EncodeResponseReadFINDA(const RequestMsg &msg, uint8_t findaValue, uint8_t *txbuff);
 
     /// Encode response to Version query
     /// @param msg source request message for this response
     /// @param value version number (0-255)
+    /// @param txbuff where to format the message
     /// @returns number of bytes written into txbuff
     static uint8_t EncodeResponseVersion(const RequestMsg &msg, uint8_t value, uint8_t *txbuff);
 
@@ -110,6 +121,7 @@ public:
     /// @param msg source request message for this response
     /// @param code status of operation (Processing, Error, Finished)
     /// @param value related to status of operation(e.g. error code or progress)
+    /// @param txbuff where to format the message
     /// @returns number of bytes written into txbuff
     static uint8_t EncodeResponseQueryOperation(const RequestMsg &msg, ResponseMsgParamCodes code, uint8_t value, uint8_t *txbuff);
 

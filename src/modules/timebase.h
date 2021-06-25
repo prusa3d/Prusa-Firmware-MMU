@@ -2,6 +2,8 @@
 #include <stdint.h>
 
 namespace modules {
+
+/// The time namespace provides all necessary facilities related to measuring real elapsed time for the whole firmware.
 namespace time {
 
 /// A basic time tracking class
@@ -11,6 +13,8 @@ class Timebase {
 public:
     constexpr inline Timebase()
         : ms(0) {}
+
+    /// Initializes the Timebase class - sets the timers and prepares the internal variables.
     void Init();
 
     /// @returns current milliseconds elapsed from the initialization of this class
@@ -22,6 +26,7 @@ private:
     static void ISR();
 };
 
+/// The one and only instance of Selector in the FW
 extern Timebase timebase;
 
 } // namespace time

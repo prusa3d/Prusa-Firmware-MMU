@@ -107,7 +107,7 @@ TEST_CASE("unload_to_finda::unload_without_FINDA_trigger", "[unload_to_finda]") 
     REQUIRE(ff.State() == logic::UnloadToFinda::WaitingForFINDA);
 
     // no changes to FINDA during unload - we'll pretend it never triggers
-    REQUIRE(!WhileCondition(
+    REQUIRE_FALSE(WhileCondition(
         ff,
         [&](int) { return mf::finda.Pressed(); },
         50000));

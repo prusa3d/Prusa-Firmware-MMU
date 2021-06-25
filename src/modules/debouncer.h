@@ -1,15 +1,17 @@
-/// A generic debouncing algorithm
-
 #pragma once
 #include <stdint.h>
 
 namespace modules {
+
+/// The debounce namespace provides a generic debouncing algorithm.
 namespace debounce {
 
 /// Implements debouncing on 2-state logic variables (true/false, high/low, on/off, pressed/unpressed)
 /// Intentionally not modelled as a template to avoid code bloat
 class Debouncer {
 public:
+    /// @param debounceTimeout initial debounce timeout in milliseconds @@TODO
+    /// - after what time of having a pressed level the debouncer considers the level stable enough to report the Pressed state.
     inline constexpr Debouncer(uint8_t debounceTimeout)
         : timeLastChange(0)
         , debounceTimeout(debounceTimeout) {}

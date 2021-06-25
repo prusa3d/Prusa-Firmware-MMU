@@ -1,15 +1,15 @@
 #pragma once
 #include <stdint.h>
 
-/// Selector model
-/// Handles asynchronnous move operations between filament individual slots
-/// Keeps track of selector's current state
-
 namespace modules {
+
+/// The selector namespace provides all necessary facilities related to the logical model of the selector device of the MMU unit.
 namespace selector {
 
+/// The selector model - handles asynchronnous move operations between filament individual slots and keeps track of selector's current state.
 class Selector {
 public:
+    /// Internal states of selector's state machine
     enum {
         Ready = 0,
         Moving,
@@ -21,13 +21,16 @@ public:
         , plannedSlot(0)
         , currentSlot(0) {}
 
-    // public operations on the selector
-
-    /// @retuns false in case an operation is already underway
+    /// Plan move of the selector to a specific filament slot
+    /// @param slot index to move to
+    /// @returns false in case an operation is already underway
     bool MoveToSlot(uint8_t slot);
-    /// @retuns false in case an operation is already underway
+
+    /// Plan homing of the selector's axis
+    /// @returns false in case an operation is already underway
     bool Home();
 
+    /// Performs one step of the state machine according to currently planned operation.
     /// @returns true if the selector is ready to accept new commands (i.e. it has finished the last operation)
     bool Step();
 
@@ -51,6 +54,7 @@ private:
     uint8_t currentSlot;
 };
 
+/// The one and only instance of Selector in the FW
 extern Selector selector;
 
 } // namespace selector
