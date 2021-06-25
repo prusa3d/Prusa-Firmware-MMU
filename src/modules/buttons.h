@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "debouncer.h"
 
+/// The modules namespace contains models of MMU's components
 namespace modules {
 
 /// The buttons namespace provides all necessary facilities related to the logical model of the physical buttons device the MMU unit.
