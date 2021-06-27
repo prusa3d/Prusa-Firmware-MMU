@@ -11,13 +11,13 @@ void LED::SetMode(leds::Mode mode) {
     state.mode = mode;
     // set initial state of LEDs correctly - transition from one mode to another
     switch (state.mode) {
-    case Mode::blink1:
-    case Mode::off:
+    case leds::Mode::blink1:
+    case leds::Mode::off:
         state.on = 0;
         break;
 
-    case Mode::blink0:
-    case Mode::on:
+    case leds::Mode::blink0:
+    case leds::Mode::on:
         state.on = 1;
         break;
     default:
@@ -28,10 +28,10 @@ void LED::SetMode(leds::Mode mode) {
 bool LED::Step(bool oddPeriod) {
     switch (state.mode) {
     // on and off don't change while stepping
-    case Mode::blink0:
+    case leds::Mode::blink0:
         state.on = oddPeriod;
         break;
-    case Mode::blink1:
+    case leds::Mode::blink1:
         state.on = !oddPeriod;
         break;
     default: // do nothing
