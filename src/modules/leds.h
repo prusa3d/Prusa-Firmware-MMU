@@ -31,7 +31,7 @@ enum Color {
 class LED {
 public:
     constexpr inline LED() = default;
-    void SetMode(Mode mode);
+    void SetMode(leds::Mode mode);
     inline leds::Mode Mode() const { return (leds::Mode)state.mode; }
 
     /// @returns true if the LED shines
@@ -44,7 +44,7 @@ private:
         uint8_t mode : 2;
         constexpr inline State()
             : on(0)
-            , mode(Mode::off) {}
+            , mode(leds::Mode::off) {}
     };
 
     State state;
