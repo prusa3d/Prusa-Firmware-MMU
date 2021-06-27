@@ -4,6 +4,8 @@
 namespace modules {
 namespace time {
 
+Timebase timebase;
+
 void Timebase::Init() {
 }
 
