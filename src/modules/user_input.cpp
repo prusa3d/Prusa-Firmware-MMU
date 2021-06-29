@@ -28,7 +28,7 @@ Event UserInput::ConsumeEvent() {
 }
 
 void UserInput::Clear() {
-    while (eventQueue.IsEmpty()) {
+    while (!eventQueue.IsEmpty()) {
         Event x;
         eventQueue.ConsumeFirst(x);
     }
