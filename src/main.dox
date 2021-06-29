@@ -1,9 +1,39 @@
 ///@mainpage Prusa Multi Material Unit for the MK4
 ///@section intro_sec Introduction
 ///
-/// This is the introduction.
+/// This is the new firmware for the Multi Material Unit (MMU).
+///
+///@subsection Motivation
+///
+/// The key motivation for developing a new firmware structure were as follows:
+/// - adding a possibility of reporting the MMU's state even during running commands - the architecture of the original MM-control-01 project
+///   didn't allow to achieve this requirement
+/// - while being able to report the internal state of the MMU, the printer should be able to describe the error states clearly on its LCD without
+///   leaving the user to rely on some blinking LEDs
+/// - modular design prepared for possible future upgrades
+///
+///@section project_sec Project structure
+///
+/// - cmake
+/// - lib
+/// - src
+/// - tests
+/// - utils
 ///
 ///@section architecture_sec Firmware architecture
+///
+/// The whole firmware is composed of simple state machines which run all at once - it is a kind of simple cooperative multi-tasking
+/// while not eating up any significant resources by deploying generic task switching solutions like RTOS or similar.
+/// The general rule is to avoid waiting inside these state machines, no state machine is allowed to block execution of others.
+/// That implies making separate waiting states which only check for some condition to be true before proceeding further.
+///
+/// The firmware is separated into 4 layers:
+/// - HAL is responsible for talking to the physical hardware, in our case an AVR processor and its peripherals, TMC2130 stepper drivers, shift registers etc.
+/// - modules are the components abstracted of the real hardware and/or connection. A typical example are the buttons, LEDs, Idler, Selector etc.
+/// - logic layer is the application logic - this layer provides the sequences and logical relations between modules thus forming the behavior of the MMU.
+/// - main is the top layer, it is responsible for initialization of the whole firmware and performing the main loop, where the stepping of all the automata is located.
+///
+/// The whole architecture becomes obvious from the following picture:
 ///
 ///@dot
 ///digraph architecture {
@@ -73,5 +103,25 @@
 ///}
 ///@enddot
 ///
+/// Sidenote: due to avr-gcc 5.4 limitations we cannot use proper Singleton patterns but have to rely on global variables of each state machine.
+///
 ///@section protocol_sec Protocol description
+///
+/// The communication protocol between the printer and the MMU has only been extended to minimize the influence on existing MMU interface implementation.
+/// However, the backwards compatibility has not been kept and at least some changes are necessary.
+/// The good news is that the Slicer's MMU code is fully backwards compatible.
+///
+///
+///@section tests_sec Tests and quality assurance
+///
+///@subsection unit_sec Unit tests
+///
+/// The firmware architecture was designed with unit testing in mind, thus each firmware layer has only the least amount of necessary dependencies to surrounding code.
+/// This approach greatly simplified the definition of unit testing procedures with only a small amount stubs necessary.
+///
+/// Each firmware layer has its own subdirectory, the directory tree follows the firmware structure
+///
+/// The usage of stubs at each layer
+///
+///@subsection integration_sec Integration tests
 ///
