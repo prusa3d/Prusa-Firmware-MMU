@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include "../hal/circle_buffer.hpp"
+#include "../hal/circular_buffer.h"
 
 namespace modules {
 
@@ -29,13 +29,13 @@ public:
     Event ConsumeEvent();
 
     /// @returns true if there is at least one event in the event queue
-    bool AnyEvent() const { return !eventQueue.IsEmpty(); }
+    bool AnyEvent() const { return !eventQueue.empty(); }
 
     /// Remove all buffered events from the event queue
     void Clear();
 
 private:
-    CircleBuffer<Event, 4> eventQueue;
+    CircularBuffer<Event, uint_fast8_t, 4> eventQueue;
 };
 
 extern UserInput userInput;

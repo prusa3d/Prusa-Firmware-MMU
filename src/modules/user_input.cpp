@@ -8,29 +8,29 @@ UserInput userInput;
 
 void UserInput::Step() {
     if (buttons::buttons.ButtonPressed(0))
-        eventQueue.push_back(Event::Left);
+        eventQueue.push(Event::Left);
     if (buttons::buttons.ButtonPressed(1))
-        eventQueue.push_back(Event::Middle);
+        eventQueue.push(Event::Middle);
     if (buttons::buttons.ButtonPressed(2))
-        eventQueue.push_back(Event::Right);
+        eventQueue.push(Event::Right);
 }
 
 void UserInput::ProcessMessage(uint8_t ev) {
-    eventQueue.push_back((Event)ev);
+    eventQueue.push((Event)ev);
 }
 
 Event UserInput::ConsumeEvent() {
-    if (eventQueue.IsEmpty())
+    if (eventQueue.empty())
         return Event::NoEvent;
     Event rv;
-    eventQueue.ConsumeFirst(rv);
+    eventQueue.pop(rv);
     return rv;
 }
 
 void UserInput::Clear() {
-    while (!eventQueue.IsEmpty()) {
+    while (!eventQueue.empty()) {
         Event x;
-        eventQueue.ConsumeFirst(x);
+        eventQueue.pop(x);
     }
 }
 
