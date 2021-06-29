@@ -14,6 +14,7 @@ add_executable(
   ../../../../src/modules/leds.cpp
   ../../../../src/modules/permanent_storage.cpp
   ../../../../src/modules/selector.cpp
+  ../../../../src/modules/user_input.cpp
   ../../modules/stubs/stub_adc.cpp
   ../../modules/stubs/stub_eeprom.cpp
   ../../modules/stubs/stub_shr16.cpp
