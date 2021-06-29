@@ -276,6 +276,7 @@ void loop() {
     mfs::fsensor.Step();
     mi::idler.Step();
     ms::selector.Step();
+    mu::userInput.Step();
     currentCommand->Step();
     // add a watchdog reset
 }

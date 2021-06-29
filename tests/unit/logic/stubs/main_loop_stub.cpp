@@ -12,6 +12,7 @@
 #include "../../../../src/modules/motion.h"
 #include "../../../../src/modules/permanent_storage.h"
 #include "../../../../src/modules/selector.h"
+#include "../../../../src/modules/user_input.h"
 
 #include "../stubs/stub_motion.h"
 
@@ -26,6 +27,7 @@ void main_loop() {
     modules::idler::idler.Step();
     modules::selector::selector.Step();
     modules::motion::motion.Step();
+    modules::user_input::userInput.Step();
 
     modules::time::IncMillis();
 }
