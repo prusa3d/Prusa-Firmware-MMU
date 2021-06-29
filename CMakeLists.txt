@@ -204,6 +204,7 @@ target_sources(
           src/modules/permanent_storage.cpp
           src/modules/selector.cpp
           src/modules/timebase.cpp
+          src/modules/user_input.cpp
           src/logic/command_base.cpp
           src/logic/cut_filament.cpp
           src/logic/eject_filament.cpp

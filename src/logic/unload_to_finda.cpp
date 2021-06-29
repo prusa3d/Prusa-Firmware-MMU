@@ -1,5 +1,4 @@
 #include "unload_to_finda.h"
-#include "../modules/buttons.h"
 #include "../modules/finda.h"
 #include "../modules/globals.h"
 #include "../modules/idler.h"

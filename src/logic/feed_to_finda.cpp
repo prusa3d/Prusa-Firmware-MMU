@@ -1,5 +1,4 @@
 #include "feed_to_finda.h"
-#include "../modules/buttons.h"
 #include "../modules/finda.h"
 #include "../modules/globals.h"
 #include "../modules/idler.h"
@@ -7,6 +6,7 @@
 #include "../modules/leds.h"
 #include "../modules/motion.h"
 #include "../modules/permanent_storage.h"
+#include "../modules/user_input.h"
 
 namespace logic {
 
@@ -14,9 +14,9 @@ namespace mm = modules::motion;
 namespace mf = modules::finda;
 namespace mi = modules::idler;
 namespace ml = modules::leds;
-namespace mb = modules::buttons;
 namespace mg = modules::globals;
 namespace ms = modules::selector;
+namespace mu = modules::user_input;
 
 void FeedToFinda::Reset(bool feedPhaseLimited) {
     state = EngagingIdler;
@@ -33,10 +33,11 @@ bool FeedToFinda::Step() {
             state = PushingFilament;
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::blink0);
             mm::motion.PlanMove(feedPhaseLimited ? 1500 : 32767, 0, 0, 4000, 0, 0); //@@TODO constants
+            mu::userInput.Clear(); // remove all buffered events if any just before we wait for some input
         }
         return false;
     case PushingFilament: {
-        if (mf::finda.Pressed() || (feedPhaseLimited && mb::buttons.AnyButtonPressed())) { // @@TODO probably also a command from the printer
+        if (mf::finda.Pressed() || (feedPhaseLimited && mu::userInput.AnyEvent())) { // @@TODO probably also a command from the printer
             mm::motion.AbortPlannedMoves(); // stop pushing filament
             // FINDA triggered - that means it works and detected the filament tip
             state = UnloadBackToPTFE;

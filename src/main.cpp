@@ -17,6 +17,7 @@
 #include "modules/leds.h"
 #include "modules/protocol.h"
 #include "modules/selector.h"
+#include "modules/user_input.h"
 
 #include "logic/command_base.h"
 #include "logic/cut_filament.h"
@@ -34,6 +35,7 @@ namespace mi = modules::idler;
 namespace ml = modules::leds;
 namespace ms = modules::selector;
 namespace mg = modules::globals;
+namespace mu = modules::user_input;
 
 namespace hu = hal::usart;
 
@@ -193,6 +195,7 @@ void ProcessRequestMsg(const mp::RequestMsg &rq) {
     switch (rq.code) {
     case mp::RequestMsgCodes::Button:
         // behave just like if the user pressed a button
+        mu::userInput.ProcessMessage(rq.value);
         break;
     case mp::RequestMsgCodes::Finda:
         // immediately report FINDA status

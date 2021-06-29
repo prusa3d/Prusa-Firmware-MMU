@@ -1,5 +1,4 @@
 #include "load_filament.h"
-#include "../modules/buttons.h"
 #include "../modules/finda.h"
 #include "../modules/globals.h"
 #include "../modules/idler.h"
@@ -7,6 +6,7 @@
 #include "../modules/motion.h"
 #include "../modules/permanent_storage.h"
 #include "../modules/selector.h"
+#include "../modules/user_input.h"
 
 namespace logic {
 
@@ -18,6 +18,7 @@ namespace ms = modules::selector;
 namespace mf = modules::finda;
 namespace ml = modules::leds;
 namespace mg = modules::globals;
+namespace mu = modules::user_input;
 
 void LoadFilament::Reset(uint8_t param) {
     state = ProgressCode::EngagingIdler;
@@ -76,26 +77,28 @@ bool LoadFilament::Step() {
     case ProgressCode::ERR1DisengagingIdler: // couldn't unload to FINDA
         if (!mi::idler.Engaged()) {
             state = ProgressCode::ERR1WaitingForUser;
+            mu::userInput.Clear(); // remove all buffered events if any just before we wait for some input
         }
         return false;
     case ProgressCode::ERR1WaitingForUser: {
         // waiting for user buttons and/or a command from the printer
-        bool help = modules::buttons::buttons.ButtonPressed(modules::buttons::Left) /*|| command_help()*/;
-        bool tryAgain = modules::buttons::buttons.ButtonPressed(modules::buttons::Middle) /*|| command_tryAgain()*/;
-        bool userResolved = modules::buttons::buttons.ButtonPressed(modules::buttons::Right) /*|| command_userResolved()*/;
-        if (help) {
-            // try to manually load just a tiny bit - help the filament with the pulley
+        mu::Event ev = mu::userInput.ConsumeEvent();
+        switch (ev) {
+        case mu::Event::Left: // try to manually load just a tiny bit - help the filament with the pulley
             state = ProgressCode::ERR1EngagingIdler;
             mi::idler.Engage(mg::globals.ActiveSlot());
-        } else if (tryAgain) {
-            // try again the whole sequence
+            break;
+        case mu::Event::Middle: // try again the whole sequence
             Reset(mg::globals.ActiveSlot());
-        } else if (userResolved) {
-            // problem resolved - the user pushed the fillament by hand?
+            break;
+        case mu::Event::Right: // problem resolved - the user pushed the fillament by hand?
             modules::leds::leds.SetMode(mg::globals.ActiveSlot(), modules::leds::red, modules::leds::off);
             modules::leds::leds.SetMode(mg::globals.ActiveSlot(), modules::leds::green, modules::leds::on);
             //                mm::motion.PlanMove(mm::Pulley, 450, 5000); // @@TODO constants
             state = ProgressCode::AvoidingGrind;
+            break;
+        default: // no event, continue waiting for user input
+            break;
         }
         return false;
     }
