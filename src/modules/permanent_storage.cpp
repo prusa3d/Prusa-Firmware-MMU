@@ -1,6 +1,7 @@
 #include "permanent_storage.h"
 #include "../hal/eeprom.h"
 #include "globals.h"
+#include "../config/config.h"
 
 #include <stddef.h>
 
@@ -18,7 +19,7 @@ namespace permanent_storage {
 /// needs to be changed to force an EEPROM erase.
 struct eeprom_t {
     uint8_t eepromLengthCorrection; ///< Legacy bowden length correction
-    uint16_t eepromBowdenLen[5]; ///< Bowden length for each filament
+    uint16_t eepromBowdenLen[config::tool_count]; ///< Bowden length for each filament
     uint8_t eepromFilamentStatus[3]; ///< Majority vote status of eepromFilament wear leveling
     uint8_t eepromFilament[800]; ///< Top nibble status, bottom nibble last filament loaded
     uint8_t eepromDriveErrorCountH;
