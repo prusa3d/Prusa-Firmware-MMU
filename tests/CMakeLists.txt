@@ -32,9 +32,8 @@ if (GCOV_ENABLE)
 		COMMAND genhtml coverage.info --output-directory Coverage
 		COMMAND tar -zcvf Coverage.tar.gz Coverage
 		# Cheat and compare a file to itself to check for existence. File-Not-Found is a failure code. 
+		COMMAND ../../utils/gcovr.py -r . -e '../../tests' -e '../../lib/Catch2' | tee Summary.txt
 		COMMAND ${CMAKE_COMMAND} -E compare_files ${PROJECT_BINARY_DIR}/.ctest-finished ${PROJECT_BINARY_DIR}/.ctest-finished
-		# TODO - this needs to be fixed so it doesn't suck in all the catch/test cruft.
-		#COMMAND ${PROJECT_SOURCE_DIR}/utils/gcovr.py -r ${PROJECT_SOURCE_DIR} -e '${PROJECT_SOURCE_DIR}/tests/*' -e Catch2 | tee ${PROJECT_BINARY_DIR}/summary.txt
 		DEPENDS test_run_all
 	)
 else()
