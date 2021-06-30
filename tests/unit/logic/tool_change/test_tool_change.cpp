@@ -27,23 +27,63 @@ namespace mb = modules::buttons;
 namespace mg = modules::globals;
 namespace ms = modules::selector;
 
-TEST_CASE("tool_change::test0", "[tool_change]") {
-    using namespace logic;
-
+void ToolChange(uint8_t fromSlot, uint8_t toSlot) {
     ForceReinitAllAutomata();
 
-    ToolChange tc;
+    logic::ToolChange tc;
+
+    EnsureActiveSlotIndex(fromSlot);
+
     // restart the automaton
-    tc.Reset(0);
+    tc.Reset(toSlot);
 
-    main_loop();
+    REQUIRE(WhileCondition(
+        tc,
+        [&](int step) -> bool {
+        if(step == 2000){ // on 2000th step make FINDA trigger
+            hal::adc::SetADC(1, 0);
+        }
+        return tc.TopLevelState() == ProgressCode::UnloadingFilament; },
+        50000));
+    REQUIRE(mg::globals.FilamentLoaded() == false);
 
-    REQUIRE(WhileTopState(tc, ProgressCode::UnloadingFilament, 5000));
-    REQUIRE(modules::globals::globals.FilamentLoaded() == false);
-
-    REQUIRE(tc.TopLevelState() == ProgressCode::LoadingFilament);
-    REQUIRE(WhileTopState(tc, ProgressCode::LoadingFilament, 5000));
+    REQUIRE(WhileCondition(
+        tc,
+        [&](int step) -> bool {
+        if(step == 1000){ // on 1000th step make FINDA trigger
+            hal::adc::SetADC(1, 900);
+        }
+        return tc.TopLevelState() == ProgressCode::LoadingFilament; },
+        50000));
 
     REQUIRE(tc.TopLevelState() == ProgressCode::OK);
-    REQUIRE(modules::globals::globals.FilamentLoaded() == true);
+    REQUIRE(mg::globals.FilamentLoaded() == true);
+    REQUIRE(mg::globals.ActiveSlot() == toSlot);
+}
+
+void NoToolChange(uint8_t fromSlot, uint8_t toSlot) {
+    ForceReinitAllAutomata();
+
+    logic::ToolChange tc;
+
+    EnsureActiveSlotIndex(fromSlot);
+
+    // restart the automaton
+    tc.Reset(toSlot);
+
+    // should not do anything
+    REQUIRE(tc.TopLevelState() == ProgressCode::OK);
+    REQUIRE(tc.Error() == ErrorCode::OK);
+}
+
+TEST_CASE("tool_change::test0", "[tool_change]") {
+    for (uint8_t fromSlot = 0; fromSlot < 5; ++fromSlot) {
+        for (uint8_t toSlot = 0; toSlot < 5; ++toSlot) {
+            if (fromSlot != toSlot) {
+                ToolChange(fromSlot, toSlot);
+            } else {
+                NoToolChange(fromSlot, toSlot);
+            }
+        }
+    }
 }
