@@ -10,6 +10,7 @@ enum class ProgressCode : uint_fast8_t {
     EngagingIdler,
     DisengagingIdler,
     UnloadingToFinda,
+    UnloadingToPulley,
     FeedingToFinda,
     FeedingToBondtech,
     AvoidingGrind,
