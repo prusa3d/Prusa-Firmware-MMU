@@ -28,6 +28,7 @@ private:
     constexpr static const uint16_t cutStepsPost = 150;
     UnloadFilament unl; ///< a high-level command/operation may be used as a building block of other operations as well
     FeedToFinda feed;
+    uint8_t cutSlot;
 
     void SelectFilamentSlot();
 };

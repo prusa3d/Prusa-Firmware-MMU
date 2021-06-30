@@ -27,30 +27,29 @@ namespace mb = modules::buttons;
 namespace mg = modules::globals;
 namespace ms = modules::selector;
 
+#include "../helpers/helpers.ipp"
+
 TEST_CASE("cut_filament::cut0", "[cut_filament]") {
-    using namespace logic;
+    uint8_t cutSlot = 0;
 
     ForceReinitAllAutomata();
 
-    CutFilament cf;
+    logic::CutFilament cf;
+
+    EnsureActiveSlotIndex(cutSlot);
+
     // restart the automaton
-    cf.Reset(0);
+    cf.Reset(cutSlot);
 
-    main_loop();
-
-    // it should have instructed the selector and idler to move to slot 1
-    // check if the idler and selector have the right command
-    CHECK(modules::motion::axes[modules::motion::Idler].targetPos == mi::Idler::SlotPosition(0));
-    CHECK(modules::motion::axes[modules::motion::Selector].targetPos == ms::Selector::SlotPosition(0));
+    // check initial conditions
+    REQUIRE(VerifyState(cf, false, 5, cutSlot, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::SelectingFilamentSlot));
 
     // now cycle at most some number of cycles (to be determined yet) and then verify, that the idler and selector reached their target positions
     REQUIRE(WhileTopState(cf, ProgressCode::SelectingFilamentSlot, 5000));
 
-    CHECK(modules::motion::axes[modules::motion::Idler].pos == mi::Idler::SlotPosition(0));
-    CHECK(modules::motion::axes[modules::motion::Selector].pos == ms::Selector::SlotPosition(0));
-
     // idler and selector reached their target positions and the CF automaton will start feeding to FINDA as the next step
-    REQUIRE(cf.TopLevelState() == ProgressCode::FeedingToFinda);
+    REQUIRE(VerifyState(cf, false, cutSlot, cutSlot, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::FeedingToFinda));
+
     // prepare for simulated finda trigger
     REQUIRE(WhileCondition(
         cf,
@@ -60,29 +59,35 @@ TEST_CASE("cut_filament::cut0", "[cut_filament]") {
         }
         return cf.TopLevelState() == ProgressCode::FeedingToFinda; }, 5000));
 
-    // filament fed into FINDA, cutting...
-    REQUIRE(cf.TopLevelState() == ProgressCode::PreparingBlade);
+    // filament fed to FINDA
+    //@@TODO filament loaded flag - decide whether the filament loaded flag means really loaded into the printer or just a piece of filament
+    // stuck out of the pulley to prevent movement of the selector
+    REQUIRE(VerifyState(cf, /*true*/ false, cutSlot, cutSlot, true, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::UnloadingToPulley));
+
+    // pull it back to the pulley + simulate FINDA depress
+    REQUIRE(WhileCondition(
+        cf,
+        [&](int step) -> bool {
+        if( step == 100 ){ // simulate FINDA trigger - will get depressed in 100 steps
+            hal::adc::SetADC(1, 0);
+        }
+        return cf.TopLevelState() == ProgressCode::UnloadingToPulley; }, 5000));
+
+    REQUIRE(VerifyState(cf, /*true*/ false, cutSlot, cutSlot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::PreparingBlade));
+
+    // now move the selector aside, prepare for cutting
     REQUIRE(WhileTopState(cf, ProgressCode::PreparingBlade, 5000));
+    REQUIRE(VerifyState(cf, /*true*/ false, cutSlot, cutSlot + 1, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::PushingFilament));
 
-    REQUIRE(cf.TopLevelState() == ProgressCode::EngagingIdler);
-    REQUIRE(WhileTopState(cf, ProgressCode::EngagingIdler, 5000));
-
-    // the idler should be at the active slot @@TODO
-    REQUIRE(cf.TopLevelState() == ProgressCode::PushingFilament);
+    // pushing filament a bit for a cut
     REQUIRE(WhileTopState(cf, ProgressCode::PushingFilament, 5000));
+    REQUIRE(VerifyState(cf, /*true*/ false, cutSlot, cutSlot + 1, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::PerformingCut));
 
-    // filament pushed - performing cut
-    REQUIRE(cf.TopLevelState() == ProgressCode::PerformingCut);
+    // cutting
     REQUIRE(WhileTopState(cf, ProgressCode::PerformingCut, 5000));
+    REQUIRE(VerifyState(cf, /*true*/ false, cutSlot, 0, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::ReturningSelector));
 
-    // returning selector
-    REQUIRE(cf.TopLevelState() == ProgressCode::ReturningSelector);
+    // moving selector to the other end of its axis
     REQUIRE(WhileTopState(cf, ProgressCode::ReturningSelector, 5000));
-
-    // the next states are still @@TODO
+    REQUIRE(VerifyState(cf, /*true*/ false, cutSlot, 5, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
 }
-
-// comments:
-// The tricky part of the whole state machine are the edge cases - filament not loaded, stall guards etc.
-// ... all the external influence we can get on the real HW
-// But the good news is we can simulate them all in the unit test and thus ensure proper handling
