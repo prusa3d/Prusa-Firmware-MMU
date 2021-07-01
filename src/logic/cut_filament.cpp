@@ -14,6 +14,7 @@ CutFilament cutFilament;
 
 namespace mm = modules::motion;
 namespace mi = modules::idler;
+namespace ml = modules::leds;
 namespace ms = modules::selector;
 namespace mg = modules::globals;
 
@@ -33,6 +34,8 @@ void CutFilament::SelectFilamentSlot() {
     state = ProgressCode::SelectingFilamentSlot;
     mi::idler.Engage(cutSlot);
     ms::selector.MoveToSlot(cutSlot);
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
 }
 
 bool CutFilament::Step() {
@@ -89,6 +92,8 @@ bool CutFilament::Step() {
     case ProgressCode::ReturningSelector:
         if (ms::selector.Slot() == 5) { // selector returned to position, feed the filament back to FINDA
             state = ProgressCode::OK;
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
             feed.Reset(true);
         }
         break;
