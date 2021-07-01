@@ -14,11 +14,11 @@ int8_t Buttons::DecodeADC(uint16_t rawADC) {
     // Button 3 - 516
     // Doesn't handle multiple pressed buttons at once
 
-    if (rawADC > config::button0ADCMin && rawADC < config::button0ADCMax)
+    if (rawADC >= config::button0ADCMin && rawADC <= config::button0ADCMax)
         return 0;
-    else if (rawADC > config::button1ADCMin && rawADC < config::button1ADCMax)
+    else if (rawADC >= config::button1ADCMin && rawADC <= config::button1ADCMax)
         return 1;
-    else if (rawADC > config::button2ADCMin && rawADC < config::button2ADCMax)
+    else if (rawADC >= config::button2ADCMin && rawADC <= config::button2ADCMax)
         return 2;
     return -1;
 }
