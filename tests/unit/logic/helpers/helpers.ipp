@@ -4,12 +4,12 @@ bool VerifyState(SM &uf, bool filamentLoaded, uint8_t idlerSlotIndex, uint8_t se
     bool findaPressed, ml::Mode greenLEDMode, ml::Mode redLEDMode, ErrorCode err, ProgressCode topLevelProgress) {
     CHECKED_ELSE(mg::globals.FilamentLoaded() == filamentLoaded) { return false; }
     CHECKED_ELSE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(idlerSlotIndex)) { return false; }
-    CHECKED_ELSE(mi::idler.Engaged() == (idlerSlotIndex < 5)) { return false; }
+    CHECKED_ELSE(mi::idler.Engaged() == (idlerSlotIndex < config::toolCount)) { return false; }
     CHECKED_ELSE(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(selectorSlotIndex)) { return false; }
     CHECKED_ELSE(ms::selector.Slot() == selectorSlotIndex) { return false; }
     CHECKED_ELSE(mf::finda.Pressed() == findaPressed) { return false; }
 
-    for(uint8_t ledIndex = 0; ledIndex < 5; ++ledIndex){
+    for(uint8_t ledIndex = 0; ledIndex < config::toolCount; ++ledIndex){
         if( ledIndex != selectorSlotIndex ){
             // the other LEDs should be off
             CHECKED_ELSE(ml::leds.Mode(ledIndex, ml::red) == ml::off) { return false; }
@@ -31,12 +31,12 @@ bool VerifyState2(SM &uf, bool filamentLoaded, uint8_t idlerSlotIndex, uint8_t s
     bool findaPressed, uint8_t ledCheckIndex, ml::Mode greenLEDMode, ml::Mode redLEDMode, ErrorCode err, ProgressCode topLevelProgress) {
     CHECKED_ELSE(mg::globals.FilamentLoaded() == filamentLoaded) { return false; }
     CHECKED_ELSE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(idlerSlotIndex)) { return false; }
-    CHECKED_ELSE(mi::idler.Engaged() == (idlerSlotIndex < 5)) { return false; }
+    CHECKED_ELSE(mi::idler.Engaged() == (idlerSlotIndex < config::toolCount)) { return false; }
     CHECKED_ELSE(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(selectorSlotIndex)) { return false; }
     CHECKED_ELSE(ms::selector.Slot() == selectorSlotIndex) { return false; }
     CHECKED_ELSE(mf::finda.Pressed() == findaPressed) { return false; }
 
-    for(uint8_t ledIndex = 0; ledIndex < 5; ++ledIndex){
+    for(uint8_t ledIndex = 0; ledIndex < config::toolCount; ++ledIndex){
         if( ledIndex != ledCheckIndex ){
             // the other LEDs should be off
             CHECKED_ELSE(ml::leds.Mode(ledIndex, ml::red) == ml::off) { return false; }

@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include "debouncer.h"
+#include "../config/config.h"
 
 /// The modules namespace contains models of MMU's components
 namespace modules {
@@ -12,11 +13,9 @@ namespace buttons {
 /// A model of a single button, performs automatic debouncing on top of the raw ADC API
 struct Button : public debounce::Debouncer {
     inline constexpr Button()
-        : debounce::Debouncer(debounce) {}
+        : debounce::Debouncer(config::buttonsDebounceMs) {}
 
 private:
-    /// time interval for debouncing @@TODO specify units
-    constexpr static const uint16_t debounce = 100;
 };
 
 /// Enum of buttons - used also as indices in an array of buttons to keep the code size tight.
@@ -29,7 +28,6 @@ enum {
 /// A model of the 3 buttons on the MMU unit
 class Buttons {
     constexpr static const uint8_t N = 3; ///< number of buttons currently supported
-    constexpr static const uint8_t adc = 1; ///< ADC index - will be some define or other constant later on
 
 public:
     inline constexpr Buttons() = default;

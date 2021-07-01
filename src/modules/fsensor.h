@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include "debouncer.h"
+#include "../config/config.h"
 
 namespace modules {
 
@@ -12,7 +13,7 @@ namespace fsensor {
 class FSensor : protected debounce::Debouncer {
 public:
     inline constexpr FSensor()
-        : debounce::Debouncer(debounce)
+        : debounce::Debouncer(config::fsensorDebounceMs)
         , reportedFSensorState(false) {};
 
     /// Performs one step of the state machine - processes a change-of-state message if any arrived
@@ -24,8 +25,6 @@ public:
     void ProcessMessage(bool on);
 
 private:
-    /// time interval for debouncing @@TODO specify units
-    constexpr static const uint16_t debounce = 10;
     bool reportedFSensorState; ///< reported state that came from the printer via a communication message
 };
 

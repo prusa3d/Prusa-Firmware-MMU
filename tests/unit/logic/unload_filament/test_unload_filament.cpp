@@ -42,7 +42,7 @@ void RegularUnloadFromSlot04Init(uint8_t slot, logic::UnloadFilament &uf) {
     SetFINDAStateAndDebounce(true);
 
     // verify startup conditions
-    REQUIRE(VerifyState(uf, true, 5, slot, true, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
 
     // restart the automaton
     uf.Reset(slot);
@@ -55,7 +55,7 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA on
     // green LED should blink, red off
-    REQUIRE(VerifyState(uf, true, 5, slot, true, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::UnloadingToFinda));
+    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::UnloadingToFinda));
 
     // run the automaton
     // Stage 1 - unloading to FINDA
@@ -63,7 +63,7 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
         uf,
         [&](int step) -> bool {
         if(step == 100){ // on 100th step make FINDA trigger
-            hal::adc::SetADC(1, 0);
+            hal::adc::SetADC(config::findaADCIndex, 0);
         }
         return uf.TopLevelState() == ProgressCode::UnloadingToFinda; },
         5000));
@@ -83,7 +83,7 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA still triggered off
     // green LED should blink
-    REQUIRE(VerifyState(uf, true, 5, slot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::AvoidingGrind));
+    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::AvoidingGrind));
 
     // Stage 3 - avoiding grind (whatever is that @@TODO)
     REQUIRE(WhileTopState(uf, ProgressCode::AvoidingGrind, 5000));
@@ -93,7 +93,7 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA still triggered off
     // green LED should blink
-    REQUIRE(VerifyState(uf, true, 5, slot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::FinishingMoves));
+    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::FinishingMoves));
 
     // Stage 4 - finishing moves and setting global state correctly
     REQUIRE(WhileTopState(uf, ProgressCode::FinishingMoves, 5000));
@@ -103,7 +103,7 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA still triggered off
     // green LED should be ON
-    REQUIRE(VerifyState(uf, false, 5, slot, false, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
+    REQUIRE(VerifyState(uf, false, mi::Idler::IdleSlotIndex(), slot, false, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
 
     // Stage 5 - repeated calls to TopLevelState should return "OK"
     REQUIRE(uf.TopLevelState() == ProgressCode::OK);
@@ -113,7 +113,7 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
 }
 
 TEST_CASE("unload_filament::regular_unload_from_slot_0-4", "[unload_filament]") {
-    for (uint8_t slot = 0; slot < 5; ++slot) {
+    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
         logic::UnloadFilament uf;
         RegularUnloadFromSlot04Init(slot, uf);
         RegularUnloadFromSlot04(slot, uf);
@@ -134,7 +134,7 @@ void FindaDidntTriggerCommonSetup(uint8_t slot, logic::UnloadFilament &uf) {
     mg::globals.SetFilamentLoaded(true);
 
     // verify startup conditions
-    REQUIRE(VerifyState(uf, true, 5, slot, true, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
 
     // restart the automaton
     uf.Reset(slot);
@@ -146,7 +146,7 @@ void FindaDidntTriggerCommonSetup(uint8_t slot, logic::UnloadFilament &uf) {
     // FINDA triggered off
     // green LED should blink
     // no error so far
-    REQUIRE(VerifyState(uf, true, 5, slot, true, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::UnloadingToFinda));
+    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::UnloadingToFinda));
 
     // run the automaton
     // Stage 1 - unloading to FINDA - do NOT let it trigger - keep it pressed, the automaton should finish all moves with the pulley
@@ -169,7 +169,7 @@ void FindaDidntTriggerCommonSetup(uint8_t slot, logic::UnloadFilament &uf) {
     // FINDA still on
     // red LED should blink
     // green LED should be off
-    REQUIRE(VerifyState(uf, true, 5, slot, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_TRIGGER, ProgressCode::ERR1WaitingForUser));
+    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_TRIGGER, ProgressCode::ERR1WaitingForUser));
 }
 
 void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
@@ -183,7 +183,7 @@ void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
     // In this case we check the first option
 
     // Perform press on button 1 + debounce
-    hal::adc::SetADC(0, 0);
+    hal::adc::SetADC(config::buttonsADCIndex, 1);
     while (!mb::buttons.ButtonPressed(0)) {
         main_loop();
         uf.Step();
@@ -194,7 +194,7 @@ void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA still on
     // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, true, 5, slot, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_TRIGGER, ProgressCode::ERR1EngagingIdler));
+    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_TRIGGER, ProgressCode::ERR1EngagingIdler));
 
     // Stage 4 - engage the idler
     REQUIRE(WhileTopState(uf, ProgressCode::ERR1EngagingIdler, 5000));
@@ -213,7 +213,7 @@ void FindaDidntTriggerResolveHelpFindaTriggered(uint8_t slot, logic::UnloadFilam
         uf,
         [&](int step) -> bool {
         if(step == 100){ // on 100th step make FINDA trigger
-            hal::adc::SetADC(1, 0);
+            hal::adc::SetADC(config::findaADCIndex, 0);
         }
         return uf.TopLevelState() == ProgressCode::ERR1HelpingFilament; },
         5000));
@@ -239,7 +239,7 @@ void FindaDidntTriggerResolveHelpFindaDidntTrigger(uint8_t slot, logic::UnloadFi
 }
 
 TEST_CASE("unload_filament::finda_didnt_trigger_resolve_help_second_ok", "[unload_filament]") {
-    for (uint8_t slot = 0; slot < 5; ++slot) {
+    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
         logic::UnloadFilament uf;
         FindaDidntTriggerCommonSetup(slot, uf);
         FindaDidntTriggerResolveHelp(slot, uf);
@@ -249,7 +249,7 @@ TEST_CASE("unload_filament::finda_didnt_trigger_resolve_help_second_ok", "[unloa
 
 TEST_CASE("unload_filament::finda_didnt_trigger_resolve_help_second_fail", "[unload_filament]") {
     // the same with different end scenario
-    for (uint8_t slot = 0; slot < 5; ++slot) {
+    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
         logic::UnloadFilament uf;
         FindaDidntTriggerCommonSetup(slot, uf);
         FindaDidntTriggerResolveHelp(slot, uf);
@@ -267,7 +267,7 @@ void FindaDidntTriggerResolveTryAgain(uint8_t slot, logic::UnloadFilament &uf) {
     // In this case we check the second option
 
     // Perform press on button 2 + debounce
-    hal::adc::SetADC(0, 340);
+    hal::adc::SetADC(config::buttonsADCIndex, 340);
     while (!mb::buttons.ButtonPressed(1)) {
         main_loop();
         uf.Step();
@@ -278,11 +278,11 @@ void FindaDidntTriggerResolveTryAgain(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA still on
     // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, true, 5, slot, true, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::UnloadingToFinda));
+    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::UnloadingToFinda));
 }
 
 TEST_CASE("unload_filament::finda_didnt_trigger_resolve_try_again", "[unload_filament]") {
-    for (uint8_t slot = 0; slot < 5; ++slot) {
+    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
         logic::UnloadFilament uf;
         FindaDidntTriggerCommonSetup(slot, uf);
         FindaDidntTriggerResolveTryAgain(slot, uf);

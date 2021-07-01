@@ -43,7 +43,7 @@ bool Step_Basic_One_Button(hal::adc::TADCData &&d, uint8_t testedButtonIndex) {
 
     // need to oversample the data as debouncing takes 100 cycles to accept a pressed button
     constexpr uint8_t oversampleFactor = 100;
-    hal::adc::ReinitADC(0, std::move(d), oversampleFactor);
+    hal::adc::ReinitADC(config::buttonsADCIndex, std::move(d), oversampleFactor);
 
     uint8_t otherButton1 = 1, otherButton2 = 2;
     switch (testedButtonIndex) {
@@ -85,7 +85,7 @@ TEST_CASE("buttons::Step-basic-button-one-after-other", "[buttons]") {
 
     // need to oversample the data as debouncing takes 100 cycles to accept a pressed button
     constexpr uint8_t oversampleFactor = 100;
-    hal::adc::ReinitADC(0, std::move(d), oversampleFactor);
+    hal::adc::ReinitADC(config::buttonsADCIndex, std::move(d), oversampleFactor);
 
     CHECK(Step_Basic_One_Button_Test(b, oversampleFactor, 0, 1, 2));
     CHECK(Step_Basic_One_Button_Test(b, oversampleFactor, 1, 0, 2));
@@ -101,7 +101,7 @@ TEST_CASE("buttons::Step-debounce-one-button", "[buttons]") {
 
     // need to oversample the data as debouncing takes 100 cycles to accept a pressed button
     constexpr uint8_t oversampleFactor = 25;
-    hal::adc::ReinitADC(0, std::move(d), oversampleFactor);
+    hal::adc::ReinitADC(config::buttonsADCIndex, std::move(d), oversampleFactor);
     modules::time::ReinitTimebase();
 
     Buttons b;

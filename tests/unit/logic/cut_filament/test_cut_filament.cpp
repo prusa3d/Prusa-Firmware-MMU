@@ -34,7 +34,7 @@ void CutSlot(uint8_t cutSlot) {
     ForceReinitAllAutomata();
 
     logic::CutFilament cf;
-    REQUIRE(VerifyState(cf, false, 5, 0, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+    REQUIRE(VerifyState(cf, false, mi::Idler::IdleSlotIndex(), 0, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
 
     EnsureActiveSlotIndex(cutSlot);
 
@@ -42,7 +42,7 @@ void CutSlot(uint8_t cutSlot) {
     cf.Reset(cutSlot);
 
     // check initial conditions
-    REQUIRE(VerifyState(cf, false, 5, cutSlot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::SelectingFilamentSlot));
+    REQUIRE(VerifyState(cf, false, mi::Idler::IdleSlotIndex(), cutSlot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::SelectingFilamentSlot));
 
     // now cycle at most some number of cycles (to be determined yet) and then verify, that the idler and selector reached their target positions
     REQUIRE(WhileTopState(cf, ProgressCode::SelectingFilamentSlot, 5000));
@@ -55,7 +55,7 @@ void CutSlot(uint8_t cutSlot) {
         cf,
         [&](int step) -> bool {
         if( step == 100 ){ // simulate FINDA trigger - will get pressed in 100 steps (due to debouncing)
-            hal::adc::SetADC(1, 900);
+            hal::adc::SetADC(config::findaADCIndex, 900);
         }
         return cf.TopLevelState() == ProgressCode::FeedingToFinda; }, 5000));
 
@@ -69,7 +69,7 @@ void CutSlot(uint8_t cutSlot) {
         cf,
         [&](int step) -> bool {
         if( step == 100 ){ // simulate FINDA trigger - will get depressed in 100 steps
-            hal::adc::SetADC(1, 0);
+            hal::adc::SetADC(config::findaADCIndex, 0);
         }
         return cf.TopLevelState() == ProgressCode::UnloadingToPulley; }, 5000));
 
@@ -89,11 +89,11 @@ void CutSlot(uint8_t cutSlot) {
 
     // moving selector to the other end of its axis
     REQUIRE(WhileTopState(cf, ProgressCode::ReturningSelector, 5000));
-    REQUIRE(VerifyState2(cf, /*true*/ false, cutSlot, 5, false, cutSlot, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
+    REQUIRE(VerifyState2(cf, /*true*/ false, cutSlot, ms::Selector::IdleSlotIndex(), false, cutSlot, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
 }
 
 TEST_CASE("cut_filament::cut0", "[cut_filament]") {
-    for (uint8_t cutSlot = 0; cutSlot < 5; ++cutSlot) {
+    for (uint8_t cutSlot = 0; cutSlot < config::toolCount; ++cutSlot) {
         CutSlot(cutSlot);
     }
 }
