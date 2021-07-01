@@ -34,6 +34,7 @@ void CutSlot(uint8_t cutSlot) {
     ForceReinitAllAutomata();
 
     logic::CutFilament cf;
+    REQUIRE(VerifyState(cf, false, 5, 0, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
 
     EnsureActiveSlotIndex(cutSlot);
 
@@ -41,19 +42,19 @@ void CutSlot(uint8_t cutSlot) {
     cf.Reset(cutSlot);
 
     // check initial conditions
-    REQUIRE(VerifyState(cf, false, 5, cutSlot, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::SelectingFilamentSlot));
+    REQUIRE(VerifyState(cf, false, 5, cutSlot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::SelectingFilamentSlot));
 
     // now cycle at most some number of cycles (to be determined yet) and then verify, that the idler and selector reached their target positions
     REQUIRE(WhileTopState(cf, ProgressCode::SelectingFilamentSlot, 5000));
 
     // idler and selector reached their target positions and the CF automaton will start feeding to FINDA as the next step
-    REQUIRE(VerifyState(cf, false, cutSlot, cutSlot, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::FeedingToFinda));
+    REQUIRE(VerifyState(cf, false, cutSlot, cutSlot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::FeedingToFinda));
 
     // prepare for simulated finda trigger
     REQUIRE(WhileCondition(
         cf,
         [&](int step) -> bool {
-        if( step == 1000 ){ // simulate FINDA trigger - will get pressed in 100 steps (due to debouncing)
+        if( step == 100 ){ // simulate FINDA trigger - will get pressed in 100 steps (due to debouncing)
             hal::adc::SetADC(1, 900);
         }
         return cf.TopLevelState() == ProgressCode::FeedingToFinda; }, 5000));
@@ -76,19 +77,19 @@ void CutSlot(uint8_t cutSlot) {
 
     // now move the selector aside, prepare for cutting
     REQUIRE(WhileTopState(cf, ProgressCode::PreparingBlade, 5000));
-    REQUIRE(VerifyState(cf, /*true*/ false, cutSlot, cutSlot + 1, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::PushingFilament));
+    REQUIRE(VerifyState2(cf, /*true*/ false, cutSlot, cutSlot + 1, false, cutSlot, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::PushingFilament));
 
     // pushing filament a bit for a cut
     REQUIRE(WhileTopState(cf, ProgressCode::PushingFilament, 5000));
-    REQUIRE(VerifyState(cf, /*true*/ false, cutSlot, cutSlot + 1, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::PerformingCut));
+    REQUIRE(VerifyState2(cf, /*true*/ false, cutSlot, cutSlot + 1, false, cutSlot, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::PerformingCut));
 
     // cutting
-    REQUIRE(WhileTopState(cf, ProgressCode::PerformingCut, 5000));
-    REQUIRE(VerifyState(cf, /*true*/ false, cutSlot, 0, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::ReturningSelector));
+    REQUIRE(WhileTopState(cf, ProgressCode::PerformingCut, 10000));
+    REQUIRE(VerifyState2(cf, /*true*/ false, cutSlot, 0, false, cutSlot, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::ReturningSelector));
 
     // moving selector to the other end of its axis
     REQUIRE(WhileTopState(cf, ProgressCode::ReturningSelector, 5000));
-    REQUIRE(VerifyState(cf, /*true*/ false, cutSlot, 5, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+    REQUIRE(VerifyState2(cf, /*true*/ false, cutSlot, 5, false, cutSlot, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
 }
 
 TEST_CASE("cut_filament::cut0", "[cut_filament]") {
