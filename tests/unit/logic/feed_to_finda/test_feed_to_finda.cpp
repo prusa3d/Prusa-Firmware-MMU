@@ -64,7 +64,7 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
 
     // now let the filament be pushed into the FINDA - do 500 steps without triggering the condition
     // and then let the simulated ADC channel 1 create a FINDA switch
-    ha::ReinitADC(1, ha::TADCData({ 600, 700, 800, 900 }), 1);
+    ha::ReinitADC(config::findaADCIndex, ha::TADCData({ 600, 700, 800, 900 }), 1);
 
     REQUIRE(WhileCondition(
         ff,
@@ -129,7 +129,7 @@ TEST_CASE("feed_to_finda::FINDA_failed", "[feed_to_finda]") {
     REQUIRE(ml::leds.Mode(mg::globals.ActiveSlot(), ml::Color::green) == ml::blink0);
 
     // now let the filament be pushed into the FINDA - but we make sure the FINDA doesn't trigger at all
-    ha::ReinitADC(1, ha::TADCData({ 0 }), 100);
+    ha::ReinitADC(config::findaADCIndex, ha::TADCData({ 0 }), 100);
 
     REQUIRE(WhileCondition(
         ff,

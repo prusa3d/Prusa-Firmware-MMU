@@ -8,7 +8,7 @@ namespace modules {
 namespace idler {
 
 // @@TODO PROGMEM
-uint16_t const Idler::slotPositions[6] = { 1, 2, 3, 4, 5, 0 };
+uint16_t const Idler::slotPositions[slotPositionSize] = { 1, 2, 3, 4, 5, 0 };
 
 Idler idler;
 
@@ -25,7 +25,7 @@ bool Idler::Disengage() {
 
     mm::motion.InitAxis(mm::Idler);
     // plan move to idle position
-    mm::motion.PlanMove(mm::Idler, slotPositions[5] - mm::motion.CurrentPos(mm::Idler), 1000); // @@TODO
+    mm::motion.PlanMove(mm::Idler, slotPositions[IdleSlotIndex()] - mm::motion.CurrentPos(mm::Idler), 1000); // @@TODO
     state = Moving;
     return true;
 }

@@ -1,5 +1,5 @@
 #pragma once
-
+#include "../config/config.h"
 #include <stdint.h>
 
 namespace modules {
@@ -116,7 +116,7 @@ public:
     }
 
 private:
-    constexpr static const uint8_t ledPairs = 5;
+    constexpr static const uint8_t ledPairs = config::toolCount;
     /// pairs of LEDs:
     /// [0] - green LED slot 0
     /// [1] - red LED slot 0

@@ -36,7 +36,7 @@ void LoadFilamentCommonSetup(uint8_t slot, logic::LoadFilament &lf) {
     EnsureActiveSlotIndex(slot);
 
     // verify startup conditions
-    REQUIRE(VerifyState(lf, false, 5, slot, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+    REQUIRE(VerifyState(lf, false, mi::Idler::IdleSlotIndex(), slot, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
 
     // restart the automaton
     lf.Reset(slot);
@@ -47,7 +47,7 @@ void LoadFilamentCommonSetup(uint8_t slot, logic::LoadFilament &lf) {
     // no change in selector's position
     // FINDA off
     // green LED should blink, red off
-    REQUIRE(VerifyState(lf, false, 5, slot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::EngagingIdler));
+    REQUIRE(VerifyState(lf, false, mi::Idler::IdleSlotIndex(), slot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::EngagingIdler));
 
     // Stage 1 - engaging idler
     REQUIRE(WhileTopState(lf, ProgressCode::EngagingIdler, 5000));
@@ -61,7 +61,7 @@ void LoadFilamentSuccessful(uint8_t slot, logic::LoadFilament &lf) {
         lf,
         [&](int step) -> bool {
         if(step == 100){ // on 100th step make FINDA trigger
-            hal::adc::SetADC(1, 1023);
+            hal::adc::SetADC(config::findaADCIndex, 1023);
         }
         return lf.TopLevelState() == ProgressCode::FeedingToFinda; },
         5000));
@@ -81,11 +81,11 @@ void LoadFilamentSuccessful(uint8_t slot, logic::LoadFilament &lf) {
 
     // Stage 4 - disengaging idler
     REQUIRE(WhileTopState(lf, ProgressCode::DisengagingIdler, 5000));
-    REQUIRE(VerifyState(lf, true, 5, slot, true, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
+    REQUIRE(VerifyState(lf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
 }
 
 TEST_CASE("load_filament::regular_load_to_slot_0-4", "[load_filament]") {
-    for (uint8_t slot = 0; slot < 5; ++slot) {
+    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
         logic::LoadFilament lf;
         LoadFilamentCommonSetup(slot, lf);
         LoadFilamentSuccessful(slot, lf);
@@ -100,7 +100,7 @@ void FailedLoadToFinda(uint8_t slot, logic::LoadFilament &lf) {
 
     // Stage 3 - disengaging idler in error mode
     REQUIRE(WhileTopState(lf, ProgressCode::ERR1DisengagingIdler, 5000));
-    REQUIRE(VerifyState(lf, false, 5, slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_TRIGGER, ProgressCode::ERR1WaitingForUser));
+    REQUIRE(VerifyState(lf, false, mi::Idler::IdleSlotIndex(), slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_TRIGGER, ProgressCode::ERR1WaitingForUser));
 }
 
 void FailedLoadToFindaResolveHelp(uint8_t slot, logic::LoadFilament &lf) {
@@ -113,13 +113,13 @@ void FailedLoadToFindaResolveHelp(uint8_t slot, logic::LoadFilament &lf) {
     // In this case we check the first option
 
     // Perform press on button 1 + debounce
-    hal::adc::SetADC(0, 0);
+    hal::adc::SetADC(config::buttonsADCIndex, 1);
     while (!mb::buttons.ButtonPressed(0)) {
         main_loop();
         lf.Step();
     }
 
-    REQUIRE(VerifyState(lf, false, 5, slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_TRIGGER, ProgressCode::ERR1EngagingIdler));
+    REQUIRE(VerifyState(lf, false, mi::Idler::IdleSlotIndex(), slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_TRIGGER, ProgressCode::ERR1EngagingIdler));
 
     // Stage 4 - engage the idler
     REQUIRE(WhileTopState(lf, ProgressCode::ERR1EngagingIdler, 5000));
@@ -133,7 +133,7 @@ void FailedLoadToFindaResolveHelpFindaTriggered(uint8_t slot, logic::LoadFilamen
         lf,
         [&](int step) -> bool {
         if(step == 100){ // on 100th step make FINDA trigger
-            hal::adc::SetADC(1, 1023);
+            hal::adc::SetADC(config::findaADCIndex, 1023);
         }
         return lf.TopLevelState() == ProgressCode::ERR1HelpingFilament; },
         5000));
@@ -149,7 +149,7 @@ void FailedLoadToFindaResolveHelpFindaDidntTrigger(uint8_t slot, logic::LoadFila
 }
 
 TEST_CASE("load_filament::failed_load_to_finda_0-4_resolve_help_second_ok", "[load_filament]") {
-    for (uint8_t slot = 0; slot < 5; ++slot) {
+    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
         logic::LoadFilament lf;
         LoadFilamentCommonSetup(slot, lf);
         FailedLoadToFinda(slot, lf);
@@ -159,7 +159,7 @@ TEST_CASE("load_filament::failed_load_to_finda_0-4_resolve_help_second_ok", "[lo
 }
 
 TEST_CASE("load_filament::failed_load_to_finda_0-4_resolve_help_second_fail", "[load_filament]") {
-    for (uint8_t slot = 0; slot < 5; ++slot) {
+    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
         logic::LoadFilament lf;
         LoadFilamentCommonSetup(slot, lf);
         FailedLoadToFinda(slot, lf);

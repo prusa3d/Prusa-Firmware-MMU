@@ -8,7 +8,7 @@ namespace modules {
 namespace selector {
 
 // @@TODO PROGMEM
-const uint16_t Selector::slotPositions[6] = { 1, 2, 3, 4, 5, 6 }; // @@TODO
+const uint16_t Selector::slotPositions[slotPositionSize] = { 1, 2, 3, 4, 5, 6 }; // @@TODO
 
 Selector selector;
 

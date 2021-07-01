@@ -41,7 +41,7 @@ void ToolChange(uint8_t fromSlot, uint8_t toSlot) {
         tc,
         [&](int step) -> bool {
         if(step == 2000){ // on 2000th step make FINDA trigger
-            hal::adc::SetADC(1, 0);
+            hal::adc::SetADC(config::findaADCIndex, 0);
         }
         return tc.TopLevelState() == ProgressCode::UnloadingFilament; },
         50000));
@@ -51,7 +51,7 @@ void ToolChange(uint8_t fromSlot, uint8_t toSlot) {
         tc,
         [&](int step) -> bool {
         if(step == 1000){ // on 1000th step make FINDA trigger
-            hal::adc::SetADC(1, 900);
+            hal::adc::SetADC(config::findaADCIndex, 900);
         }
         return tc.TopLevelState() == ProgressCode::LoadingFilament; },
         50000));
@@ -77,8 +77,8 @@ void NoToolChange(uint8_t fromSlot, uint8_t toSlot) {
 }
 
 TEST_CASE("tool_change::test0", "[tool_change]") {
-    for (uint8_t fromSlot = 0; fromSlot < 5; ++fromSlot) {
-        for (uint8_t toSlot = 0; toSlot < 5; ++toSlot) {
+    for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
+        for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
             if (fromSlot != toSlot) {
                 ToolChange(fromSlot, toSlot);
             } else {

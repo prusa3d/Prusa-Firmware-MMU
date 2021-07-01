@@ -1,4 +1,5 @@
 #pragma once
+#include "../config/config.h"
 #include <stdint.h>
 
 namespace modules {
@@ -42,9 +43,14 @@ public:
     /// @returns predefined positions of individual slots
     inline static uint16_t SlotPosition(uint8_t slot) { return slotPositions[slot]; }
 
+    /// @returns the index of idle position of the selector, usually 5 in case of 0-4 valid indices of filament slots
+    inline static constexpr uint8_t IdleSlotIndex() { return config::toolCount; }
+
 private:
+    constexpr static const uint8_t slotPositionSize = config::toolCount + 1;
+
     /// slots 0-4 are the real ones, the 5th is the farthest parking positions
-    static const uint16_t slotPositions[6];
+    static const uint16_t slotPositions[slotPositionSize];
 
     /// internal state of the automaton
     uint8_t state;
