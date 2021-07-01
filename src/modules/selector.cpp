@@ -7,9 +7,6 @@
 namespace modules {
 namespace selector {
 
-// @@TODO PROGMEM
-const uint16_t Selector::slotPositions[slotPositionSize] = { 1, 2, 3, 4, 5, 6 }; // @@TODO
-
 Selector selector;
 
 namespace mm = modules::motion;
@@ -24,7 +21,7 @@ bool Selector::MoveToSlot(uint8_t slot) {
         return true;
 
     mm::motion.InitAxis(mm::Selector);
-    mm::motion.PlanMove(mm::Selector, slotPositions[slot] - mm::motion.CurrentPos(mm::Selector), 1000); // @@TODO
+    mm::motion.PlanMove(mm::Selector, config::selectorSlotPositions[slot] - mm::motion.CurrentPos(mm::Selector), 1000); // @@TODO
     state = Moving;
     return true;
 }
