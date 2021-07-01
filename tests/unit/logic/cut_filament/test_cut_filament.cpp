@@ -29,8 +29,7 @@ namespace ms = modules::selector;
 
 #include "../helpers/helpers.ipp"
 
-TEST_CASE("cut_filament::cut0", "[cut_filament]") {
-    uint8_t cutSlot = 0;
+void CutSlot(uint8_t cutSlot) {
 
     ForceReinitAllAutomata();
 
@@ -90,4 +89,10 @@ TEST_CASE("cut_filament::cut0", "[cut_filament]") {
     // moving selector to the other end of its axis
     REQUIRE(WhileTopState(cf, ProgressCode::ReturningSelector, 5000));
     REQUIRE(VerifyState(cf, /*true*/ false, cutSlot, 5, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+}
+
+TEST_CASE("cut_filament::cut0", "[cut_filament]") {
+    for (uint8_t cutSlot = 0; cutSlot < 5; ++cutSlot) {
+        CutSlot(cutSlot);
+    }
 }
