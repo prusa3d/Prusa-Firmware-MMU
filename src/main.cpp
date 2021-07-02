@@ -110,8 +110,8 @@ void setup() {
     // @@TODO if the shift register doesn't work we really can't signalize anything, only internal variables will be accessible if the UART works
 
     hu::USART::USART_InitTypeDef usart_conf = {
-        .rx_pin = gpio::GPIO_pin(GPIOD, 2),
-        .tx_pin = gpio::GPIO_pin(GPIOD, 3),
+        .rx_pin = USART_RX,
+        .tx_pin = USART_TX,
         .baudrate = 115200,
     };
     hu::usart1.Init(&usart_conf);
@@ -121,10 +121,10 @@ void setup() {
     // @@TODO if both shift register and the UART are dead, we are sitting ducks :(
 
     spi::SPI_InitTypeDef spi_conf = {
-        .miso_pin = gpio::GPIO_pin(TMC2130_SPI_MISO_PIN),
-        .mosi_pin = gpio::GPIO_pin(TMC2130_SPI_MOSI_PIN),
-        .sck_pin = gpio::GPIO_pin(TMC2130_SPI_SCK_PIN),
-        .ss_pin = gpio::GPIO_pin(TMC2130_SPI_SS_PIN),
+        .miso_pin = TMC2130_SPI_MISO_PIN,
+        .mosi_pin = TMC2130_SPI_MOSI_PIN,
+        .sck_pin = TMC2130_SPI_SCK_PIN,
+        .ss_pin = TMC2130_SPI_SS_PIN,
         .prescaler = 2, //4mhz
         .cpha = 1,
         .cpol = 1,

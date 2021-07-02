@@ -40,11 +40,10 @@ struct GPIO_InitTypeDef {
 };
 
 struct GPIO_pin {
+    // No constructor here in order to allow brace-initialization in old
+    // gcc versions/standards
     GPIO_TypeDef *const port;
     const uint8_t pin;
-    inline GPIO_pin(GPIO_TypeDef *const port, const uint8_t pin)
-        : port(port)
-        , pin(pin) {};
 };
 
 __attribute__((always_inline)) inline void WritePin(const GPIO_pin portPin, Level level) {

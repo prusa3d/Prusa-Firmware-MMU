@@ -13,22 +13,22 @@ SHR16 shr16;
 
 void SHR16::Init() {
     using namespace hal::gpio;
-    gpio::Init(GPIO_pin(SHR16_DATA), GPIO_InitTypeDef(Mode::output, Level::low));
-    gpio::Init(GPIO_pin(SHR16_LATCH), GPIO_InitTypeDef(Mode::output, Level::high));
-    gpio::Init(GPIO_pin(SHR16_CLOCK), GPIO_InitTypeDef(Mode::output, Level::low));
+    gpio::Init(SHR16_DATA, GPIO_InitTypeDef(Mode::output, Level::low));
+    gpio::Init(SHR16_LATCH, GPIO_InitTypeDef(Mode::output, Level::high));
+    gpio::Init(SHR16_CLOCK, GPIO_InitTypeDef(Mode::output, Level::low));
     Write(0);
 }
 
 void SHR16::Write(uint16_t v) {
     using namespace hal::gpio;
-    WritePin(GPIO_pin(SHR16_LATCH), Level::low);
+    WritePin(SHR16_LATCH, Level::low);
     for (uint16_t m = 0x8000; m; m >>= 1)
     {
-        WritePin(GPIO_pin(SHR16_DATA), (Level)((m & v) != 0));
-        WritePin(GPIO_pin(SHR16_CLOCK), Level::high);
-        WritePin(GPIO_pin(SHR16_CLOCK), Level::low);
+        WritePin(SHR16_DATA, (Level)((m & v) != 0));
+        WritePin(SHR16_CLOCK, Level::high);
+        WritePin(SHR16_CLOCK, Level::low);
     }
-    WritePin(GPIO_pin(SHR16_LATCH), Level::high);
+    WritePin(SHR16_LATCH, Level::high);
     shr16_v = v;
 }
 
