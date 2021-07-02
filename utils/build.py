@@ -61,45 +61,11 @@ def get_dependency(name):
         return install_dir
 
 
-class Printer(Enum):
-    """Represents the -DPRINTER CMake option."""
-
-    MMU = 'MMU'
-
-
-#class Bootloader(Enum):
-#    """Represents the -DBOOTLOADER CMake option."""
-#
-#    NO = 'NO'
-#    EMPTY = 'EMPTY'
-#    YES = 'YES'
-#
-#    @property
-#    def file_component(self):
-#        if self == Bootloader.NO:
-#            return 'NOBOOT'
-#        elif self == Bootloader.EMPTY:
-#            return 'EMPTYBOOT'
-#        elif self == Bootloader.YES:
-#            return 'BOOT'
-#        else:
-#            raise NotImplementedError
-
-
 class BuildType(Enum):
     """Represents the -DCONFIG CMake option."""
 
     DEBUG = 'DEBUG'
     RELEASE = 'RELEASE'
-
-
-#class HostTool(Enum):
-#    """Known host tools."""
-#
-#    png2font = "png2font"
-#    bin2cc = "bin2cc"
-#    hex2dfu = "hex2dfu"
-#    makefsdata = "makefsdata"
 
 
 class BuildConfiguration(ABC):
@@ -121,14 +87,12 @@ class BuildConfiguration(ABC):
 
 class FirmwareBuildConfiguration(BuildConfiguration):
     def __init__(self,
-                 printer: Printer,
                  build_type: BuildType,
                  toolchain: Path = None,
                  generator: str = None,
                  version_suffix: str = None,
                  version_suffix_short: str = None,
                  custom_entries: List[str] = None):
-        self.printer = printer
         self.build_type = build_type
         self.toolchain = toolchain or FirmwareBuildConfiguration.default_toolchain(
         )
@@ -139,8 +103,7 @@ class FirmwareBuildConfiguration(BuildConfiguration):
 
     @staticmethod
     def default_toolchain() -> Path:
-        return Path(
-            __file__).resolve().parent.parent / 'cmake/AnyAvrGcc.cmake'
+        return Path(__file__).resolve().parent.parent / 'cmake/AnyAvrGcc.cmake'
 
     def get_cmake_cache_entries(self):
         entries = []
@@ -149,7 +112,6 @@ class FirmwareBuildConfiguration(BuildConfiguration):
                             str(get_dependency('ninja'))))
         entries.extend([
             ('CMAKE_MAKE_PROGRAM', 'FILEPATH', str(get_dependency('ninja'))),
-            ('PRINTER', 'STRING', self.printer.value),
             ('CMAKE_TOOLCHAIN_FILE', 'FILEPATH', str(self.toolchain)),
             ('CMAKE_BUILD_TYPE', 'STRING', self.build_type.value.title()),
             ('PROJECT_VERSION_SUFFIX', 'STRING', self.version_suffix or ''),
@@ -170,7 +132,6 @@ class FirmwareBuildConfiguration(BuildConfiguration):
     @property
     def name(self):
         components = [
-            self.printer.name,
             self.build_type.value,
         ]
         return '_'.join(components)
@@ -178,7 +139,6 @@ class FirmwareBuildConfiguration(BuildConfiguration):
 
 class BuildResult:
     """Represents a result of an attempt to build the project."""
-
     def __init__(self, config_returncode: int, build_returncode: Optional[int],
                  stdout: Path, stderr: Path, products: List[Path]):
         self.config_returncode = config_returncode
@@ -281,7 +241,6 @@ def store_products(products: List[Path], build_config: BuildConfiguration,
 
 def list_of(EnumType):
     """Create an argument-parser for comma-separated list of values of some Enum subclass."""
-
     def convert(val):
         if val == '':
             return []
@@ -305,12 +264,6 @@ def cmake_cache_entry(arg):
 def main():
     parser = argparse.ArgumentParser()
     # yapf: disable
-    parser.add_argument(
-        '--printer',
-        type=list_of(Printer),
-        default=list(Printer),
-        help='Printer type (default: {default}).'.format(
-            default=','.join(str(p.value.lower()) for p in Printer)))
     parser.add_argument(
         '--build-type',
         type=list_of(BuildType),
@@ -349,12 +302,6 @@ def main():
         type=Path,
         help='Path to a CMake toolchain file to be used.')
     parser.add_argument(
-        '--host-tools',
-        action='store_true',
-        help=('Build host tools (png2font and others). '
-              'Turned on by default with --generate-cproject only.')
-    )
-    parser.add_argument(
         '--no-build',
         action='store_true',
         help='Do not build, configure the build only.'
@@ -388,13 +335,11 @@ def main():
     # prepare configurations
     configurations = [
         FirmwareBuildConfiguration(
-            printer=printer,
             build_type=build_type,
             version_suffix=args.version_suffix,
             version_suffix_short=args.version_suffix_short,
             generator=args.generator,
-            custom_entries=args.cmake_def) for printer in args.printer
-        for build_type in args.build_type
+            custom_entries=args.cmake_def) for build_type in args.build_type
     ]
 
     # build everything

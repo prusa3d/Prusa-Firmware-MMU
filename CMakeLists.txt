@@ -21,17 +21,9 @@ endif()
 #
 # You should specify those options when invoking CMake. Example:
 # ~~~
-# cmake .. <other options> -DPRINTER=MMU
+# cmake .. <other options> -DCUSTOM_COMPILE_OPTIONS=-DENABLE_FEATURE_X
 # ~~~
 
-set(PRINTER_VALID_OPTS "MMU")
-
-set(PRINTER
-    "MMU"
-    CACHE
-      STRING
-      "Select the MMU unit for which you want to compile the project (valid values are ${PRINTER_VALID_OPTS})."
-    )
 set(PROJECT_VERSION_SUFFIX
     "<auto>"
     CACHE
@@ -52,13 +44,6 @@ set(CUSTOM_COMPILE_OPTIONS
     ""
     CACHE STRING "Allows adding custom C/C++ flags"
     )
-
-# Validate options
-foreach(OPTION "PRINTER")
-  if(NOT ${OPTION} IN_LIST ${OPTION}_VALID_OPTS)
-    message(FATAL_ERROR "Invalid ${OPTION} ${${OPTION}}: Valid values are ${${OPTION}_VALID_OPTS}")
-  endif()
-endforeach()
 
 # Resolve BUILD_NUMBER and PROJECT_VERSION_* variables
 resolve_version_variables()
@@ -86,7 +71,6 @@ message(
   STATUS "Project version with short suffix: ${PROJECT_VERSION}${PROJECT_VERSION_SUFFIX_SHORT}"
   )
 message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}.")
-message(STATUS "Printer: ${PRINTER}")
 
 # eclipse sets those variables, so lets just use them so we don't get a warning about unused
 # variables
