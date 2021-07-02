@@ -183,7 +183,7 @@ void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
     // In this case we check the first option
 
     // Perform press on button 1 + debounce
-    hal::adc::SetADC(config::buttonsADCIndex, 1);
+    hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCLimits[0][0] + 1);
     while (!mb::buttons.ButtonPressed(0)) {
         main_loop();
         uf.Step();
@@ -267,7 +267,7 @@ void FindaDidntTriggerResolveTryAgain(uint8_t slot, logic::UnloadFilament &uf) {
     // In this case we check the second option
 
     // Perform press on button 2 + debounce
-    hal::adc::SetADC(config::buttonsADCIndex, 340);
+    hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCLimits[1][0] + 1);
     while (!mb::buttons.ButtonPressed(1)) {
         main_loop();
         uf.Step();
