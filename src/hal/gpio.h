@@ -1,6 +1,9 @@
 #pragma once
 #include <inttypes.h>
+
+#ifdef __AVR__
 #include <avr/io.h>
+#endif
 
 namespace hal {
 namespace gpio {
@@ -74,6 +77,7 @@ __attribute__((always_inline)) inline void Init(const GPIO_pin portPin, GPIO_Ini
 }
 }
 
+#ifdef __AVR__
 #define GPIOA ((hal::gpio::GPIO_TypeDef *)&PINA)
 #define GPIOB ((hal::gpio::GPIO_TypeDef *)&PINB)
 #define GPIOC ((hal::gpio::GPIO_TypeDef *)&PINC)
@@ -82,6 +86,37 @@ __attribute__((always_inline)) inline void Init(const GPIO_pin portPin, GPIO_Ini
 #define GPIOF ((hal::gpio::GPIO_TypeDef *)&PINF)
 #define GPIOG ((hal::gpio::GPIO_TypeDef *)&PING)
 #define GPIOH ((hal::gpio::GPIO_TypeDef *)&PINH)
+#define GPIOI ((hal::gpio::GPIO_TypeDef *)&PINI)
 #define GPIOJ ((hal::gpio::GPIO_TypeDef *)&PINJ)
 #define GPIOK ((hal::gpio::GPIO_TypeDef *)&PINK)
 #define GPIOL ((hal::gpio::GPIO_TypeDef *)&PINL)
+#else
+
+// stub entries
+extern hal::gpio::GPIO_TypeDef _GPIOA;
+extern hal::gpio::GPIO_TypeDef _GPIOB;
+extern hal::gpio::GPIO_TypeDef _GPIOC;
+extern hal::gpio::GPIO_TypeDef _GPIOD;
+extern hal::gpio::GPIO_TypeDef _GPIOE;
+extern hal::gpio::GPIO_TypeDef _GPIOF;
+extern hal::gpio::GPIO_TypeDef _GPIOG;
+extern hal::gpio::GPIO_TypeDef _GPIOH;
+extern hal::gpio::GPIO_TypeDef _GPIOI;
+extern hal::gpio::GPIO_TypeDef _GPIOJ;
+extern hal::gpio::GPIO_TypeDef _GPIOK;
+extern hal::gpio::GPIO_TypeDef _GPIOL;
+
+#define GPIOA (&_GPIOB)
+#define GPIOB (&_GPIOB)
+#define GPIOC (&_GPIOB)
+#define GPIOD (&_GPIOB)
+#define GPIOE (&_GPIOB)
+#define GPIOF (&_GPIOB)
+#define GPIOG (&_GPIOB)
+#define GPIOH (&_GPIOB)
+#define GPIOI (&_GPIOB)
+#define GPIOJ (&_GPIOB)
+#define GPIOK (&_GPIOB)
+#define GPIOL (&_GPIOB)
+
+#endif
