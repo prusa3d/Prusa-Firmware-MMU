@@ -27,8 +27,6 @@ enum {
 
 /// A model of the 3 buttons on the MMU unit
 class Buttons {
-    constexpr static const uint8_t N = 3; ///< number of buttons currently supported
-
 public:
     inline constexpr Buttons() = default;
 
@@ -41,7 +39,7 @@ public:
 
     /// @returns true if any of the button is pressed
     inline bool AnyButtonPressed() const {
-        for (uint8_t i = 0; i < N; ++i) {
+        for (uint8_t i = 0; i < config::buttonCount; ++i) {
             if (ButtonPressed(i))
                 return true;
         }
@@ -49,7 +47,7 @@ public:
     }
 
 private:
-    Button buttons[N];
+    Button buttons[config::buttonCount];
 
     /// Decode ADC output into a button index
     /// @returns index of the button pressed or -1 in case no button is pressed
