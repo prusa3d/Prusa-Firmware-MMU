@@ -86,7 +86,6 @@ __attribute__((always_inline)) inline void Init(const GPIO_pin portPin, GPIO_Ini
 #define GPIOF ((hal::gpio::GPIO_TypeDef *)&PINF)
 #define GPIOG ((hal::gpio::GPIO_TypeDef *)&PING)
 #define GPIOH ((hal::gpio::GPIO_TypeDef *)&PINH)
-#define GPIOI ((hal::gpio::GPIO_TypeDef *)&PINI)
 #define GPIOJ ((hal::gpio::GPIO_TypeDef *)&PINJ)
 #define GPIOK ((hal::gpio::GPIO_TypeDef *)&PINK)
 #define GPIOL ((hal::gpio::GPIO_TypeDef *)&PINL)
@@ -101,7 +100,6 @@ extern hal::gpio::GPIO_TypeDef _GPIOE;
 extern hal::gpio::GPIO_TypeDef _GPIOF;
 extern hal::gpio::GPIO_TypeDef _GPIOG;
 extern hal::gpio::GPIO_TypeDef _GPIOH;
-extern hal::gpio::GPIO_TypeDef _GPIOI;
 extern hal::gpio::GPIO_TypeDef _GPIOJ;
 extern hal::gpio::GPIO_TypeDef _GPIOK;
 extern hal::gpio::GPIO_TypeDef _GPIOL;
@@ -114,7 +112,6 @@ extern hal::gpio::GPIO_TypeDef _GPIOL;
 #define GPIOF (&_GPIOB)
 #define GPIOG (&_GPIOB)
 #define GPIOH (&_GPIOB)
-#define GPIOI (&_GPIOB)
 #define GPIOJ (&_GPIOB)
 #define GPIOK (&_GPIOB)
 #define GPIOL (&_GPIOB)
