@@ -25,6 +25,7 @@ struct MotorParams {
 };
 
 struct MotorCurrents {
+    bool vSense;            ///< VSense current scaling
     uint8_t iRun;           ///< Running current
     uint8_t iHold;          ///< Holding current
 };
