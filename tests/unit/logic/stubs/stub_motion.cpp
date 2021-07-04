@@ -49,7 +49,7 @@ void Motion::Home(Axis axis, bool direction) {
     axes[Pulley].homed = true;
 }
 
-void Motion::SetMode(MotorMode mode) {
+void Motion::SetMode(hal::tmc2130::MotorMode mode) {
 }
 
 void Motion::Step() {

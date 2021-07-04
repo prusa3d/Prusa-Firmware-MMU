@@ -1,5 +1,10 @@
 #pragma once
 #include <stdint.h>
+#include "../config/config.h"
+#include "../hal/tmc2130.h"
+#include "../pins.h"
+
+namespace modules {
 
 /// @@TODO
 /// Logic of motor handling
@@ -20,8 +25,6 @@
 /// rotate(speed)
 /// rotate(speed, angle/steps)
 /// home?
-
-namespace modules {
 namespace motion {
 
 enum Axis {
@@ -30,35 +33,11 @@ enum Axis {
     Idler,
 };
 
-enum MotorMode {
-    Stealth,
-    Normal
-};
-
 enum IdlerMode {
     Engage,
     Disengage
 };
 
-/// As step and dir pins are randomly scattered on the board for each of the axes/motors
-/// it is convenient to make a common interface for them
-class StepDirPins {
-public:
-    static void SetIdlerDirUp();
-    static void SetIdlerDirDown();
-
-    static void SetSelectorDirLeft();
-    static void SetSelectorDirRight();
-
-    static void SetPulleyDirPull();
-    static void SetPulleyDirPush();
-
-    static void StepIdler(uint8_t on);
-    static void StepSelector(uint8_t on);
-    static void StepPulley(uint8_t on);
-};
-
-/// @@TODO this is subject of discussion and change in the future
 class Motion {
 public:
     inline constexpr Motion() = default;
@@ -96,7 +75,7 @@ public:
 
     /// Set mode of TMC/motors operation
     /// Common for all axes/motors
-    void SetMode(MotorMode mode);
+    void SetMode(hal::tmc2130::MotorMode mode);
 
     /// State machine doing all the planning and stepping preparation based on received commands
     void Step();
