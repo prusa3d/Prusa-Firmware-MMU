@@ -8,7 +8,7 @@ using namespace modules::speed_table;
 // The following reference values are calculated for 16MHz F_CPU
 static_assert(F_CPU == 16000000);
 
-static const uint16_t reference[][3] = {
+static const st_timer_t reference[][3] = {
     { 1, 62500, 1 },
     { 501, 3992, 1 },
     { 1001, 1998, 1 },
@@ -94,9 +94,9 @@ static const uint16_t reference[][3] = {
 TEST_CASE("speed_table::calc_timer", "[speed_table]") {
     // Check the result values of calc_timer against an AVR reference table
     for (unsigned i = 0; i != sizeof(reference) / sizeof(*reference); ++i) {
-        uint16_t step_rate = reference[i][0];
+        st_timer_t step_rate = reference[i][0];
         uint8_t loops;
-        uint16_t timer = calc_timer(step_rate, loops);
+        st_timer_t timer = calc_timer(step_rate, loops);
 
         // allow +/-1 of difference for rounding between the C and ASM versions
         REQUIRE(abs((int)timer - (int)reference[i][1]) <= 1);

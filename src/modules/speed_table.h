@@ -8,14 +8,16 @@ namespace modules {
 /// Speed  tables for acceleration calculations
 namespace speed_table {
 
+typedef uint16_t st_timer_t;
+
 /// Lookup table for rates equal or higher than 8*256
-extern const uint16_t speed_table_fast[256][2] PROGMEM;
+extern const st_timer_t speed_table_fast[256][2] PROGMEM;
 
 /// Lookup table for lower step rates
-extern const uint16_t speed_table_slow[256][2] PROGMEM;
+extern const st_timer_t speed_table_slow[256][2] PROGMEM;
 
 /// Calculate the next timer interval and steps according to current step rate
-static inline uint16_t calc_timer(uint16_t step_rate, uint8_t &step_loops) {
+static inline st_timer_t calc_timer(st_timer_t step_rate, uint8_t &step_loops) {
     if (step_rate > MAX_STEP_FREQUENCY)
         step_rate = MAX_STEP_FREQUENCY;
     if (step_rate > 20000) { // If steprate > 20kHz >> step 4 times
@@ -31,7 +33,7 @@ static inline uint16_t calc_timer(uint16_t step_rate, uint8_t &step_loops) {
     using modules::math::mulU8X16toH16;
     namespace pm = hal::progmem;
 
-    uint16_t timer; // calculated interval
+    st_timer_t timer; // calculated interval
 
     if (step_rate < (F_CPU / 500000))
         step_rate = (F_CPU / 500000);

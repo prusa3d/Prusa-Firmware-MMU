@@ -27,13 +27,59 @@ namespace modules {
 /// home?
 namespace motion {
 
-enum Axis {
+/// Main axis enumeration
+enum Axis : uint8_t {
     Pulley,
     Selector,
     Idler,
+    _Axis_Last = Idler
 };
 
-enum IdlerMode {
+static constexpr uint8_t NUM_AXIS = _Axis_Last + 1;
+
+/// Static axis configuration
+struct AxisParams {
+    char name;
+    hal::tmc2130::MotorParams params;
+    hal::tmc2130::MotorCurrents currents;
+    float scale;
+    float accel;
+};
+
+static constexpr AxisParams axisParams[NUM_AXIS] = {
+    // Idler
+    {
+        .name = 'I',
+        .params = {
+            .idx = Idler,
+            .dirOn = config::idler.dirOn,
+            .csPin = IDLER_CS_PIN,
+            .stepPin = IDLER_STEP_PIN,
+            .sgPin = IDLER_SG_PIN,
+            .uSteps = config::idler.uSteps },
+        .currents = { .vSense = config::idler.vSense, .iRun = config::idler.iRun, .iHold = config::idler.iHold },
+        .scale = config::idler.scale,
+        .accel = config::idler.accel,
+    },
+    // Pulley
+    {
+        .name = 'P',
+        .params = { .idx = Pulley, .dirOn = config::pulley.dirOn, .csPin = PULLEY_CS_PIN, .stepPin = PULLEY_STEP_PIN, .sgPin = PULLEY_SG_PIN, .uSteps = config::pulley.uSteps },
+        .currents = { .vSense = config::pulley.vSense, .iRun = config::pulley.iRun, .iHold = config::pulley.iHold },
+        .scale = config::pulley.scale,
+        .accel = config::pulley.accel,
+    },
+    // Selector
+    {
+        .name = 'S',
+        .params = { .idx = Selector, .dirOn = config::selector.dirOn, .csPin = SELECTOR_CS_PIN, .stepPin = SELECTOR_STEP_PIN, .sgPin = SELECTOR_SG_PIN, .uSteps = config::selector.uSteps },
+        .currents = { .vSense = config::selector.vSense, .iRun = config::selector.iRun, .iHold = config::selector.iHold },
+        .scale = config::selector.scale,
+        .accel = config::selector.accel,
+    },
+};
+
+enum IdlerMode : uint8_t {
     Engage,
     Disengage
 };
