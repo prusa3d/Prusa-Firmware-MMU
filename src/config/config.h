@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include "todo.h"
 
 /// Wrangler for assorted compile-time configuration and constants.
 namespace config {
