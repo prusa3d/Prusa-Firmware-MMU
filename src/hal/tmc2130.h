@@ -51,29 +51,29 @@ public:
     const MotorCurrents& Currents() { return currents; } const
     void SetCurrents(const MotorCurrents& currents);
 
-    /// Return enabled state
-    bool Enabled() const;
+    /// Return enabled state (TODO)
+    static bool Enabled(const MotorParams& params);
 
     /// Enable/Disable the motor
-    void SetEnabled(const MotorParams& params, bool enabled)
+    static void SetEnabled(const MotorParams& params, bool enabled)
     {
         hal::shr16::shr16.SetTMCDir(params.idx, enabled);
     }
 
     /// Set direction
-    void SetDir(const MotorParams& params, bool dir)
+    static inline void SetDir(const MotorParams& params, bool dir)
     {
         hal::shr16::shr16.SetTMCDir(params.idx, dir ^ params.dirOn);
     }
 
     /// Step the motor
-    inline void Step(const MotorParams& params)
+    static inline void Step(const MotorParams& params)
     {
         gpio::TogglePin(params.stepPin); // assumes DEDGE
     }
 
     /// Return SG state
-    inline bool Stall(const MotorParams& params)
+    static inline bool Stall(const MotorParams& params)
     {
         return gpio::ReadPin(params.sgPin) == gpio::Level::high;
     }
