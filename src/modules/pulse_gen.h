@@ -4,91 +4,86 @@
 #include "../hal/tmc2130.h"
 
 namespace modules {
+
+/// Acceleration ramp and stepper pulse generator
 namespace pulse_gen {
 
 using speed_table::st_timer_t;
-typedef uint32_t steps_t;
-typedef uint32_t rate_t;
-typedef int32_t pos_t;
-
-struct block_t {
-    // Fields used by the bresenham algorithm for tracing the line
-    // steps_x.y,z, step_event_count, acceleration_rate, direction_bits and active_extruder are set by plan_buffer_line().
-    steps_t step_event_count; // The number of step events required to complete this block
-    rate_t acceleration_rate; // The acceleration rate used for acceleration calculation
-    bool direction; // The direction bit set for this block (refers to *_DIRECTION_BIT in config.h)
-
-    // accelerate_until and decelerate_after are set by calculate_trapezoid_for_block() and they need to be synchronized with the stepper interrupt controller.
-    steps_t accelerate_until; // The index of the step event on which to stop acceleration
-    steps_t decelerate_after; // The index of the step event on which to start decelerating
-
-    // Fields used by the motion planner to manage acceleration
-    //  float speed_x, speed_y, speed_z, speed_e;        // Nominal mm/sec for each axis
-    // The nominal speed for this block in mm/sec.
-    // This speed may or may not be reached due to the jerk and acceleration limits.
-    float nominal_speed;
-    // Entry speed at previous-current junction in mm/sec, respecting the acceleration and jerk limits.
-    // The entry speed limit of the current block equals the exit speed of the preceding block.
-    //float entry_speed;
-
-    // The total travel of this block in mm
-    float millimeters;
-    // acceleration mm/sec^2
-    float acceleration;
-
-    // Settings for the trapezoid generator (runs inside an interrupt handler).
-    // Changing the following values in the planner needs to be synchronized with the interrupt handler by disabling the interrupts.
-    rate_t nominal_rate; // The nominal step rate for this block in step_events/sec
-    rate_t initial_rate; // The jerk-adjusted step rate at start of block
-    rate_t final_rate; // The minimal rate at exit
-    rate_t acceleration_st; // acceleration steps/sec^2
-
-    // Pre-calculated division for the calculate_trapezoid_for_block() routine to run faster.
-    float speed_factor;
-};
+typedef uint32_t steps_t; ///< Absolute step units
+typedef uint32_t rate_t; ///< Type for step rates
+typedef int32_t pos_t; ///< Axis position (signed)
 
 class PulseGen {
 public:
     PulseGen();
 
-    float Acceleration() const { return acceleration; };
-    void SetAcceleration(float accel) { acceleration = accel; }
+    /// @returns the acceleration for the axis
+    steps_t Acceleration() const { return acceleration; };
 
-    void Move(float x, float feed_rate);
-    float Position() const;
+    /// Set acceleration for the axis
+    void SetAcceleration(steps_t accel) { acceleration = accel; }
+
+    /// Plan a single move (can only be executed when !Full())
+    void Move(pos_t x, steps_t feed_rate);
+
+    /// @returns the current position of the axis
+    pos_t Position() const { return position; }
+
+    /// Set the position of the axis
+    void SetPosition(pos_t x) { position = x; }
+
+    /// @returns true if all planned moves have been finished
     bool QueueEmpty() const;
+
+    /// @returns false if new moves can still be planned
     bool Full() const;
 
+    /// Single-step the axis
+    /// @returns the interval for the next tick
     st_timer_t Step(const hal::tmc2130::MotorParams &motorParams);
 
 private:
+    /// Motion parameters for the current planned or executing move
+    struct block_t {
+        steps_t steps; ///< Step events
+        bool direction; ///< The direction for this block
+
+        rate_t acceleration_rate; ///< The acceleration rate
+        steps_t accelerate_until; ///< The index of the step event on which to stop acceleration
+        steps_t decelerate_after; ///< The index of the step event on which to start decelerating
+
+        // Settings for the trapezoid generator (runs inside an interrupt handler)
+        rate_t nominal_rate; ///< The nominal step rate for this block in steps/sec
+        rate_t initial_rate; ///< Rate at start of block
+        rate_t final_rate; ///< Rate at exit
+        rate_t acceleration; ///< acceleration steps/sec^2
+    };
+
     //{ units constants
-    steps_t axis_steps_per_sqr_second;
-    float axis_steps_per_unit;
-    float max_jerk;
+    steps_t max_jerk;
     steps_t dropsegments; // segments are dropped if lower than that
     //}
 
-    //{ block buffer
+    // Block buffer parameters
     block_t block_buffer[2];
     block_t *current_block;
     uint8_t block_buffer_head;
     uint8_t block_buffer_tail;
-    //}
 
-    //{ state
-    pos_t position;
-    float acceleration;
+    // Axis data
+    pos_t position; ///< Current axis position
+    steps_t acceleration; ///< Current axis acceleration
 
+    // Step parameters
     rate_t acceleration_time, deceleration_time;
     st_timer_t acc_step_rate; // decelaration start point
-    uint8_t step_loops;
-    uint8_t step_loops_nominal;
-    st_timer_t timer_nominal;
-    steps_t step_events_completed;
-    //}
+    uint8_t step_loops; // steps per loop
+    uint8_t step_loops_nominal; // steps per loop at nominal speed
+    st_timer_t timer_nominal; // nominal interval
+    steps_t steps_completed; // steps completed
 
-    void calculate_trapezoid_for_block(block_t *block, float entry_speed, float exit_speed);
+    /// Calculate the trapezoid parameters for the block
+    void CalculateTrapezoid(block_t *block, steps_t entry_speed, steps_t exit_speed);
 };
 
 } // namespace pulse_gen

@@ -18,24 +18,14 @@ PulseGen::PulseGen() {
 
     // TODO: configuration constants
     dropsegments = 5;
-
-    // TODO: base units for the axis
-    steps_t max_acceleration_units_per_sq_second = 2500; // mm/s2
-    axis_steps_per_unit = 100.f; // steps/mm
-    max_jerk = 10.f;
-
-    // TODO: derived for trapezoid calculations
-    axis_steps_per_sqr_second = max_acceleration_units_per_sq_second * axis_steps_per_unit;
+    max_jerk = 100;
 }
 
-// Calculates trapezoid parameters so that the entry- and exit-speed is compensated by the provided factors.
-void PulseGen::calculate_trapezoid_for_block(block_t *block, float entry_speed, float exit_speed) {
-    // These two lines are the only floating point calculations performed in this routine.
-    // initial_rate, final_rate in Hz.
+void PulseGen::CalculateTrapezoid(block_t *block, steps_t entry_speed, steps_t exit_speed) {
     // Minimum stepper rate 120Hz, maximum 40kHz. If the stepper rate goes above 10kHz,
     // the stepper interrupt routine groups the pulses by 2 or 4 pulses per interrupt tick.
-    rate_t initial_rate = ceil(entry_speed * block->speed_factor); // (step/min)
-    rate_t final_rate = ceil(exit_speed * block->speed_factor); // (step/min)
+    rate_t initial_rate = entry_speed;
+    rate_t final_rate = exit_speed;
 
     // Limit minimal step rate (Otherwise the timer will overflow.)
     if (initial_rate < MINIMAL_STEP_RATE)
@@ -47,9 +37,8 @@ void PulseGen::calculate_trapezoid_for_block(block_t *block, float entry_speed, 
     if (final_rate > block->nominal_rate)
         final_rate = block->nominal_rate;
 
-    rate_t acceleration = block->acceleration_st;
-
     // Don't allow zero acceleration.
+    rate_t acceleration = block->acceleration;
     if (acceleration == 0)
         acceleration = 1;
 
@@ -70,39 +59,31 @@ void PulseGen::calculate_trapezoid_for_block(block_t *block, float entry_speed, 
     // Is the Plateau of Nominal Rate smaller than nothing? That means no cruising, and we will
     // have to use intersection_distance() to calculate when to abort acceleration and start braking
     // in order to reach the final_rate exactly at the end of this block.
-    if (accel_decel_steps < block->step_event_count) {
-        plateau_steps = block->step_event_count - accel_decel_steps;
+    if (accel_decel_steps < block->steps) {
+        plateau_steps = block->steps - accel_decel_steps;
     } else {
         uint32_t acceleration_x4 = acceleration << 2;
         // Avoid negative numbers
         if (final_rate_sqr >= initial_rate_sqr) {
-            // accelerate_steps = ceil(intersection_distance(initial_rate, final_rate, acceleration, block->step_event_count));
+            // accelerate_steps = ceil(intersection_distance(initial_rate, final_rate, acceleration, block->steps));
             // intersection_distance(float initial_rate, float final_rate, float acceleration, float distance)
             // (2.0*acceleration*distance-initial_rate*initial_rate+final_rate*final_rate)/(4.0*acceleration);
-#if 0
-            accelerate_steps = (block->step_event_count >> 1) + (final_rate_sqr - initial_rate_sqr + acceleration_x4 - 1 + (block->step_event_count & 1) * acceleration_x2) / acceleration_x4;
-#else
             accelerate_steps = final_rate_sqr - initial_rate_sqr + acceleration_x4 - 1;
-            if (block->step_event_count & 1)
+            if (block->steps & 1)
                 accelerate_steps += acceleration_x2;
             accelerate_steps /= acceleration_x4;
-            accelerate_steps += (block->step_event_count >> 1);
-#endif
-            if (accelerate_steps > block->step_event_count)
-                accelerate_steps = block->step_event_count;
+            accelerate_steps += (block->steps >> 1);
+            if (accelerate_steps > block->steps)
+                accelerate_steps = block->steps;
         } else {
-#if 0
-            decelerate_steps = (block->step_event_count >> 1) + (initial_rate_sqr - final_rate_sqr + (block->step_event_count & 1) * acceleration_x2) / acceleration_x4;
-#else
             decelerate_steps = initial_rate_sqr - final_rate_sqr;
-            if (block->step_event_count & 1)
+            if (block->steps & 1)
                 decelerate_steps += acceleration_x2;
             decelerate_steps /= acceleration_x4;
-            decelerate_steps += (block->step_event_count >> 1);
-#endif
-            if (decelerate_steps > block->step_event_count)
-                decelerate_steps = block->step_event_count;
-            accelerate_steps = block->step_event_count - decelerate_steps;
+            decelerate_steps += (block->steps >> 1);
+            if (decelerate_steps > block->steps)
+                decelerate_steps = block->steps;
+            accelerate_steps = block->steps - decelerate_steps;
         }
     }
 
@@ -112,53 +93,31 @@ void PulseGen::calculate_trapezoid_for_block(block_t *block, float entry_speed, 
     block->final_rate = final_rate;
 }
 
-// Add a new linear movement to the buffer. steps_x, _y and _z is the absolute position in
-// mm. Microseconds specify how many microseconds the move should take to perform. To aid acceleration
-// calculation the caller must also provide the physical length of the line in millimeters.
-void PulseGen::Move(float x, float feed_rate) {
+void PulseGen::Move(pos_t target, steps_t feed_rate) {
     // Prepare to set up new block
     block_t *block = &block_buffer[block_buffer_head];
 
-    // The target position of the tool in absolute steps
-    // Calculate target position in absolute steps
-    long target = lround(x * axis_steps_per_unit);
-
-    block->step_event_count = abs(target - position);
+    block->steps = abs(target - position);
 
     // Bail if this is a zero-length block
-    if (block->step_event_count <= dropsegments)
+    if (block->steps <= dropsegments)
         return;
 
-    // Compute direction bits for this block
-    block->direction = (target < position);
+    // Direction and speed for this block
+    block->direction = (target > position);
+    block->nominal_rate = feed_rate;
 
-    float delta_mm = (target - position) / axis_steps_per_unit;
-    block->millimeters = abs(delta_mm);
-
-    float inverse_millimeters = 1.0f / block->millimeters; // Inverse millimeters to remove multiple divides
-
-    // Calculate speed in mm/second for each axis. No divide by zero due to previous checks.
-    float inverse_second = feed_rate * inverse_millimeters;
-
-    block->nominal_speed = block->millimeters * inverse_second; // (mm/sec) Always > 0
-    block->nominal_rate = ceil(block->step_event_count * inverse_second); // (step/sec) Always > 0
-
-    // Compute and limit the acceleration rate for the trapezoid generator.
-    float steps_per_mm = block->step_event_count / block->millimeters;
-
-    // Acceleration of the segment, in mm/sec^2
-    block->acceleration_st = ceil(acceleration * steps_per_mm); // convert to: acceleration steps/sec^2
+    // Acceleration of the segment, in steps/sec^2
     block->acceleration = acceleration;
-    block->acceleration_rate = ((float)block->acceleration_st * (float)(16777216.0 / (F_CPU / 8.0)));
+    block->acceleration_rate = block->acceleration * (rate_t)((float)F_CPU / (F_CPU / STEP_TIMER_DIVIDER));
 
-    // Precalculate the division, so when all the trapezoids in the planner queue get recalculated, the division is not repeated.
-    block->speed_factor = block->nominal_rate / block->nominal_speed;
-
-    // TODO: chain moves?
-    calculate_trapezoid_for_block(block, max_jerk, max_jerk);
+    // Perform the trapezoid calculations
+    CalculateTrapezoid(block, max_jerk, max_jerk);
 
     // TODO: Move the buffer head
     //block_buffer_head++;
+
+    position = target;
 }
 
 st_timer_t PulseGen::Step(const MotorParams &motorParams) {
@@ -176,7 +135,7 @@ st_timer_t PulseGen::Step(const MotorParams &motorParams) {
         deceleration_time = 0;
         acc_step_rate = uint16_t(current_block->initial_rate);
         acceleration_time = calc_timer(acc_step_rate, step_loops);
-        step_events_completed = 0;
+        steps_completed = 0;
 
         // Set the nominal step loops to zero to indicate, that the timer value is not known yet.
         // That means, delay the initialization of nominal step rate and step loops until the steady
@@ -187,7 +146,7 @@ st_timer_t PulseGen::Step(const MotorParams &motorParams) {
     // Step the motor
     for (uint8_t i = 0; i < step_loops; ++i) {
         TMC2130::Step(motorParams);
-        if (++step_events_completed >= current_block->step_event_count)
+        if (++steps_completed >= current_block->steps)
             break;
     }
 
@@ -195,7 +154,7 @@ st_timer_t PulseGen::Step(const MotorParams &motorParams) {
     // 13.38-14.63us for steady state,
     // 25.12us for acceleration / deceleration.
     st_timer_t timer;
-    if (step_events_completed <= current_block->accelerate_until) {
+    if (steps_completed <= current_block->accelerate_until) {
         // v = t * a   ->   acc_step_rate = acceleration_time * current_block->acceleration_rate
         acc_step_rate = mulU24X24toH16(acceleration_time, current_block->acceleration_rate);
         acc_step_rate += uint16_t(current_block->initial_rate);
@@ -205,7 +164,7 @@ st_timer_t PulseGen::Step(const MotorParams &motorParams) {
         // step_rate to timer interval
         timer = calc_timer(acc_step_rate, step_loops);
         acceleration_time += timer;
-    } else if (step_events_completed > current_block->decelerate_after) {
+    } else if (steps_completed > current_block->decelerate_after) {
         st_timer_t step_rate = mulU24X24toH16(deceleration_time, current_block->acceleration_rate);
 
         if (step_rate > acc_step_rate) { // Check step_rate stays positive
@@ -232,7 +191,7 @@ st_timer_t PulseGen::Step(const MotorParams &motorParams) {
     }
 
     // If current block is finished, reset pointer
-    if (step_events_completed >= current_block->step_event_count) {
+    if (steps_completed >= current_block->steps) {
         current_block = nullptr;
     }
 
