@@ -16,18 +16,18 @@ enum MotorMode : uint8_t {
 };
 
 struct MotorParams {
-    uint8_t idx;            ///< SHR16 index
-    bool dirOn;             ///< forward direction
-    gpio::GPIO_pin csPin;   ///< CS pin
+    uint8_t idx; ///< SHR16 index
+    bool dirOn; ///< forward direction
+    gpio::GPIO_pin csPin; ///< CS pin
     gpio::GPIO_pin stepPin; ///< step pin
-    gpio::GPIO_pin sgPin;   ///< stallguard pin
-    uint8_t uSteps;         ///< microstep resolution
+    gpio::GPIO_pin sgPin; ///< stallguard pin
+    uint8_t uSteps; ///< microstep resolution
 };
 
 struct MotorCurrents {
-    bool vSense;            ///< VSense current scaling
-    uint8_t iRun;           ///< Running current
-    uint8_t iHold;          ///< Holding current
+    bool vSense; ///< VSense current scaling
+    uint8_t iRun; ///< Running current
+    uint8_t iHold; ///< Holding current
 };
 
 class TMC2130 {
@@ -35,46 +35,50 @@ class TMC2130 {
     MotorCurrents currents;
 
 public:
-    /// constructor
-    TMC2130(const MotorParams& params,
-            const MotorCurrents& currents,
-            MotorMode mode);
+    /// Constructor
+    TMC2130(const MotorParams &params,
+        const MotorCurrents &currents,
+        MotorMode mode);
 
     /// (re)initialization of the chip
-    void Init(const MotorParams& params);
+    void Init(const MotorParams &params);
 
-    /// Get/Change the current motor mode
-    MotorMode Mode() { return mode; } const
+    /// Get the current motor mode
+    MotorMode Mode() const {
+        return mode;
+    }
+
+    /// Set the current motor mode
     void SetMode(MotorMode mode);
 
-    /// Get/Change the current motor currents
-    const MotorCurrents& Currents() { return currents; } const
-    void SetCurrents(const MotorCurrents& currents);
+    /// Get the current motor currents
+    const MotorCurrents &Currents() const {
+        return currents;
+    }
+
+    /// Set the current motor currents
+    void SetCurrents(const MotorCurrents &currents);
 
     /// Return enabled state (TODO)
-    static bool Enabled(const MotorParams& params);
+    static bool Enabled(const MotorParams &params);
 
     /// Enable/Disable the motor
-    static void SetEnabled(const MotorParams& params, bool enabled)
-    {
+    static void SetEnabled(const MotorParams &params, bool enabled) {
         hal::shr16::shr16.SetTMCDir(params.idx, enabled);
     }
 
     /// Set direction
-    static inline void SetDir(const MotorParams& params, bool dir)
-    {
+    static inline void SetDir(const MotorParams &params, bool dir) {
         hal::shr16::shr16.SetTMCDir(params.idx, dir ^ params.dirOn);
     }
 
     /// Step the motor
-    static inline void Step(const MotorParams& params)
-    {
+    static inline void Step(const MotorParams &params) {
         gpio::TogglePin(params.stepPin); // assumes DEDGE
     }
 
     /// Return SG state
-    static inline bool Stall(const MotorParams& params)
-    {
+    static inline bool Stall(const MotorParams &params) {
         return gpio::ReadPin(params.sgPin) == gpio::Level::high;
     }
 };
