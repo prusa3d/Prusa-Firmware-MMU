@@ -4,10 +4,10 @@
 #include <stddef.h>
 
 /// A generic circular index class which can be used to build circular buffers
-/// Can hold up to (size-1) elements
+/// Can hold up to size elements
 /// @param index_t data type of indices into array of elements
 ///   (recommended to keep uint8_fast8_t as single byte operations are atomical on the AVR)
-/// @param size number of index positions + 1.
+/// @param size number of index positions.
 ///   It is recommended to keep a power of 2 to allow for optimal code generation on the AVR (there is no HW modulo instruction)
 template <typename index_t = uint_fast8_t, size_t size = 16>
 class CircularIndex {
@@ -23,7 +23,9 @@ public:
 
     /// @returns true if full
     inline bool full() const {
-        return next(head) == tail;
+        // alternative without wrap-around logic:
+        //   return tail != head && mask(tail) == mask(head);
+        return (head - tail) % (size * 2) == size;
     }
 
     /// Advance the head index of the buffer.
@@ -41,29 +43,37 @@ public:
     /// @returns return the tail index from the buffer.
     /// Does not perform any range checks for performance reasons, should be preceeded by if(!empty()) in the user code
     inline index_t front() const {
-        return tail;
+        return mask(tail);
     }
 
     /// @returns return the head index from the buffer.
     /// Does not perform any range checks for performance reasons, should be preceeded by if(!empty()) in the user code
     inline index_t back() const {
-        return head;
+        return mask(head);
     }
 
 protected:
-    index_t tail; ///< index of element to read (pop/extract) from the buffer
-    index_t head; ///< index of an empty spot or element insertion (write)
+    index_t tail; ///< cursor of the element to read (pop/extract) from the buffer
+    index_t head; ///< cursor of the empty spot or element insertion (write)
 
-    /// @returns next index wrapped past the end of the array of elements
-    static index_t next(index_t index) { return (index + 1) % size; }
+    /// @return the index position given a cursor
+    static index_t mask(index_t cursor) { return cursor % size; }
+
+    /// @returns next cursor for internal comparisons
+    static index_t next(index_t cursor) {
+        // note: the modulo can be avoided if size is a power of two: we can do this
+        // relying on the optimizer eliding the following check at compile time.
+        static constexpr bool power2 = !(size & (size - 1));
+        return power2 ? (cursor + 1) : (cursor + 1) % (size * 2);
+    }
 };
 
 /// A generic circular buffer class
-/// Can hold up to (size-1) elements
+/// Can hold up to size elements
 /// @param T data type of stored elements
 /// @param index_t data type of indices into array of elements
 ///   (recommended to keep uint8_fast8_t as single byte operations are atomical on the AVR)
-/// @param size number of elements to store + 1.
+/// @param size number of elements to store
 ///   It is recommended to keep a power of 2 to allow for optimal code generation on the AVR (there is no HW modulo instruction)
 template <typename T = uint8_t, typename index_t = uint_fast8_t, size_t size = 16>
 class CircularBuffer {
