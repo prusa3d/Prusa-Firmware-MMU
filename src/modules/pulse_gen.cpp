@@ -9,16 +9,15 @@ using modules::speed_table::calc_timer;
 namespace modules {
 namespace pulse_gen {
 
-PulseGen::PulseGen() {
-    // Some initial values
+PulseGen::PulseGen(steps_t max_jerk, steps_t acceleration) {
+    // Axis status
     position = 0;
-    acceleration = 1200;
+    this->max_jerk = max_jerk;
+    this->acceleration = acceleration;
+
+    // Block buffer
     block_buffer_head = block_buffer_tail = 0;
     current_block = nullptr;
-
-    // TODO: configuration constants
-    dropsegments = 5;
-    max_jerk = 100;
 }
 
 void PulseGen::CalculateTrapezoid(block_t *block, steps_t entry_speed, steps_t exit_speed) {
@@ -28,12 +27,12 @@ void PulseGen::CalculateTrapezoid(block_t *block, steps_t entry_speed, steps_t e
     rate_t final_rate = exit_speed;
 
     // Limit minimal step rate (Otherwise the timer will overflow.)
-    if (initial_rate < MINIMAL_STEP_RATE)
-        initial_rate = MINIMAL_STEP_RATE;
+    if (initial_rate < config::minStepRate)
+        initial_rate = config::minStepRate;
     if (initial_rate > block->nominal_rate)
         initial_rate = block->nominal_rate;
-    if (final_rate < MINIMAL_STEP_RATE)
-        final_rate = MINIMAL_STEP_RATE;
+    if (final_rate < config::minStepRate)
+        final_rate = config::minStepRate;
     if (final_rate > block->nominal_rate)
         final_rate = block->nominal_rate;
 
@@ -100,7 +99,7 @@ void PulseGen::Move(pos_t target, steps_t feed_rate) {
     block->steps = abs(target - position);
 
     // Bail if this is a zero-length block
-    if (block->steps <= dropsegments)
+    if (block->steps <= config::dropSegments)
         return;
 
     // Direction and speed for this block
@@ -109,7 +108,7 @@ void PulseGen::Move(pos_t target, steps_t feed_rate) {
 
     // Acceleration of the segment, in steps/sec^2
     block->acceleration = acceleration;
-    block->acceleration_rate = block->acceleration * (rate_t)((float)F_CPU / (F_CPU / STEP_TIMER_DIVIDER));
+    block->acceleration_rate = block->acceleration * (rate_t)((float)F_CPU / (F_CPU / speed_table::cpuFrequencyDivider));
 
     // Perform the trapezoid calculations
     CalculateTrapezoid(block, max_jerk, max_jerk);

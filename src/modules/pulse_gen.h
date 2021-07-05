@@ -15,7 +15,7 @@ typedef int32_t pos_t; ///< Axis position (signed)
 
 class PulseGen {
 public:
-    PulseGen();
+    PulseGen(steps_t max_jerk, steps_t acceleration);
 
     /// @returns the acceleration for the axis
     steps_t Acceleration() const { return acceleration; };
@@ -59,11 +59,6 @@ private:
         rate_t acceleration; ///< acceleration steps/sec^2
     };
 
-    //{ units constants
-    steps_t max_jerk;
-    steps_t dropsegments; // segments are dropped if lower than that
-    //}
-
     // Block buffer parameters
     block_t block_buffer[2];
     block_t *current_block;
@@ -72,6 +67,7 @@ private:
 
     // Axis data
     pos_t position; ///< Current axis position
+    steps_t max_jerk; ///< Axis jerk (could be constant)
     steps_t acceleration; ///< Current axis acceleration
 
     // Step parameters

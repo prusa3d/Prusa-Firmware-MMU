@@ -1,7 +1,6 @@
 #pragma once
 #include <stdint.h>
 #include "axis.h"
-#include "todo.h"
 
 /// Wrangler for assorted compile-time configuration and constants.
 namespace config {
@@ -32,6 +31,15 @@ static constexpr const uint8_t buttonsADCIndex = 0; ///< ADC index of buttons in
 /// the step intevals on the motion API, independently of the selected
 /// microstepping interval.
 static constexpr uint8_t uStepMaxRes = 32;
+
+/// Do not plan moves equal or shorter than the requested steps
+static constexpr uint8_t dropSegments = 0;
+
+/// Max step frequency 40KHz
+static constexpr uint16_t maxStepFrequency = 40000;
+
+/// Minimum stepping rate 120Hz
+static constexpr uint16_t minStepRate = 120;
 
 /// Idler configuration
 static constexpr AxisConfig idler = {
