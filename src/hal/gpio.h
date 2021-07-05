@@ -104,16 +104,16 @@ extern hal::gpio::GPIO_TypeDef _GPIOJ;
 extern hal::gpio::GPIO_TypeDef _GPIOK;
 extern hal::gpio::GPIO_TypeDef _GPIOL;
 
-#define GPIOA (&_GPIOB)
-#define GPIOB (&_GPIOB)
-#define GPIOC (&_GPIOB)
-#define GPIOD (&_GPIOB)
-#define GPIOE (&_GPIOB)
-#define GPIOF (&_GPIOB)
-#define GPIOG (&_GPIOB)
-#define GPIOH (&_GPIOB)
-#define GPIOJ (&_GPIOB)
-#define GPIOK (&_GPIOB)
-#define GPIOL (&_GPIOB)
+#define GPIOA (&::_GPIOA)
+#define GPIOB (&::_GPIOB)
+#define GPIOC (&::_GPIOC)
+#define GPIOD (&::_GPIOD)
+#define GPIOE (&::_GPIOE)
+#define GPIOF (&::_GPIOF)
+#define GPIOG (&::_GPIOG)
+#define GPIOH (&::_GPIOH)
+#define GPIOJ (&::_GPIOJ)
+#define GPIOK (&::_GPIOK)
+#define GPIOL (&::_GPIOL)
 
 #endif
