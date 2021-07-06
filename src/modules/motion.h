@@ -132,23 +132,19 @@ private:
         pulse_gen::PulseGen ctrl; ///< Motor controller
     };
 
+    /// Helper to initialize AxisData members
+    static AxisData DataForAxis(Axis axis) {
+        return {
+            .drv = { axisParams[axis].params, axisParams[axis].currents, axisParams[axis].mode },
+            .ctrl = { axisParams[axis].jerk, axisParams[axis].accel },
+        };
+    }
+
     /// Dynamic axis data
     AxisData axisData[NUM_AXIS] = {
-        // Idler
-        {
-            .drv = { axisParams[Idler].params, axisParams[Idler].currents, axisParams[Idler].mode },
-            .ctrl = { axisParams[Idler].jerk, axisParams[Idler].accel },
-        },
-        // Pulley
-        {
-            .drv = { axisParams[Pulley].params, axisParams[Pulley].currents, axisParams[Pulley].mode },
-            .ctrl = { axisParams[Pulley].jerk, axisParams[Pulley].accel },
-        },
-        // Selector
-        {
-            .drv = { axisParams[Selector].params, axisParams[Selector].currents, axisParams[Selector].mode },
-            .ctrl = { axisParams[Selector].jerk, axisParams[Selector].accel },
-        }
+        DataForAxis(Idler),
+        DataForAxis(Pulley),
+        DataForAxis(Selector),
     };
 };
 
