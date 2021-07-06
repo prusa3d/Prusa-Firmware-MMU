@@ -166,12 +166,16 @@ if(CMAKE_CROSSCOMPILING)
 
   # produce ASM listing
   add_custom_command(
-    TARGET firmware POST_BUILD COMMAND ${CMAKE_OBJDUMP} -CSd firmware > firmware.asm
+    TARGET firmware
+    POST_BUILD
+    COMMAND ${CMAKE_OBJDUMP} -CSd firmware > firmware.asm
     )
 
   # inform about the firmware's size in terminal
   add_custom_command(
-    TARGET firmware POST_BUILD COMMAND ${CMAKE_SIZE_UTIL} -C --mcu=atmega32u4 firmware
+    TARGET firmware
+    POST_BUILD
+    COMMAND ${CMAKE_SIZE_UTIL} -C --mcu=atmega32u4 firmware
     )
   report_size(firmware)
 
