@@ -12,11 +12,11 @@
 ///   (recommended to keep uint8_fast8_t as single byte operations are atomical on the AVR)
 /// @param size number of index positions.
 ///   It is recommended to keep a power of 2 to allow for optimal code generation on the AVR (there is no HW modulo instruction)
-template <typename index_t = uint_fast8_t, size_t size = 16>
+template <typename index_t = uint_fast8_t, index_t size = 16>
 class CircularIndex {
 public:
 #ifndef __AVR__
-    static_assert(size <= std::numeric_limits<index_t>::max(),
+    static_assert(size <= std::numeric_limits<index_t>::max() / 2,
         "index_t is too small for the requested size");
 #endif
 
@@ -33,7 +33,7 @@ public:
     inline bool full() const {
         // alternative without wrap-around logic:
         //   return tail != head && mask(tail) == mask(head);
-        return (head - tail) % (size * 2) == size;
+        return ((index_t)(head - tail) % (size * 2)) == size;
     }
 
     /// Advance the head index of the buffer.
