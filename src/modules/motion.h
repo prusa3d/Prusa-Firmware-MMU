@@ -39,15 +39,6 @@ static constexpr MotorMode DefaultMotorMode(const config::AxisConfig &axis) {
 
 /// Static axis configuration
 static constexpr AxisParams axisParams[NUM_AXIS] = {
-    // Idler
-    {
-        .name = 'I',
-        .params = { .idx = Idler, .dirOn = config::idler.dirOn, .csPin = IDLER_CS_PIN, .stepPin = IDLER_STEP_PIN, .sgPin = IDLER_SG_PIN, .uSteps = config::idler.uSteps },
-        .currents = { .vSense = config::idler.vSense, .iRun = config::idler.iRun, .iHold = config::idler.iHold },
-        .mode = DefaultMotorMode(config::idler),
-        .jerk = config::idler.jerk,
-        .accel = config::idler.accel,
-    },
     // Pulley
     {
         .name = 'P',
@@ -65,6 +56,15 @@ static constexpr AxisParams axisParams[NUM_AXIS] = {
         .mode = DefaultMotorMode(config::selector),
         .jerk = config::selector.jerk,
         .accel = config::selector.accel,
+    },
+    // Idler
+    {
+        .name = 'I',
+        .params = { .idx = Idler, .dirOn = config::idler.dirOn, .csPin = IDLER_CS_PIN, .stepPin = IDLER_STEP_PIN, .sgPin = IDLER_SG_PIN, .uSteps = config::idler.uSteps },
+        .currents = { .vSense = config::idler.vSense, .iRun = config::idler.iRun, .iHold = config::idler.iHold },
+        .mode = DefaultMotorMode(config::idler),
+        .jerk = config::idler.jerk,
+        .accel = config::idler.accel,
     },
 };
 
@@ -160,9 +160,9 @@ private:
 
     /// Dynamic axis data
     AxisData axisData[NUM_AXIS] = {
-        DataForAxis(Idler),
         DataForAxis(Pulley),
         DataForAxis(Selector),
+        DataForAxis(Idler),
     };
 };
 
