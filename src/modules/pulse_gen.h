@@ -1,5 +1,4 @@
 #pragma once
-#include <stdint.h>
 #include "speed_table.h"
 #include "../hal/tmc2130.h"
 #include "../hal/circular_buffer.h"

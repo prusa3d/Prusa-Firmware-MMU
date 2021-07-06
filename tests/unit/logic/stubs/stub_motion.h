@@ -5,8 +5,8 @@ namespace modules {
 namespace motion {
 
 struct AxisSim {
-    int32_t pos;
-    int32_t targetPos;
+    pos_t pos;
+    pos_t targetPos;
     bool enabled;
     bool homed;
     bool stallGuard;

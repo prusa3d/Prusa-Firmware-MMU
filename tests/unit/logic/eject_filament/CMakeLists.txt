@@ -15,11 +15,14 @@ add_executable(
   ../../../../src/modules/permanent_storage.cpp
   ../../../../src/modules/selector.cpp
   ../../../../src/modules/user_input.cpp
+  ../../../../src/modules/pulse_gen.cpp
   ../../modules/stubs/stub_adc.cpp
   ../../modules/stubs/stub_eeprom.cpp
   ../../modules/stubs/stub_gpio.cpp
   ../../modules/stubs/stub_shr16.cpp
   ../../modules/stubs/stub_timebase.cpp
+  ../../modules/stubs/stub_gpio.cpp
+  ../../modules/stubs/stub_tmc2130.cpp
   ../stubs/main_loop_stub.cpp
   ../stubs/stub_motion.cpp
   test_eject_filament.cpp

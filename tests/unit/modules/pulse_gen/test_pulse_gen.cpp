@@ -8,6 +8,7 @@ using namespace modules::pulse_gen;
 using hal::tmc2130::MotorParams;
 
 TEST_CASE("pulse_gen::basic", "[pulse_gen]") {
+    // TODO: woefully incomplete
     MotorParams mp = {
         .idx = 0,
         .dirOn = config::idler.dirOn,

@@ -50,7 +50,7 @@ bool EjectFilament::Step() {
         if (mm::motion.QueueEmpty()) { // selector parked aside
             state = ProgressCode::EjectingFilament;
             mm::motion.InitAxis(mm::Pulley);
-            mm::motion.PlanMove(ejectSteps, 0, 0, 1500, 0, 0);
+            mm::motion.PlanMove(mm::Pulley, ejectSteps, 1500);
         }
         break;
     case ProgressCode::EjectingFilament:

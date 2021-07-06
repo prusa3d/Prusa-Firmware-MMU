@@ -10,9 +10,9 @@ struct AxisConfig {
     bool vSense; ///< vSense scaling
     uint8_t iRun; ///< running current
     uint8_t iHold; ///< holding current
-    float scale; ///< Scaling unit (unit/uStepsMaxRes)
-    float accel; ///< Acceleration (unit/s^2)
-    float jerk; ///< Jerk (unit/s)
+    uint16_t accel; ///< Acceleration (unit/s^2)
+    uint16_t jerk; ///< Jerk (unit/s)
+    bool stealth; ///< Default to Stealth mode
 };
 
 } // namespace config

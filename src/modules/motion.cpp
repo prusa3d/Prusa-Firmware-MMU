@@ -13,21 +13,27 @@ bool Motion::StallGuard(Axis axis) { return false; }
 
 void Motion::ClearStallGuardFlag(Axis axis) {}
 
-void Motion::PlanMove(int16_t pulley, int16_t idler, int16_t selector, uint16_t feedrate, uint16_t starting_speed, uint16_t ending_speed) {}
+void Motion::PlanMoveTo(Axis axis, pos_t pos, steps_t feedrate) {}
 
-void Motion::PlanMove(Axis axis, int16_t delta, uint16_t feedrate) {}
-
-uint16_t Motion::CurrentPos(Axis axis) const { return 0; }
+pos_t Motion::CurrentPos(Axis axis) const { return axisData[axis].ctrl.Position(); }
 
 void Motion::Home(Axis axis, bool direction) {}
 
-void Motion::SetMode(hal::tmc2130::MotorMode mode) {}
+void Motion::SetMode(Axis axis, MotorMode mode) {}
+
+bool Motion::QueueEmpty() const {
+    for (uint8_t i = 0; i != NUM_AXIS; ++i)
+        if (!axisData[i].ctrl.QueueEmpty())
+            return false;
+    return true;
+}
+
+void Motion::AbortPlannedMoves() {
+    for (uint8_t i = 0; i != NUM_AXIS; ++i)
+        axisData[i].ctrl.AbortPlannedMoves();
+}
 
 void Motion::Step() {}
-
-bool Motion::QueueEmpty() const { return false; }
-
-void Motion::AbortPlannedMoves() {}
 
 void ISR() {}
 

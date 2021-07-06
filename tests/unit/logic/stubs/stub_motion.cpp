@@ -30,18 +30,11 @@ void Motion::ClearStallGuardFlag(Axis axis) {
     axes[axis].stallGuard = false;
 }
 
-void Motion::PlanMove(int16_t pulley, int16_t idler, int16_t selector, uint16_t feedrate, uint16_t starting_speed, uint16_t ending_speed) {
-    axes[Pulley].targetPos = axes[Pulley].pos + pulley;
-    axes[Idler].targetPos = axes[Idler].pos + idler;
-    axes[Selector].targetPos = axes[Selector].pos + selector;
-    // speeds and feedrates are not simulated yet
+void Motion::PlanMoveTo(Axis axis, pos_t pos, steps_t feedrate) {
+    axes[axis].targetPos = pos;
 }
 
-void Motion::PlanMove(Axis axis, int16_t delta, uint16_t feedrate) {
-    axes[axis].targetPos = axes[axis].pos + delta;
-}
-
-uint16_t Motion::CurrentPos(Axis axis) const {
+pos_t Motion::CurrentPos(Axis axis) const {
     return axes[axis].pos;
 }
 
@@ -49,7 +42,7 @@ void Motion::Home(Axis axis, bool direction) {
     axes[Pulley].homed = true;
 }
 
-void Motion::SetMode(hal::tmc2130::MotorMode mode) {
+void Motion::SetMode(Axis axis, hal::tmc2130::MotorMode mode) {
 }
 
 void Motion::Step() {

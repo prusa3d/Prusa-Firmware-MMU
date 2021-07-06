@@ -51,9 +51,9 @@ static constexpr AxisConfig idler = {
     .vSense = false,
     .iRun = 20,
     .iHold = 20,
-    .scale = 1.,
-    .accel = 100.,
-    .jerk = 1.,
+    .accel = 100,
+    .jerk = 10,
+    .stealth = false,
 };
 
 /// Pulley configuration
@@ -63,9 +63,9 @@ static constexpr AxisConfig pulley = {
     .vSense = false,
     .iRun = 20,
     .iHold = 20,
-    .scale = 1.,
-    .accel = 100.,
-    .jerk = 1.,
+    .accel = 100,
+    .jerk = 10,
+    .stealth = false,
 };
 
 /// Selector configuration
@@ -75,9 +75,9 @@ static constexpr AxisConfig selector = {
     .vSense = false,
     .iRun = 20,
     .iHold = 20,
-    .scale = 1.,
-    .accel = 100.,
-    .jerk = 1.,
+    .accel = 100,
+    .jerk = 1,
+    .stealth = false
 };
 
 } // namespace config

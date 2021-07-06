@@ -195,6 +195,7 @@ target_sources(
           src/hal/avr/usart.cpp
           src/hal/avr/shr16.cpp
           src/hal/avr/eeprom.cpp
+          src/hal/avr/tmc2130.cpp
           src/hal/adc.cpp
           src/modules/protocol.cpp
           src/modules/buttons.cpp
@@ -205,6 +206,7 @@ target_sources(
           src/modules/idler.cpp
           src/modules/leds.cpp
           src/modules/motion.cpp
+          src/modules/pulse_gen.cpp
           src/modules/permanent_storage.cpp
           src/modules/selector.cpp
           src/modules/timebase.cpp

@@ -32,7 +32,7 @@ bool FeedToFinda::Step() {
         if (mi::idler.Engaged() && ms::selector.Slot() == mg::globals.ActiveSlot()) {
             state = PushingFilament;
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::blink0);
-            mm::motion.PlanMove(feedPhaseLimited ? 1500 : 32767, 0, 0, 4000, 0, 0); //@@TODO constants
+            mm::motion.PlanMove(mm::Pulley, feedPhaseLimited ? 1500 : 32767, 4000); //@@TODO constants
             mu::userInput.Clear(); // remove all buffered events if any just before we wait for some input
         }
         return false;
@@ -41,7 +41,7 @@ bool FeedToFinda::Step() {
             mm::motion.AbortPlannedMoves(); // stop pushing filament
             // FINDA triggered - that means it works and detected the filament tip
             state = UnloadBackToPTFE;
-            mm::motion.PlanMove(-600, 0, 0, 4000, 0, 0); //@@TODO constants
+            mm::motion.PlanMove(mm::Pulley, -600, 4000); //@@TODO constants
         } else if (mm::motion.QueueEmpty()) { // all moves have been finished and FINDA didn't switch on
             state = Failed;
             // @@TODO - shall we disengage the idler?
