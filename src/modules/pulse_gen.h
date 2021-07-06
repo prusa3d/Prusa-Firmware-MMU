@@ -32,6 +32,9 @@ public:
     /// Plan a single move (can only be executed when !Full())
     void Move(pos_t x, steps_t feed_rate);
 
+    /// stop whatever moves are being done
+    void AbortPlannedMoves();
+
     /// @returns the current position of the axis
     pos_t Position() const { return position; }
 

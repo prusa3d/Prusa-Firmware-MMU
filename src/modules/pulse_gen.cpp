@@ -96,7 +96,7 @@ void PulseGen::Move(pos_t target, steps_t feed_rate) {
         return;
 
     // Direction and speed for this block
-    block->direction = (target > position);
+    block->direction = (target >= position);
     block->nominal_rate = feed_rate;
 
     // Acceleration of the segment, in steps/sec^2
@@ -109,6 +109,22 @@ void PulseGen::Move(pos_t target, steps_t feed_rate) {
     // Move forward
     block_index.push();
     position = target;
+}
+
+void PulseGen::AbortPlannedMoves() {
+    if (!current_block)
+        return;
+
+    // update position
+    steps_t steps_missing = (current_block->steps - steps_completed);
+    if (current_block->direction)
+        position -= steps_missing;
+    else
+        position += steps_missing;
+
+    // destroy the block
+    current_block = nullptr;
+    block_index.pop();
 }
 
 } // namespace motor
