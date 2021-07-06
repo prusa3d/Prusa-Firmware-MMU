@@ -41,6 +41,9 @@ static constexpr uint16_t maxStepFrequency = 40000;
 /// Minimum stepping rate 120Hz
 static constexpr uint16_t minStepRate = 120;
 
+/// Size for the motion planner block buffer size
+static constexpr uint8_t blockBufferSize = 2;
+
 /// Idler configuration
 static constexpr AxisConfig idler = {
     .dirOn = true,

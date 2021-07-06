@@ -2,12 +2,14 @@
 #include <stdint.h>
 #include "speed_table.h"
 #include "../hal/tmc2130.h"
+#include "../hal/circular_buffer.h"
 
 namespace modules {
 
 /// Acceleration ramp and stepper pulse generator
 namespace pulse_gen {
 
+using config::blockBufferSize;
 using speed_table::st_timer_t;
 typedef uint32_t steps_t; ///< Absolute step units
 typedef uint32_t rate_t; ///< Type for step rates
@@ -33,10 +35,10 @@ public:
     void SetPosition(pos_t x) { position = x; }
 
     /// @returns true if all planned moves have been finished
-    bool QueueEmpty() const;
+    bool QueueEmpty() const { return block_index.empty(); }
 
     /// @returns false if new moves can still be planned
-    bool Full() const;
+    bool Full() const { return block_index.full(); }
 
     /// Single-step the axis
     /// @returns the interval for the next tick
@@ -60,10 +62,9 @@ private:
     };
 
     // Block buffer parameters
-    block_t block_buffer[2];
+    block_t block_buffer[blockBufferSize];
+    CircularIndex<uint8_t, blockBufferSize> block_index;
     block_t *current_block;
-    uint8_t block_buffer_head;
-    uint8_t block_buffer_tail;
 
     // Axis data
     pos_t position; ///< Current axis position

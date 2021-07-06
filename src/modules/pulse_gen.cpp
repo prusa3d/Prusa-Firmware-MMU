@@ -16,7 +16,6 @@ PulseGen::PulseGen(steps_t max_jerk, steps_t acceleration) {
     this->acceleration = acceleration;
 
     // Block buffer
-    block_buffer_head = block_buffer_tail = 0;
     current_block = nullptr;
 }
 
@@ -94,7 +93,7 @@ void PulseGen::CalculateTrapezoid(block_t *block, steps_t entry_speed, steps_t e
 
 void PulseGen::Move(pos_t target, steps_t feed_rate) {
     // Prepare to set up new block
-    block_t *block = &block_buffer[block_buffer_head];
+    block_t *block = &block_buffer[block_index.back()];
 
     block->steps = abs(target - position);
 
@@ -113,17 +112,16 @@ void PulseGen::Move(pos_t target, steps_t feed_rate) {
     // Perform the trapezoid calculations
     CalculateTrapezoid(block, max_jerk, max_jerk);
 
-    // TODO: Move the buffer head
-    //block_buffer_head++;
-
+    // Move forward
+    block_index.push();
     position = target;
 }
 
 st_timer_t PulseGen::Step(const MotorParams &motorParams) {
     if (!current_block) {
-        // TODO: fetch next block
-        if (!block_buffer_head)
-            current_block = &block_buffer[block_buffer_head++];
+        // fetch next block
+        if (!block_index.empty())
+            current_block = &block_buffer[block_index.front()];
         if (!current_block)
             return 0;
 
@@ -136,9 +134,9 @@ st_timer_t PulseGen::Step(const MotorParams &motorParams) {
         acceleration_time = calc_timer(acc_step_rate, step_loops);
         steps_completed = 0;
 
-        // Set the nominal step loops to zero to indicate, that the timer value is not known yet.
-        // That means, delay the initialization of nominal step rate and step loops until the steady
-        // state is reached.
+        // Set the nominal step loops to zero to indicate, that the timer value is not
+        // known yet. That means, delay the initialization of nominal step rate and step
+        // loops until the steady state is reached.
         step_loops_nominal = 0;
     }
 
@@ -181,8 +179,8 @@ st_timer_t PulseGen::Step(const MotorParams &motorParams) {
         deceleration_time += timer;
     } else {
         if (!step_loops_nominal) {
-            // Calculation of the steady state timer rate has been delayed to the 1st tick of the steady state to lower
-            // the initial interrupt blocking.
+            // Calculation of the steady state timer rate has been delayed to the 1st tick
+            // of the steady state to lower the initial interrupt blocking.
             timer_nominal = calc_timer(uint16_t(current_block->nominal_rate), step_loops);
             step_loops_nominal = step_loops;
         }
@@ -192,6 +190,7 @@ st_timer_t PulseGen::Step(const MotorParams &motorParams) {
     // If current block is finished, reset pointer
     if (steps_completed >= current_block->steps) {
         current_block = nullptr;
+        block_index.pop();
     }
 
     return timer;
