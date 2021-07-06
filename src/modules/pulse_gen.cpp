@@ -85,15 +85,18 @@ void PulseGen::CalculateTrapezoid(block_t *block, steps_t entry_speed, steps_t e
     block->final_rate = final_rate;
 }
 
-void PulseGen::Move(pos_t target, steps_t feed_rate) {
+bool PulseGen::Move(pos_t target, steps_t feed_rate) {
     // Prepare to set up new block
+    if (block_index.full())
+        return false;
     block_t *block = &block_buffer[block_index.back()];
 
-    block->steps = abs(target - position);
-
     // Bail if this is a zero-length block
-    if (block->steps <= config::dropSegments)
-        return;
+    block->steps = abs(target - position);
+    if (block->steps <= config::dropSegments) {
+        // behave as-if the block as been scheduled
+        return true;
+    }
 
     // Direction and speed for this block
     block->direction = (target >= position);
@@ -109,6 +112,7 @@ void PulseGen::Move(pos_t target, steps_t feed_rate) {
     // Move forward
     block_index.push();
     position = target;
+    return true;
 }
 
 void PulseGen::AbortPlannedMoves() {

@@ -28,8 +28,9 @@ public:
     /// Set acceleration for the axis
     void SetAcceleration(steps_t accel) { acceleration = accel; }
 
-    /// Plan a single move (can only be executed when !Full())
-    void Move(pos_t x, steps_t feed_rate);
+    /// Plan a single move (can only be executed when not Full())
+    /// @returns True if the move has been planned
+    bool Move(pos_t x, steps_t feed_rate);
 
     /// stop whatever moves are being done
     void AbortPlannedMoves();
