@@ -24,7 +24,10 @@ Event UserInput::ConsumeEvent() {
         return Event::NoEvent;
     Event rv;
     eventQueue.pop(rv);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
     return rv;
+#pragma GCC diagnostic pop
 }
 
 void UserInput::Clear() {
