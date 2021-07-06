@@ -86,13 +86,15 @@ public:
     /// clear stall guard flag reported on an axis
     void ClearStallGuardFlag(Axis axis);
 
-    /// Enqueue a single axis move in steps starting and ending at zero speed with maximum feedrate
+    /// Enqueue a single axis move in steps starting and ending at zero speed with maximum
+    /// feedrate. Moves can only be enqueued if the axis is not Full().
     /// @param axis axis affected
     /// @param pos target position
     /// @param feedrate maximum feedrate
     void PlanMoveTo(Axis axis, pos_t pos, steps_t feedrate);
 
-    /// Enqueue a single axis move in steps starting and ending at zero speed with maximum feedrate
+    /// Enqueue a single axis move in steps starting and ending at zero speed with maximum
+    /// feedrate. Moves can only be enqueued if the axis is not Full().
     /// @param axis axis affected
     /// @param delta relative to current position
     /// @param feedrate maximum feedrate
@@ -120,8 +122,24 @@ public:
     /// State machine doing all the planning and stepping preparation based on received commands
     void Step();
 
-    /// @returns true if all planned moves have been finished
+    /// @returns true if all planned moves have been finished for all axes
     bool QueueEmpty() const;
+
+    /// @returns true if all planned moves have been finished for one axis
+    /// @param axis requested
+    bool QueueEmpty(Axis axis) const { return axisData[axis].ctrl.QueueEmpty(); }
+
+    /// @returns false if new moves can still be planned for _any_ axis
+    bool Full() const {
+        for (uint8_t i = 0; i != NUM_AXIS; ++i)
+            if (axisData[i].ctrl.Full())
+                return true;
+        return false;
+    }
+
+    /// @returns false if new moves can still be planned for one axis
+    /// @param axis axis requested
+    bool Full(Axis axis) const { return axisData[axis].ctrl.Full(); }
 
     /// stop whatever moves are being done
     void AbortPlannedMoves();
