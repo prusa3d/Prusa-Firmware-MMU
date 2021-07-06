@@ -1,10 +1,6 @@
 #pragma once
-
-#include <stdint.h>
 #include <stddef.h>
-#ifndef __AVR__
-#include <limits>
-#endif
+#include "../limits.h"
 
 /// A generic circular index class which can be used to build circular buffers
 /// Can hold up to size elements
@@ -15,10 +11,8 @@
 template <typename index_t = uint_fast8_t, index_t size = 16>
 class CircularIndex {
 public:
-#ifndef __AVR__
     static_assert(size <= std::numeric_limits<index_t>::max() / 2,
         "index_t is too small for the requested size");
-#endif
 
     constexpr inline CircularIndex()
         : tail(0)
