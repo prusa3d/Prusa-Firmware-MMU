@@ -85,7 +85,7 @@ void PulseGen::CalculateTrapezoid(block_t *block, steps_t entry_speed, steps_t e
     block->final_rate = final_rate;
 }
 
-bool PulseGen::Move(pos_t target, steps_t feed_rate) {
+bool PulseGen::PlanMoveTo(pos_t target, steps_t feed_rate) {
     // Prepare to set up new block
     if (block_index.full())
         return false;

@@ -20,7 +20,7 @@ TEST_CASE("pulse_gen::basic", "[pulse_gen]") {
 
     for (int accel = 100; accel <= 5000; accel *= 2) {
         PulseGen pg(10, accel);
-        pg.Move(100000, 10000);
+        pg.PlanMoveTo(100000, 10000);
 
         unsigned long ts = 0;
         st_timer_t next;

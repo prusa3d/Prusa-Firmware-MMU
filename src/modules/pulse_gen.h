@@ -28,9 +28,12 @@ public:
     /// Set acceleration for the axis
     void SetAcceleration(steps_t accel) { acceleration = accel; }
 
-    /// Plan a single move (can only be executed when not Full())
-    /// @returns True if the move has been planned
-    bool Move(pos_t x, steps_t feed_rate);
+    /// Enqueue a single move in steps starting and ending at zero speed with maximum
+    /// feedrate. Moves can only be enqueued if the axis is not Full().
+    /// @param pos target position
+    /// @param feedrate maximum feedrate
+    /// @returns true if the move has been enqueued
+    bool PlanMoveTo(pos_t pos, steps_t feedrate);
 
     /// stop whatever moves are being done
     void AbortPlannedMoves();
