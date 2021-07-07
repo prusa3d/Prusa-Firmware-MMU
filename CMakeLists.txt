@@ -165,7 +165,7 @@ endif()
 
 # add_link_dependency(firmware "${LINKER_SCRIPT}")
 
-target_include_directories(firmware PRIVATE include src)
+target_include_directories(firmware PRIVATE src)
 
 target_compile_options(firmware PRIVATE -Wdouble-promotion)
 target_sources(
