@@ -7,7 +7,7 @@ namespace pm = hal::progmem;
 TEST_CASE("progmem::read_word", "[progmem]") {
 
     // create a PROGMEM array
-    const uint16_t arr[2] PROGMEM = {0, 1};
+    const uint16_t arr[2] PROGMEM = { 0, 1 };
 
     // ensure it can be read correctly
     REQUIRE(0 == pm::read_word(&arr[0]));

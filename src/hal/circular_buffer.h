@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #ifndef __AVR__
-    #include <limits>
+#include <limits>
 #endif
 
 /// A generic circular index class which can be used to build circular buffers
