@@ -168,49 +168,9 @@ endif()
 target_include_directories(firmware PRIVATE src)
 
 target_compile_options(firmware PRIVATE -Wdouble-promotion)
-target_sources(
-  firmware
-  PRIVATE src/main.cpp
-          src/hal/avr/cpu.cpp
-          src/hal/avr/usart.cpp
-          src/hal/avr/shr16.cpp
-          src/hal/avr/eeprom.cpp
-          src/hal/adc.cpp
-          src/modules/protocol.cpp
-          src/modules/buttons.cpp
-          src/modules/debouncer.cpp
-          src/modules/finda.cpp
-          src/modules/fsensor.cpp
-          src/modules/globals.cpp
-          src/modules/idler.cpp
-          src/modules/leds.cpp
-          src/modules/motion.cpp
-          src/modules/permanent_storage.cpp
-          src/modules/selector.cpp
-          src/modules/timebase.cpp
-          src/modules/user_input.cpp
-          src/logic/command_base.cpp
-          src/logic/cut_filament.cpp
-          src/logic/eject_filament.cpp
-          src/logic/feed_to_bondtech.cpp
-          src/logic/feed_to_finda.cpp
-          src/logic/load_filament.cpp
-          src/logic/no_command.cpp
-          src/logic/tool_change.cpp
-          src/logic/unload_filament.cpp
-          src/logic/unload_to_finda.cpp
-  )
 
-set_property(
-  SOURCE src/version.c
-  APPEND
-  PROPERTY COMPILE_DEFINITIONS
-           FW_BUILD_NUMBER=${BUILD_NUMBER}
-           FW_VERSION_FULL=${PROJECT_VERSION_FULL}
-           FW_VERSION=${PROJECT_VERSION}
-           FW_VERSION_SUFFIX=${PROJECT_VERSION_SUFFIX}
-           FW_VERSION_SUFFIX_SHORT=${PROJECT_VERSION_SUFFIX_SHORT}
-  )
+add_subdirectory(src)
+
 if(NOT CMAKE_CROSSCOMPILING)
   enable_testing()
   add_subdirectory(tests)

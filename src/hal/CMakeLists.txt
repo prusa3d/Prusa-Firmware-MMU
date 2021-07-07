@@ -1,0 +1,9 @@
+target_sources(
+  firmware
+  PRIVATE
+  avr/cpu.cpp
+  avr/usart.cpp
+  avr/shr16.cpp
+  avr/eeprom.cpp
+  adc.cpp
+)
