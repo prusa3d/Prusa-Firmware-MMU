@@ -13,8 +13,7 @@ namespace hal {
 namespace progmem {
 
 /// read a 16bit word from PROGMEM
-static inline uint16_t read_word(const uint16_t* addr)
-{
+static inline uint16_t read_word(const uint16_t *addr) {
 #ifndef __AVR__
     return *addr;
 #else

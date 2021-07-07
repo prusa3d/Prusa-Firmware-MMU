@@ -12,7 +12,7 @@ namespace hal {
 namespace usart {
 
 constexpr uint16_t UART_BAUD_SELECT(uint32_t baudRate, uint32_t xtalCpu) {
-    return (((double)(xtalCpu))/(((double)(baudRate))*8.0)-1.0+0.5);
+    return (((double)(xtalCpu)) / (((double)(baudRate)) * 8.0) - 1.0 + 0.5);
 }
 
 class USART {
@@ -88,7 +88,8 @@ public:
             husart->UCSRxB &= ~(1 << 5); // disable UDRE interrupt
     }
 
-    USART(hal::usart::USART::USART_TypeDef *husart) : husart(husart) {};
+    USART(hal::usart::USART::USART_TypeDef *husart)
+        : husart(husart) {};
 
 private:
     // IO base address

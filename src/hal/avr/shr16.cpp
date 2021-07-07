@@ -22,8 +22,7 @@ void SHR16::Init() {
 void SHR16::Write(uint16_t v) {
     using namespace hal::gpio;
     WritePin(SHR16_LATCH, Level::low);
-    for (uint16_t m = 0x8000; m; m >>= 1)
-    {
+    for (uint16_t m = 0x8000; m; m >>= 1) {
         WritePin(SHR16_DATA, (Level)((m & v) != 0));
         WritePin(SHR16_CLOCK, Level::high);
         WritePin(SHR16_CLOCK, Level::low);

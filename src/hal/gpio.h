@@ -2,7 +2,7 @@
 #include <inttypes.h>
 
 #ifdef __AVR__
-    #include <avr/io.h>
+#include <avr/io.h>
 #endif
 
 namespace hal {
@@ -78,17 +78,17 @@ __attribute__((always_inline)) inline void Init(const GPIO_pin portPin, GPIO_Ini
 }
 
 #ifdef __AVR__
-    #define GPIOA ((hal::gpio::GPIO_TypeDef *)&PINA)
-    #define GPIOB ((hal::gpio::GPIO_TypeDef *)&PINB)
-    #define GPIOC ((hal::gpio::GPIO_TypeDef *)&PINC)
-    #define GPIOD ((hal::gpio::GPIO_TypeDef *)&PIND)
-    #define GPIOE ((hal::gpio::GPIO_TypeDef *)&PINE)
-    #define GPIOF ((hal::gpio::GPIO_TypeDef *)&PINF)
-    #define GPIOG ((hal::gpio::GPIO_TypeDef *)&PING)
-    #define GPIOH ((hal::gpio::GPIO_TypeDef *)&PINH)
-    #define GPIOJ ((hal::gpio::GPIO_TypeDef *)&PINJ)
-    #define GPIOK ((hal::gpio::GPIO_TypeDef *)&PINK)
-    #define GPIOL ((hal::gpio::GPIO_TypeDef *)&PINL)
+#define GPIOA ((hal::gpio::GPIO_TypeDef *)&PINA)
+#define GPIOB ((hal::gpio::GPIO_TypeDef *)&PINB)
+#define GPIOC ((hal::gpio::GPIO_TypeDef *)&PINC)
+#define GPIOD ((hal::gpio::GPIO_TypeDef *)&PIND)
+#define GPIOE ((hal::gpio::GPIO_TypeDef *)&PINE)
+#define GPIOF ((hal::gpio::GPIO_TypeDef *)&PINF)
+#define GPIOG ((hal::gpio::GPIO_TypeDef *)&PING)
+#define GPIOH ((hal::gpio::GPIO_TypeDef *)&PINH)
+#define GPIOJ ((hal::gpio::GPIO_TypeDef *)&PINJ)
+#define GPIOK ((hal::gpio::GPIO_TypeDef *)&PINK)
+#define GPIOL ((hal::gpio::GPIO_TypeDef *)&PINL)
 #else
 
 // stub entries
@@ -104,16 +104,16 @@ extern hal::gpio::GPIO_TypeDef _GPIOJ;
 extern hal::gpio::GPIO_TypeDef _GPIOK;
 extern hal::gpio::GPIO_TypeDef _GPIOL;
 
-    #define GPIOA (&::_GPIOA)
-    #define GPIOB (&::_GPIOB)
-    #define GPIOC (&::_GPIOC)
-    #define GPIOD (&::_GPIOD)
-    #define GPIOE (&::_GPIOE)
-    #define GPIOF (&::_GPIOF)
-    #define GPIOG (&::_GPIOG)
-    #define GPIOH (&::_GPIOH)
-    #define GPIOJ (&::_GPIOJ)
-    #define GPIOK (&::_GPIOK)
-    #define GPIOL (&::_GPIOL)
+#define GPIOA (&::_GPIOA)
+#define GPIOB (&::_GPIOB)
+#define GPIOC (&::_GPIOC)
+#define GPIOD (&::_GPIOD)
+#define GPIOE (&::_GPIOE)
+#define GPIOF (&::_GPIOF)
+#define GPIOG (&::_GPIOG)
+#define GPIOH (&::_GPIOH)
+#define GPIOJ (&::_GPIOJ)
+#define GPIOK (&::_GPIOK)
+#define GPIOL (&::_GPIOL)
 
 #endif
