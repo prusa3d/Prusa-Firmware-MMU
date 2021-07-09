@@ -165,6 +165,9 @@ target_compile_options(firmware PRIVATE -Wdouble-promotion)
 add_subdirectory(src)
 
 if(NOT CMAKE_CROSSCOMPILING)
+  # do not build the firmware by default (tests are the focus if not crosscompiling)
+  set_target_properties(firmware PROPERTIES EXCLUDE_FROM_ALL YES)
+
   enable_testing()
   add_subdirectory(tests)
 endif()
