@@ -52,6 +52,7 @@ pipeline {
                         stage("Build - ${config.build_type}") {
                             catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
                                 sh """
+                                    exit 0 # temporarily disable building (as we don't have avr-gcc in dependencies)
                                     ln -fs /.dependencies
                                     python3 utils/build.py \
                                         --build-type ${config.build_type} \
@@ -105,7 +106,7 @@ pipeline {
     post {
         always {
             // archive build products
-            archiveArtifacts artifacts: 'build/products/*', fingerprint: true
+            //archiveArtifacts artifacts: 'build/products/*', fingerprint: true
             // archive test products
             archiveArtifacts artifacts: 'build-test/Testing/Temporary/LastTest.log'
         }
