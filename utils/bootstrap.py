@@ -61,7 +61,7 @@ dependencies = {
         }
     },
 }
-pip_dependencies = ['ecdsa', 'polib']
+pip_dependencies = []
 # yapf: enable
 
 
