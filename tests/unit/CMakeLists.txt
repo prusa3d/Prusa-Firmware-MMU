@@ -17,6 +17,9 @@ endfunction()
 add_executable(system_tests ${CMAKE_CURRENT_SOURCE_DIR}/system_test.cpp)
 add_catch_test(system_tests)
 
+set(MODULES_STUBS_DIR ${CMAKE_SOURCE_DIR}/tests/unit/modules/stubs)
+set(LOGIC_STUBS_DIR ${CMAKE_SOURCE_DIR}/tests/unit/logic/stubs)
+
 # now, include all the unit tests; they should add themselves using the add_catch_test function
 add_subdirectory(hal)
 add_subdirectory(logic)
