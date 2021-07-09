@@ -1,10 +1,6 @@
 # first, let's create a symbolic target for all tests
 add_custom_target(tests)
 
-# this had a reason on the Buddy FW, but on the AVR we cannot get close to having 16bit ints and
-# pointers so the unit tests may be compiled 64bit afterall set(CMAKE_C_FLAGS -m32)
-# set(CMAKE_CXX_FLAGS -m32)
-
 # include catch_discover_tests function from Catch2
 include(${Catch2_SOURCE_DIR}/contrib/Catch.cmake)
 
