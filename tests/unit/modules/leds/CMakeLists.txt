@@ -1,7 +1,7 @@
 # define the test executable
 add_executable(
-  leds_tests ../../../../src/modules/leds.cpp ../stubs/stub_shr16.cpp ../stubs/stub_timebase.cpp
-             test_leds.cpp
+  leds_tests ${CMAKE_SOURCE_DIR}/src/modules/leds.cpp ${MODULES_STUBS_DIR}/stub_shr16.cpp
+             ${MODULES_STUBS_DIR}/stub_timebase.cpp test_leds.cpp
   )
 
 # define required search paths
