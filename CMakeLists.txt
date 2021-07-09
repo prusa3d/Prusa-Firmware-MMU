@@ -9,13 +9,6 @@ project(
   VERSION ${PROJECT_VERSION}
   )
 
-if(NOT CMAKE_CROSSCOMPILING)
-  #
-  # If we are not crosscompiling, include `utils` with host tools.
-  #
-  add_subdirectory(utils)
-endif()
-
 #
 # Command Line Options
 #
