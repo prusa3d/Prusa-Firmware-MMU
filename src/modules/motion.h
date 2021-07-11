@@ -77,17 +77,26 @@ public:
     /// state especially when the TMC may get randomly reset (deinited)
     void InitAxis(Axis axis);
 
-    /// Set axis power status
+    /// Set axis power status. One must manually ensure no moves are currently being
+    /// performed by calling QueueEmpty().
     void SetEnabled(Axis axis, bool enabled);
 
-    /// Disable axis motor
+    /// Disable axis motor. One must manually ensure no moves are currently being
+    /// performed by calling QueueEmpty().
     void Disable(Axis axis) { SetEnabled(axis, false); }
+
+    /// Set mode of TMC/motors operation. One must manually ensure no moves are currently
+    /// being performed by calling QueueEmpty().
+    void SetMode(Axis axis, MotorMode mode);
 
     /// @returns true if a stall guard event occurred recently on the axis
     bool StallGuard(Axis axis);
 
     /// clear stall guard flag reported on an axis
     void ClearStallGuardFlag(Axis axis);
+
+    /// Enqueue performing of homing of an axis
+    void Home(Axis axis, bool direction);
 
     /// Enqueue a single axis move in steps starting and ending at zero speed with maximum
     /// feedrate. Moves can only be enqueued if the axis is not Full().
@@ -116,14 +125,9 @@ public:
         axisData[axis].ctrl.SetAcceleration(accel);
     }
 
-    /// Enqueue performing of homing of an axis
-    void Home(Axis axis, bool direction);
-
-    /// Set mode of TMC/motors operation
-    void SetMode(Axis axis, MotorMode mode);
-
-    /// State machine doing all the planning and stepping preparation based on received commands
-    void Step();
+    /// State machine doing all the planning and stepping. Called by the stepping ISR.
+    /// @returns the interval for the next tick
+    st_timer_t Step();
 
     /// @returns true if all planned moves have been finished for all axes
     bool QueueEmpty() const;
@@ -131,14 +135,6 @@ public:
     /// @returns true if all planned moves have been finished for one axis
     /// @param axis requested
     bool QueueEmpty(Axis axis) const { return axisData[axis].ctrl.QueueEmpty(); }
-
-    /// @returns false if new moves can still be planned for _any_ axis
-    bool Full() const {
-        for (uint8_t i = 0; i != NUM_AXIS; ++i)
-            if (axisData[i].ctrl.Full())
-                return true;
-        return false;
-    }
 
     /// @returns false if new moves can still be planned for one axis
     /// @param axis axis requested
