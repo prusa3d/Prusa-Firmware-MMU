@@ -15,7 +15,7 @@ extern uint8_t shr16_tmc_dir;
 } // namespace shr16
 } // namespace hal
 
-// Conveniently read the direction set into lower-level the shift register
+// Conveniently read the direction set into the lower-level shift register
 bool getTMCDir(const MotorParams &mp) {
     return (hal::shr16::shr16_tmc_dir & (1 << mp.idx)) ^ mp.dirOn;
 }
