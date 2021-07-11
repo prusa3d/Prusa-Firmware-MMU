@@ -202,9 +202,9 @@ TEST_CASE("pulse_gen::queue_abort", "[pulse_gen]") {
     // queue should start empty
     REQUIRE(pg.QueueEmpty());
 
-    // enqueue a move and step halfway through
+    // enqueue a move and step ~1/3 through
     REQUIRE(pg.PlanMoveTo(10, 1));
-    REQUIRE(stepUntilDone(pg, mp, 5) == -1);
+    REQUIRE(stepUntilDone(pg, mp, 3) == -1);
 
     // abort the queue
     pg.AbortPlannedMoves();
@@ -214,7 +214,9 @@ TEST_CASE("pulse_gen::queue_abort", "[pulse_gen]") {
     bool st = ReadPin(IDLER_STEP_PIN) == Level::high;
     REQUIRE(pg.Step(mp) == 0);
     REQUIRE(st == (ReadPin(IDLER_STEP_PIN) == Level::high));
-    REQUIRE(pg.Position() == 5);
+
+    // check that the aborted position matches
+    REQUIRE(pg.Position() == 3);
 }
 
 TEST_CASE("pulse_gen::accel_ramp", "[pulse_gen]") {
