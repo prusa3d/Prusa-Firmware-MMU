@@ -57,7 +57,7 @@ __attribute__((always_inline)) inline void WritePin(const GPIO_pin portPin, Leve
 }
 
 __attribute__((always_inline)) inline Level ReadPin(const GPIO_pin portPin) {
-    return (Level)(portPin.port->PINx & (1 << portPin.pin));
+    return (Level)((portPin.port->PINx & (1 << portPin.pin)) != 0);
 }
 
 __attribute__((always_inline)) inline void TogglePin(const GPIO_pin portPin) {
