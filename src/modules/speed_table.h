@@ -12,8 +12,7 @@ namespace speed_table {
 typedef uint16_t st_timer_t;
 
 /// CPU timer frequency divider required for the speed tables
-static constexpr uint8_t cpuFrequencyDivider = 8;
-static_assert(F_CPU / cpuFrequencyDivider == 2000000,
+static_assert(F_CPU / config::stepTimerFrequencyDivider == 2000000,
     "speed tables not compatible for the requested frequency");
 
 /// Lookup table for rates equal or higher than 8*256

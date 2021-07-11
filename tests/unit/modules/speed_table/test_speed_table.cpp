@@ -6,7 +6,7 @@ using Catch::Matchers::Equals;
 using namespace modules::speed_table;
 
 // The following reference values are calculated for 2MHz timer
-static_assert(F_CPU / cpuFrequencyDivider == 2000000,
+static_assert(F_CPU / config::stepTimerFrequencyDivider == 2000000,
     "speed tables not compatible for the requested frequency");
 
 static const st_timer_t reference[][3] = {

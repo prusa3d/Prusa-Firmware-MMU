@@ -44,6 +44,9 @@ static constexpr uint16_t minStepRate = 120;
 /// Size for the motion planner block buffer size
 static constexpr uint8_t blockBufferSize = 2;
 
+/// Step timer frequency divider (F = F_CPU / divider)
+static constexpr uint8_t stepTimerFrequencyDivider = 8;
+
 /// Idler configuration
 static constexpr AxisConfig idler = {
     .dirOn = true,

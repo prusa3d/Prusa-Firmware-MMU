@@ -104,7 +104,7 @@ bool PulseGen::PlanMoveTo(pos_t target, steps_t feed_rate) {
 
     // Acceleration of the segment, in steps/sec^2
     block->acceleration = acceleration;
-    block->acceleration_rate = block->acceleration * (rate_t)((float)F_CPU / (F_CPU / speed_table::cpuFrequencyDivider));
+    block->acceleration_rate = block->acceleration * (rate_t)((float)F_CPU / (F_CPU / config::stepTimerFrequencyDivider));
 
     // Perform the trapezoid calculations
     CalculateTrapezoid(block, max_jerk, max_jerk);
