@@ -7,7 +7,10 @@ Motion motion;
 
 void Motion::InitAxis(Axis axis) {}
 
-void Motion::DisableAxis(Axis axis) {}
+void Motion::SetEnabled(Axis axis, bool enabled) {
+    axisData[axis].drv.SetEnabled(axisParams[axis].params, enabled);
+    axisData[axis].enabled = enabled;
+}
 
 bool Motion::StallGuard(Axis axis) { return false; }
 

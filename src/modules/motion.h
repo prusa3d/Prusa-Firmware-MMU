@@ -77,8 +77,11 @@ public:
     /// state especially when the TMC may get randomly reset (deinited)
     void InitAxis(Axis axis);
 
+    /// Set axis power status
+    void SetEnabled(Axis axis, bool enabled);
+
     /// Disable axis motor
-    void DisableAxis(Axis axis);
+    void Disable(Axis axis) { SetEnabled(axis, false); }
 
     /// @returns true if a stall guard event occurred recently on the axis
     bool StallGuard(Axis axis);
@@ -148,6 +151,7 @@ private:
     struct AxisData {
         TMC2130 drv; ///< Motor driver
         pulse_gen::PulseGen ctrl; ///< Motor controller
+        bool enabled; ///< Axis enabled
     };
 
     /// Helper to initialize AxisData members

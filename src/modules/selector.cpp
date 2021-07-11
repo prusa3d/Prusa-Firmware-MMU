@@ -44,7 +44,7 @@ bool Selector::Step() {
         return false;
     case Ready:
         currentSlot = plannedSlot;
-        mm::motion.DisableAxis(mm::Selector); // turn off selector motor's power every time
+        mm::motion.Disable(mm::Selector); // turn off selector motor's power every time
         return true;
     case Failed:
     default:

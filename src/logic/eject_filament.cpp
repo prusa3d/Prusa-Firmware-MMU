@@ -61,7 +61,7 @@ bool EjectFilament::Step() {
         break;
     case ProgressCode::DisengagingIdler:
         if (!mi::idler.Engaged()) { // idler disengaged
-            mm::motion.DisableAxis(mm::Pulley);
+            mm::motion.Disable(mm::Pulley);
             state = ProgressCode::OK;
         }
         break;

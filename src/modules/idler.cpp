@@ -66,7 +66,7 @@ bool Idler::Step() {
         currentSlot = plannedSlot;
 
         if (!Engaged()) // turn off power into the Idler motor when disengaged (no force necessary)
-            mm::motion.DisableAxis(mm::Idler);
+            mm::motion.Disable(mm::Idler);
 
         return true;
     case Failed:

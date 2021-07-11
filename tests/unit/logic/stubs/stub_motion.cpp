@@ -18,8 +18,8 @@ void Motion::InitAxis(Axis axis) {
     axes[axis].enabled = true;
 }
 
-void Motion::DisableAxis(Axis axis) {
-    axes[axis].enabled = false;
+void Motion::SetEnabled(Axis axis, bool enabled) {
+    axes[axis].enabled = enabled;
 }
 
 bool Motion::StallGuard(Axis axis) {
