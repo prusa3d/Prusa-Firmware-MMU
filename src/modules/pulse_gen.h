@@ -14,6 +14,7 @@ using hal::tmc2130::TMC2130;
 using math::mulU24X24toH16;
 using speed_table::calc_timer;
 using speed_table::st_timer_t;
+typedef CircularIndex<uint8_t, blockBufferSize> circular_index_t;
 typedef uint32_t steps_t; ///< Absolute step units
 typedef uint32_t rate_t; ///< Type for step rates
 typedef int32_t pos_t; ///< Axis position (signed)
@@ -35,13 +36,20 @@ public:
     /// @returns true if the move has been enqueued
     bool PlanMoveTo(pos_t pos, steps_t feedrate);
 
-    /// stop whatever moves are being done
+    /// Stop whatever moves are being done
     void AbortPlannedMoves();
 
-    /// @returns the current position of the axis
+    /// @returns the position of the axis at the end of all moves
     pos_t Position() const { return position; }
 
+    /// Fetch the current position of the axis while stepping. This function is expensive!
+    /// It's necessary only in exceptional cases. For regular usage, Position() should
+    /// probably be used instead.
+    /// @returns the current position of the axis
+    pos_t CurPosition() const;
+
     /// Set the position of the axis
+    /// Should only be called when the queue is empty.
     void SetPosition(pos_t x) { position = x; }
 
     /// @returns true if all planned moves have been finished
@@ -150,7 +158,7 @@ private:
 
     // Block buffer parameters
     block_t block_buffer[blockBufferSize];
-    CircularIndex<uint8_t, blockBufferSize> block_index;
+    circular_index_t block_index;
     block_t *current_block;
 
     // Axis data
@@ -168,6 +176,17 @@ private:
 
     /// Calculate the trapezoid parameters for the block
     void CalculateTrapezoid(block_t *block, steps_t entry_speed, steps_t exit_speed);
+
+    /// Return the axis shift introduced by the current (live) block
+    inline pos_t CurBlockShift() const {
+        steps_t steps_missing = (current_block->steps - steps_completed);
+        return current_block->direction ? steps_missing : -steps_missing;
+    }
+
+    /// Return the axis shift introduced by the specified full block
+    static inline pos_t BlockShift(const block_t *block) {
+        return block->direction ? block->steps : -block->steps;
+    }
 };
 
 } // namespace pulse_gen

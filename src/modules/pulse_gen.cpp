@@ -115,20 +115,34 @@ bool PulseGen::PlanMoveTo(pos_t target, steps_t feed_rate) {
     return true;
 }
 
+pos_t PulseGen::CurPosition() const {
+    pos_t cur_pos = position;
+    circular_index_t iter = block_index;
+
+    // if we have a live block remove the partial offset
+    if (current_block) {
+        cur_pos -= CurBlockShift();
+        iter.pop();
+    }
+
+    // rollback remaining blocks
+    while (!iter.empty()) {
+        cur_pos -= BlockShift(&block_buffer[iter.front()]);
+        iter.pop();
+    }
+
+    return cur_pos;
+}
+
 void PulseGen::AbortPlannedMoves() {
-    if (!current_block)
-        return;
+    // always update to effective position
+    position = CurPosition();
 
-    // update position
-    steps_t steps_missing = (current_block->steps - steps_completed);
-    if (current_block->direction)
-        position -= steps_missing;
-    else
-        position += steps_missing;
-
-    // destroy the block
-    current_block = nullptr;
-    block_index.pop();
+    // destroy the current block
+    if (current_block) {
+        current_block = nullptr;
+        block_index.pop();
+    }
 }
 
 } // namespace motor

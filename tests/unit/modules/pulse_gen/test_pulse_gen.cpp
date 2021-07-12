@@ -112,10 +112,14 @@ TEST_CASE("pulse_gen::step_count", "[pulse_gen]") {
     pg.PlanMoveTo(10, 10);
     bool st = ReadPin(IDLER_STEP_PIN) == Level::high;
     for (size_t i = 0; i != 10; ++i) {
+        // check current axis position
+        REQUIRE((pos_t)i == pg.CurPosition());
+
+        // perform the step
         REQUIRE(pg.Step(mp) > 0);
         bool newSt = ReadPin(IDLER_STEP_PIN) == Level::high;
 
-        // Assuming DEDGE each step should toggle the pin
+        // assuming DEDGE each step should toggle the pin
         REQUIRE(newSt != st);
         st = newSt;
     }
@@ -127,6 +131,42 @@ TEST_CASE("pulse_gen::step_count", "[pulse_gen]") {
     // no pin or position change
     REQUIRE(st == (ReadPin(IDLER_STEP_PIN) == Level::high));
     REQUIRE(pg.Position() == 10);
+}
+
+TEST_CASE("pulse_gen::queue_position", "[pulse_gen]") {
+    MotorParams mp = {
+        .idx = 0,
+        .dirOn = config::idler.dirOn,
+        .csPin = IDLER_CS_PIN,
+        .stepPin = IDLER_STEP_PIN,
+        .sgPin = IDLER_SG_PIN,
+        .uSteps = config::idler.uSteps
+    };
+
+    PulseGen pg(10, 100);
+
+    // enqueue two moves, observing Position and CurPosition.
+    REQUIRE(pg.Position() == 0);
+    REQUIRE(pg.CurPosition() == 0);
+
+    // while enqueuing Position should move but CurPosition should not
+    pg.PlanMoveTo(10, 10);
+    REQUIRE(pg.Position() == 10);
+    REQUIRE(pg.CurPosition() == 0);
+
+    pg.PlanMoveTo(15, 10);
+    REQUIRE(pg.Position() == 15);
+    REQUIRE(pg.CurPosition() == 0);
+
+    // step through the moves manually, cycling through two blocks
+    for (size_t i = 0; i != 15; ++i) {
+        REQUIRE((pos_t)i == pg.CurPosition());
+        REQUIRE(pg.Position() == 15);
+        pg.Step(mp);
+    }
+
+    // the final positions should match
+    REQUIRE(pg.CurPosition() == pg.Position());
 }
 
 TEST_CASE("pulse_gen::queue_size", "[pulse_gen]") {
