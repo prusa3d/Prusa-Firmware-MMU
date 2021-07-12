@@ -17,13 +17,13 @@ static constexpr const uint16_t fsensorDebounceMs = 10;
 
 // FINDA setup
 static constexpr const uint16_t findaDebounceMs = 100;
-static constexpr const uint8_t findaADCIndex = 1; ///< ADC index of FINDA input
+static constexpr const uint8_t findaADCIndex = 6; ///< ADC index of FINDA input
 static constexpr const uint16_t findaADCDecisionLevel = 512; ///< ADC decision level when a FINDA is considered pressed/not pressed
 
 // Buttons setup
 static constexpr const uint8_t buttonCount = 3; ///< number of buttons currently supported
 static constexpr const uint16_t buttonsDebounceMs = 100;
 static constexpr const uint16_t buttonADCLimits[buttonCount][2] = { { 0, 10 }, { 320, 360 }, { 500, 530 } };
-static constexpr const uint8_t buttonsADCIndex = 0; ///< ADC index of buttons input
+static constexpr const uint8_t buttonsADCIndex = 5; ///< ADC index of buttons input
 
 } // namespace config
