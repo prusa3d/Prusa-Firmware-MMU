@@ -1,10 +1,6 @@
 # first, let's create a symbolic target for all tests
 add_custom_target(tests)
 
-# this had a reason on the Buddy FW, but on the AVR we cannot get close to having 16bit ints and
-# pointers so the unit tests may be compiled 64bit afterall set(CMAKE_C_FLAGS -m32)
-# set(CMAKE_CXX_FLAGS -m32)
-
 # include catch_discover_tests function from Catch2
 include(${Catch2_SOURCE_DIR}/contrib/Catch.cmake)
 
@@ -20,6 +16,9 @@ endfunction()
 
 add_executable(system_tests ${CMAKE_CURRENT_SOURCE_DIR}/system_test.cpp)
 add_catch_test(system_tests)
+
+set(MODULES_STUBS_DIR ${CMAKE_SOURCE_DIR}/tests/unit/modules/stubs)
+set(LOGIC_STUBS_DIR ${CMAKE_SOURCE_DIR}/tests/unit/logic/stubs)
 
 # now, include all the unit tests; they should add themselves using the add_catch_test function
 add_subdirectory(hal)

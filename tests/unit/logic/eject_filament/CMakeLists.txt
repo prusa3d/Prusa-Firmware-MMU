@@ -1,30 +1,29 @@
 # define the test executable
 add_executable(
   eject_filament_tests
-  ../../../../src/logic/eject_filament.cpp
-  ../../../../src/logic/feed_to_finda.cpp
-  ../../../../src/logic/unload_filament.cpp
-  ../../../../src/logic/unload_to_finda.cpp
-  ../../../../src/modules/buttons.cpp
-  ../../../../src/modules/debouncer.cpp
-  ../../../../src/modules/finda.cpp
-  ../../../../src/modules/fsensor.cpp
-  ../../../../src/modules/globals.cpp
-  ../../../../src/modules/idler.cpp
-  ../../../../src/modules/leds.cpp
-  ../../../../src/modules/permanent_storage.cpp
-  ../../../../src/modules/selector.cpp
-  ../../../../src/modules/user_input.cpp
-  ../../../../src/modules/pulse_gen.cpp
-  ../../modules/stubs/stub_adc.cpp
-  ../../modules/stubs/stub_eeprom.cpp
-  ../../modules/stubs/stub_gpio.cpp
-  ../../modules/stubs/stub_shr16.cpp
-  ../../modules/stubs/stub_timebase.cpp
-  ../../modules/stubs/stub_gpio.cpp
-  ../../modules/stubs/stub_tmc2130.cpp
-  ../stubs/main_loop_stub.cpp
-  ../stubs/stub_motion.cpp
+  ${CMAKE_SOURCE_DIR}/src/logic/eject_filament.cpp
+  ${CMAKE_SOURCE_DIR}/src/logic/feed_to_finda.cpp
+  ${CMAKE_SOURCE_DIR}/src/logic/unload_filament.cpp
+  ${CMAKE_SOURCE_DIR}/src/logic/unload_to_finda.cpp
+  ${CMAKE_SOURCE_DIR}/src/modules/buttons.cpp
+  ${CMAKE_SOURCE_DIR}/src/modules/debouncer.cpp
+  ${CMAKE_SOURCE_DIR}/src/modules/finda.cpp
+  ${CMAKE_SOURCE_DIR}/src/modules/fsensor.cpp
+  ${CMAKE_SOURCE_DIR}/src/modules/globals.cpp
+  ${CMAKE_SOURCE_DIR}/src/modules/idler.cpp
+  ${CMAKE_SOURCE_DIR}/src/modules/leds.cpp
+  ${CMAKE_SOURCE_DIR}/src/modules/permanent_storage.cpp
+  ${CMAKE_SOURCE_DIR}/src/modules/selector.cpp
+  ${CMAKE_SOURCE_DIR}/src/modules/user_input.cpp
+  ${CMAKE_SOURCE_DIR}/src/modules/pulse_gen.cpp
+  ${MODULES_STUBS_DIR}/stub_adc.cpp
+  ${MODULES_STUBS_DIR}/stub_eeprom.cpp
+  ${MODULES_STUBS_DIR}/stub_gpio.cpp
+  ${MODULES_STUBS_DIR}/stub_shr16.cpp
+  ${MODULES_STUBS_DIR}/stub_timebase.cpp
+  ${MODULES_STUBS_DIR}/stub_tmc2130.cpp
+  ${LOGIC_STUBS_DIR}/main_loop_stub.cpp
+  ${LOGIC_STUBS_DIR}/stub_motion.cpp
   test_eject_filament.cpp
   )
 

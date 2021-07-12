@@ -9,29 +9,14 @@ project(
   VERSION ${PROJECT_VERSION}
   )
 
-if(NOT CMAKE_CROSSCOMPILING)
-  #
-  # If we are not crosscompiling, include `utils` with host tools.
-  #
-  add_subdirectory(utils)
-endif()
-
 #
 # Command Line Options
 #
 # You should specify those options when invoking CMake. Example:
 # ~~~
-# cmake .. <other options> -DPRINTER=MMU
+# cmake .. <other options> -DCUSTOM_COMPILE_OPTIONS=-DENABLE_FEATURE_X
 # ~~~
 
-set(PRINTER_VALID_OPTS "MMU")
-
-set(PRINTER
-    "MMU"
-    CACHE
-      STRING
-      "Select the MMU unit for which you want to compile the project (valid values are ${PRINTER_VALID_OPTS})."
-    )
 set(PROJECT_VERSION_SUFFIX
     "<auto>"
     CACHE
@@ -52,13 +37,6 @@ set(CUSTOM_COMPILE_OPTIONS
     ""
     CACHE STRING "Allows adding custom C/C++ flags"
     )
-
-# Validate options
-foreach(OPTION "PRINTER")
-  if(NOT ${OPTION} IN_LIST ${OPTION}_VALID_OPTS)
-    message(FATAL_ERROR "Invalid ${OPTION} ${${OPTION}}: Valid values are ${${OPTION}_VALID_OPTS}")
-  endif()
-endforeach()
 
 # Resolve BUILD_NUMBER and PROJECT_VERSION_* variables
 resolve_version_variables()
@@ -86,7 +64,6 @@ message(
   STATUS "Project version with short suffix: ${PROJECT_VERSION}${PROJECT_VERSION_SUFFIX_SHORT}"
   )
 message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}.")
-message(STATUS "Printer: ${PRINTER}")
 
 # eclipse sets those variables, so lets just use them so we don't get a warning about unused
 # variables
@@ -185,56 +162,16 @@ endif()
 
 # add_link_dependency(firmware "${LINKER_SCRIPT}")
 
-target_include_directories(firmware PRIVATE include src)
+target_include_directories(firmware PRIVATE src)
 
 target_compile_options(firmware PRIVATE -Wdouble-promotion)
-target_sources(
-  firmware
-  PRIVATE src/main.cpp
-          src/hal/avr/cpu.cpp
-          src/hal/avr/usart.cpp
-          src/hal/avr/shr16.cpp
-          src/hal/avr/eeprom.cpp
-          src/hal/avr/tmc2130.cpp
-          src/hal/adc.cpp
-          src/modules/protocol.cpp
-          src/modules/buttons.cpp
-          src/modules/debouncer.cpp
-          src/modules/finda.cpp
-          src/modules/fsensor.cpp
-          src/modules/globals.cpp
-          src/modules/idler.cpp
-          src/modules/leds.cpp
-          src/modules/motion.cpp
-          src/modules/pulse_gen.cpp
-          src/modules/permanent_storage.cpp
-          src/modules/selector.cpp
-          src/modules/timebase.cpp
-          src/modules/user_input.cpp
-          src/modules/speed_table.cpp
-          src/logic/command_base.cpp
-          src/logic/cut_filament.cpp
-          src/logic/eject_filament.cpp
-          src/logic/feed_to_bondtech.cpp
-          src/logic/feed_to_finda.cpp
-          src/logic/load_filament.cpp
-          src/logic/no_command.cpp
-          src/logic/tool_change.cpp
-          src/logic/unload_filament.cpp
-          src/logic/unload_to_finda.cpp
-  )
 
-set_property(
-  SOURCE src/version.c
-  APPEND
-  PROPERTY COMPILE_DEFINITIONS
-           FW_BUILD_NUMBER=${BUILD_NUMBER}
-           FW_VERSION_FULL=${PROJECT_VERSION_FULL}
-           FW_VERSION=${PROJECT_VERSION}
-           FW_VERSION_SUFFIX=${PROJECT_VERSION_SUFFIX}
-           FW_VERSION_SUFFIX_SHORT=${PROJECT_VERSION_SUFFIX_SHORT}
-  )
+add_subdirectory(src)
+
 if(NOT CMAKE_CROSSCOMPILING)
+  # do not build the firmware by default (tests are the focus if not crosscompiling)
+  set_target_properties(firmware PROPERTIES EXCLUDE_FROM_ALL YES)
+
   enable_testing()
   add_subdirectory(tests)
 endif()
