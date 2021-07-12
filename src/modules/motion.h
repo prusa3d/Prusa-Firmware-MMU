@@ -112,12 +112,12 @@ public:
     /// @param delta relative to current position
     /// @param feedrate maximum feedrate
     void PlanMove(Axis axis, pos_t delta, steps_t feedrate) {
-        PlanMoveTo(axis, CurrentPos(axis) + delta, feedrate);
+        PlanMoveTo(axis, Position(axis) + delta, feedrate);
     }
 
-    /// @returns current position of an axis
+    /// @returns head position of an axis (last enqueued position)
     /// @param axis axis affected
-    pos_t CurrentPos(Axis axis) const;
+    pos_t Position(Axis axis) const;
 
     /// Set acceleration for the selected axis
     /// @param axis axis affected

@@ -39,7 +39,7 @@ void Motion::PlanMoveTo(Axis axis, pos_t pos, steps_t feedrate) {
     }
 }
 
-pos_t Motion::CurrentPos(Axis axis) const {
+pos_t Motion::Position(Axis axis) const {
     return axisData[axis].ctrl.Position();
 }
 

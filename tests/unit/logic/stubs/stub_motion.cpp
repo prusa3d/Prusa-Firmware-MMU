@@ -34,7 +34,7 @@ void Motion::PlanMoveTo(Axis axis, pos_t pos, steps_t feedrate) {
     axes[axis].targetPos = pos;
 }
 
-pos_t Motion::CurrentPos(Axis axis) const {
+pos_t Motion::Position(Axis axis) const {
     return axes[axis].pos;
 }
 
