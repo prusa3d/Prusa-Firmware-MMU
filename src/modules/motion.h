@@ -11,6 +11,7 @@ namespace motion {
 
 using namespace hal::tmc2130;
 using pulse_gen::pos_t;
+using pulse_gen::st_timer_t;
 using pulse_gen::steps_t;
 
 /// Main axis enumeration

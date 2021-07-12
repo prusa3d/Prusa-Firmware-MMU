@@ -45,13 +45,14 @@ void Motion::Home(Axis axis, bool direction) {
 void Motion::SetMode(Axis axis, hal::tmc2130::MotorMode mode) {
 }
 
-void Motion::Step() {
+st_timer_t Motion::Step() {
     for (uint8_t i = 0; i < 3; ++i) {
         if (axes[i].pos != axes[i].targetPos) {
             int8_t dirInc = (axes[i].pos < axes[i].targetPos) ? 1 : -1;
             axes[i].pos += dirInc;
         }
     }
+    return 0;
 }
 
 bool Motion::QueueEmpty() const {

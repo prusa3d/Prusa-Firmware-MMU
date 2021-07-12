@@ -55,7 +55,9 @@ void Motion::AbortPlannedMoves() {
         axisData[i].ctrl.AbortPlannedMoves();
 }
 
-st_timer_t Motion::Step() {}
+st_timer_t Motion::Step() {
+    return 0;
+}
 
 void ISR() {}
 
