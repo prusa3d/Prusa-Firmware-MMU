@@ -77,9 +77,9 @@ public:
             acceleration_time = calc_timer(acc_step_rate, step_loops);
             steps_completed = 0;
 
-            // Set the nominal step loops to zero to indicate, that the timer value is not
-            // known yet. That means, delay the initialization of nominal step rate and step
-            // loops until the steady state is reached.
+            // Set the nominal step loops to zero to indicate that the timer value is not
+            // known yet. That means, delay the initialization of nominal step rate and
+            // step loops until the steady state is reached.
             step_loops_nominal = 0;
         }
 

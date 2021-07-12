@@ -94,7 +94,7 @@ bool PulseGen::PlanMoveTo(pos_t target, steps_t feed_rate) {
     // Bail if this is a zero-length block
     block->steps = abs(target - position);
     if (block->steps <= config::dropSegments) {
-        // behave as-if the block as been scheduled
+        // behave as-if the block has been scheduled
         return true;
     }
 
