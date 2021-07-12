@@ -137,7 +137,7 @@ void setup() {
     ml::leds.SetMode(1, ml::Color::green, ml::Mode::on);
     ml::leds.Step();
 
-    // adc::Init();
+    adc::Init();
     ml::leds.SetMode(0, ml::Color::green, ml::Mode::on);
     ml::leds.Step();
 }
