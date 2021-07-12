@@ -27,6 +27,8 @@
 #include "logic/tool_change.h"
 #include "logic/unload_filament.h"
 
+#include "version.h"
+
 namespace mb = modules::buttons;
 namespace mp = modules::protocol;
 namespace mf = modules::finda;
@@ -142,7 +144,82 @@ void setup() {
     ml::leds.Step();
 }
 
-void SendMessage(const mp::ResponseMsg &msg) {
+static constexpr const uint8_t maxMsgLen = 10;
+
+bool WriteToUSART(const uint8_t *src, uint8_t len) {
+    // How to properly enqueue the message? Especially in case of a full buffer.
+    // We neither can stay here in an endless loop until the buffer drains.
+    // Nor can we save the message elsewhere ... it must be just skipped and the protocol must handle it.
+    // Under normal circumstances, such a situation should not happen.
+    // The MMU cannot produce response messages on its own - it only responds to requests from the printer.
+    // That means there is only one message in the output buffer at once as long as the printer waits for the response before sending another request.
+    for (uint8_t i = 0; i < len; ++i) {
+        if (hal::usart::usart1.CanWrite()) {
+            // should not block waiting for the TX buffer to drain as there was an empty spot for at least 1 byte
+            hal::usart::usart1.Write(src[i]);
+        } else {
+            //buffer full - must skip the rest of the message - the communication will drop out anyway
+            return false;
+        }
+    }
+    return true; // not sure if we can actually leverage the knowledge of success while sending the message
+}
+
+void ReportCommandAccepted(const mp::RequestMsg &rq, mp::ResponseMsgParamCodes status) {
+    uint8_t tmp[maxMsgLen];
+    uint8_t len = protocol.EncodeResponseCmdAR(rq, status, tmp);
+    WriteToUSART(tmp, len);
+}
+
+void ReportFINDA(const mp::RequestMsg &rq) {
+    uint8_t rsp[maxMsgLen];
+    uint8_t len = protocol.EncodeResponseReadFINDA(rq, mf::finda.Pressed(), rsp);
+    WriteToUSART(rsp, len);
+}
+
+void ReportVersion(const mp::RequestMsg &rq) {
+    uint8_t v = 0;
+
+    switch (rq.value) {
+    case 0:
+        v = project_version_major;
+        break;
+    case 1:
+        v = project_version_minor;
+        break;
+    case 2:
+        v = project_version_revision;
+        break;
+    default:
+        v = 0;
+        break;
+    }
+
+    uint8_t rsp[10];
+    uint8_t len = protocol.EncodeResponseVersion(rq, v, rsp);
+    WriteToUSART(rsp, len);
+}
+
+void ReportRunningCommand() {
+    mp::ResponseMsgParamCodes commandStatus;
+    uint8_t value = 0;
+    switch (currentCommand->Error()) {
+    case ErrorCode::RUNNING:
+        commandStatus = mp::ResponseMsgParamCodes::Processing;
+        value = (uint8_t)currentCommand->State();
+        break;
+    case ErrorCode::OK:
+        commandStatus = mp::ResponseMsgParamCodes::Finished;
+        break;
+    default:
+        commandStatus = mp::ResponseMsgParamCodes::Error;
+        value = (uint8_t)currentCommand->Error();
+        break;
+    }
+
+    uint8_t rsp[maxMsgLen];
+    uint8_t len = protocol.EncodeResponseQueryOperation(currentCommandRq, commandStatus, value, rsp);
+    WriteToUSART(rsp, len);
 }
 
 void PlanCommand(const mp::RequestMsg &rq) {
@@ -169,26 +246,10 @@ void PlanCommand(const mp::RequestMsg &rq) {
             break;
         }
         currentCommand->Reset(rq.value);
+        ReportCommandAccepted(rq, mp::ResponseMsgParamCodes::Accepted);
+    } else {
+        ReportCommandAccepted(rq, mp::ResponseMsgParamCodes::Rejected);
     }
-}
-
-void ReportRunningCommand() {
-    mp::ResponseMsgParamCodes commandStatus;
-    uint8_t value = 0;
-    switch (currentCommand->Error()) {
-    case ErrorCode::RUNNING:
-        commandStatus = mp::ResponseMsgParamCodes::Processing;
-        value = (uint8_t)currentCommand->State();
-        break;
-    case ErrorCode::OK:
-        commandStatus = mp::ResponseMsgParamCodes::Finished;
-        break;
-    default:
-        commandStatus = mp::ResponseMsgParamCodes::Error;
-        value = (uint8_t)currentCommand->Error();
-        break;
-    }
-    SendMessage(mp::ResponseMsg(currentCommandRq, commandStatus, value));
 }
 
 void ProcessRequestMsg(const mp::RequestMsg &rq) {
@@ -199,7 +260,7 @@ void ProcessRequestMsg(const mp::RequestMsg &rq) {
         break;
     case mp::RequestMsgCodes::Finda:
         // immediately report FINDA status
-        SendMessage(mp::ResponseMsg(rq, mp::ResponseMsgParamCodes::Accepted, mf::finda.Pressed()));
+        ReportFINDA(rq);
         break;
     case mp::RequestMsgCodes::Mode:
         // immediately switch to normal/stealth as requested
@@ -213,7 +274,8 @@ void ProcessRequestMsg(const mp::RequestMsg &rq) {
         // immediately reset the board - there is no response in this case
         break; // @@TODO
     case mp::RequestMsgCodes::Version:
-        SendMessage(mp::ResponseMsg(rq, mp::ResponseMsgParamCodes::Accepted, 1)); // @@TODO
+        ReportVersion(rq);
+        break;
     case mp::RequestMsgCodes::Wait:
         break; // @@TODO
     case mp::RequestMsgCodes::Cut:

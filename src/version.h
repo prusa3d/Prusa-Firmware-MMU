@@ -4,10 +4,14 @@
 extern "C" {
 #endif //__cplusplus
 
-/// Project's version (4.0.2)
+#define project_version_major 2
+#define project_version_minor 0
+#define project_version_revision 0
+
+/// Project's version (2.0.0)
 extern const char project_version[];
 
-/// Full project's version (4.0.3-BETA+1035.PR111.B4)
+/// Full project's version (2.0.0-BETA+1035.PR111.B4)
 extern const char project_version_full[];
 
 /// Project's version suffix (-BETA+1035.PR111.B4)
