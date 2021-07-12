@@ -7,7 +7,8 @@ namespace hal {
 namespace adc {
 
 /// ADC access routines
-uint16_t ReadADC(uint8_t adc);
+void Init();
+uint16_t ReadADC(uint8_t channel);
 
 } // namespace adc
 } // namespace hal
