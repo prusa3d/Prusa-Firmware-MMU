@@ -5,8 +5,8 @@
 namespace hal {
 namespace adc {
 
-static TADCData values2Return[2];
-static TADCData::const_iterator rdptr[2] = { values2Return[0].cbegin(), values2Return[1].cbegin() };
+static TADCData values2Return[6];
+static TADCData::const_iterator rdptr[6] = { values2Return[0].cbegin(), values2Return[1].cbegin() };
 static uint8_t oversampleFactor = 1;
 static uint8_t oversample = 1; ///< current count of oversampled values returned from the ADC - will get filled with oversampleFactor once it reaches zero
 
