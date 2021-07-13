@@ -56,7 +56,29 @@ void Motion::AbortPlannedMoves() {
 }
 
 st_timer_t Motion::Step() {
-    return 0;
+    st_timer_t timers[NUM_AXIS];
+
+    // step and calculate interval for each new move
+    for (uint8_t i = 0; i != NUM_AXIS; ++i) {
+        timers[i] = axisData[i].residual;
+        if (timers[i] <= config::stepTimerQuantum) {
+            timers[i] += axisData[i].ctrl.Step(axisParams[i].params);
+        }
+    }
+
+    // plan next closest interval
+    st_timer_t next = timers[0];
+    for (uint8_t i = 1; i != NUM_AXIS; ++i) {
+        if (timers[i] && (!next || timers[i] < next))
+            next = timers[i];
+    }
+
+    // update residuals
+    for (uint8_t i = 0; i != NUM_AXIS; ++i) {
+        axisData[i].residual = (timers[i] ? timers[i] - next : 0);
+    }
+
+    return next;
 }
 
 void ISR() {}

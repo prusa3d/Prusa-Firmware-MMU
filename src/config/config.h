@@ -47,6 +47,10 @@ static constexpr uint8_t blockBufferSize = 2;
 /// Step timer frequency divider (F = F_CPU / divider)
 static constexpr uint8_t stepTimerFrequencyDivider = 8;
 
+/// Smallest stepping ISR scheduling slice (T = F_CPU / divider * quantum)
+/// 16 = 8us (25us is the max frequency interval per maxStepFrequency)
+static constexpr uint8_t stepTimerQuantum = 16;
+
 /// Idler configuration
 static constexpr AxisConfig idler = {
     .dirOn = true,

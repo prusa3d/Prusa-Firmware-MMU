@@ -125,3 +125,46 @@ TEST_CASE("motion::triple_move", "[motion]") {
     REQUIRE(motion.Position(Selector) == 20);
     REQUIRE(motion.Position(Pulley) == 30);
 }
+
+TEST_CASE("motion::dual_move_ramp", "[motion]") {
+    // TODO: output ramps still to be checked
+    const int idlerSteps = 100;
+    const int selectorSteps = 80;
+    const int maxFeedRate = 1000;
+
+    for (int accel = 2000; accel <= 50000; accel *= 2) {
+        REQUIRE(motion.QueueEmpty());
+
+        // first axis using nominal values
+        motion.SetPosition(Idler, 0);
+        motion.SetAcceleration(Idler, accel);
+        motion.PlanMoveTo(Idler, idlerSteps, maxFeedRate);
+
+        // second axis finishes slightly sooner at triple acceleration to maximize the
+        // aliasing effects
+        motion.SetPosition(Selector, 0);
+        motion.SetAcceleration(Selector, accel * 3);
+        motion.PlanMoveTo(Selector, selectorSteps, maxFeedRate);
+
+        // step and output time, interval and positions
+        unsigned long ts = 0;
+        st_timer_t next;
+        do {
+            next = motion.Step();
+            pos_t pos_idler = motion.CurPosition(Idler);
+            pos_t pos_selector = motion.CurPosition(Selector);
+
+            printf("%lu %u %d %d\n", ts, next, pos_idler, pos_selector);
+
+            ts += next;
+        } while (next);
+        printf("\n\n");
+
+        // check queue status
+        REQUIRE(motion.QueueEmpty());
+
+        // check final position
+        REQUIRE(motion.Position(Idler) == idlerSteps);
+        REQUIRE(motion.Position(Selector) == selectorSteps);
+    }
+}
