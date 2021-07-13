@@ -14,6 +14,12 @@ using pulse_gen::pos_t;
 using pulse_gen::st_timer_t;
 using pulse_gen::steps_t;
 
+// Check for configuration invariants
+static_assert(
+    (1. / (F_CPU / config::stepTimerFrequencyDivider) * config::stepTimerQuantum)
+        < (1. / config::maxStepFrequency / 2),
+    "stepTimerQuantum must be smaller than the maximal stepping frequency interval");
+
 /// Main axis enumeration
 enum Axis : uint8_t {
     Pulley,
