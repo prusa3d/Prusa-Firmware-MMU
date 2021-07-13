@@ -79,7 +79,7 @@ static constexpr AxisConfig selector = {
     .iRun = 20,
     .iHold = 20,
     .accel = 100,
-    .jerk = 1,
+    .jerk = 10,
     .stealth = false
 };
 

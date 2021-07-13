@@ -51,6 +51,7 @@ public:
 
     /// Set the position of the axis
     /// Should only be called when the queue is empty.
+    /// @param x position to set
     void SetPosition(pos_t x) { position = x; }
 
     /// @returns true if all planned moves have been finished

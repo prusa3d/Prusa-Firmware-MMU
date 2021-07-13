@@ -119,6 +119,25 @@ public:
     /// @param axis axis affected
     pos_t Position(Axis axis) const;
 
+    /// Fetch the current position of the axis while stepping. This function is expensive!
+    /// It's necessary only in exceptional cases. For regular usage, Position() should
+    /// probably be used instead.
+    /// @param axis axis affected
+    /// @returns the current position of the axis
+    pos_t CurPosition(Axis axis) const { return axisData[axis].ctrl.CurPosition(); }
+
+    /// Set the position of an axis. Should only be called when the queue is empty.
+    /// @param axis axis affected
+    /// @param x position to set
+    void SetPosition(Axis axis, pos_t x) { axisData[axis].ctrl.SetPosition(x); }
+
+    /// Get current acceleration for the selected axis
+    /// @param axis axis affected
+    /// @returns acceleration
+    steps_t Acceleration(Axis axis) {
+        return axisData[axis].ctrl.Acceleration();
+    }
+
     /// Set acceleration for the selected axis
     /// @param axis axis affected
     /// @param accel acceleration
@@ -154,8 +173,15 @@ private:
     /// Helper to initialize AxisData members
     static AxisData DataForAxis(Axis axis) {
         return {
-            .drv = { axisParams[axis].params, axisParams[axis].currents, axisParams[axis].mode },
-            .ctrl = { axisParams[axis].jerk, axisParams[axis].accel },
+            .drv = {
+                axisParams[axis].params,
+                axisParams[axis].currents,
+                axisParams[axis].mode,
+            },
+            .ctrl = {
+                axisParams[axis].jerk,
+                axisParams[axis].accel,
+            },
         };
     }
 
