@@ -11,6 +11,12 @@ void Motion::InitAxis(Axis axis) {}
 void Motion::SetEnabled(Axis axis, bool enabled) {
     axisData[axis].drv.SetEnabled(axisParams[axis].params, enabled);
     axisData[axis].enabled = enabled;
+
+    if (!axisData[axis].enabled) {
+        // axis is powered off, clear internal StallGuard counters
+        axisData[axis].stall_trig = false;
+        axisData[axis].stall_cnt = 0;
+    }
 }
 
 void Motion::SetMode(Axis axis, MotorMode mode) {
@@ -18,13 +24,12 @@ void Motion::SetMode(Axis axis, MotorMode mode) {
         axisData[axis].drv.SetMode(mode);
 }
 
-// TODO: not implemented
 bool Motion::StallGuard(Axis axis) {
-    return false;
+    return axisData[axis].stall_trig;
 }
 
-// TODO: not implemented
 void Motion::ClearStallGuardFlag(Axis axis) {
+    axisData[axis].stall_trig = false;
 }
 
 // TODO: not implemented
@@ -63,6 +68,14 @@ st_timer_t Motion::Step() {
         timers[i] = axisData[i].residual;
         if (timers[i] <= config::stepTimerQuantum) {
             timers[i] += axisData[i].ctrl.Step(axisParams[i].params);
+
+            // axis has been moved, sample StallGuard
+            if (hal::tmc2130::TMC2130::Stall(axisParams[i].params)) {
+                // TODO: on the MK3 a stall is marked as such as 1/2 of a full step is
+                // lost: this is too simplistic for production
+                ++axisData[i].stall_cnt;
+                axisData[i].stall_trig = true;
+            }
         }
     }
 

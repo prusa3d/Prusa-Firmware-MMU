@@ -175,6 +175,8 @@ private:
         pulse_gen::PulseGen ctrl; ///< Motor controller
         bool enabled; ///< Axis enabled
         st_timer_t residual; ///< Axis timer residual
+        uint8_t stall_cnt; ///< Underlying StallGuard lost ustep count
+        bool stall_trig; ///< StallGuard trigger flag
     };
 
     /// Helper to initialize AxisData members
