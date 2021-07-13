@@ -14,6 +14,7 @@ using hal::tmc2130::TMC2130;
 using math::mulU24X24toH16;
 using speed_table::calc_timer;
 using speed_table::st_timer_t;
+
 typedef CircularIndex<uint8_t, blockBufferSize> circular_index_t;
 typedef uint32_t steps_t; ///< Absolute step units
 typedef uint32_t rate_t; ///< Type for step rates
@@ -39,7 +40,7 @@ public:
     /// Stop whatever moves are being done
     void AbortPlannedMoves();
 
-    /// @returns the position of the axis at the end of all moves
+    /// @returns the head position of the axis at the end of all moves
     pos_t Position() const { return position; }
 
     /// Fetch the current position of the axis while stepping. This function is expensive!
