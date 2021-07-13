@@ -72,7 +72,7 @@ TEST_CASE("motion::dual_move_inv", "[motion]") {
     motion.SetPosition(Idler, 0);
     motion.SetPosition(Selector, 5);
 
-    // plan two moves at the same speed and acceleration, like in the previous
+    // plan two moves at the same speed and acceleration: like in the previous
     // test this should *also* reduce to the same steps being performed
     motion.PlanMove(Idler, 10, 1);
     motion.PlanMove(Selector, -10, 1);
@@ -94,8 +94,7 @@ TEST_CASE("motion::dual_move_complex", "[motion]") {
     motion.SetAcceleration(Idler, 10);
     motion.SetAcceleration(Selector, 20);
 
-    // plan two moves at the same speed and acceleration, like in the previous
-    // test: this should *also* reduce to the same steps being performed
+    // plan two moves with difference accelerations
     motion.PlanMoveTo(Idler, 10, 1);
     motion.PlanMoveTo(Selector, 10, 1);
 
@@ -109,7 +108,7 @@ TEST_CASE("motion::dual_move_complex", "[motion]") {
 }
 
 TEST_CASE("motion::triple_move", "[motion]") {
-    // that that we can move three axes at the same time
+    // check that we can move three axes at the same time
     motion.PlanMoveTo(Idler, 10, 1);
     motion.PlanMoveTo(Selector, 20, 1);
     motion.PlanMoveTo(Pulley, 30, 1);
