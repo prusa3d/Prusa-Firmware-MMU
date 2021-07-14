@@ -9,5 +9,9 @@ TMC2130::TMC2130(const MotorParams &params,
     // TODO
 }
 
+void TMC2130::Init(const MotorParams &params) {
+    // TODO
+}
+
 } // namespace tmc2130
 } // namespace hal
