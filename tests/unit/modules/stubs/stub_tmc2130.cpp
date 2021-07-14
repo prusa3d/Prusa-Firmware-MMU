@@ -13,5 +13,9 @@ void TMC2130::SetMode(MotorMode mode) {
     // TODO
 }
 
+void TMC2130::Init(const MotorParams & /*params*/) {
+    // TODO
+}
+
 } // namespace tmc2130
 } // namespace hal
