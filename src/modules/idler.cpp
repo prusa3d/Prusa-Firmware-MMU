@@ -22,7 +22,7 @@ bool Idler::Disengage() {
 
     mm::motion.InitAxis(mm::Idler);
     // plan move to idle position
-    mm::motion.PlanMove(mm::Idler, config::idlerSlotPositions[IdleSlotIndex()] - mm::motion.CurrentPos(mm::Idler), 1000); // @@TODO
+    mm::motion.PlanMove(mm::Idler, config::idlerSlotPositions[IdleSlotIndex()] - mm::motion.Position(mm::Idler), 1000); // @@TODO
     state = Moving;
     return true;
 }
@@ -38,7 +38,7 @@ bool Idler::Engage(uint8_t slot) {
         return true;
 
     mm::motion.InitAxis(mm::Idler);
-    mm::motion.PlanMove(mm::Idler, config::idlerSlotPositions[slot] - mm::motion.CurrentPos(mm::Idler), 1000); // @@TODO
+    mm::motion.PlanMove(mm::Idler, config::idlerSlotPositions[slot] - mm::motion.Position(mm::Idler), 1000); // @@TODO
     state = Moving;
     return true;
 }
@@ -66,7 +66,7 @@ bool Idler::Step() {
         currentSlot = plannedSlot;
 
         if (!Engaged()) // turn off power into the Idler motor when disengaged (no force necessary)
-            mm::motion.DisableAxis(mm::Idler);
+            mm::motion.Disable(mm::Idler);
 
         return true;
     case Failed:

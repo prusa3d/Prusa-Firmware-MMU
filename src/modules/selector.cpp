@@ -21,7 +21,7 @@ bool Selector::MoveToSlot(uint8_t slot) {
         return true;
 
     mm::motion.InitAxis(mm::Selector);
-    mm::motion.PlanMove(mm::Selector, config::selectorSlotPositions[slot] - mm::motion.CurrentPos(mm::Selector), 1000); // @@TODO
+    mm::motion.PlanMove(mm::Selector, config::selectorSlotPositions[slot] - mm::motion.Position(mm::Selector), 1000); // @@TODO
     state = Moving;
     return true;
 }
@@ -44,7 +44,7 @@ bool Selector::Step() {
         return false;
     case Ready:
         currentSlot = plannedSlot;
-        mm::motion.DisableAxis(mm::Selector); // turn off selector motor's power every time
+        mm::motion.Disable(mm::Selector); // turn off selector motor's power every time
         return true;
     case Failed:
     default:

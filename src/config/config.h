@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include "axis.h"
 
 /// Wrangler for assorted compile-time configuration and constants.
 namespace config {
@@ -25,5 +26,65 @@ static constexpr const uint8_t buttonCount = 3; ///< number of buttons currently
 static constexpr const uint16_t buttonsDebounceMs = 100;
 static constexpr const uint16_t buttonADCLimits[buttonCount][2] = { { 0, 50 }, { 80, 100 }, { 160, 180 } };
 static constexpr const uint8_t buttonsADCIndex = 5; ///< ADC index of buttons input
+
+/// Maximum microstepping resolution. This defines the effective unit of
+/// the step intevals on the motion API, independently of the selected
+/// microstepping interval.
+static constexpr uint8_t uStepMaxRes = 32;
+
+/// Do not plan moves equal or shorter than the requested steps
+static constexpr uint8_t dropSegments = 0;
+
+/// Max step frequency 40KHz
+static constexpr uint16_t maxStepFrequency = 40000;
+
+/// Minimum stepping rate 120Hz
+static constexpr uint16_t minStepRate = 120;
+
+/// Size for the motion planner block buffer size
+static constexpr uint8_t blockBufferSize = 2;
+
+/// Step timer frequency divider (F = F_CPU / divider)
+static constexpr uint8_t stepTimerFrequencyDivider = 8;
+
+/// Smallest stepping ISR scheduling slice (T = F_CPU / divider * quantum)
+/// 16 = 8us (25us is the max frequency interval per maxStepFrequency)
+static constexpr uint8_t stepTimerQuantum = 16;
+
+/// Idler configuration
+static constexpr AxisConfig idler = {
+    .dirOn = true,
+    .uSteps = 16,
+    .vSense = false,
+    .iRun = 20,
+    .iHold = 20,
+    .accel = 100,
+    .jerk = 10,
+    .stealth = false,
+};
+
+/// Pulley configuration
+static constexpr AxisConfig pulley = {
+    .dirOn = true,
+    .uSteps = 16,
+    .vSense = false,
+    .iRun = 20,
+    .iHold = 20,
+    .accel = 100,
+    .jerk = 10,
+    .stealth = false,
+};
+
+/// Selector configuration
+static constexpr AxisConfig selector = {
+    .dirOn = true,
+    .uSteps = 16,
+    .vSense = false,
+    .iRun = 20,
+    .iHold = 20,
+    .accel = 100,
+    .jerk = 10,
+    .stealth = false
+};
 
 } // namespace config

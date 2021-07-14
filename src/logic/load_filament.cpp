@@ -59,7 +59,7 @@ bool LoadFilament::Step() {
             case FeedToBondtech::Failed:
 
             case FeedToBondtech::OK:
-                mm::motion.DisableAxis(mm::Pulley);
+                mm::motion.Disable(mm::Pulley);
                 mi::idler.Disengage();
                 state = ProgressCode::DisengagingIdler;
             }

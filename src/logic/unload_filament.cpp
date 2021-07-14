@@ -63,7 +63,7 @@ bool UnloadFilament::Step() {
     case ProgressCode::FinishingMoves:
         if (mm::motion.QueueEmpty()) {
             state = ProgressCode::OK;
-            mm::motion.DisableAxis(mm::Pulley);
+            mm::motion.Disable(mm::Pulley);
             mg::globals.SetFilamentLoaded(false); // filament unloaded
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
         }

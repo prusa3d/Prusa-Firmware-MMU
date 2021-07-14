@@ -1,71 +1,106 @@
 #include "motion.h"
-#include "../hal/shr16.h"
 
 namespace modules {
 namespace motion {
 
 Motion motion;
 
-void Motion::InitAxis(Axis axis) {}
+void Motion::InitAxis(Axis axis) {
+    for (uint8_t i = 0; i != NUM_AXIS; ++i) {
+        // disable the axis and re-init the driver: this will clear the internal
+        // StallGuard data as a result without special handling
+        Disable(axis);
+        axisData[axis].drv.Init(axisParams[axis].params);
+    }
+}
 
-void Motion::DisableAxis(Axis axis) {}
+void Motion::SetEnabled(Axis axis, bool enabled) {
+    axisData[axis].drv.SetEnabled(axisParams[axis].params, enabled);
+    axisData[axis].enabled = enabled;
 
-bool Motion::StallGuard(Axis axis) { return false; }
+    if (!axisData[axis].enabled) {
+        // axis is powered off, clear internal StallGuard counters
+        axisData[axis].stall_trig = false;
+        axisData[axis].stall_cnt = 0;
+    }
+}
 
-void Motion::ClearStallGuardFlag(Axis axis) {}
+void Motion::SetMode(Axis axis, MotorMode mode) {
+    for (uint8_t i = 0; i != NUM_AXIS; ++i)
+        axisData[axis].drv.SetMode(mode);
+}
 
-void Motion::PlanMove(int16_t pulley, int16_t idler, int16_t selector, uint16_t feedrate, uint16_t starting_speed, uint16_t ending_speed) {}
+bool Motion::StallGuard(Axis axis) {
+    return axisData[axis].stall_trig;
+}
 
-void Motion::PlanMove(Axis axis, int16_t delta, uint16_t feedrate) {}
+void Motion::ClearStallGuardFlag(Axis axis) {
+    axisData[axis].stall_trig = false;
+}
 
-uint16_t Motion::CurrentPos(Axis axis) const { return 0; }
+// TODO: not implemented
+void Motion::Home(Axis axis, bool direction) {
+}
 
-void Motion::Home(Axis axis, bool direction) {}
+void Motion::PlanMoveTo(Axis axis, pos_t pos, steps_t feedrate) {
+    if (axisData[axis].ctrl.PlanMoveTo(pos, feedrate)) {
+        // move was queued, prepare the axis
+        if (!axisData[axis].enabled)
+            SetEnabled(axis, true);
+    }
+}
 
-void Motion::SetMode(MotorMode mode) {}
+pos_t Motion::Position(Axis axis) const {
+    return axisData[axis].ctrl.Position();
+}
 
-void Motion::Step() {}
+bool Motion::QueueEmpty() const {
+    for (uint8_t i = 0; i != NUM_AXIS; ++i)
+        if (!axisData[i].ctrl.QueueEmpty())
+            return false;
+    return true;
+}
 
-bool Motion::QueueEmpty() const { return false; }
+void Motion::AbortPlannedMoves() {
+    for (uint8_t i = 0; i != NUM_AXIS; ++i)
+        axisData[i].ctrl.AbortPlannedMoves();
+}
 
-void Motion::AbortPlannedMoves() {}
+st_timer_t Motion::Step() {
+    st_timer_t timers[NUM_AXIS];
+
+    // step and calculate interval for each new move
+    for (uint8_t i = 0; i != NUM_AXIS; ++i) {
+        timers[i] = axisData[i].residual;
+        if (timers[i] <= config::stepTimerQuantum) {
+            timers[i] += axisData[i].ctrl.Step(axisParams[i].params);
+
+            // axis has been moved, sample StallGuard
+            if (hal::tmc2130::TMC2130::Stall(axisParams[i].params)) {
+                // TODO: on the MK3 a stall is marked as such as 1/2 of a full step is
+                // lost: this is too simplistic for production
+                ++axisData[i].stall_cnt;
+                axisData[i].stall_trig = true;
+            }
+        }
+    }
+
+    // plan next closest interval
+    st_timer_t next = timers[0];
+    for (uint8_t i = 1; i != NUM_AXIS; ++i) {
+        if (timers[i] && (!next || timers[i] < next))
+            next = timers[i];
+    }
+
+    // update residuals
+    for (uint8_t i = 0; i != NUM_AXIS; ++i) {
+        axisData[i].residual = (timers[i] ? timers[i] - next : 0);
+    }
+
+    return next;
+}
 
 void ISR() {}
-
-//@@TODO check the directions
-void StepDirPins::SetIdlerDirUp() {
-    hal::shr16::shr16.SetTMCDir(Axis::Idler, true);
-}
-
-void StepDirPins::SetIdlerDirDown() {
-    hal::shr16::shr16.SetTMCDir(Axis::Idler, false);
-}
-
-void StepDirPins::SetSelectorDirLeft() {
-    hal::shr16::shr16.SetTMCDir(Axis::Selector, true);
-}
-void StepDirPins::SetSelectorDirRight() {
-    hal::shr16::shr16.SetTMCDir(Axis::Selector, false);
-}
-
-void StepDirPins::SetPulleyDirPull() {
-    hal::shr16::shr16.SetTMCDir(Axis::Pulley, true);
-}
-void StepDirPins::SetPulleyDirPush() {
-    hal::shr16::shr16.SetTMCDir(Axis::Pulley, false);
-}
-
-void StepDirPins::StepIdler(uint8_t on) {
-    // PORTD |= idler_step_pin;
-}
-
-void StepDirPins::StepSelector(uint8_t on) {
-    // PORTD |= selector_step_pin;
-}
-
-void StepDirPins::StepPulley(uint8_t on) {
-    // PORTB |= pulley_step_pin;
-}
 
 } // namespace motion
 } // namespace modules
