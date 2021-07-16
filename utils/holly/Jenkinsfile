@@ -52,6 +52,7 @@ pipeline {
                         stage("Build - ${config.build_type}") {
                             catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
                                 sh """
+                                    python3 utils/bootstrap.py
                                     exit 0 # temporarily disable building (as we don't have avr-gcc in dependencies)
                                     ln -fs /.dependencies
                                     python3 utils/build.py \
