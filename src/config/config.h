@@ -61,6 +61,7 @@ static constexpr AxisConfig pulley = {
 //static constexpr AxisConfig idler = {
 //>>>>>>> tmc2130: Define the SPI bus for the tmc drivers
     .dirOn = true,
+    .uSteps = 4, //x16
     .vSense = false,
     .iRun = 20,
     .iHold = 20,
@@ -79,6 +80,7 @@ static constexpr PulleyLimits pulleyLimits = {
 /// Selector configuration
 static constexpr AxisConfig selector = {
     .dirOn = true,
+    .uSteps = 4, //x16
     .vSense = false,
     .iRun = 20,
     .iHold = 20,
@@ -97,6 +99,7 @@ static constexpr SelectorLimits selectorLimits = {
 /// Idler configuration
 static constexpr AxisConfig idler = {
     .dirOn = true,
+    .uSteps = 4, //x16
     .vSense = false,
     .iRun = 20,
     .iHold = 20,

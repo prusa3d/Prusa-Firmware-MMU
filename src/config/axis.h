@@ -9,11 +9,11 @@ using namespace unit;
 /// Axis configuration data
 struct AxisConfig {
     bool dirOn; ///< direction ON state (for inversion)
+    uint8_t uSteps; ///< microstepping [0-8, where 0 is x256 and 8 is fullstepping]
     bool vSense; ///< vSense scaling
     uint8_t iRun; ///< running current
     uint8_t iHold; ///< holding current
     bool stealth; ///< Default to Stealth mode
-    uint8_t uSteps; ///< microstepping [1-256]
     long double stepsPerUnit; ///< steps per unit
 };
 

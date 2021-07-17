@@ -23,7 +23,7 @@ struct MotorParams {
     gpio::GPIO_pin csPin; ///< CS pin
     gpio::GPIO_pin stepPin; ///< step pin
     gpio::GPIO_pin sgPin; ///< stallguard pin
-    uint8_t uSteps; ///< microstep resolution
+    uint8_t uSteps; ///< microstep resolution (mres)
 };
 
 struct MotorCurrents {
@@ -35,7 +35,14 @@ struct MotorCurrents {
 class TMC2130 {
     MotorMode mode;
     MotorCurrents currents;
-    uint8_t spi_status = 0;
+    struct __attribute__((packed)) {
+        uint8_t reset : 1;
+        uint8_t uv_cp : 1;
+        uint8_t s2ga : 1;
+        uint8_t s2gb : 1;
+        uint8_t otpw : 1;
+        uint8_t ot : 1;
+    } errorFlags;
 
 public:
     enum class Registers : uint8_t {
@@ -115,7 +122,7 @@ public:
 
 private:
     void _spi_tx_rx(const MotorParams &params, uint8_t (&pData)[5]);
-    void _handle_spi_status(uint8_t status);
+    void _handle_spi_status(const MotorParams &params, uint8_t status);
 };
 
 } // namespace tmc2130
