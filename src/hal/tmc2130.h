@@ -81,6 +81,28 @@ public:
     static inline bool Stall(const MotorParams &params) {
         return gpio::ReadPin(params.sgPin) == gpio::Level::high;
     }
+
+    enum class Registers : uint8_t {
+        /// General Configuration Registers
+        GCONF = 0x00,
+        GSTAT = 0x01,
+        IOIN = 0x04,
+
+        /// Velocity Dependent Driver Feature Control Register Set
+        IHOLD_IRUN = 0x10,
+        TPOWERDOWN = 0x11,
+        TSTEP = 0x12,
+        TPWMTHRS = 0x13,
+        TCOOLTHRS = 0x14,
+        THIGH = 0x15,
+
+        /// Motor Driver Registers
+        MSCNT = 0x6A,
+        CHOPCONF = 0x6C,
+        COOLCONF = 0x6D,
+        DRV_STATUS = 0x6F,
+        PWMCONF = 0x70,
+    };
 };
 
 } // namespace tmc2130
