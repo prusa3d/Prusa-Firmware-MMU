@@ -5,28 +5,71 @@ namespace tmc2130 {
 
 TMC2130::TMC2130(const MotorParams &params,
     const MotorCurrents &currents,
-    MotorMode mode) {
+    MotorMode mode)
+    : currents(currents) {
     // TODO
 }
 
 void TMC2130::Init(const MotorParams &params) {
-    // TODO
+    gpio::Init(params.csPin, gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::high));
+    gpio::Init(params.sgPin, gpio::GPIO_InitTypeDef(gpio::Mode::input, gpio::Pull::up));
+    gpio::Init(params.stepPin, gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::low));
+
+    ///check for compatible tmc driver (IOIN version field)
+    uint32_t IOIN = ReadRegister(params, Registers::IOIN);
+    if (((IOIN >> 24) != 0x11) | !(IOIN & (1 << 6))) ///if the version is incorrect or an always 1 bit is 0 (the supposed SD_MODE pin that doesn't exist on this driver variant)
+        return; // @todo return some kind of failure
+
+    ///clear reset flag as we are (re)initializing
+    errorFlags.reset = false;
+
+    ///apply chopper parameters
+    uint32_t chopconf = 0;
+    chopconf |= (uint32_t)(3 & 0x0F) << 0; //toff
+    chopconf |= (uint32_t)(5 & 0x07) << 4; //hstrt
+    chopconf |= (uint32_t)(1 & 0x0F) << 7; //hend
+    chopconf |= (uint32_t)(2 & 0x03) << 15; //tbl
+    chopconf |= (uint32_t)(currents.vSense & 0x01) << 17; //vsense
+    chopconf |= (uint32_t)(params.uSteps & 0x0F) << 24; //mres
+    chopconf |= (uint32_t)((bool)params.uSteps) << 28; //intpol
+    chopconf |= (uint32_t)(1 & 0x01) << 29; //dedge
+    WriteRegister(params, Registers::CHOPCONF, chopconf);
+
+    ///apply currents
+    uint32_t ihold_irun = 0;
+    ihold_irun |= (uint32_t)(currents.iHold & 0x1F) << 0; //ihold
+    ihold_irun |= (uint32_t)(currents.iRun & 0x1F) << 8; //irun
+    ihold_irun |= (uint32_t)(15 & 0x0F) << 16; //IHOLDDELAY
+    WriteRegister(params, Registers::IHOLD_IRUN, ihold_irun);
+
+    ///instant powerdown ramp
+    WriteRegister(params, Registers::TPOWERDOWN, 0);
+
+    ///Stallguard parameters
+    int8_t sg_thrs = 3; // @todo 7bit two's complement for the sg_thrs
+    WriteRegister(params, Registers::COOLCONF, (((uint32_t)sg_thrs) << 16)); // @todo should be configurable
+    WriteRegister(params, Registers::TCOOLTHRS, 400); // @todo should be configurable
+
+    ///Write stealth mode config and setup diag0 output
+    uint32_t gconf = 0;
+    gconf |= (uint32_t)((uint8_t)mode & 0x01) << 2; //en_pwm_mode
+    gconf |= (uint32_t)(1 & 0x01) << 7; //diag0_stall
+    WriteRegister(params, Registers::GCONF, gconf);
 }
 
 uint32_t TMC2130::ReadRegister(const MotorParams &params, Registers reg) {
-    uint8_t pData[5] = {(uint8_t)reg};
-	_spi_tx_rx(params, pData);
-	// _handle_spi_status(pData[0]); /// could be outdated. Safer not to use it.
-	pData[0] = 0;
-	_spi_tx_rx(params, pData);
-	_handle_spi_status(pData[0]);
-	return ((uint32_t)pData[1] << 24 | (uint32_t)pData[2] << 16 | (uint32_t)pData[3] << 8 | (uint32_t)pData[4]);
+    uint8_t pData[5] = { (uint8_t)reg };
+    _spi_tx_rx(params, pData);
+    pData[0] = 0;
+    _spi_tx_rx(params, pData);
+    _handle_spi_status(params, pData[0]);
+    return ((uint32_t)pData[1] << 24 | (uint32_t)pData[2] << 16 | (uint32_t)pData[3] << 8 | (uint32_t)pData[4]);
 }
 
 void TMC2130::WriteRegister(const MotorParams &params, Registers reg, uint32_t data) {
-	uint8_t pData[5] = {(uint8_t)((uint8_t)(reg) | 0x80), (uint8_t)(data >> 24), (uint8_t)(data >> 16), (uint8_t)(data >> 8), (uint8_t)data};
-	_spi_tx_rx(params, pData);
-	_handle_spi_status(pData[0]);
+    uint8_t pData[5] = { (uint8_t)((uint8_t)(reg) | 0x80), (uint8_t)(data >> 24), (uint8_t)(data >> 16), (uint8_t)(data >> 8), (uint8_t)data };
+    _spi_tx_rx(params, pData);
+    _handle_spi_status(params, pData[0]);
 }
 
 void TMC2130::_spi_tx_rx(const MotorParams &params, uint8_t (&pData)[5]) {
@@ -36,8 +79,26 @@ void TMC2130::_spi_tx_rx(const MotorParams &params, uint8_t (&pData)[5]) {
     hal::gpio::WritePin(params.csPin, hal::gpio::Level::high);
 }
 
-void TMC2130::_handle_spi_status(uint8_t status) {
-    spi_status |= status & 0x03; /// update reset_flag and driver_error
+void TMC2130::_handle_spi_status(const MotorParams &params, uint8_t status) {
+    status &= 0x03;
+    if (status) {
+        uint32_t GSTAT = ReadRegister(params, Registers::GSTAT);
+        if (GSTAT & (1 << 0))
+            errorFlags.reset |= true;
+        if (GSTAT & (1 << 1)) {
+            uint32_t DRV_STATUS = ReadRegister(params, Registers::DRV_STATUS);
+            if (DRV_STATUS & (1ul << 25))
+                errorFlags.ot |= true;
+            if (DRV_STATUS & (1ul << 26))
+                errorFlags.otpw |= true;
+            if (DRV_STATUS & (1ul << 27))
+                errorFlags.s2ga |= true;
+            if (DRV_STATUS & (1ul << 28))
+                errorFlags.s2gb |= true;
+        }
+        if (GSTAT & (1 << 2))
+            errorFlags.uv_cp |= true;
+    }
 }
 
 } // namespace tmc2130
