@@ -1,6 +1,7 @@
 #pragma once
 #include "../hal/gpio.h"
 #include "../hal/shr16.h"
+#include "../hal/spi.h"
 
 namespace hal {
 
@@ -16,6 +17,7 @@ enum MotorMode : uint8_t {
 };
 
 struct MotorParams {
+    hal::spi::SPI_TypeDef *spi;
     uint8_t idx; ///< SHR16 index
     bool dirOn; ///< forward direction
     gpio::GPIO_pin csPin; ///< CS pin
@@ -33,8 +35,31 @@ struct MotorCurrents {
 class TMC2130 {
     MotorMode mode;
     MotorCurrents currents;
+    uint8_t spi_status = 0;
 
 public:
+    enum class Registers : uint8_t {
+        /// General Configuration Registers
+        GCONF = 0x00,
+        GSTAT = 0x01,
+        IOIN = 0x04,
+
+        /// Velocity Dependent Driver Feature Control Register Set
+        IHOLD_IRUN = 0x10,
+        TPOWERDOWN = 0x11,
+        TSTEP = 0x12,
+        TPWMTHRS = 0x13,
+        TCOOLTHRS = 0x14,
+        THIGH = 0x15,
+
+        /// Motor Driver Registers
+        MSCNT = 0x6A,
+        CHOPCONF = 0x6C,
+        COOLCONF = 0x6D,
+        DRV_STATUS = 0x6F,
+        PWMCONF = 0x70,
+    };
+
     /// Constructor
     TMC2130(const MotorParams &params,
         const MotorCurrents &currents,
@@ -82,27 +107,15 @@ public:
         return gpio::ReadPin(params.sgPin) == gpio::Level::high;
     }
 
-    enum class Registers : uint8_t {
-        /// General Configuration Registers
-        GCONF = 0x00,
-        GSTAT = 0x01,
-        IOIN = 0x04,
+    /// Reads a driver register and updates the status flags
+    uint32_t ReadRegister(const MotorParams &params, Registers reg);
 
-        /// Velocity Dependent Driver Feature Control Register Set
-        IHOLD_IRUN = 0x10,
-        TPOWERDOWN = 0x11,
-        TSTEP = 0x12,
-        TPWMTHRS = 0x13,
-        TCOOLTHRS = 0x14,
-        THIGH = 0x15,
+    /// Writes a driver register and updates the status flags
+    void WriteRegister(const MotorParams &params, Registers reg, uint32_t data);
 
-        /// Motor Driver Registers
-        MSCNT = 0x6A,
-        CHOPCONF = 0x6C,
-        COOLCONF = 0x6D,
-        DRV_STATUS = 0x6F,
-        PWMCONF = 0x70,
-    };
+private:
+    void _spi_tx_rx(const MotorParams &params, uint8_t (&pData)[5]);
+    void _handle_spi_status(uint8_t status);
 };
 
 } // namespace tmc2130
