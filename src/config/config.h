@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include "axis.h"
+#include "hal/spi.h"
 
 /// Wrangler for assorted compile-time configuration and constants.
 namespace config {
@@ -50,8 +51,15 @@ static constexpr uint8_t stepTimerFrequencyDivider = 8;
 /// 16 = 8us (25us is the max frequency interval per maxStepFrequency)
 static constexpr uint8_t stepTimerQuantum = 16;
 
+//<<<<<<< HEAD
 /// Pulley axis configuration
 static constexpr AxisConfig pulley = {
+//=======
+//static constexpr hal::spi::SPI_TypeDef *TmcSpiBus = SPI0;
+
+///// Idler configuration
+//static constexpr AxisConfig idler = {
+//>>>>>>> tmc2130: Define the SPI bus for the tmc drivers
     .dirOn = true,
     .vSense = false,
     .iRun = 20,
