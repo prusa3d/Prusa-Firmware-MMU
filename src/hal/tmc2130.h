@@ -43,6 +43,7 @@ class TMC2130 {
         uint8_t otpw : 1;
         uint8_t ot : 1;
     } errorFlags;
+    bool enabled = false;
 
 public:
     enum class Registers : uint8_t {
@@ -81,7 +82,7 @@ public:
     }
 
     /// Set the current motor mode
-    void SetMode(MotorMode mode);
+    void SetMode(const MotorParams &params, MotorMode mode);
 
     /// Get the current motor currents
     const MotorCurrents &Currents() const {
@@ -89,15 +90,15 @@ public:
     }
 
     /// Set the current motor currents
-    void SetCurrents(const MotorCurrents &currents);
+    void SetCurrents(const MotorParams &params, const MotorCurrents &currents);
 
-    /// Return enabled state (TODO)
-    static bool Enabled(const MotorParams &params);
+    /// Return enabled state
+    const bool Enabled() const {
+        return enabled;
+    }
 
     /// Enable/Disable the motor
-    static void SetEnabled(const MotorParams &params, bool enabled) {
-        hal::shr16::shr16.SetTMCDir(params.idx, enabled);
-    }
+    void SetEnabled(const MotorParams &params, bool enabled);
 
     /// Set direction
     static inline void SetDir(const MotorParams &params, bool dir) {

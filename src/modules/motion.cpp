@@ -29,7 +29,7 @@ void Motion::SetEnabled(Axis axis, bool enabled) {
 
 void Motion::SetMode(Axis axis, MotorMode mode) {
     for (uint8_t i = 0; i != NUM_AXIS; ++i)
-        axisData[axis].drv.SetMode(mode);
+        axisData[axis].drv.SetMode(axisParams[axis].params, mode);
 }
 
 bool Motion::StallGuard(Axis axis) {
