@@ -111,7 +111,7 @@ public:
 
     /// Return SG state
     static inline bool Stall(const MotorParams &params) {
-        return gpio::ReadPin(params.sgPin) == gpio::Level::high;
+        return gpio::ReadPin(params.sgPin) == gpio::Level::low;
     }
 
     /// Reads a driver register and updates the status flags
