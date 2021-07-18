@@ -36,11 +36,7 @@ void TMC2130::Init(const MotorParams &params) {
     WriteRegister(params, Registers::CHOPCONF, chopconf);
 
     ///apply currents
-    uint32_t ihold_irun = 0;
-    ihold_irun |= (uint32_t)(currents.iHold & 0x1F) << 0; //ihold
-    ihold_irun |= (uint32_t)(currents.iRun & 0x1F) << 8; //irun
-    ihold_irun |= (uint32_t)(15 & 0x0F) << 16; //IHOLDDELAY
-    WriteRegister(params, Registers::IHOLD_IRUN, ihold_irun);
+    SetCurrents(params, currents);
 
     ///instant powerdown ramp
     WriteRegister(params, Registers::TPOWERDOWN, 0);
@@ -64,9 +60,25 @@ void TMC2130::Init(const MotorParams &params) {
     pwmconf |= (uint32_t)(1 & 0x01) << 18; //pwm_autoscale
     WriteRegister(params, Registers::PWMCONF, pwmconf);
 
-    ///TPWMTHRS: switching velocity between stealthChop and spreadCycle. Stallguard is also disabled if the velocity falls below this. Should be set to 0 when homing.
+    ///TPWMTHRS: switching velocity between stealthChop and spreadCycle. Stallguard is also disabled if the velocity falls below this. Should be set as high as possible when homing.
+    SetMode(params, mode);
+}
+
+void TMC2130::SetMode(const MotorParams &params, MotorMode mode) {
+    this->mode = mode;
+
     ///0xFFF00 is used as a "Normal" mode threshold since stealthchop will be used at standstill.
     WriteRegister(params, Registers::TPWMTHRS, (mode == Stealth) ? 70 : 0xFFF00); // @todo should be configurable
+}
+
+void TMC2130::SetCurrents(const MotorParams &params, const MotorCurrents &currents) {
+    this->currents = currents;
+
+    uint32_t ihold_irun = 0;
+    ihold_irun |= (uint32_t)(currents.iHold & 0x1F) << 0; //ihold
+    ihold_irun |= (uint32_t)(currents.iRun & 0x1F) << 8; //irun
+    ihold_irun |= (uint32_t)(15 & 0x0F) << 16; //IHOLDDELAY
+    WriteRegister(params, Registers::IHOLD_IRUN, ihold_irun);
 }
 
 uint32_t TMC2130::ReadRegister(const MotorParams &params, Registers reg) {
@@ -76,6 +88,11 @@ uint32_t TMC2130::ReadRegister(const MotorParams &params, Registers reg) {
     _spi_tx_rx(params, pData);
     _handle_spi_status(params, pData[0]);
     return ((uint32_t)pData[1] << 24 | (uint32_t)pData[2] << 16 | (uint32_t)pData[3] << 8 | (uint32_t)pData[4]);
+}
+
+void TMC2130::SetEnabled(const MotorParams &params, bool enabled) {
+    hal::shr16::shr16.SetTMCDir(params.idx, enabled);
+    this->enabled = enabled;
 }
 
 void TMC2130::WriteRegister(const MotorParams &params, Registers reg, uint32_t data) {
