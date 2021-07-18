@@ -52,9 +52,21 @@ void TMC2130::Init(const MotorParams &params) {
 
     ///Write stealth mode config and setup diag0 output
     uint32_t gconf = 0;
-    gconf |= (uint32_t)((uint8_t)mode & 0x01) << 2; //en_pwm_mode
-    gconf |= (uint32_t)(1 & 0x01) << 7; //diag0_stall
+    gconf |= (uint32_t)(1 & 0x01) << 2; //en_pwm_mode - always enabled since we can control it's effect with TPWMTHRS (0=only stealthchop, 0xFFFFF=only spreadcycle)
+    gconf |= (uint32_t)(1 & 0x01) << 7; //diag0_stall - diag0 is open collector => active low with external pullups
     WriteRegister(params, Registers::GCONF, gconf);
+
+    ///stealthChop parameters
+    uint32_t pwmconf = 0; /// @todo All of these parameters should be configurable
+    pwmconf |= (uint32_t)(240 & 0xFF) << 0; //PWM_AMPL
+    pwmconf |= (uint32_t)(4 & 0xFF) << 8; //PWM_GRAD
+    pwmconf |= (uint32_t)(2 & 0x03) << 16; //pwm_freq
+    pwmconf |= (uint32_t)(1 & 0x01) << 18; //pwm_autoscale
+    WriteRegister(params, Registers::PWMCONF, pwmconf);
+
+    ///TPWMTHRS: switching velocity between stealthChop and spreadCycle. Stallguard is also disabled if the velocity falls below this. Should be set to 0 when homing.
+    ///0xFFF00 is used as a "Normal" mode threshold since stealthchop will be used at standstill.
+    WriteRegister(params, Registers::TPWMTHRS, (mode == Stealth) ? 70 : 0xFFF00); // @todo should be configurable
 }
 
 uint32_t TMC2130::ReadRegister(const MotorParams &params, Registers reg) {
