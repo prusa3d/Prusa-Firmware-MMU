@@ -43,7 +43,7 @@ bool LoadFilament::Step() {
             if (feed.State() == FeedToFinda::Failed) {
                 // @@TODO - try to repeat 6x - push/pull sequence - probably something to put into feed_to_finda as an option
                 state = ProgressCode::ERR1DisengagingIdler;
-                error = ErrorCode::FINDA_DIDNT_TRIGGER;
+                error = ErrorCode::FINDA_DIDNT_SWITCH_ON;
                 mi::idler.Disengage();
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::Mode::off);
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::red, ml::Mode::blink0); // signal loading error

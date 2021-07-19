@@ -36,7 +36,7 @@ bool UnloadFilament::Step() {
             if (unl.State() == UnloadToFinda::Failed) {
                 // couldn't unload to FINDA, report error and wait for user to resolve it
                 state = ProgressCode::ERR1DisengagingIdler;
-                error = ErrorCode::FINDA_DIDNT_TRIGGER;
+                error = ErrorCode::FINDA_DIDNT_SWITCH_OFF;
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0);
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
             } else {
