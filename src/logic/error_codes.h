@@ -9,8 +9,17 @@ enum class ErrorCode : int_fast8_t {
     OK, ///< the operation finished OK
 
     /// Unload Filament related error codes
-    FINDA_DIDNT_TRIGGER = -1, ///< FINDA didn't trigger while unloading filament - either there is something blocking the metal ball or a cable is broken/disconnected
-    UNLOAD_ERROR2 = -2,
+    FINDA_DIDNT_SWITCH_ON = -1, ///< FINDA didn't switch on while loading filament - either there is something blocking the metal ball or a cable is broken/disconnected
+    FINDA_DIDNT_SWITCH_OFF = -2, ///< FINDA didn't switch off while unloading filament
+
+    FSENSOR_DIDNT_SWITCH_ON = -3, ///< Filament sensor didn't switch on while performing LoadFilament
+    FSENSOR_DIDNT_SWITCH_OFF = -4, ///< Filament sensor didn't switch off while performing UnloadFilament
+
+    FILAMENT_ALREADY_LOADED = -5, ///< cannot perform operation LoadFilament or move the selector as the filament is already loaded
+
+    TMC_INIT_ERROR = -6, ///< TMC driver init error - the MMU cannot move one motor due to a HW problem
+
+    MMU_NOT_RESPONDING = -126, ///< internal error of the printer - communication with the MMU is not working
 
     INTERNAL = -127, ///< internal runtime error (software)
 };
