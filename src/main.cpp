@@ -4,6 +4,7 @@
 #include "hal/shr16.h"
 #include "hal/spi.h"
 #include "hal/usart.h"
+#include "hal/watchdog.h"
 
 #include "pins.h"
 #include <avr/interrupt.h>
@@ -95,6 +96,8 @@ void setup() {
     cpu::Init();
 
     mt::timebase.Init();
+
+    hal::watchdog::ConfigureWatchDog(8);
 
     mg::globals.Init();
 
@@ -363,7 +366,8 @@ void loop() {
     ms::selector.Step();
     mui::userInput.Step();
     currentCommand->Step();
-    // add a watchdog reset
+
+    hal::watchdog::ResetWatchDog();
 }
 
 int main() {
