@@ -293,12 +293,15 @@ void ProcessRequestMsg(const mp::RequestMsg &rq) {
         break;
     case mp::RequestMsgCodes::Reset:
         // immediately reset the board - there is no response in this case
-        break; // @@TODO
+        hal::watchdog::ConfigureWatchDog(1); // set the watchdog to the lowest possible timeout
+        for (;;)
+            ; // cycle indefinitely (i.e. let the watchdog reset the CPU)
+        break;
     case mp::RequestMsgCodes::Version:
         ReportVersion(rq);
         break;
     case mp::RequestMsgCodes::Wait:
-        break; // @@TODO
+        break; // @@TODO - not used anywhere yet
     case mp::RequestMsgCodes::Cut:
     case mp::RequestMsgCodes::Eject:
     case mp::RequestMsgCodes::Load:
