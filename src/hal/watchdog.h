@@ -7,8 +7,8 @@ namespace hal {
 namespace watchdog {
 
 /// watchdog interface
-void ConfigureWatchDog(uint16_t period);
-void ResetWatchDog();
+void Enable(uint16_t period);
+void Reset();
 
 } // namespace watchdog
 } // namespace hal

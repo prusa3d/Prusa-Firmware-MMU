@@ -3,11 +3,11 @@
 namespace hal {
 namespace watchdog {
 
-void ConfigureWatchDog(uint16_t period) {
+void Enable(uint16_t period) {
     // @@TODO
 }
 
-void ResetWatchDog() {
+void Reset() {
     asm("wdr");
 }
 
