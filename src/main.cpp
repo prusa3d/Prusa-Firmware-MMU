@@ -97,7 +97,7 @@ void setup() {
 
     mt::timebase.Init();
 
-    hal::watchdog::ConfigureWatchDog(8);
+    watchdog::Enable(8000); //8s timeout
 
     mg::globals.Init();
 
@@ -294,9 +294,7 @@ void ProcessRequestMsg(const mp::RequestMsg &rq) {
         break;
     case mp::RequestMsgCodes::Reset:
         // immediately reset the board - there is no response in this case
-        hal::watchdog::ConfigureWatchDog(1); // set the watchdog to the lowest possible timeout
-        for (;;)
-            ; // cycle indefinitely (i.e. let the watchdog reset the CPU)
+        hal::cpu::Reset();
         break;
     case mp::RequestMsgCodes::Version:
         ReportVersion(rq);
@@ -370,7 +368,7 @@ void loop() {
     mui::userInput.Step();
     currentCommand->Step();
 
-    hal::watchdog::ResetWatchDog();
+    hal::watchdog::Reset();
 }
 
 int main() {
