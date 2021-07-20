@@ -5,13 +5,11 @@ namespace motion {
 
 Motion motion;
 
-void Motion::InitAxis(Axis axis) {
-    for (uint8_t i = 0; i != NUM_AXIS; ++i) {
-        // disable the axis and re-init the driver: this will clear the internal
-        // StallGuard data as a result without special handling
-        Disable(axis);
-        axisData[axis].drv.Init(axisParams[axis].params);
-    }
+bool Motion::InitAxis(Axis axis) {
+    // disable the axis and re-init the driver: this will clear the internal
+    // StallGuard data as a result without special handling
+    Disable(axis);
+    return axisData[axis].drv.Init(axisParams[axis].params);
 }
 
 void Motion::SetEnabled(Axis axis, bool enabled) {

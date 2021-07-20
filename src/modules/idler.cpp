@@ -11,9 +11,9 @@ Idler idler;
 
 namespace mm = modules::motion;
 
-bool Idler::Disengage() {
+Idler::EngageDisengage Idler::Disengage() {
     if (state == Moving)
-        return false;
+        return EngageDisengage::Refused;
 
     plannedEngage = false;
 
@@ -25,11 +25,22 @@ bool Idler::Disengage() {
     mm::motion.PlanMoveTo<mm::Idler>(SlotPosition(IdleSlotIndex()), 1000._I_deg_s); // @@TODO
     state = Moving;
     return true;
+//        return EngageDisengage::Accepted;
+//
+//    if (!mm::motion.InitAxis(mm::Idler)) {
+//        state = Failed;
+//        return EngageDisengage::Failed;
+//    } else {
+//        // plan move to idle position
+//        mm::motion.PlanMove(mm::Idler, config::idlerSlotPositions[IdleSlotIndex()] - mm::motion.Position(mm::Idler), 1000); // @@TODO
+//        state = Moving;
+//        return EngageDisengage::Accepted;
+//    }
 }
 
-bool Idler::Engage(uint8_t slot) {
+Idler::EngageDisengage Idler::Engage(uint8_t slot) {
     if (state == Moving)
-        return false;
+        return EngageDisengage::Refused;
 
     plannedSlot = slot;
     plannedEngage = true;
@@ -41,6 +52,16 @@ bool Idler::Engage(uint8_t slot) {
     mm::motion.PlanMoveTo<mm::Idler>(SlotPosition(slot), 1000._I_deg_s); // @@TODO
     state = Moving;
     return true;
+//        return EngageDisengage::Accepted;
+//
+//    if (!mm::motion.InitAxis(mm::Idler)) {
+//        state = Failed;
+//        return EngageDisengage::Failed;
+//    } else {
+//        mm::motion.PlanMove(mm::Idler, config::idlerSlotPositions[slot] - mm::motion.Position(mm::Idler), 1000); // @@TODO
+//        state = Moving;
+//        return EngageDisengage::Accepted;
+//    }
 }
 
 bool Idler::Home() {

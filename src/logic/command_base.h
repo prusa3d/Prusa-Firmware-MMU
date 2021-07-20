@@ -30,9 +30,16 @@ public:
     /// @param param numerical parameter that comes with some commands (e.g. T1 for tool change 1)
     virtual void Reset(uint8_t param) = 0;
 
-    /// steps the state machine
+    /// Steps the state machine. This is the preferred way of stepping the machine
+    /// as it handles the global HW error states uniformly (so that the derived classes do not have to deal
+    /// with these error states on their own).
+    /// Each derived class then only implements its own logic via the virtual #StepInner method.
     /// @returns true if the automaton finished its work
-    virtual bool Step() = 0;
+    bool Step();
+
+    /// Each derived class shall implement its own state machine logic in this method
+    /// It is being called from #Step after the HW error states have been checked
+    virtual bool StepInner() = 0;
 
     /// @returns progress of operation - each automaton consists of several internal states
     /// which should be reported to the user via the printer's LCD

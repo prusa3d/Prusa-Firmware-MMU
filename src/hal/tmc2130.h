@@ -80,7 +80,9 @@ public:
         const MotorCurrents &currents,
         MotorMode mode);
 
-    /// (re)initialization of the chip
+    /// (re)initialization of the chip - please note this is necessary due to some HW flaws in the original MMU boards.
+    /// And yes, the TMC may not get correctly initialized.
+    /// @returns true if the TMC2130 was inited correctly
     bool Init(const MotorParams &params);
 
     /// Get the current motor mode

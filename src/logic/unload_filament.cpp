@@ -28,7 +28,7 @@ void UnloadFilament::Reset(uint8_t /*param*/) {
     ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
 }
 
-bool UnloadFilament::Step() {
+bool UnloadFilament::StepInner() {
     switch (state) {
     // state 1 engage idler - will be done by the Unload to FINDA state machine
     case ProgressCode::UnloadingToFinda: // state 2 rotate pulley as long as the FINDA is on

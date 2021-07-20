@@ -14,8 +14,9 @@ AxisSim axes[3] = {
     { -32767, -32767, false, false, false }, // idler
 };
 
-void Motion::InitAxis(Axis axis) {
+bool Motion::InitAxis(Axis axis) {
     axes[axis].enabled = true;
+    return true;
 }
 
 void Motion::SetEnabled(Axis axis, bool enabled) {
