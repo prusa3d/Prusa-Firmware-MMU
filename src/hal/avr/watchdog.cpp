@@ -4,8 +4,8 @@
 namespace hal {
 namespace watchdog {
 
-void Enable(uint16_t period) {
-    // @@TODO
+void Enable(const configuration &config) {
+    wdt_enable(config.prescalerBits);
 }
 
 void Disable() {

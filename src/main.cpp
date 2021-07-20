@@ -96,7 +96,7 @@ void setup() {
     cpu::Init();
 
     mt::timebase.Init();
-    watchdog::Enable(8000); //8s timeout
+    watchdog::Enable(watchdog::configuration::compute(8)); //set 8s timeout
 
     mg::globals.Init();
 
