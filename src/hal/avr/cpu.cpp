@@ -10,7 +10,7 @@ void Init() {
 
 void Reset() {
     cli();
-    watchdog::Enable(0); //minimum amount of watchdog
+    watchdog::Enable(watchdog::configuration::compute(0)); //quickest watchdog reset
     for (;;)
         ; //endless loop while waiting for the watchdog to reset
 }
