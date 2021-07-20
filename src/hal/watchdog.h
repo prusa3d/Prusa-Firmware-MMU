@@ -8,6 +8,7 @@ namespace watchdog {
 
 /// watchdog interface
 void Enable(uint16_t period);
+void Disable();
 void Reset();
 
 } // namespace watchdog
