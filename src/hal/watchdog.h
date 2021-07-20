@@ -28,7 +28,7 @@ public:
         uint32_t ticks = timeout * F_WDT / (basePrescaler * (1 << prescalerBits));
         while ((ticks >= (1 << reloadBits)) && (prescalerBits < maxPrescaler)) {
             prescalerBits++;
-            ticks = timeout * F_WDT / (basePrescaler * (1 << prescalerBits));
+            ticks >>= 1;
         }
         if ((prescalerBits == 0) && (ticks == 0))
             ticks = 1; //1 tick is minimum
