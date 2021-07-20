@@ -29,7 +29,7 @@ void LoadFilament::Reset(uint8_t param) {
     ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
 }
 
-bool LoadFilament::Step() {
+bool LoadFilament::StepInner() {
     switch (state) {
     case ProgressCode::EngagingIdler:
         if (mi::idler.Engaged()) {
@@ -49,7 +49,7 @@ bool LoadFilament::Step() {
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::red, ml::Mode::blink0); // signal loading error
             } else {
                 state = ProgressCode::FeedingToBondtech;
-                james.Reset(2);
+                james.Reset(config::feedToBondtechMaxRetries);
             }
         }
         break;

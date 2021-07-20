@@ -36,10 +36,10 @@ void EjectFilament::MoveSelectorAside() {
     ms::selector.MoveToSlot(selectorParkedPos);
 }
 
-bool EjectFilament::Step() {
+bool EjectFilament::StepInner() {
     switch (state) {
     case ProgressCode::UnloadingFilament:
-        if (unl.Step()) {
+        if (unl.StepInner()) {
             // unloading sequence finished - basically, no errors can occurr here
             // as UnloadFilament should handle all the possible error states on its own
             // There is no way the UnloadFilament to finish in an error state

@@ -15,7 +15,7 @@ public:
     void Reset(uint8_t /*param*/) override {}
 
     /// @returns true if the state machine finished its job, false otherwise
-    bool Step() override { return true; }
+    bool StepInner() override { return true; }
 };
 
 /// The one and only instance of NoCommand state machine in the FW

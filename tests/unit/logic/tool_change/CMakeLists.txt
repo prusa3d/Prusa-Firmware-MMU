@@ -1,6 +1,7 @@
 # define the test executable
 add_executable(
   tool_change_tests
+  ${CMAKE_SOURCE_DIR}/src/logic/command_base.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/feed_to_bondtech.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/feed_to_finda.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/load_filament.cpp

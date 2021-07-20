@@ -16,7 +16,7 @@ public:
     void Reset(uint8_t param) override;
 
     /// @returns true if the state machine finished its job, false otherwise
-    bool Step() override;
+    bool StepInner() override;
 
 private:
     constexpr static const uint8_t maxRetries = 3;

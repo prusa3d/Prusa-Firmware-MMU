@@ -75,7 +75,8 @@ public:
     /// Init axis driver - @@TODO this should be probably hidden
     /// somewhere deeper ... something should manage the axes and their
     /// state especially when the TMC may get randomly reset (deinited)
-    void InitAxis(Axis axis);
+    /// @returns true if the init was successful (TMC2130 responded ok)
+    bool InitAxis(Axis axis);
 
     /// Set axis power status. One must manually ensure no moves are currently being
     /// performed by calling QueueEmpty().

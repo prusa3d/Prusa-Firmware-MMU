@@ -186,7 +186,7 @@ void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
     hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCLimits[0][0] + 1);
     while (!mb::buttons.ButtonPressed(0)) {
         main_loop();
-        uf.Step();
+        uf.StepInner();
     }
 
     // we still think we have filament loaded at this stage
@@ -270,7 +270,7 @@ void FindaDidntTriggerResolveTryAgain(uint8_t slot, logic::UnloadFilament &uf) {
     hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCLimits[1][0] + 1);
     while (!mb::buttons.ButtonPressed(1)) {
         main_loop();
-        uf.Step();
+        uf.StepInner();
     }
 
     // we still think we have filament loaded at this stage

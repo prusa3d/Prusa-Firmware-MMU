@@ -29,10 +29,10 @@ void ToolChange::Reset(uint8_t param) {
     }
 }
 
-bool ToolChange::Step() {
+bool ToolChange::StepInner() {
     switch (state) {
     case ProgressCode::UnloadingFilament:
-        if (unl.Step()) {
+        if (unl.StepInner()) {
             // unloading sequence finished - basically, no errors can occurr here
             // as UnloadFilament should handle all the possible error states on its own
             // There is no way the UnloadFilament to finish in an error state
@@ -41,7 +41,7 @@ bool ToolChange::Step() {
         }
         break;
     case ProgressCode::LoadingFilament:
-        if (load.Step()) {
+        if (load.StepInner()) {
             // loading sequence finished - basically, no errors can occurr here
             // as LoadFilament should handle all the possible error states on its own
             // There is no way the LoadFilament to finish in an error state

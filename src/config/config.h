@@ -106,6 +106,10 @@ static constexpr IdlerLimits idlerLimits = {
     .accel = 1000.0_deg_s2,
 };
 
+
+/// Max retries of FeedToBondtech used in LoadFilament
+static constexpr uint8_t feedToBondtechMaxRetries = 2;
+
 // TMC2130 setup
 
 static constexpr int8_t tmc2130_sg_thrs = 3; // @todo 7bit two's complement for the sg_thrs
