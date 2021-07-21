@@ -4,11 +4,11 @@
 #include "gpio.h"
 #include "circular_buffer.h"
 
+namespace hal {
+
 /// USART interface
 /// @@TODO decide, if this class will behave like a singleton, or there will be multiple classes
 /// for >1 USART interfaces
-
-namespace hal {
 namespace usart {
 
 constexpr uint16_t UART_BAUD_SELECT(uint32_t baudRate, uint32_t xtalCpu) {

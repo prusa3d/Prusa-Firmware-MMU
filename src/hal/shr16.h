@@ -3,7 +3,6 @@
 #include <stdint.h>
 
 namespace hal {
-namespace shr16 {
 
 /// 16bit shift register (2x74595) interface
 ///
@@ -36,6 +35,8 @@ namespace shr16 {
 ///
 /// SHR16_DIR_MSK = (SHR16_DIR_0 + SHR16_DIR_1 + SHR16_DIR_2)
 /// SHR16_ENA_MSK = (SHR16_ENA_0 + SHR16_ENA_1 + SHR16_ENA_2)
+namespace shr16 {
+
 class SHR16 {
 
 public:

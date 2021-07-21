@@ -1,8 +1,8 @@
 #pragma once
 
-/// Hardware Abstraction Layer for the CPU's features and peripherals
-
 namespace hal {
+
+/// Hardware Abstraction Layer for the CPU's internal watchdog
 namespace watchdog {
 
 /// watchdog interface

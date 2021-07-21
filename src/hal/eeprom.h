@@ -2,9 +2,10 @@
 #include <stdint.h>
 
 namespace hal {
-namespace eeprom {
 
 /// EEPROM interface
+namespace eeprom {
+
 class EEPROM {
 public:
     using addr_t = uint16_t;

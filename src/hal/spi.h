@@ -2,10 +2,11 @@
 #include <inttypes.h>
 #include "gpio.h"
 
-/// SPI interface
-
 namespace hal {
+
+/// SPI interface
 namespace spi {
+
 struct SPI_TypeDef {
     volatile uint8_t SPCRx;
     volatile uint8_t SPSRx;

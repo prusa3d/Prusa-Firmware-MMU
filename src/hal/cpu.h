@@ -1,8 +1,8 @@
 #pragma once
 
-/// Hardware Abstraction Layer for the CPU
-
 namespace hal {
+
+/// Hardware Abstraction Layer for the CPU
 namespace cpu {
 
 #ifndef F_CPU
