@@ -1,5 +1,8 @@
 #include "motion.h"
+#include "idler.h"
 #include "stub_motion.h"
+
+namespace mi = modules::idler;
 
 namespace modules {
 namespace motion {
@@ -75,8 +78,10 @@ void ReinitMotion() {
 
     // reset the simulation data to defaults
     axes[0] = AxisSim({ 0, 0, false, false, false }); // pulley
-    axes[1] = AxisSim({ selector_pos, selector_pos, false, false, false }); // selector //@@TODO proper selector positions once defined
-    axes[2] = AxisSim({ 0, 0, false, false, false }); // idler
+//    axes[1] = AxisSim({ selector_pos, selector_pos, false, false, false }); // selector //@@TODO proper selector positions once defined
+//    axes[2] = AxisSim({ 0, 0, false, false, false }); // idler
+    axes[1] = AxisSim({ config::selectorSlotPositions[0], config::selectorSlotPositions[0], false, false, false }); // selector
+    axes[2] = AxisSim({ config::idlerSlotPositions[mi::Idler::IdleSlotIndex()], config::idlerSlotPositions[mi::Idler::IdleSlotIndex()], false, false, false }); // idler
 }
 
 /// probably higher-level operations knowing the semantic meaning of axes
