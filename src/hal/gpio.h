@@ -6,6 +6,8 @@
 #endif
 
 namespace hal {
+
+/// GPIO interface
 namespace gpio {
 
 struct GPIO_TypeDef {
