@@ -151,6 +151,20 @@ public:
         axisData[axis].ctrl.SetAcceleration(accel);
     }
 
+    /// Get current jerk for the selected axis
+    /// @param axis axis affected
+    /// @returns jerk
+    steps_t Jerk(Axis axis) const {
+        return axisData[axis].ctrl.Jerk();
+    }
+
+    /// Set maximum jerk for the selected axis
+    /// @param axis axis affected
+    /// @param max_jerk maximum jerk
+    void SetJerk(Axis axis, steps_t max_jerk) {
+        return axisData[axis].ctrl.SetJerk(max_jerk);
+    }
+
     /// State machine doing all the planning and stepping. Called by the stepping ISR.
     /// @returns the interval for the next tick
     st_timer_t Step();

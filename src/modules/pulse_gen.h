@@ -24,6 +24,12 @@ class PulseGen {
 public:
     PulseGen(steps_t max_jerk, steps_t acceleration);
 
+    /// @returns the jerk for the axis
+    steps_t Jerk() const { return max_jerk; };
+
+    /// Set maximum jerk for the axis
+    void SetJerk(steps_t max_jerk) { this->max_jerk = max_jerk; };
+
     /// @returns the acceleration for the axis
     steps_t Acceleration() const { return acceleration; };
 

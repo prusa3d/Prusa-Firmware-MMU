@@ -32,12 +32,12 @@ TEST_CASE("motion::basic", "[motion]") {
 }
 
 TEST_CASE("motion::dual_move_fwd", "[motion]") {
-    // check for configuration values that we cannot change but should match for this test
-    // to function as expected (maybe this should be a static_assert?)
-    REQUIRE(config::idler.jerk == config::selector.jerk);
-
     // enqueue moves on two axes
     REQUIRE(motion.QueueEmpty());
+
+    // ensure the same jerk is set on both
+    motion.SetJerk(Idler, motion.Jerk(Selector));
+    REQUIRE(motion.Jerk(Idler) == motion.Jerk(Selector));
 
     // ensure the same acceleration is set on both
     motion.SetAcceleration(Idler, motion.Acceleration(Selector));
@@ -57,12 +57,12 @@ TEST_CASE("motion::dual_move_fwd", "[motion]") {
 }
 
 TEST_CASE("motion::dual_move_inv", "[motion]") {
-    // check for configuration values that we cannot change but should match for this test
-    // to function as expected (maybe this should be a static_assert?)
-    REQUIRE(config::idler.jerk == config::selector.jerk);
-
     // enqueue moves on two axes
     REQUIRE(motion.QueueEmpty());
+
+    // ensure the same jerk is set on both
+    motion.SetJerk(Idler, motion.Jerk(Selector));
+    REQUIRE(motion.Jerk(Idler) == motion.Jerk(Selector));
 
     // ensure the same acceleration is set on both
     motion.SetAcceleration(Idler, motion.Acceleration(Selector));
