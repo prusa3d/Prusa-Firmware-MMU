@@ -140,7 +140,7 @@ public:
     /// Get current acceleration for the selected axis
     /// @param axis axis affected
     /// @returns acceleration
-    steps_t Acceleration(Axis axis) {
+    steps_t Acceleration(Axis axis) const {
         return axisData[axis].ctrl.Acceleration();
     }
 
