@@ -44,7 +44,7 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
 
     // it should have instructed the selector and idler to move to slot 1
     // check if the idler and selector have the right command
-    CHECK(mm::axes[mm::Idler].targetPos == mi::Idler::SlotPosition(0));
+    CHECK(mm::axes[mm::Idler].targetPos == mi::Idler::SlotPosition(0).v);
     CHECK(mm::axes[mm::Selector].targetPos == ms::Selector::SlotPosition(0));
     CHECK(mm::axes[mm::Idler].enabled == true);
 
@@ -54,7 +54,7 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
         [&](int) { return !mi::idler.Engaged(); },
         5000));
 
-    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(0));
+    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(0).v);
     CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(0));
 
     // idler engaged, selector in position, we'll start pushing filament
@@ -86,7 +86,7 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
     //        [&](int) { return mi::idler.Engaged(); },
     //        5000));
 
-    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(0)); // @@TODO constants
+    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(0).v); // @@TODO constants
     CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(0));
 
     // state machine finished ok, the green LED should be on
@@ -111,7 +111,7 @@ TEST_CASE("feed_to_finda::FINDA_failed", "[feed_to_finda]") {
 
     // it should have instructed the selector and idler to move to slot 1
     // check if the idler and selector have the right command
-    CHECK(mm::axes[mm::Idler].targetPos == mi::Idler::SlotPosition(0));
+    CHECK(mm::axes[mm::Idler].targetPos == mi::Idler::SlotPosition(0).v);
     CHECK(mm::axes[mm::Selector].targetPos == ms::Selector::SlotPosition(0));
 
     // engaging idler
@@ -120,7 +120,7 @@ TEST_CASE("feed_to_finda::FINDA_failed", "[feed_to_finda]") {
         [&](int) { return !mi::idler.Engaged(); },
         5000));
 
-    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(0));
+    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(0).v);
     CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(0));
 
     // idler engaged, we'll start pushing filament

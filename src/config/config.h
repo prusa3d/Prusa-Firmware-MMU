@@ -8,7 +8,9 @@ namespace config {
 static constexpr const uint8_t toolCount = 5U; ///< Max number of extruders/tools/slots
 
 // Idler's setup
-static constexpr uint16_t idlerSlotPositions[toolCount + 1] = { 1, 2, 3, 4, 5, 0 }; ///< slots 0-4 are the real ones, the 5th is the idle position
+static constexpr U_deg idlerSlotPositions[toolCount + 1] = {
+    1.0_deg, 2.0_deg, 3.0_deg, 4.0_deg, 5.0_deg, 0
+}; ///< slots 0-4 are the real ones, the 5th is the idle position
 
 // Selector's setup
 static constexpr uint16_t selectorSlotPositions[toolCount + 1] = { 1, 2, 3, 4, 5, 6 }; ///< slots 0-4 are the real ones, the 5th is the farthest parking positions

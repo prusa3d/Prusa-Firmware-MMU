@@ -22,7 +22,7 @@ bool Idler::Disengage() {
 
     mm::motion.InitAxis(mm::Idler);
     // plan move to idle position
-    mm::motion.PlanMove(mm::Idler, config::idlerSlotPositions[IdleSlotIndex()] - mm::motion.Position(mm::Idler), 1000); // @@TODO
+    mm::motion.PlanMoveTo<mm::Idler>(SlotPosition(IdleSlotIndex()), 1000._I_deg_s); // @@TODO
     state = Moving;
     return true;
 }
@@ -38,7 +38,7 @@ bool Idler::Engage(uint8_t slot) {
         return true;
 
     mm::motion.InitAxis(mm::Idler);
-    mm::motion.PlanMove(mm::Idler, config::idlerSlotPositions[slot] - mm::motion.Position(mm::Idler), 1000); // @@TODO
+    mm::motion.PlanMoveTo<mm::Idler>(SlotPosition(slot), 1000._I_deg_s); // @@TODO
     state = Moving;
     return true;
 }
