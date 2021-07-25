@@ -41,6 +41,9 @@ template <typename T, UnitBase B, UnitType U>
 struct Unit {
     T v;
 
+    static constexpr UnitBase base = B;
+    static constexpr UnitType unit = U;
+
     typedef T type_t;
     typedef Unit<T, B, U> self_t;
 

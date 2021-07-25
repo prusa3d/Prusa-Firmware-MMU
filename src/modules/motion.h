@@ -28,8 +28,6 @@ struct AxisParams {
     MotorParams params;
     MotorCurrents currents;
     MotorMode mode;
-    long double stepsPerUnit;
-    config::UnitBase unitBase;
     steps_t jerk;
     steps_t accel;
 };
@@ -37,12 +35,6 @@ struct AxisParams {
 /// Return the default motor mode for an Axis
 static constexpr MotorMode DefaultMotorMode(const config::AxisConfig &axis) {
     return axis.stealth ? MotorMode::Stealth : MotorMode::Normal;
-}
-
-/// Convert an AxisUnit to a steps type (pos_t or steps_t)
-template <typename AU, typename U>
-static constexpr typename AU::type_t unitToSteps(const long double stepsPerUnit, U v) {
-    return unitToAxisUnit<AU>(stepsPerUnit, v).v;
 }
 
 /// Static axis configuration
@@ -53,10 +45,8 @@ static constexpr AxisParams axisParams[NUM_AXIS] = {
         .params = { .idx = Pulley, .dirOn = config::pulley.dirOn, .csPin = PULLEY_CS_PIN, .stepPin = PULLEY_STEP_PIN, .sgPin = PULLEY_SG_PIN, .uSteps = config::pulley.uSteps },
         .currents = { .vSense = config::pulley.vSense, .iRun = config::pulley.iRun, .iHold = config::pulley.iHold },
         .mode = DefaultMotorMode(config::pulley),
-        .stepsPerUnit = config::pulley.stepsPerUnit,
-        .unitBase = config::PulleyLimits::base,
-        .jerk = unitToSteps<P_speed_t>(config::pulley.stepsPerUnit, config::pulleyLimits.jerk),
-        .accel = unitToSteps<P_accel_t>(config::pulley.stepsPerUnit, config::pulleyLimits.accel),
+        .jerk = unitToSteps<P_speed_t>(config::pulleyLimits.jerk),
+        .accel = unitToSteps<P_accel_t>(config::pulleyLimits.accel),
     },
     // Selector
     {
@@ -64,10 +54,8 @@ static constexpr AxisParams axisParams[NUM_AXIS] = {
         .params = { .idx = Selector, .dirOn = config::selector.dirOn, .csPin = SELECTOR_CS_PIN, .stepPin = SELECTOR_STEP_PIN, .sgPin = SELECTOR_SG_PIN, .uSteps = config::selector.uSteps },
         .currents = { .vSense = config::selector.vSense, .iRun = config::selector.iRun, .iHold = config::selector.iHold },
         .mode = DefaultMotorMode(config::selector),
-        .stepsPerUnit = config::selector.stepsPerUnit,
-        .unitBase = config::SelectorLimits::base,
-        .jerk = unitToSteps<S_speed_t>(config::selector.stepsPerUnit, config::selectorLimits.jerk),
-        .accel = unitToSteps<S_accel_t>(config::selector.stepsPerUnit, config::selectorLimits.accel),
+        .jerk = unitToSteps<S_speed_t>(config::selectorLimits.jerk),
+        .accel = unitToSteps<S_accel_t>(config::selectorLimits.accel),
     },
     // Idler
     {
@@ -75,10 +63,8 @@ static constexpr AxisParams axisParams[NUM_AXIS] = {
         .params = { .idx = Idler, .dirOn = config::idler.dirOn, .csPin = IDLER_CS_PIN, .stepPin = IDLER_STEP_PIN, .sgPin = IDLER_SG_PIN, .uSteps = config::idler.uSteps },
         .currents = { .vSense = config::idler.vSense, .iRun = config::idler.iRun, .iHold = config::idler.iHold },
         .mode = DefaultMotorMode(config::idler),
-        .stepsPerUnit = config::idler.stepsPerUnit,
-        .unitBase = config::IdlerLimits::base,
-        .jerk = unitToSteps<I_speed_t>(config::idler.stepsPerUnit, config::idlerLimits.jerk),
-        .accel = unitToSteps<I_accel_t>(config::idler.stepsPerUnit, config::idlerLimits.accel),
+        .jerk = unitToSteps<I_speed_t>(config::idlerLimits.jerk),
+        .accel = unitToSteps<I_accel_t>(config::idlerLimits.accel),
     },
 };
 
@@ -133,10 +119,9 @@ public:
     template <Axis A, config::UnitBase B>
     constexpr void PlanMoveTo(config::Unit<long double, B, Lenght> pos,
         config::Unit<long double, B, Speed> feedrate) {
-        static_assert(B == axisParams[A].unitBase, "incorrect unit base");
         PlanMoveTo<A>(
-            unitToAxisUnit<AxisUnit<pos_t, A, Lenght>>(axisParams[A].stepsPerUnit, pos),
-            unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(axisParams[A].stepsPerUnit, feedrate));
+            unitToAxisUnit<AxisUnit<pos_t, A, Lenght>>(pos),
+            unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(feedrate));
     }
 
     /// Enqueue a single axis move in steps starting and ending at zero speed with maximum
@@ -162,10 +147,9 @@ public:
     template <Axis A, config::UnitBase B>
     constexpr void PlanMove(config::Unit<long double, B, Lenght> delta,
         config::Unit<long double, B, Speed> feedrate) {
-        static_assert(B == axisParams[A].unitBase, "incorrect unit base");
         PlanMove<A>(
-            unitToAxisUnit<AxisUnit<pos_t, A, Lenght>>(axisParams[A].stepsPerUnit, delta),
-            unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(axisParams[A].stepsPerUnit, feedrate));
+            unitToAxisUnit<AxisUnit<pos_t, A, Lenght>>(delta),
+            unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(feedrate));
     }
 
     /// @returns head position of an axis (last enqueued position)
@@ -264,7 +248,7 @@ private:
 };
 
 /// ISR stepping routine
-extern void ISR();
+//extern void ISR();
 
 extern Motion motion;
 
