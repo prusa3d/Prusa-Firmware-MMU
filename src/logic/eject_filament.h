@@ -2,8 +2,13 @@
 #include <stdint.h>
 #include "command_base.h"
 #include "unload_filament.h"
+#include "../modules/axisunit.h"
 
 namespace logic {
+
+// These cannot be class memebers without definition until c++17
+static constexpr modules::motion::P_pos_t ejectLenght = 50.0_P_mm; //@@TODO
+static constexpr modules::motion::P_speed_t ejectSpeed = 1000.0_P_mm_s; //@@TODO
 
 /// @brief  A high-level command state machine - handles the complex logic of ejecting filament
 ///
@@ -31,7 +36,6 @@ public:
     ErrorCode Error() const override;
 
 private:
-    constexpr static const uint16_t ejectSteps = 500; //@@TODO
     UnloadFilament unl; ///< a high-level command/operation may be used as a building block of other operations as well
     uint8_t slot;
     void MoveSelectorAside();
