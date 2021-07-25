@@ -31,6 +31,51 @@ TEST_CASE("motion::basic", "[motion]") {
     REQUIRE(motion.Position(Idler) == 10);
 }
 
+TEST_CASE("motion::unit", "[motion]") {
+    // test AxisUnit conversion in the PlanMove and PlanMoveTo.
+    using config::operator"" _mm;
+    using config::operator"" _mm_s;
+    using config::operator"" _deg;
+    using config::operator"" _deg_s;
+
+    REQUIRE(motion.QueueEmpty());
+    REQUIRE(motion.Position(Pulley) == 0);
+
+    // move with AxisUnit
+    pos_t target = config::pulley.stepsPerUnit * 10;
+    motion.PlanMoveTo<Pulley>(10.0_P_mm, 100.0_P_mm_s);
+    CHECK(stepUntilDone());
+    REQUIRE(motion.Position(Pulley) == target);
+
+    // move directly with physical units
+    motion.PlanMoveTo<Pulley>(10.0_mm, 100.0_mm_s);
+    REQUIRE(stepUntilDone() == 0);
+    REQUIRE(motion.Position(Pulley) == target);
+
+    // relative move with AxisUnit
+    motion.PlanMove<Pulley>(-5.0_P_mm, 100.0_P_mm_s);
+    CHECK(stepUntilDone());
+    REQUIRE(motion.Position(Pulley) == target / 2);
+
+    // relative move with physical unit
+    motion.PlanMove<Pulley>(-5.0_mm, 100.0_mm_s);
+    CHECK(stepUntilDone());
+    REQUIRE(motion.Position(Pulley) == 0);
+
+    // now test remaining axes
+    target = config::selector.stepsPerUnit * 10;
+    motion.PlanMoveTo<Selector>(10.0_S_mm, 100.0_S_mm_s);
+    motion.PlanMove<Selector>(10.0_mm, 100.0_mm_s);
+    CHECK(stepUntilDone());
+    REQUIRE(motion.Position(Selector) == target * 2);
+
+    target = config::idler.stepsPerUnit * 10;
+    motion.PlanMoveTo<Idler>(10.0_I_deg, 100.0_I_deg_s);
+    motion.PlanMove<Idler>(10.0_deg, 100.0_deg_s);
+    CHECK(stepUntilDone());
+    REQUIRE(motion.Position(Idler) == target * 2);
+}
+
 TEST_CASE("motion::dual_move_fwd", "[motion]") {
     // enqueue moves on two axes
     REQUIRE(motion.QueueEmpty());
