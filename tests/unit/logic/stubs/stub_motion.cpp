@@ -70,9 +70,11 @@ void Motion::AbortPlannedMoves() {
 }
 
 void ReinitMotion() {
+    const pos_t selector_pos = unitToSteps<S_pos_t>(config::selectorSlotPositions[0]);
+
     // reset the simulation data to defaults
     axes[0] = AxisSim({ 0, 0, false, false, false }); // pulley
-    axes[1] = AxisSim({ 1, 1, false, false, false }); // selector //@@TODO proper selector positions once defined
+    axes[1] = AxisSim({ selector_pos, selector_pos, false, false, false }); // selector //@@TODO proper selector positions once defined
     axes[2] = AxisSim({ 0, 0, false, false, false }); // idler
 }
 

@@ -42,7 +42,7 @@ TEST_CASE("eject_filament::eject0", "[eject_filament][.]") {
     // it should have instructed the selector and idler to move to slot 1
     // check if the idler and selector have the right command
     CHECK(modules::motion::axes[modules::motion::Idler].targetPos == mi::Idler::SlotPosition(0).v);
-    CHECK(modules::motion::axes[modules::motion::Selector].targetPos == ms::Selector::SlotPosition(4));
+    CHECK(modules::motion::axes[modules::motion::Selector].targetPos == ms::Selector::SlotPosition(4).v);
 
     // now cycle at most some number of cycles (to be determined yet) and then verify, that the idler and selector reached their target positions
     REQUIRE(WhileTopState(ef, ProgressCode::SelectingFilamentSlot, 5000));

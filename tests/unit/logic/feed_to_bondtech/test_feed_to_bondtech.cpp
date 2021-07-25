@@ -45,7 +45,7 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
     // it should have instructed the selector and idler to move to slot 0
     // check if the idler and selector have the right command
     CHECK(mm::axes[mm::Idler].targetPos == mi::Idler::SlotPosition(0).v);
-    CHECK(mm::axes[mm::Selector].targetPos == ms::Selector::SlotPosition(0));
+    CHECK(mm::axes[mm::Selector].targetPos == ms::Selector::SlotPosition(0).v);
     CHECK(mm::axes[mm::Idler].enabled == true);
 
     // engaging idler
@@ -55,7 +55,7 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
         5000));
 
     CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(0).v);
-    CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(0));
+    CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(0).v);
 
     // idler engaged, selector in position, we'll start pushing filament
     REQUIRE(fb.State() == FeedToBondtech::PushingFilament);
@@ -81,7 +81,7 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
     //        5000));
 
     //    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5)); // @@TODO constants
-    CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(0));
+    CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(0).v);
 
     // state machine finished ok, the green LED should be on
     REQUIRE(fb.State() == FeedToBondtech::OK);

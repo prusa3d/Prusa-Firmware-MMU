@@ -1,11 +1,13 @@
 #pragma once
 #include "../config/config.h"
-#include <stdint.h>
+#include "../modules/axisunit.h"
 
 namespace modules {
 
 /// The selector namespace provides all necessary facilities related to the logical model of the selector device of the MMU unit.
 namespace selector {
+
+namespace mm = modules::motion;
 
 /// The selector model - handles asynchronnous move operations between filament individual slots and keeps track of selector's current state.
 class Selector {
@@ -41,7 +43,9 @@ public:
     inline uint8_t Slot() const { return currentSlot; }
 
     /// @returns predefined positions of individual slots
-    inline static uint16_t SlotPosition(uint8_t slot) { return config::selectorSlotPositions[slot]; }
+    static constexpr mm::S_pos_t SlotPosition(uint8_t slot) {
+        return mm::unitToAxisUnit<mm::S_pos_t>(config::selectorSlotPositions[slot]);
+    }
 
     /// @returns the index of idle position of the selector, usually 5 in case of 0-4 valid indices of filament slots
     inline static constexpr uint8_t IdleSlotIndex() { return config::toolCount; }

@@ -21,7 +21,7 @@ bool Selector::MoveToSlot(uint8_t slot) {
         return true;
 
     mm::motion.InitAxis(mm::Selector);
-    mm::motion.PlanMove(mm::Selector, config::selectorSlotPositions[slot] - mm::motion.Position(mm::Selector), 1000); // @@TODO
+    mm::motion.PlanMoveTo<mm::Selector>(SlotPosition(slot), 1000.0_S_mm_s); // @@TODO
     state = Moving;
     return true;
 }

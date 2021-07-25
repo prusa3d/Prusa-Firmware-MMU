@@ -45,7 +45,7 @@ TEST_CASE("unload_to_finda::regular_unload", "[unload_to_finda]") {
     // it should have instructed the selector and idler to move to slot 1
     // check if the idler and selector have the right command
     CHECK(mm::axes[mm::Idler].targetPos == mi::Idler::SlotPosition(0).v);
-    CHECK(mm::axes[mm::Selector].targetPos == ms::Selector::SlotPosition(0));
+    CHECK(mm::axes[mm::Selector].targetPos == ms::Selector::SlotPosition(0).v);
     CHECK(mm::axes[mm::Idler].enabled == true);
 
     // engaging idler
@@ -94,7 +94,7 @@ TEST_CASE("unload_to_finda::unload_without_FINDA_trigger", "[unload_to_finda]") 
     // it should have instructed the selector and idler to move to slot 1
     // check if the idler and selector have the right command
     CHECK(mm::axes[mm::Idler].targetPos == mi::Idler::SlotPosition(0).v);
-    CHECK(mm::axes[mm::Selector].targetPos == ms::Selector::SlotPosition(0));
+    CHECK(mm::axes[mm::Selector].targetPos == ms::Selector::SlotPosition(0).v);
     CHECK(mm::axes[mm::Idler].enabled == true);
 
     // engaging idler
