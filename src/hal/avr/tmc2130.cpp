@@ -10,7 +10,7 @@ TMC2130::TMC2130(const MotorParams &params,
     // TODO
 }
 
-void TMC2130::Init(const MotorParams &params) {
+bool TMC2130::Init(const MotorParams &params) {
     gpio::Init(params.csPin, gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::high));
     gpio::Init(params.sgPin, gpio::GPIO_InitTypeDef(gpio::Mode::input, gpio::Pull::up));
     gpio::Init(params.stepPin, gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::low));
@@ -18,7 +18,7 @@ void TMC2130::Init(const MotorParams &params) {
     ///check for compatible tmc driver (IOIN version field)
     uint32_t IOIN = ReadRegister(params, Registers::IOIN);
     if (((IOIN >> 24) != 0x11) | !(IOIN & (1 << 6))) ///if the version is incorrect or an always 1 bit is 0 (the supposed SD_MODE pin that doesn't exist on this driver variant)
-        return; // @todo return some kind of failure
+        return true; // @todo return some kind of failure
 
     ///clear reset flag as we are (re)initializing
     errorFlags.reset = false;
@@ -62,6 +62,7 @@ void TMC2130::Init(const MotorParams &params) {
 
     ///TPWMTHRS: switching velocity between stealthChop and spreadCycle. Stallguard is also disabled if the velocity falls below this. Should be set as high as possible when homing.
     SetMode(params, mode);
+    return false;
 }
 
 void TMC2130::SetMode(const MotorParams &params, MotorMode mode) {

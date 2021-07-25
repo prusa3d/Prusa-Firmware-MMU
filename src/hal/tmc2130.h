@@ -74,7 +74,7 @@ public:
         MotorMode mode);
 
     /// (re)initialization of the chip
-    void Init(const MotorParams &params);
+    bool Init(const MotorParams &params);
 
     /// Get the current motor mode
     MotorMode Mode() const {
