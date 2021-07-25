@@ -10,8 +10,8 @@ Buttons buttons;
 int8_t Buttons::DecodeADC(uint16_t rawADC) {
     // decode 3 buttons' levels from one ADC
     // Button 1 - 0
-    // Button 2 - 344
-    // Button 3 - 516
+    // Button 2 - 90
+    // Button 3 - 170
     // Doesn't handle multiple pressed buttons at once
 
     for (int8_t buttonIndex = 0; buttonIndex < config::buttonCount; ++buttonIndex) {
