@@ -36,12 +36,8 @@ class TMC2130 {
     MotorMode mode;
     MotorCurrents currents;
     struct __attribute__((packed)) {
-        uint8_t reset : 1;
-        uint8_t uv_cp : 1;
-        uint8_t s2ga : 1;
-        uint8_t s2gb : 1;
-        uint8_t otpw : 1;
-        uint8_t ot : 1;
+        uint8_t reset_flag : 1;
+        uint8_t driver_error : 1;
     } errorFlags;
     bool enabled = false;
 
