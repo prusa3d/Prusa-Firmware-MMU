@@ -20,8 +20,8 @@ bool TMC2130::Init(const MotorParams &params) {
     if (((IOIN >> 24) != 0x11) | !(IOIN & (1 << 6))) ///if the version is incorrect or an always 1 bit is 0 (the supposed SD_MODE pin that doesn't exist on this driver variant)
         return true; // @todo return some kind of failure
 
-    ///clear reset flag as we are (re)initializing
-    errorFlags.reset = false;
+    ///clear reset_flag as we are (re)initializing
+    errorFlags.reset_flag = false;
 
     ///apply chopper parameters
     uint32_t chopconf = 0;
@@ -110,25 +110,8 @@ void TMC2130::_spi_tx_rx(const MotorParams &params, uint8_t (&pData)[5]) {
 }
 
 void TMC2130::_handle_spi_status(const MotorParams &params, uint8_t status) {
-    status &= 0x03;
-    if (status) {
-        uint32_t GSTAT = ReadRegister(params, Registers::GSTAT);
-        if (GSTAT & (1 << 0))
-            errorFlags.reset |= true;
-        if (GSTAT & (1 << 1)) {
-            uint32_t DRV_STATUS = ReadRegister(params, Registers::DRV_STATUS);
-            if (DRV_STATUS & (1ul << 25))
-                errorFlags.ot |= true;
-            if (DRV_STATUS & (1ul << 26))
-                errorFlags.otpw |= true;
-            if (DRV_STATUS & (1ul << 27))
-                errorFlags.s2ga |= true;
-            if (DRV_STATUS & (1ul << 28))
-                errorFlags.s2gb |= true;
-        }
-        if (GSTAT & (1 << 2))
-            errorFlags.uv_cp |= true;
-    }
+    errorFlags.reset_flag |= status & (1 << 0);
+    errorFlags.driver_error |= status & (1 << 1);
 }
 
 } // namespace tmc2130
