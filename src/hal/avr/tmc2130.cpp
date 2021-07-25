@@ -81,6 +81,11 @@ void TMC2130::SetCurrents(const MotorParams &params, const MotorCurrents &curren
     WriteRegister(params, Registers::IHOLD_IRUN, ihold_irun);
 }
 
+void TMC2130::SetEnabled(const MotorParams &params, bool enabled) {
+    hal::shr16::shr16.SetTMCDir(params.idx, enabled);
+    this->enabled = enabled;
+}
+
 uint32_t TMC2130::ReadRegister(const MotorParams &params, Registers reg) {
     uint8_t pData[5] = { (uint8_t)reg };
     _spi_tx_rx(params, pData);
@@ -88,11 +93,6 @@ uint32_t TMC2130::ReadRegister(const MotorParams &params, Registers reg) {
     _spi_tx_rx(params, pData);
     _handle_spi_status(params, pData[0]);
     return ((uint32_t)pData[1] << 24 | (uint32_t)pData[2] << 16 | (uint32_t)pData[3] << 8 | (uint32_t)pData[4]);
-}
-
-void TMC2130::SetEnabled(const MotorParams &params, bool enabled) {
-    hal::shr16::shr16.SetTMCDir(params.idx, enabled);
-    this->enabled = enabled;
 }
 
 void TMC2130::WriteRegister(const MotorParams &params, Registers reg, uint32_t data) {
