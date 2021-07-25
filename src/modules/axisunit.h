@@ -95,11 +95,11 @@ static constexpr AxisScale axisScale[config::NUM_AXIS] = {
 /// Convert a unit::Unit to AxisUnit.
 /// The scaling factor is stored with the pair config::AxisConfig::uSteps and
 /// config::AxisConfig::stepsPerUnit (one per-axis).
-template <typename T, typename U>
-static constexpr T unitToAxisUnit(U v) {
-    static_assert(T::unit == U::unit, "incorrect unit type conversion");
-    static_assert(U::base == axisScale[T::axis].base, "incorrect unit base conversion");
-    return { (typename T::type_t)(v.v * axisScale[T::axis].stepsPerUnit) };
+template <typename AU, typename U>
+static constexpr AU unitToAxisUnit(U v) {
+    static_assert(AU::unit == U::unit, "incorrect unit type conversion");
+    static_assert(U::base == axisScale[AU::axis].base, "incorrect unit base conversion");
+    return { (typename AU::type_t)(v.v * axisScale[AU::axis].stepsPerUnit) };
 }
 
 /// Convert an unit::Unit to a steps type (pos_t or steps_t).
