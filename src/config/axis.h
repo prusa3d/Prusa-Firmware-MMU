@@ -1,8 +1,10 @@
 #pragma once
 #include <stdint.h>
-#include "unit.h"
+#include "../unit.h"
 
 namespace config {
+
+using namespace unit;
 
 /// Axis configuration data
 struct AxisConfig {

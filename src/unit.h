@@ -1,28 +1,27 @@
 #pragma once
 #include <stdint.h>
 
-// In this header we introduce a minimal Unit class that can be used for conformability,
-// type checking and conversion at compile time. Template parameters are abused to create
-// unique types, which then can go through (explicit) overload and conversion. Despite
-// looking daunting, usage is quite straightforward once the appropriate aliases and
-// inline operators are defined:
-//
-// U_mm distance = 10.0_mm;
-// auto another = 20.5_mm;
-// auto sum = distance + another;
-//
-// auto angle = 15.0_deg;
-// auto test = distance + angle; // compile time error
-//
-// Template parameters are only used for type checking. The Unit contains a single value
-// Unit<T>::v and is thus well suited for parameter passing and inline initialization.
-//
-// Conversion to physical steps is done in modules::motion through the sister class
-// AxisUnit, which also ensures quantities from different axes are not mixed together.
-// AxisUnit are the normal units that should be used at runtime, which is why physical
-// units and operators are not exported into the global namespace by default.
-
-namespace config {
+/// Introduce a minimal Unit class that can be used for conformability, type checking and
+/// conversion at compile time. Template parameters are abused to create unique types,
+/// which then can go through (explicit) overload and conversion. Despite looking
+/// daunting, usage is quite straightforward once the appropriate aliases and inline
+/// operators are defined:
+///
+/// U_mm distance = 10.0_mm;
+/// auto another = 20.5_mm;
+/// auto sum = distance + another;
+///
+/// auto angle = 15.0_deg;
+/// auto test = distance + angle; // compile time error
+///
+/// Template parameters are only used for type checking. The Unit contains a single value
+/// Unit<T>::v and is thus well suited for parameter passing and inline initialization.
+///
+/// Conversion to physical steps is done in modules::motion through the sister class
+/// AxisUnit, which also ensures quantities from different axes are not mixed together.
+/// AxisUnit are the normal units that should be used at runtime, which is why physical
+/// units and operators are not exported into the global namespace by default.
+namespace unit {
 
 /// Base units for conformability testing
 enum UnitBase : uint8_t {
@@ -86,4 +85,12 @@ static constexpr U_deg_s2 operator"" _deg_s2(long double deg_s2) {
     return { deg_s2 };
 }
 
-} // namespace config
+} // namespace unit
+
+// Inject literal operators into the global namespace for convenience
+using unit::operator"" _mm;
+using unit::operator"" _mm_s;
+using unit::operator"" _mm_s2;
+using unit::operator"" _deg;
+using unit::operator"" _deg_s;
+using unit::operator"" _deg_s2;
