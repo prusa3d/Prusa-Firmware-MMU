@@ -123,7 +123,7 @@ public:
     /// be supplied as the first template argument: PlanMoveTo<axis>(pos, rate).
     /// @see PlanMoveTo, unitToSteps
     template <Axis A>
-    void PlanMoveTo(AxisUnit<pos_t, A, Lenght> pos, AxisUnit<steps_t, A, Speed> feedrate) {
+    constexpr void PlanMoveTo(AxisUnit<pos_t, A, Lenght> pos, AxisUnit<steps_t, A, Speed> feedrate) {
         PlanMoveTo(A, pos.v, feedrate.v);
     }
 
@@ -131,7 +131,7 @@ public:
     /// needs to be supplied as the first template argument: PlanMoveTo<axis>(pos, rate).
     /// @see PlanMoveTo, unitToSteps
     template <Axis A, config::UnitBase B>
-    void PlanMoveTo(config::Unit<long double, B, Lenght> pos,
+    constexpr void PlanMoveTo(config::Unit<long double, B, Lenght> pos,
         config::Unit<long double, B, Speed> feedrate) {
         static_assert(B == axisParams[A].unitBase, "incorrect unit base");
         PlanMoveTo<A>(
@@ -152,7 +152,7 @@ public:
     /// be supplied as the first template argument: PlanMove<axis>(pos, rate).
     /// @see PlanMove, unitToSteps
     template <Axis A>
-    void PlanMove(AxisUnit<pos_t, A, Lenght> delta, AxisUnit<steps_t, A, Speed> feedrate) {
+    constexpr void PlanMove(AxisUnit<pos_t, A, Lenght> delta, AxisUnit<steps_t, A, Speed> feedrate) {
         PlanMove(A, delta.v, feedrate.v);
     }
 
@@ -160,7 +160,7 @@ public:
     /// be supplied as the first template argument: PlanMove<axis>(pos, rate).
     /// @see PlanMove, unitToSteps
     template <Axis A, config::UnitBase B>
-    void PlanMove(config::Unit<long double, B, Lenght> delta,
+    constexpr void PlanMove(config::Unit<long double, B, Lenght> delta,
         config::Unit<long double, B, Speed> feedrate) {
         static_assert(B == axisParams[A].unitBase, "incorrect unit base");
         PlanMove<A>(
