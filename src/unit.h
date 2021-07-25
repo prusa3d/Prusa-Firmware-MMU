@@ -7,20 +7,20 @@
 /// daunting, usage is quite straightforward once the appropriate aliases and inline
 /// operators are defined:
 ///
-/// U_mm distance = 10.0_mm;
-/// auto another = 20.5_mm;
-/// auto sum = distance + another;
+///     U_mm distance = 10.0_mm;
+///     auto another = 20.5_mm;
+///     auto sum = distance + another;
 ///
-/// auto angle = 15.0_deg;
-/// auto test = distance + angle; // compile time error
+///     auto angle = 15.0_deg;
+///     auto test = distance + angle; // compile time error
 ///
-/// Template parameters are only used for type checking. The Unit contains a single value
+/// Template parameters are only used for type checking. Unit contains a single value
 /// Unit<T>::v and is thus well suited for parameter passing and inline initialization.
 ///
 /// Conversion to physical steps is done in modules::motion through the sister class
-/// AxisUnit, which also ensures quantities from different axes are not mixed together.
-/// AxisUnit are the normal units that should be used at runtime, which is why physical
-/// units and operators are not exported into the global namespace by default.
+/// modules::motion::AxisUnit, modules::motion::unitToAxisUnit and
+/// modules::motion::unitToSteps, which also ensures quantities from different axes are
+/// not mixed together. AxisUnit are the normal type that *should* be used at runtime.
 namespace unit {
 
 /// Base units for conformability testing
