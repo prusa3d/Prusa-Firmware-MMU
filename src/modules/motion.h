@@ -248,7 +248,7 @@ private:
 };
 
 /// ISR stepping routine
-//extern void ISR();
+//extern void Isr();
 
 extern Motion motion;
 

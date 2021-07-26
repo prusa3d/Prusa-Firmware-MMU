@@ -10,7 +10,7 @@ uint16_t millis = 0;
 
 void Timebase::Init() {}
 
-void Timebase::ISR() {}
+void Timebase::Isr() {}
 
 uint16_t Timebase::Millis() const {
     return millis;
