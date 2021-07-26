@@ -104,8 +104,11 @@ void TMC2130::WriteRegister(const MotorParams &params, Registers reg, uint32_t d
 
 void TMC2130::_spi_tx_rx(const MotorParams &params, uint8_t (&pData)[5]) {
     hal::gpio::WritePin(params.csPin, hal::gpio::Level::low);
-    for (uint8_t i = 0; i < sizeof(pData); i++)
-        pData[i] = hal::spi::TxRx(params.spi, pData[i]);
+    for (uint8_t i = 0; i < sizeof(pData); i++) {
+        // @@TODO horrible hack to persuate the compiler, that the expression is const in terms of memory layout and meaning,
+        // but we need to write into those registers
+        pData[i] = hal::spi::TxRx(const_cast<hal::spi::SPI_TypeDef *>(params.spi), pData[i]);
+    }
     hal::gpio::WritePin(params.csPin, hal::gpio::Level::high);
 }
 

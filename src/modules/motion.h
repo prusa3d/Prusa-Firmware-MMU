@@ -42,7 +42,7 @@ static constexpr AxisParams axisParams[NUM_AXIS] = {
     // Pulley
     {
         .name = 'P',
-        .params = { .spi = config::TmcSpiBus, .idx = Pulley, .dirOn = config::pulley.dirOn, .csPin = PULLEY_CS_PIN, .stepPin = PULLEY_STEP_PIN, .sgPin = PULLEY_SG_PIN, .uSteps = config::pulley.uSteps },
+        .params = { .spi = hal::spi::TmcSpiBus, .idx = Pulley, .dirOn = config::pulley.dirOn, .csPin = PULLEY_CS_PIN, .stepPin = PULLEY_STEP_PIN, .sgPin = PULLEY_SG_PIN, .uSteps = config::pulley.uSteps },
         .currents = { .vSense = config::pulley.vSense, .iRun = config::pulley.iRun, .iHold = config::pulley.iHold },
         .mode = DefaultMotorMode(config::pulley),
         .jerk = unitToSteps<P_speed_t>(config::pulleyLimits.jerk),
@@ -51,7 +51,7 @@ static constexpr AxisParams axisParams[NUM_AXIS] = {
     // Selector
     {
         .name = 'S',
-        .params = { .spi = config::TmcSpiBus, .idx = Selector, .dirOn = config::selector.dirOn, .csPin = SELECTOR_CS_PIN, .stepPin = SELECTOR_STEP_PIN, .sgPin = SELECTOR_SG_PIN, .uSteps = config::selector.uSteps },
+        .params = { .spi = hal::spi::TmcSpiBus, .idx = Selector, .dirOn = config::selector.dirOn, .csPin = SELECTOR_CS_PIN, .stepPin = SELECTOR_STEP_PIN, .sgPin = SELECTOR_SG_PIN, .uSteps = config::selector.uSteps },
         .currents = { .vSense = config::selector.vSense, .iRun = config::selector.iRun, .iHold = config::selector.iHold },
         .mode = DefaultMotorMode(config::selector),
         .jerk = unitToSteps<S_speed_t>(config::selectorLimits.jerk),
@@ -60,7 +60,7 @@ static constexpr AxisParams axisParams[NUM_AXIS] = {
     // Idler
     {
         .name = 'I',
-        .params = { .spi = config::TmcSpiBus, .idx = Idler, .dirOn = config::idler.dirOn, .csPin = IDLER_CS_PIN, .stepPin = IDLER_STEP_PIN, .sgPin = IDLER_SG_PIN, .uSteps = config::idler.uSteps },
+        .params = { .spi = hal::spi::TmcSpiBus, .idx = Idler, .dirOn = config::idler.dirOn, .csPin = IDLER_CS_PIN, .stepPin = IDLER_STEP_PIN, .sgPin = IDLER_SG_PIN, .uSteps = config::idler.uSteps },
         .currents = { .vSense = config::idler.vSense, .iRun = config::idler.iRun, .iHold = config::idler.iHold },
         .mode = DefaultMotorMode(config::idler),
         .jerk = unitToSteps<I_speed_t>(config::idlerLimits.jerk),

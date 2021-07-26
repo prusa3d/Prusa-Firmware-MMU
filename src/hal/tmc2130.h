@@ -17,7 +17,7 @@ enum MotorMode : uint8_t {
 };
 
 struct MotorParams {
-    hal::spi::SPI_TypeDef *spi;
+    const hal::spi::SPI_TypeDef *spi;
     uint8_t idx; ///< SHR16 index
     bool dirOn; ///< forward direction
     gpio::GPIO_pin csPin; ///< CS pin
