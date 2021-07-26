@@ -151,6 +151,13 @@ private:
 
     ResponseStates rspState;
     ResponseMsg responseMsg;
+
+    static bool IsNewLine(uint8_t c) {
+        return c == '\n' || c == '\r';
+    }
+    static bool IsDigit(uint8_t c) {
+        return c >= '0' && c <= '9';
+    }
 };
 
 } // namespace protocol
