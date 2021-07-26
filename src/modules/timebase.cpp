@@ -9,7 +9,7 @@ Timebase timebase;
 void Timebase::Init() {
 }
 
-void Timebase::ISR() {
+void Timebase::Isr() {
 }
 
 uint16_t Timebase::Millis() const {

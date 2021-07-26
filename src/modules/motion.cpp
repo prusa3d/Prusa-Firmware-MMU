@@ -100,7 +100,7 @@ st_timer_t Motion::Step() {
     return next;
 }
 
-void ISR() {}
+void Isr() {}
 
 } // namespace motion
 } // namespace modules

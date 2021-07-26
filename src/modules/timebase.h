@@ -23,7 +23,7 @@ public:
 
 private:
     uint16_t ms;
-    static void ISR();
+    static void Isr();
 };
 
 /// The one and only instance of Selector in the FW
