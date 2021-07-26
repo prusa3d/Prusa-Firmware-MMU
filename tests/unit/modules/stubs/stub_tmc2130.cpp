@@ -9,12 +9,17 @@ TMC2130::TMC2130(const MotorParams &params,
     // TODO
 }
 
-void TMC2130::SetMode(MotorMode mode) {
+void TMC2130::SetMode(const MotorParams &params, MotorMode mode) {
     // TODO
 }
 
-void TMC2130::Init(const MotorParams & /*params*/) {
+bool TMC2130::Init(const MotorParams & /*params*/) {
     // TODO
+    return true;
+}
+
+void TMC2130::SetEnabled(const MotorParams &params, bool enabled) {
+    this->enabled = enabled;
 }
 
 } // namespace tmc2130
