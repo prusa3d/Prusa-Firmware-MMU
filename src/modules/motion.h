@@ -191,6 +191,7 @@ private:
                 axisParams[axis].jerk,
                 axisParams[axis].accel,
             },
+            .enabled = false
         };
     }
 

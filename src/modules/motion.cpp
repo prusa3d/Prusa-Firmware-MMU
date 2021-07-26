@@ -15,14 +15,16 @@ void Motion::InitAxis(Axis axis) {
 }
 
 void Motion::SetEnabled(Axis axis, bool enabled) {
-    axisData[axis].drv.SetEnabled(axisParams[axis].params, enabled);
-    axisData[axis].enabled = enabled;
+    if (enabled != axisData[axis].enabled) {
+        axisData[axis].drv.SetEnabled(axisParams[axis].params, enabled);
+        axisData[axis].enabled = enabled;
 
-    if (!axisData[axis].enabled) {
-        // axis is powered off, clear internal StallGuard counters
-        axisData[axis].stall_trig = false;
-        axisData[axis].stall_cnt = 0;
-    }
+        if (!axisData[axis].enabled) {
+            // axis is powered off, clear internal StallGuard counters
+            axisData[axis].stall_trig = false;
+            axisData[axis].stall_cnt = 0;
+        }
+    } // else skip unnecessary Enable/Disable operations on an axis if already in the desired state
 }
 
 void Motion::SetMode(Axis axis, MotorMode mode) {
