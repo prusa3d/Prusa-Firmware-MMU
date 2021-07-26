@@ -51,11 +51,11 @@ DecodeStatus Protocol::DecodeRequest(uint8_t c) {
             return DecodeStatus::Error;
         }
     case RequestStates::Value:
-        if (c >= '0' && c <= '9') {
+        if (IsDigit(c)) {
             requestMsg.value *= 10;
             requestMsg.value += c - '0';
             return DecodeStatus::NeedMoreData;
-        } else if (c == '\n') {
+        } else if (IsNewLine(c)) {
             rqState = RequestStates::Code;
             return DecodeStatus::MessageCompleted;
         } else {
@@ -64,7 +64,7 @@ DecodeStatus Protocol::DecodeRequest(uint8_t c) {
             return DecodeStatus::Error;
         }
     default: //case error:
-        if (c == '\n') {
+        if (IsNewLine(c)) {
             rqState = RequestStates::Code;
             return DecodeStatus::MessageCompleted;
         } else {
@@ -107,7 +107,7 @@ DecodeStatus Protocol::DecodeResponse(uint8_t c) {
             return DecodeStatus::Error;
         }
     case ResponseStates::RequestValue:
-        if (c >= '0' && c <= '9') {
+        if (IsDigit(c)) {
             responseMsg.request.value *= 10;
             responseMsg.request.value += c - '0';
             return DecodeStatus::NeedMoreData;
@@ -135,11 +135,11 @@ DecodeStatus Protocol::DecodeResponse(uint8_t c) {
             return DecodeStatus::Error;
         }
     case ResponseStates::ParamValue:
-        if (c >= '0' && c <= '9') {
+        if (IsDigit(c)) {
             responseMsg.paramValue *= 10;
             responseMsg.paramValue += c - '0';
             return DecodeStatus::NeedMoreData;
-        } else if (c == '\n') {
+        } else if (IsNewLine(c)) {
             rspState = ResponseStates::RequestCode;
             return DecodeStatus::MessageCompleted;
         } else {
@@ -148,7 +148,7 @@ DecodeStatus Protocol::DecodeResponse(uint8_t c) {
             return DecodeStatus::Error;
         }
     default: //case error:
-        if (c == '\n') {
+        if (IsNewLine(c)) {
             rspState = ResponseStates::RequestCode;
             return DecodeStatus::MessageCompleted;
         } else {
