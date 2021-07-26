@@ -28,5 +28,13 @@ void Globals::SetFilamentLoaded(bool newFilamentLoaded) {
     filamentLoaded = newFilamentLoaded;
 }
 
+uint16_t Globals::DriveErrors() const {
+    return modules::permanent_storage::DriveError::get();
+}
+
+void Globals::IncDriveErrors() {
+    modules::permanent_storage::DriveError::increment();
+}
+
 } // namespace globals
 } // namespace modules

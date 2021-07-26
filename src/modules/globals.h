@@ -33,6 +33,13 @@ public:
     /// @param newFilamentLoaded new state
     void SetFilamentLoaded(bool newFilamentLoaded);
 
+    /// @returns the total number of MMU errors so far
+    /// Errors are stored in the EEPROM
+    uint16_t DriveErrors() const;
+
+    /// Increment MMU errors by 1
+    void IncDriveErrors();
+
 private:
     uint8_t activeSlot;
     bool filamentLoaded;

@@ -190,6 +190,11 @@ void ReportVersion(const mp::RequestMsg &rq) {
     case 2:
         v = project_version_revision;
         break;
+    case 3:
+        // @@TODO may be allow reporting uint16_t number of errors,
+        // but anything beyond 255 errors means there is something seriously wrong with the MMU
+        v = mg::globals.DriveErrors();
+        break;
     default:
         v = 0;
         break;
