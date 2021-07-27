@@ -24,3 +24,9 @@ bool WhileTopState(SM &sm, ProgressCode state, uint32_t maxLoops = 5000) {
 extern void EnsureActiveSlotIndex(uint8_t slot);
 
 extern void SetFINDAStateAndDebounce(bool press);
+
+// these are recommended max steps for simulated movement of the idler and selector
+// - roughly the amount of motion steps from one end to the other + some margin
+// ... could be computed in the future from the pre-set number of microsteps and real positions
+static constexpr uint32_t idlerEngageDisengageMaxSteps = 40000UL;
+static constexpr uint32_t selectorMoveMaxSteps = 40000UL;

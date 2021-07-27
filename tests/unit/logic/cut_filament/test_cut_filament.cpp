@@ -45,7 +45,8 @@ void CutSlot(uint8_t cutSlot) {
     REQUIRE(VerifyState(cf, false, mi::Idler::IdleSlotIndex(), cutSlot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::SelectingFilamentSlot));
 
     // now cycle at most some number of cycles (to be determined yet) and then verify, that the idler and selector reached their target positions
-    REQUIRE(WhileTopState(cf, ProgressCode::SelectingFilamentSlot, 5000));
+    // Beware - with the real positions of the selector, the number of steps needed to finish some states grows, so the ~40K steps here has a reason
+    REQUIRE(WhileTopState(cf, ProgressCode::SelectingFilamentSlot, selectorMoveMaxSteps));
 
     // idler and selector reached their target positions and the CF automaton will start feeding to FINDA as the next step
     REQUIRE(VerifyState(cf, false, cutSlot, cutSlot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::FeedingToFinda));
@@ -84,11 +85,11 @@ void CutSlot(uint8_t cutSlot) {
     REQUIRE(VerifyState2(cf, /*true*/ false, cutSlot, cutSlot + 1, false, cutSlot, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::PerformingCut));
 
     // cutting
-    REQUIRE(WhileTopState(cf, ProgressCode::PerformingCut, 10000));
+    REQUIRE(WhileTopState(cf, ProgressCode::PerformingCut, selectorMoveMaxSteps));
     REQUIRE(VerifyState2(cf, /*true*/ false, cutSlot, 0, false, cutSlot, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::ReturningSelector));
 
     // moving selector to the other end of its axis
-    REQUIRE(WhileTopState(cf, ProgressCode::ReturningSelector, 5000));
+    REQUIRE(WhileTopState(cf, ProgressCode::ReturningSelector, selectorMoveMaxSteps));
     REQUIRE(VerifyState2(cf, /*true*/ false, cutSlot, ms::Selector::IdleSlotIndex(), false, cutSlot, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
 }
 
