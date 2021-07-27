@@ -207,18 +207,18 @@ void ReportVersion(const mp::RequestMsg &rq) {
 
 void ReportRunningCommand() {
     mp::ResponseMsgParamCodes commandStatus;
-    uint8_t value = 0;
+    uint16_t value = 0;
     switch (currentCommand->Error()) {
     case ErrorCode::RUNNING:
         commandStatus = mp::ResponseMsgParamCodes::Processing;
-        value = (uint8_t)currentCommand->State();
+        value = (uint16_t)currentCommand->State();
         break;
     case ErrorCode::OK:
         commandStatus = mp::ResponseMsgParamCodes::Finished;
         break;
     default:
         commandStatus = mp::ResponseMsgParamCodes::Error;
-        value = (uint8_t)currentCommand->Error();
+        value = (uint16_t)currentCommand->Error();
         break;
     }
 

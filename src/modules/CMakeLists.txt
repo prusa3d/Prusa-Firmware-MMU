@@ -9,6 +9,7 @@ target_sources(
           idler.cpp
           leds.cpp
           motion.cpp
+          movable_base.cpp
           permanent_storage.cpp
           selector.cpp
           timebase.cpp

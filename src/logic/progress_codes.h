@@ -16,12 +16,12 @@ enum class ProgressCode : uint_fast8_t {
     AvoidingGrind,
     FinishingMoves,
 
-    ERR1DisengagingIdler,
-    ERR1EngagingIdler,
-    ERR1WaitingForUser,
+    ERRDisengagingIdler,
+    ERREngagingIdler,
+    ERRWaitingForUser,
     ERRInternal,
-    ERR1HelpingFilament,
-    ERR1TMCInitFailed,
+    ERRHelpingFilament,
+    ERRTMCFailed,
 
     UnloadingFilament,
     LoadingFilament,

@@ -197,7 +197,7 @@ uint8_t Protocol::EncodeResponseVersion(const RequestMsg &msg, uint8_t value, ui
     return dst - txbuff + 1;
 }
 
-uint8_t Protocol::EncodeResponseQueryOperation(const RequestMsg &msg, ResponseMsgParamCodes code, uint8_t value, uint8_t *txbuff) {
+uint8_t Protocol::EncodeResponseQueryOperation(const RequestMsg &msg, ResponseMsgParamCodes code, uint16_t value, uint8_t *txbuff) {
     txbuff[0] = (uint8_t)msg.code;
     txbuff[1] = msg.value + '0';
     txbuff[2] = ' ';
@@ -209,8 +209,19 @@ uint8_t Protocol::EncodeResponseQueryOperation(const RequestMsg &msg, ResponseMs
         } else if (value < 100) {
             *dst++ = value / 10 + '0';
             *dst++ = value % 10 + '0';
-        } else {
+        } else if (value < 1000) {
             *dst++ = value / 100 + '0';
+            *dst++ = (value / 10) % 10 + '0';
+            *dst++ = value % 10 + '0';
+        } else if (value < 10000) {
+            *dst++ = value / 1000 + '0';
+            *dst++ = (value / 100) % 100 + '0';
+            *dst++ = (value / 10) % 10 + '0';
+            *dst++ = value % 10 + '0';
+        } else {
+            *dst++ = value / 10000 + '0';
+            *dst++ = (value / 1000) % 1000 + '0';
+            *dst++ = (value / 100) % 100 + '0';
             *dst++ = (value / 10) % 10 + '0';
             *dst++ = value % 10 + '0';
         }

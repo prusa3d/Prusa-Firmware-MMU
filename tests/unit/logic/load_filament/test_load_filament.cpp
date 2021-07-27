@@ -96,11 +96,11 @@ void FailedLoadToFinda(uint8_t slot, logic::LoadFilament &lf) {
     // Stage 2 - feeding to finda
     // we'll assume the finda is defective here and does not trigger
     REQUIRE(WhileTopState(lf, ProgressCode::FeedingToFinda, 5000));
-    REQUIRE(VerifyState(lf, false, slot, slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERR1DisengagingIdler));
+    REQUIRE(VerifyState(lf, false, slot, slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRDisengagingIdler));
 
     // Stage 3 - disengaging idler in error mode
-    REQUIRE(WhileTopState(lf, ProgressCode::ERR1DisengagingIdler, 5000));
-    REQUIRE(VerifyState(lf, false, mi::Idler::IdleSlotIndex(), slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERR1WaitingForUser));
+    REQUIRE(WhileTopState(lf, ProgressCode::ERRDisengagingIdler, 5000));
+    REQUIRE(VerifyState(lf, false, mi::Idler::IdleSlotIndex(), slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));
 }
 
 void FailedLoadToFindaResolveHelp(uint8_t slot, logic::LoadFilament &lf) {
@@ -119,12 +119,12 @@ void FailedLoadToFindaResolveHelp(uint8_t slot, logic::LoadFilament &lf) {
         lf.Step();
     }
 
-    REQUIRE(VerifyState(lf, false, mi::Idler::IdleSlotIndex(), slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERR1EngagingIdler));
+    REQUIRE(VerifyState(lf, false, mi::Idler::IdleSlotIndex(), slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERREngagingIdler));
 
     // Stage 4 - engage the idler
-    REQUIRE(WhileTopState(lf, ProgressCode::ERR1EngagingIdler, 5000));
+    REQUIRE(WhileTopState(lf, ProgressCode::ERREngagingIdler, 5000));
 
-    REQUIRE(VerifyState(lf, false, slot, slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERR1HelpingFilament));
+    REQUIRE(VerifyState(lf, false, slot, slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRHelpingFilament));
 }
 
 void FailedLoadToFindaResolveHelpFindaTriggered(uint8_t slot, logic::LoadFilament &lf) {
@@ -135,7 +135,7 @@ void FailedLoadToFindaResolveHelpFindaTriggered(uint8_t slot, logic::LoadFilamen
         if(step == 100){ // on 100th step make FINDA trigger
             hal::adc::SetADC(config::findaADCIndex, 1023);
         }
-        return lf.TopLevelState() == ProgressCode::ERR1HelpingFilament; },
+        return lf.TopLevelState() == ProgressCode::ERRHelpingFilament; },
         5000));
 
     REQUIRE(VerifyState(lf, false, slot, slot, true, ml::off, ml::blink0, ErrorCode::OK, ProgressCode::FeedingToBondtech));
@@ -143,9 +143,9 @@ void FailedLoadToFindaResolveHelpFindaTriggered(uint8_t slot, logic::LoadFilamen
 
 void FailedLoadToFindaResolveHelpFindaDidntTrigger(uint8_t slot, logic::LoadFilament &lf) {
     // Stage 5 - move the pulley a bit - no FINDA change
-    REQUIRE(WhileTopState(lf, ProgressCode::ERR1HelpingFilament, 5000));
+    REQUIRE(WhileTopState(lf, ProgressCode::ERRHelpingFilament, 5000));
 
-    REQUIRE(VerifyState(lf, false, slot, slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERR1DisengagingIdler));
+    REQUIRE(VerifyState(lf, false, slot, slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRDisengagingIdler));
 }
 
 TEST_CASE("load_filament::failed_load_to_finda_0-4_resolve_help_second_ok", "[load_filament]") {

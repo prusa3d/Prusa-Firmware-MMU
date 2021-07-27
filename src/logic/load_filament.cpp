@@ -42,7 +42,7 @@ bool LoadFilament::StepInner() {
         if (feed.Step()) {
             if (feed.State() == FeedToFinda::Failed) {
                 // @@TODO - try to repeat 6x - push/pull sequence - probably something to put into feed_to_finda as an option
-                state = ProgressCode::ERR1DisengagingIdler;
+                state = ProgressCode::ERRDisengagingIdler;
                 error = ErrorCode::FINDA_DIDNT_SWITCH_ON;
                 mi::idler.Disengage();
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::Mode::off);
@@ -74,18 +74,18 @@ bool LoadFilament::StepInner() {
         break;
     case ProgressCode::OK:
         return true;
-    case ProgressCode::ERR1DisengagingIdler: // couldn't unload to FINDA
+    case ProgressCode::ERRDisengagingIdler: // couldn't unload to FINDA
         if (!mi::idler.Engaged()) {
-            state = ProgressCode::ERR1WaitingForUser;
+            state = ProgressCode::ERRWaitingForUser;
             mu::userInput.Clear(); // remove all buffered events if any just before we wait for some input
         }
         return false;
-    case ProgressCode::ERR1WaitingForUser: {
+    case ProgressCode::ERRWaitingForUser: {
         // waiting for user buttons and/or a command from the printer
         mu::Event ev = mu::userInput.ConsumeEvent();
         switch (ev) {
         case mu::Event::Left: // try to manually load just a tiny bit - help the filament with the pulley
-            state = ProgressCode::ERR1EngagingIdler;
+            state = ProgressCode::ERREngagingIdler;
             mi::idler.Engage(mg::globals.ActiveSlot());
             break;
         case mu::Event::Middle: // try again the whole sequence
@@ -102,20 +102,20 @@ bool LoadFilament::StepInner() {
         }
         return false;
     }
-    case ProgressCode::ERR1EngagingIdler:
+    case ProgressCode::ERREngagingIdler:
         if (mi::idler.Engaged()) {
-            state = ProgressCode::ERR1HelpingFilament;
+            state = ProgressCode::ERRHelpingFilament;
             mm::motion.PlanMove(mm::Pulley, 450, 5000); //@@TODO constants
         }
         return false;
-    case ProgressCode::ERR1HelpingFilament:
+    case ProgressCode::ERRHelpingFilament:
         if (mf::finda.Pressed()) {
             // the help was enough to press the FINDA, we are ok, continue normally
             state = ProgressCode::FeedingToBondtech;
             error = ErrorCode::OK;
         } else if (mm::motion.QueueEmpty()) {
             // helped a bit, but FINDA didn't trigger, return to the main error state
-            state = ProgressCode::ERR1DisengagingIdler;
+            state = ProgressCode::ERRDisengagingIdler;
         }
         return false;
     default: // we got into an unhandled state, better report it

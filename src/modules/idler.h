@@ -1,6 +1,7 @@
 #pragma once
 #include "../config/config.h"
-#include "../modules/axisunit.h"
+#include "axisunit.h"
+#include "movable_base.h"
 
 namespace modules {
 
@@ -10,37 +11,21 @@ namespace idler {
 namespace mm = modules::motion;
 
 /// The Idler model handles asynchronnous Engaging / Disengaging operations and keeps track of idler's current state.
-class Idler {
+class Idler : public motion::MovableBase {
 public:
-    /// Internal states of idler's state machine
-    enum {
-        Ready = 0, // intentionally set as zero in order to allow zeroing the Idler structure upon startup -> avoid explicit initialization code
-        Moving,
-        Failed
-    };
-
     inline constexpr Idler()
-        : state(Ready)
+        : MovableBase()
         , plannedEngage(false)
-        , plannedSlot(0)
-        , currentSlot(0)
         , currentlyEngaged(false) {}
-
-    /// Engage/Disengage return values
-    enum class EngageDisengage : uint8_t {
-        Accepted, ///< the operation has been successfully started
-        Refused, ///< another operation is currently underway, cannot start a new one
-        Failed ///< the operation could not been started due to HW issues
-    };
 
     /// Plan engaging of the idler to a specific filament slot
     /// @param slot index to be activated
     /// @returns #EngageDisengage
-    EngageDisengage Engage(uint8_t slot);
+    OperationResult Engage(uint8_t slot);
 
     /// Plan disengaging of the idler, i.e. parking the idler
     /// @returns #EngageDisengage
-    EngageDisengage Disengage();
+    OperationResult Disengage();
 
     /// Plan homing of the idler axis
     /// @returns false in case an operation is already underway
@@ -55,9 +40,6 @@ public:
     /// state machines to use this call as a waiting condition for the desired state of the idler
     inline bool Engaged() const { return currentlyEngaged; }
 
-    /// @returns currently active slot
-    inline uint8_t Slot() const { return currentSlot; }
-
     /// @returns predefined positions of individual slots
     static constexpr mm::I_pos_t SlotPosition(uint8_t slot) {
         return mm::unitToAxisUnit<mm::I_pos_t>(config::idlerSlotPositions[slot]);
@@ -66,19 +48,14 @@ public:
     /// @returns the index of idle position of the idler, usually 5 in case of 0-4 valid indices of filament slots
     inline static constexpr uint8_t IdleSlotIndex() { return config::toolCount; }
 
-    /// @returns internal state of the Idler
-    inline uint8_t State() const { return state; }
+protected:
+    virtual void PrepareMoveToPlannedSlot() override;
 
 private:
-    /// internal state of the automaton
-    uint8_t state;
-
     /// direction of travel - engage/disengage
     bool plannedEngage;
-    uint8_t plannedSlot;
 
     /// current state
-    uint8_t currentSlot;
     bool currentlyEngaged;
 };
 

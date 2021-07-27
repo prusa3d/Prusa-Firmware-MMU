@@ -52,12 +52,12 @@ struct RequestMsg {
 struct ResponseMsg {
     RequestMsg request; ///< response is always preceeded by the request message
     ResponseMsgParamCodes paramCode; ///< code of the parameter
-    uint8_t paramValue; ///< value of the parameter
+    uint16_t paramValue; ///< value of the parameter
 
     /// @param request the source request message this response is a reply to
     /// @param paramCode code of the parameter
     /// @param paramValue value of the parameter
-    inline ResponseMsg(RequestMsg request, ResponseMsgParamCodes paramCode, uint8_t paramValue)
+    inline ResponseMsg(RequestMsg request, ResponseMsgParamCodes paramCode, uint16_t paramValue)
         : request(request)
         , paramCode(paramCode)
         , paramValue(paramValue) {}
@@ -123,7 +123,7 @@ public:
     /// @param value related to status of operation(e.g. error code or progress)
     /// @param txbuff where to format the message
     /// @returns number of bytes written into txbuff
-    static uint8_t EncodeResponseQueryOperation(const RequestMsg &msg, ResponseMsgParamCodes code, uint8_t value, uint8_t *txbuff);
+    static uint8_t EncodeResponseQueryOperation(const RequestMsg &msg, ResponseMsgParamCodes code, uint16_t value, uint8_t *txbuff);
 
     /// @returns the most recently lexed request message
     inline const RequestMsg GetRequestMsg() const { return requestMsg; }
