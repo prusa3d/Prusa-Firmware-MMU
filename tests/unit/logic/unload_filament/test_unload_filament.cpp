@@ -66,7 +66,7 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
             hal::adc::SetADC(config::findaADCIndex, 0);
         }
         return uf.TopLevelState() == ProgressCode::UnloadingToFinda; },
-        5000));
+        50000));
 
     // we still think we have filament loaded at this stage
     // idler should have been activated by the underlying automaton
@@ -76,7 +76,7 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
     REQUIRE(VerifyState(uf, true, slot, slot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::DisengagingIdler));
 
     // Stage 2 - idler was engaged, disengage it
-    REQUIRE(WhileTopState(uf, ProgressCode::DisengagingIdler, 5000));
+    REQUIRE(WhileTopState(uf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
 
     // we still think we have filament loaded at this stage
     // idler should have been disengaged
@@ -161,7 +161,7 @@ void FindaDidntTriggerCommonSetup(uint8_t slot, logic::UnloadFilament &uf) {
     REQUIRE(VerifyState(uf, true, slot, slot, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRDisengagingIdler));
 
     // Stage 2 - idler should get disengaged
-    REQUIRE(WhileTopState(uf, ProgressCode::ERRDisengagingIdler, 5000));
+    REQUIRE(WhileTopState(uf, ProgressCode::ERR1DisengagingIdler, idlerEngageDisengageMaxSteps));
 
     // we still think we have filament loaded at this stage
     // idler should have been disengaged
@@ -197,7 +197,7 @@ void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
     REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERREngagingIdler));
 
     // Stage 4 - engage the idler
-    REQUIRE(WhileTopState(uf, ProgressCode::ERREngagingIdler, 5000));
+    REQUIRE(WhileTopState(uf, ProgressCode::ERR1EngagingIdler, idlerEngageDisengageMaxSteps));
 
     // we still think we have filament loaded at this stage
     // idler should be engaged

@@ -7,42 +7,26 @@ namespace config {
 
 static constexpr const uint8_t toolCount = 5U; ///< Max number of extruders/tools/slots
 
-// Idler's setup
-/*
-static constexpr U_deg idlerSlotPositions[toolCount + 1] = {
-    1.0_deg, 2.0_deg, 3.0_deg, 4.0_deg, 5.0_deg, 0
-}; ///< slots 0-4 are the real ones, the 5th is the idle position
-
-// Selector's setup
-static constexpr U_mm selectorSlotPositions[toolCount + 1] = {
-    1.0_mm, 2.0_mm, 3.0_mm, 4.0_mm, 5.0_mm, 6.0_mm
-}; ///< slots 0-4 are the real ones, the 5th is the farthest parking positions
-*/
-/// Idler steps between neighbor positions: 2 msteps = 180 / 4
-static constexpr uint16_t idlerSteps = 1420 / 4;
-
 /// Absolute positions for Idler's slots: 0-4 are the real ones, the 5th index is the idle position
-static constexpr uint16_t idlerSlotPositions[toolCount + 1] = {
-    idlerSteps,
-    idlerSteps * 2,
-    idlerSteps * 3,
-    idlerSteps * 4,
-    idlerSteps * 5,
-    0
+static constexpr U_deg idlerSlotPositions[toolCount + 1] = {
+    45.0_deg,
+    90.0_deg,
+    135.0_deg,
+    180.0_deg,
+    225.0_deg,
+    0.0_deg
 };
 
 // Selector's setup
 
-/// Selector steps between neighbor positions
-static constexpr uint16_t selectorSteps = 2790 / 4;
 /// slots 0-4 are the real ones, the 5th is the farthest parking positions
-static constexpr uint16_t selectorSlotPositions[toolCount + 1] = {
-    selectorSteps,
-    selectorSteps * 2,
-    selectorSteps * 3,
-    selectorSteps * 4,
-    selectorSteps * 5,
-    selectorSteps * 6
+static constexpr U_mm selectorSlotPositions[toolCount + 1] = {
+    20.0_mm,
+    20.0_mm + 14.0_mm,
+    20.0_mm + 2.0_mm * 14.0_mm,
+    20.0_mm + 3.0_mm * 14.0_mm,
+    20.0_mm + 4.0_mm * 14.0_mm,
+    20.0_mm + 5.0_mm * 14.0_mm
 };
 
 // Printer's filament sensor setup

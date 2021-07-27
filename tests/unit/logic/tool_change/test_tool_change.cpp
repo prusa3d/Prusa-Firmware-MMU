@@ -44,7 +44,7 @@ void ToolChange(uint8_t fromSlot, uint8_t toSlot) {
             hal::adc::SetADC(config::findaADCIndex, 0);
         }
         return tc.TopLevelState() == ProgressCode::UnloadingFilament; },
-        50000));
+        200000UL));
     REQUIRE(mg::globals.FilamentLoaded() == false);
 
     REQUIRE(WhileCondition(
@@ -54,7 +54,7 @@ void ToolChange(uint8_t fromSlot, uint8_t toSlot) {
             hal::adc::SetADC(config::findaADCIndex, 900);
         }
         return tc.TopLevelState() == ProgressCode::LoadingFilament; },
-        50000));
+        200000UL));
 
     REQUIRE(tc.TopLevelState() == ProgressCode::OK);
     REQUIRE(mg::globals.FilamentLoaded() == true);

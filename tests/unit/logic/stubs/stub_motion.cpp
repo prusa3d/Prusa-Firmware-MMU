@@ -74,14 +74,14 @@ void Motion::AbortPlannedMoves() {
 }
 
 void ReinitMotion() {
-    const pos_t selector_pos = unitToSteps<S_pos_t>(config::selectorSlotPositions[0]);
-
     // reset the simulation data to defaults
     axes[0] = AxisSim({ 0, 0, false, false, false }); // pulley
-//    axes[1] = AxisSim({ selector_pos, selector_pos, false, false, false }); // selector //@@TODO proper selector positions once defined
-//    axes[2] = AxisSim({ 0, 0, false, false, false }); // idler
-    axes[1] = AxisSim({ config::selectorSlotPositions[0], config::selectorSlotPositions[0], false, false, false }); // selector
-    axes[2] = AxisSim({ config::idlerSlotPositions[mi::Idler::IdleSlotIndex()], config::idlerSlotPositions[mi::Idler::IdleSlotIndex()], false, false, false }); // idler
+    axes[1] = AxisSim({ unitToSteps<S_pos_t>(config::selectorSlotPositions[0]),
+        unitToSteps<S_pos_t>(config::selectorSlotPositions[0]),
+        false, false, false }); // selector
+    axes[2] = AxisSim({ unitToSteps<I_pos_t>(config::idlerSlotPositions[mi::Idler::IdleSlotIndex()]),
+        unitToSteps<I_pos_t>(config::idlerSlotPositions[mi::Idler::IdleSlotIndex()]),
+        false, false, false }); // idler
 }
 
 /// probably higher-level operations knowing the semantic meaning of axes

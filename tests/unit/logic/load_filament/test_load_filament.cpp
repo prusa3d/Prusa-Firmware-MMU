@@ -50,7 +50,7 @@ void LoadFilamentCommonSetup(uint8_t slot, logic::LoadFilament &lf) {
     REQUIRE(VerifyState(lf, false, mi::Idler::IdleSlotIndex(), slot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::EngagingIdler));
 
     // Stage 1 - engaging idler
-    REQUIRE(WhileTopState(lf, ProgressCode::EngagingIdler, 5000));
+    REQUIRE(WhileTopState(lf, ProgressCode::EngagingIdler, idlerEngageDisengageMaxSteps));
     REQUIRE(VerifyState(lf, false, slot, slot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::FeedingToFinda));
 }
 
@@ -80,7 +80,7 @@ void LoadFilamentSuccessful(uint8_t slot, logic::LoadFilament &lf) {
     REQUIRE(VerifyState(lf, false, slot, slot, true, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::DisengagingIdler));
 
     // Stage 4 - disengaging idler
-    REQUIRE(WhileTopState(lf, ProgressCode::DisengagingIdler, 5000));
+    REQUIRE(WhileTopState(lf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
     REQUIRE(VerifyState(lf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
 }
 
@@ -99,7 +99,7 @@ void FailedLoadToFinda(uint8_t slot, logic::LoadFilament &lf) {
     REQUIRE(VerifyState(lf, false, slot, slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRDisengagingIdler));
 
     // Stage 3 - disengaging idler in error mode
-    REQUIRE(WhileTopState(lf, ProgressCode::ERRDisengagingIdler, 5000));
+    REQUIRE(WhileTopState(lf, ProgressCode::ERR1DisengagingIdler, idlerEngageDisengageMaxSteps));
     REQUIRE(VerifyState(lf, false, mi::Idler::IdleSlotIndex(), slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));
 }
 
@@ -122,7 +122,7 @@ void FailedLoadToFindaResolveHelp(uint8_t slot, logic::LoadFilament &lf) {
     REQUIRE(VerifyState(lf, false, mi::Idler::IdleSlotIndex(), slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERREngagingIdler));
 
     // Stage 4 - engage the idler
-    REQUIRE(WhileTopState(lf, ProgressCode::ERREngagingIdler, 5000));
+    REQUIRE(WhileTopState(lf, ProgressCode::ERR1EngagingIdler, idlerEngageDisengageMaxSteps));
 
     REQUIRE(VerifyState(lf, false, slot, slot, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRHelpingFilament));
 }
