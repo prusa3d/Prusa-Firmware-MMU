@@ -84,7 +84,14 @@ void TMC2130::SetCurrents(const MotorParams &params, const MotorCurrents &curren
 
 void TMC2130::SetEnabled(const MotorParams &params, bool enabled) {
     hal::shr16::shr16.SetTMCDir(params.idx, enabled);
+    if (this->enabled != enabled)
+        ClearStallguard(params);
     this->enabled = enabled;
+}
+
+void TMC2130::ClearStallguard(const MotorParams &params) {
+    // @todo: maximum resolution right now is x256/4 (uint8_t / 4)
+    sg_counter = 4 * (1 << (8 - params.uSteps)) - 1; /// one electrical full step (4 steps when fullstepping)
 }
 
 uint32_t TMC2130::ReadRegister(const MotorParams &params, Registers reg) {
@@ -100,6 +107,15 @@ void TMC2130::WriteRegister(const MotorParams &params, Registers reg, uint32_t d
     uint8_t pData[5] = { (uint8_t)((uint8_t)(reg) | 0x80), (uint8_t)(data >> 24), (uint8_t)(data >> 16), (uint8_t)(data >> 8), (uint8_t)data };
     _spi_tx_rx(params, pData);
     _handle_spi_status(params, pData[0]);
+}
+
+void TMC2130::Isr(const MotorParams &params) {
+    if (sg_counter) {
+        if (SampleDiag(params))
+            sg_counter--;
+        else if (sg_counter < (4 * (1 << (8 - params.uSteps)) - 1))
+            sg_counter++;
+    }
 }
 
 void TMC2130::_spi_tx_rx(const MotorParams &params, uint8_t (&pData)[5]) {

@@ -93,7 +93,7 @@ public:
     bool StallGuard(Axis axis);
 
     /// clear stall guard flag reported on an axis
-    void ClearStallGuardFlag(Axis axis);
+    void StallGuardReset(Axis axis);
 
     /// Enqueue performing of homing of an axis
     void Home(Axis axis, bool direction);
@@ -220,8 +220,6 @@ private:
         pulse_gen::PulseGen ctrl; ///< Motor controller
         bool enabled; ///< Axis enabled
         st_timer_t residual; ///< Axis timer residual
-        uint8_t stall_cnt; ///< Underlying StallGuard lost ustep count
-        bool stall_trig; ///< StallGuard trigger flag
     };
 
     /// Helper to initialize AxisData members
