@@ -40,6 +40,7 @@ class TMC2130 {
         uint8_t driver_error : 1;
     } errorFlags;
     bool enabled = false;
+    uint8_t sg_counter;
 
 public:
     enum class Registers : uint8_t {
@@ -107,15 +108,24 @@ public:
     }
 
     /// Return SG state
-    static inline bool Stall(const MotorParams &params) {
+    static inline bool SampleDiag(const MotorParams &params) {
         return gpio::ReadPin(params.sgPin) == gpio::Level::low;
     }
+
+    inline bool Stalled() const {
+        return sg_counter == 0;
+    }
+
+    void ClearStallguard(const MotorParams &params);
 
     /// Reads a driver register and updates the status flags
     uint32_t ReadRegister(const MotorParams &params, Registers reg);
 
     /// Writes a driver register and updates the status flags
     void WriteRegister(const MotorParams &params, Registers reg, uint32_t data);
+
+    /// Used for polling the DIAG pin. Should be called from the stepper isr periodically when moving.
+    void Isr(const MotorParams &params);
 
 private:
     void _spi_tx_rx(const MotorParams &params, uint8_t (&pData)[5]);
