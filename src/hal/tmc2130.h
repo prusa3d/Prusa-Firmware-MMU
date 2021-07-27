@@ -35,9 +35,12 @@ struct MotorCurrents {
 class TMC2130 {
     MotorMode mode;
     MotorCurrents currents;
-    struct __attribute__((packed)) {
+    struct __attribute__((packed)) ErrorFlags {
         uint8_t reset_flag : 1;
-        uint8_t driver_error : 1;
+        uint8_t uv_cp : 1;
+        uint8_t s2g : 1;
+        uint8_t otpw : 1;
+        uint8_t ot : 1;
     } errorFlags;
     bool enabled = false;
     uint8_t sg_counter;
@@ -117,6 +120,13 @@ public:
     }
 
     void ClearStallguard(const MotorParams &params);
+
+    /// Should be called periodically from main loop. Maybe not all the time. Once every 10 ms is probably enough
+    bool CheckForErrors(const MotorParams &params);
+
+    inline ErrorFlags GetErrorFlags() const {
+        return errorFlags;
+    }
 
     /// Reads a driver register and updates the status flags
     uint32_t ReadRegister(const MotorParams &params, Registers reg);

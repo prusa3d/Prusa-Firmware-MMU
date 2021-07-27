@@ -94,6 +94,18 @@ void TMC2130::ClearStallguard(const MotorParams &params) {
     sg_counter = 4 * (1 << (8 - params.uSteps)) - 1; /// one electrical full step (4 steps when fullstepping)
 }
 
+bool TMC2130::CheckForErrors(const MotorParams &params) {
+    uint32_t GSTAT = ReadRegister(params, Registers::GSTAT);
+    uint32_t DRV_STATUS = ReadRegister(params, Registers::DRV_STATUS);
+    errorFlags.reset_flag |= GSTAT & (1 << 0);
+    errorFlags.uv_cp = GSTAT & (1 << 2);
+    errorFlags.s2g = DRV_STATUS & (3ul << 27);
+    errorFlags.otpw = DRV_STATUS & (1ul << 26);
+    errorFlags.ot = DRV_STATUS & (1ul << 25);
+
+    return GSTAT || errorFlags.reset_flag; //any bit in gstat is an error
+}
+
 uint32_t TMC2130::ReadRegister(const MotorParams &params, Registers reg) {
     uint8_t pData[5] = { (uint8_t)reg };
     _spi_tx_rx(params, pData);
@@ -129,8 +141,8 @@ void TMC2130::_spi_tx_rx(const MotorParams &params, uint8_t (&pData)[5]) {
 }
 
 void TMC2130::_handle_spi_status(const MotorParams &params, uint8_t status) {
-    errorFlags.reset_flag |= status & (1 << 0);
-    errorFlags.driver_error |= status & (1 << 1);
+    // errorFlags.reset_flag |= status & (1 << 0);
+    // errorFlags.driver_error |= status & (1 << 1);
 }
 
 } // namespace tmc2130
