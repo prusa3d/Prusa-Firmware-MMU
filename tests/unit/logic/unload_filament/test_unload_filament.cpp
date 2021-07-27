@@ -158,10 +158,10 @@ void FindaDidntTriggerCommonSetup(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA still on
     // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, true, slot, slot, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERR1DisengagingIdler));
+    REQUIRE(VerifyState(uf, true, slot, slot, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRDisengagingIdler));
 
     // Stage 2 - idler should get disengaged
-    REQUIRE(WhileTopState(uf, ProgressCode::ERR1DisengagingIdler, 5000));
+    REQUIRE(WhileTopState(uf, ProgressCode::ERRDisengagingIdler, 5000));
 
     // we still think we have filament loaded at this stage
     // idler should have been disengaged
@@ -169,7 +169,7 @@ void FindaDidntTriggerCommonSetup(uint8_t slot, logic::UnloadFilament &uf) {
     // FINDA still on
     // red LED should blink
     // green LED should be off
-    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERR1WaitingForUser));
+    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRWaitingForUser));
 }
 
 void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
@@ -194,17 +194,17 @@ void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA still on
     // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERR1EngagingIdler));
+    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERREngagingIdler));
 
     // Stage 4 - engage the idler
-    REQUIRE(WhileTopState(uf, ProgressCode::ERR1EngagingIdler, 5000));
+    REQUIRE(WhileTopState(uf, ProgressCode::ERREngagingIdler, 5000));
 
     // we still think we have filament loaded at this stage
     // idler should be engaged
     // no change in selector's position
     // FINDA still on
     // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, true, slot, slot, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERR1HelpingFilament));
+    REQUIRE(VerifyState(uf, true, slot, slot, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRHelpingFilament));
 }
 
 void FindaDidntTriggerResolveHelpFindaTriggered(uint8_t slot, logic::UnloadFilament &uf) {
@@ -215,7 +215,7 @@ void FindaDidntTriggerResolveHelpFindaTriggered(uint8_t slot, logic::UnloadFilam
         if(step == 100){ // on 100th step make FINDA trigger
             hal::adc::SetADC(config::findaADCIndex, 0);
         }
-        return uf.TopLevelState() == ProgressCode::ERR1HelpingFilament; },
+        return uf.TopLevelState() == ProgressCode::ERRHelpingFilament; },
         5000));
 
     // we still think we have filament loaded at this stage
@@ -228,14 +228,14 @@ void FindaDidntTriggerResolveHelpFindaTriggered(uint8_t slot, logic::UnloadFilam
 
 void FindaDidntTriggerResolveHelpFindaDidntTrigger(uint8_t slot, logic::UnloadFilament &uf) {
     // Stage 5 - move the pulley a bit - no FINDA change
-    REQUIRE(WhileTopState(uf, ProgressCode::ERR1HelpingFilament, 5000));
+    REQUIRE(WhileTopState(uf, ProgressCode::ERRHelpingFilament, 5000));
 
     // we still think we have filament loaded at this stage
     // idler should be engaged
     // no change in selector's position
     // FINDA still pressed
     // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, true, slot, slot, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERR1DisengagingIdler));
+    REQUIRE(VerifyState(uf, true, slot, slot, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRDisengagingIdler));
 }
 
 TEST_CASE("unload_filament::finda_didnt_trigger_resolve_help_second_ok", "[unload_filament]") {

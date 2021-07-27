@@ -11,57 +11,34 @@ Idler idler;
 
 namespace mm = modules::motion;
 
-Idler::EngageDisengage Idler::Disengage() {
-    if (state == Moving)
-        return EngageDisengage::Refused;
+void Idler::PrepareMoveToPlannedSlot() {
+    mm::motion.PlanMoveTo<mm::Idler>(SlotPosition(plannedSlot), 1000._I_deg_s); // @@TODO
+}
 
+Idler::OperationResult Idler::Disengage() {
+    if (state == Moving)
+        return OperationResult::Refused;
+
+    plannedSlot = IdleSlotIndex();
     plannedEngage = false;
 
     if (!Engaged())
-        return true;
+        return OperationResult::Accepted;
 
-    mm::motion.InitAxis(mm::Idler);
-    // plan move to idle position
-    mm::motion.PlanMoveTo<mm::Idler>(SlotPosition(IdleSlotIndex()), 1000._I_deg_s); // @@TODO
-    state = Moving;
-    return true;
-//        return EngageDisengage::Accepted;
-//
-//    if (!mm::motion.InitAxis(mm::Idler)) {
-//        state = Failed;
-//        return EngageDisengage::Failed;
-//    } else {
-//        // plan move to idle position
-//        mm::motion.PlanMove(mm::Idler, config::idlerSlotPositions[IdleSlotIndex()] - mm::motion.Position(mm::Idler), 1000); // @@TODO
-//        state = Moving;
-//        return EngageDisengage::Accepted;
-//    }
+    return InitMovement(mm::Idler);
 }
 
-Idler::EngageDisengage Idler::Engage(uint8_t slot) {
+Idler::OperationResult Idler::Engage(uint8_t slot) {
     if (state == Moving)
-        return EngageDisengage::Refused;
+        return OperationResult::Refused;
 
     plannedSlot = slot;
     plannedEngage = true;
 
     if (Engaged())
-        return true;
+        return OperationResult::Accepted;
 
-    mm::motion.InitAxis(mm::Idler);
-    mm::motion.PlanMoveTo<mm::Idler>(SlotPosition(slot), 1000._I_deg_s); // @@TODO
-    state = Moving;
-    return true;
-//        return EngageDisengage::Accepted;
-//
-//    if (!mm::motion.InitAxis(mm::Idler)) {
-//        state = Failed;
-//        return EngageDisengage::Failed;
-//    } else {
-//        mm::motion.PlanMove(mm::Idler, config::idlerSlotPositions[slot] - mm::motion.Position(mm::Idler), 1000); // @@TODO
-//        state = Moving;
-//        return EngageDisengage::Accepted;
-//    }
+    return InitMovement(mm::Idler);
 }
 
 bool Idler::Home() {

@@ -11,19 +11,20 @@ Selector selector;
 
 namespace mm = modules::motion;
 
-bool Selector::MoveToSlot(uint8_t slot) {
+void Selector::PrepareMoveToPlannedSlot() {
+    mm::motion.PlanMoveTo<mm::Selector>(SlotPosition(plannedSlot), 1000.0_S_mm_s); // @@TODO
+}
+
+Selector::OperationResult Selector::MoveToSlot(uint8_t slot) {
     if (state == Moving)
-        return false;
+        return OperationResult::Refused;
 
     plannedSlot = slot;
 
     if (currentSlot == slot)
-        return true;
+        return OperationResult::Accepted;
 
-    mm::motion.InitAxis(mm::Selector);
-    mm::motion.PlanMoveTo<mm::Selector>(SlotPosition(slot), 1000.0_S_mm_s); // @@TODO
-    state = Moving;
-    return true;
+    return InitMovement(mm::Selector);
 }
 
 bool Selector::Home() {
