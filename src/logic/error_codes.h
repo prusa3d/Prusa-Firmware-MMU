@@ -26,15 +26,15 @@ enum class ErrorCode : uint_fast16_t {
 
     FILAMENT_ALREADY_LOADED = 0x8005, ///< cannot perform operation LoadFilament or move the selector as the filament is already loaded
 
-    MMU_NOT_RESPONDING = 0x807e, ///< internal error of the printer - communication with the MMU is not working
+    MMU_NOT_RESPONDING = 0x801e, ///< internal error of the printer - communication with the MMU is not working
 
-    INTERNAL = 0x807f, ///< internal runtime error (software)
+    INTERNAL = 0x801f, ///< internal runtime error (software)
 
     // TMC bit masks
 
-    TMC_PULLEY_BIT = 0x0080, ///< TMC Pulley bit
-    TMC_SELECTOR_BIT = 0x00A0, ///< TMC Pulley bit
-    TMC_IDLER_BIT = 0x00C0, ///< TMC Pulley bit
+    TMC_PULLEY_BIT = 0x0020, ///< TMC Pulley bit
+    TMC_SELECTOR_BIT = 0x0040, ///< TMC Pulley bit
+    TMC_IDLER_BIT = 0x0080, ///< TMC Pulley bit
 
     TMC_IOIN_MISMATCH = 0x8100, ///< TMC driver init error - TMC dead or bad communication
 
@@ -46,8 +46,8 @@ enum class ErrorCode : uint_fast16_t {
 
     TMC_UNDERVOLTAGE_ON_CHARGE_PUMP = 0x8400, ///< not enough current for the TMC, NOT RECOVERABLE
 
-    TMC_SERIOUS_ERROR = 0x8800, ///< TMC driver serious error coil A or coil B - dangerous to recover
-    TMC_ERROR_A = 0x9000, ///< TMC driver error coil A or coil B - can be recovered
+    TMC_SERIOUS_COIL_ERROR = 0x8800, ///< TMC driver serious error coil A or coil B - dangerous to recover
+    TMC_COIL_ERROR = 0x9000, ///< TMC driver error coil A or coil B - can be recovered
 
     TMC_OVER_TEMPERATURE_WARN = 0xA000, ///< TMC driver over temperature warning - can be recovered by restarting the driver
     TMC_OVER_TEMPERATURE_ERROR = 0xC000, ///< TMC driver over temperature error - the TMC probably fried
