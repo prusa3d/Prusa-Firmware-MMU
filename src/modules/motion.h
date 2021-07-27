@@ -1,6 +1,7 @@
 #pragma once
 #include "../pins.h"
 #include "pulse_gen.h"
+#include "axisunit.h"
 
 namespace modules {
 
@@ -9,10 +10,11 @@ namespace modules {
 /// Ideally enable stepping of motors under ISR (all timers have higher priority than serial)
 namespace motion {
 
+// Import axes definitions
+using config::NUM_AXIS;
+
 using namespace hal::tmc2130;
-using pulse_gen::pos_t;
 using pulse_gen::st_timer_t;
-using pulse_gen::steps_t;
 
 // Check for configuration invariants
 static_assert(
@@ -21,15 +23,6 @@ static_assert(
     "stepTimerQuantum must be smaller than the maximal stepping frequency interval");
 
 /// Main axis enumeration
-enum Axis : uint8_t {
-    Pulley,
-    Selector,
-    Idler,
-    _Axis_Last = Idler
-};
-
-static constexpr uint8_t NUM_AXIS = _Axis_Last + 1;
-
 struct AxisParams {
     char name;
     MotorParams params;
@@ -52,8 +45,8 @@ static constexpr AxisParams axisParams[NUM_AXIS] = {
         .params = { .idx = Pulley, .dirOn = config::pulley.dirOn, .csPin = PULLEY_CS_PIN, .stepPin = PULLEY_STEP_PIN, .sgPin = PULLEY_SG_PIN, .uSteps = config::pulley.uSteps },
         .currents = { .vSense = config::pulley.vSense, .iRun = config::pulley.iRun, .iHold = config::pulley.iHold },
         .mode = DefaultMotorMode(config::pulley),
-        .jerk = config::pulley.jerk,
-        .accel = config::pulley.accel,
+        .jerk = unitToSteps<P_speed_t>(config::pulleyLimits.jerk),
+        .accel = unitToSteps<P_accel_t>(config::pulleyLimits.accel),
     },
     // Selector
     {
@@ -61,8 +54,8 @@ static constexpr AxisParams axisParams[NUM_AXIS] = {
         .params = { .idx = Selector, .dirOn = config::selector.dirOn, .csPin = SELECTOR_CS_PIN, .stepPin = SELECTOR_STEP_PIN, .sgPin = SELECTOR_SG_PIN, .uSteps = config::selector.uSteps },
         .currents = { .vSense = config::selector.vSense, .iRun = config::selector.iRun, .iHold = config::selector.iHold },
         .mode = DefaultMotorMode(config::selector),
-        .jerk = config::selector.jerk,
-        .accel = config::selector.accel,
+        .jerk = unitToSteps<S_speed_t>(config::selectorLimits.jerk),
+        .accel = unitToSteps<S_accel_t>(config::selectorLimits.accel),
     },
     // Idler
     {
@@ -70,8 +63,8 @@ static constexpr AxisParams axisParams[NUM_AXIS] = {
         .params = { .idx = Idler, .dirOn = config::idler.dirOn, .csPin = IDLER_CS_PIN, .stepPin = IDLER_STEP_PIN, .sgPin = IDLER_SG_PIN, .uSteps = config::idler.uSteps },
         .currents = { .vSense = config::idler.vSense, .iRun = config::idler.iRun, .iHold = config::idler.iHold },
         .mode = DefaultMotorMode(config::idler),
-        .jerk = config::idler.jerk,
-        .accel = config::idler.accel,
+        .jerk = unitToSteps<I_speed_t>(config::idlerLimits.jerk),
+        .accel = unitToSteps<I_accel_t>(config::idlerLimits.accel),
     },
 };
 
@@ -112,6 +105,25 @@ public:
     /// @param feedrate maximum feedrate
     void PlanMoveTo(Axis axis, pos_t pos, steps_t feedrate);
 
+    /// Enqueue a single axis move using PlanMoveTo, but using AxisUnit. The Axis needs to
+    /// be supplied as the first template argument: PlanMoveTo<axis>(pos, rate).
+    /// @see PlanMoveTo, unitToSteps
+    template <Axis A>
+    constexpr void PlanMoveTo(AxisUnit<pos_t, A, Lenght> pos, AxisUnit<steps_t, A, Speed> feedrate) {
+        PlanMoveTo(A, pos.v, feedrate.v);
+    }
+
+    /// Enqueue a single axis move using PlanMoveTo, but using physical units. The Axis
+    /// needs to be supplied as the first template argument: PlanMoveTo<axis>(pos, rate).
+    /// @see PlanMoveTo, unitToSteps
+    template <Axis A, config::UnitBase B>
+    constexpr void PlanMoveTo(config::Unit<long double, B, Lenght> pos,
+        config::Unit<long double, B, Speed> feedrate) {
+        PlanMoveTo<A>(
+            unitToAxisUnit<AxisUnit<pos_t, A, Lenght>>(pos),
+            unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(feedrate));
+    }
+
     /// Enqueue a single axis move in steps starting and ending at zero speed with maximum
     /// feedrate. Moves can only be enqueued if the axis is not Full().
     /// @param axis axis affected
@@ -119,6 +131,25 @@ public:
     /// @param feedrate maximum feedrate
     void PlanMove(Axis axis, pos_t delta, steps_t feedrate) {
         PlanMoveTo(axis, Position(axis) + delta, feedrate);
+    }
+
+    /// Enqueue a single axis move using PlanMove, but using AxisUnit. The Axis needs to
+    /// be supplied as the first template argument: PlanMove<axis>(pos, rate).
+    /// @see PlanMove, unitToSteps
+    template <Axis A>
+    constexpr void PlanMove(AxisUnit<pos_t, A, Lenght> delta, AxisUnit<steps_t, A, Speed> feedrate) {
+        PlanMove(A, delta.v, feedrate.v);
+    }
+
+    /// Enqueue a single axis move using PlanMove, but using physical units. The Axis needs to
+    /// be supplied as the first template argument: PlanMove<axis>(pos, rate).
+    /// @see PlanMove, unitToSteps
+    template <Axis A, config::UnitBase B>
+    constexpr void PlanMove(config::Unit<long double, B, Lenght> delta,
+        config::Unit<long double, B, Speed> feedrate) {
+        PlanMove<A>(
+            unitToAxisUnit<AxisUnit<pos_t, A, Lenght>>(delta),
+            unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(feedrate));
     }
 
     /// @returns head position of an axis (last enqueued position)
@@ -140,7 +171,7 @@ public:
     /// Get current acceleration for the selected axis
     /// @param axis axis affected
     /// @returns acceleration
-    steps_t Acceleration(Axis axis) {
+    steps_t Acceleration(Axis axis) const {
         return axisData[axis].ctrl.Acceleration();
     }
 
@@ -149,6 +180,20 @@ public:
     /// @param accel acceleration
     void SetAcceleration(Axis axis, steps_t accel) {
         axisData[axis].ctrl.SetAcceleration(accel);
+    }
+
+    /// Get current jerk for the selected axis
+    /// @param axis axis affected
+    /// @returns jerk
+    steps_t Jerk(Axis axis) const {
+        return axisData[axis].ctrl.Jerk();
+    }
+
+    /// Set maximum jerk for the selected axis
+    /// @param axis axis affected
+    /// @param max_jerk maximum jerk
+    void SetJerk(Axis axis, steps_t max_jerk) {
+        return axisData[axis].ctrl.SetJerk(max_jerk);
     }
 
     /// State machine doing all the planning and stepping. Called by the stepping ISR.
@@ -204,7 +249,7 @@ private:
 };
 
 /// ISR stepping routine
-extern void Isr();
+//extern void Isr();
 
 extern Motion motion;
 

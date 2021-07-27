@@ -1,11 +1,13 @@
 #pragma once
 #include "../config/config.h"
-#include <stdint.h>
+#include "../modules/axisunit.h"
 
 namespace modules {
 
 /// The idler namespace provides all necessary facilities related to the logical model of the idler device of the MMU unit.
 namespace idler {
+
+namespace mm = modules::motion;
 
 /// The Idler model handles asynchronnous Engaging / Disengaging operations and keeps track of idler's current state.
 class Idler {
@@ -50,7 +52,9 @@ public:
     inline uint8_t Slot() const { return currentSlot; }
 
     /// @returns predefined positions of individual slots
-    inline static uint16_t SlotPosition(uint8_t slot) { return config::idlerSlotPositions[slot]; }
+    static constexpr mm::I_pos_t SlotPosition(uint8_t slot) {
+        return mm::unitToAxisUnit<mm::I_pos_t>(config::idlerSlotPositions[slot]);
+    }
 
     /// @returns the index of idle position of the idler, usually 5 in case of 0-4 valid indices of filament slots
     inline static constexpr uint8_t IdleSlotIndex() { return config::toolCount; }
