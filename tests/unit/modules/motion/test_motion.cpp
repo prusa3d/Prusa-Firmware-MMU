@@ -33,11 +33,6 @@ TEST_CASE("motion::basic", "[motion]") {
 
 TEST_CASE("motion::unit", "[motion]") {
     // test AxisUnit conversion in the PlanMove and PlanMoveTo.
-    using config::operator"" _mm;
-    using config::operator"" _mm_s;
-    using config::operator"" _deg;
-    using config::operator"" _deg_s;
-
     REQUIRE(motion.QueueEmpty());
     REQUIRE(motion.Position(Pulley) == 0);
 
