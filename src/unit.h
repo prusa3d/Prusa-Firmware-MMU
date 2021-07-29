@@ -47,12 +47,21 @@ struct Unit {
     typedef T type_t;
     typedef Unit<T, B, U> self_t;
 
-    constexpr self_t operator+(const self_t r) { return { v + r.v }; }
-    constexpr self_t operator-(const self_t r) { return { v - r.v }; }
-    constexpr self_t operator-() { return { -v }; }
-    constexpr self_t operator*(const self_t r) { return { v * r.v }; }
-    constexpr self_t operator/(const self_t r) { return { v / r.v }; }
+    // same-type operations
+    constexpr self_t operator+(const self_t r) const { return { v + r.v }; }
+    constexpr self_t operator-(const self_t r) const { return { v - r.v }; }
+    constexpr self_t operator-() const { return { -v }; }
+    constexpr self_t operator*(const self_t r) const { return { v * r.v }; }
+    constexpr self_t operator/(const self_t r) const { return { v / r.v }; }
+
+    // allow an unitless multiplier to scale the quantity: U * f => U
+    constexpr self_t operator*(const long double f) const { return { (T)(v * f) }; }
+    constexpr self_t operator/(const long double f) const { return { (T)(v / f) }; }
 };
+
+// complementary f * U => U * f
+template <typename T, UnitBase B, UnitType U>
+constexpr Unit<T, B, U> operator*(const long double f, const Unit<T, B, U> u) { return u * f; }
 
 // Millimiters
 typedef Unit<long double, Millimeter, Lenght> U_mm;
