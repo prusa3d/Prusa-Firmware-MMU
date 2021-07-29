@@ -73,12 +73,21 @@ struct AxisUnit {
     typedef T type_t;
     typedef AxisUnit<T, A, U> self_t;
 
-    constexpr self_t operator+(const self_t r) { return { v + r.v }; }
-    constexpr self_t operator-(const self_t r) { return { v - r.v }; }
-    constexpr self_t operator-() { return { -v }; }
-    constexpr self_t operator*(const self_t r) { return { v * r.v }; }
-    constexpr self_t operator/(const self_t r) { return { v / r.v }; }
+    // same-type operations
+    constexpr self_t operator+(const self_t r) const { return { v + r.v }; }
+    constexpr self_t operator-(const self_t r) const { return { v - r.v }; }
+    constexpr self_t operator-() const { return { -v }; }
+    constexpr self_t operator*(const self_t r) const { return { v * r.v }; }
+    constexpr self_t operator/(const self_t r) const { return { v / r.v }; }
+
+    // allow an unitless multiplier to scale the quantity: AU * f => AU
+    constexpr self_t operator*(const long double f) const { return { (T)(v * f) }; }
+    constexpr self_t operator/(const long double f) const { return { (T)(v / f) }; }
 };
+
+// complementary f * AU => AU * f
+template <typename T, Axis A, config::UnitType U>
+constexpr AxisUnit<T, A, U> operator*(const long double f, const AxisUnit<T, A, U> u) { return u * f; }
 
 /// Axis type conversion table for template expansion
 struct AxisScale {
