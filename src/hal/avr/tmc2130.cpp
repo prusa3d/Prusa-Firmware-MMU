@@ -19,7 +19,7 @@ bool TMC2130::Init(const MotorParams &params) {
     ///check for compatible tmc driver (IOIN version field)
     uint32_t IOIN = ReadRegister(params, Registers::IOIN);
 
-    // if the version is incorrect or an always 1st bit is 0
+    // if the version is incorrect or a bit always set to 1 is suddenly 0
     // (the supposed SD_MODE pin that doesn't exist on this driver variant)
     if (((IOIN >> 24U) != 0x11) | !(IOIN & (1U << 6U)))
         return true; // @todo return some kind of failure
@@ -45,7 +45,8 @@ bool TMC2130::Init(const MotorParams &params) {
     WriteRegister(params, Registers::TPOWERDOWN, 0);
 
     ///Stallguard parameters
-    WriteRegister(params, Registers::COOLCONF, config::tmc2130_coolConf);
+    static constexpr uint32_t tmc2130_coolConf = (((uint32_t)config::tmc2130_sg_thrs) << 16U);
+    WriteRegister(params, Registers::COOLCONF, tmc2130_coolConf);
     WriteRegister(params, Registers::TCOOLTHRS, config::tmc2130_coolStepThreshold);
 
     ///Write stealth mode config and setup diag0 output
@@ -54,7 +55,10 @@ bool TMC2130::Init(const MotorParams &params) {
     WriteRegister(params, Registers::GCONF, gconf);
 
     ///stealthChop parameters
-    constexpr uint32_t pwmconf = config::tmc2130_PWM_AMPL | config::tmc2130_PWM_GRAD | config::tmc2130_PWM_FREQ | config::tmc2130_PWM_AUTOSCALE;
+    constexpr uint32_t pwmconf = ((uint32_t)(config::tmc2130_PWM_AMPL) << 0U)
+        | ((uint32_t)(config::tmc2130_PWM_GRAD) << 8U)
+        | ((uint32_t)(config::tmc2130_PWM_FREQ) << 16U)
+        | ((uint32_t)(config::tmc2130_PWM_AUTOSCALE & 0x01U) << 18U);
     WriteRegister(params, Registers::PWMCONF, pwmconf);
 
     /// TPWMTHRS: switching velocity between stealthChop and spreadCycle.
