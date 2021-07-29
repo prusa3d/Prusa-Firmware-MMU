@@ -112,7 +112,7 @@ static constexpr int8_t tmc2130_sg_thrs = 3; // @todo 7bit two's complement for 
 static_assert(tmc2130_sg_thrs >= -64 && tmc2130_sg_thrs <= 63, "tmc2130_sg_thrs out of range");
 
 static constexpr uint32_t tmc2130_coolStepThreshold = 400; ///< step-based 20bit uint
-static_assert(tmc2130_coolStepThreshold <= 0x3ffff, "tmc2130_coolStepThreshold out of range");
+static_assert(tmc2130_coolStepThreshold <= 0xfffff, "tmc2130_coolStepThreshold out of range");
 
 static constexpr uint32_t tmc2130_PWM_AMPL = 240;
 static_assert(tmc2130_PWM_AMPL <= 255, "tmc2130_PWM_AMPL out of range");
