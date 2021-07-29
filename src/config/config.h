@@ -106,7 +106,6 @@ static constexpr IdlerLimits idlerLimits = {
     .accel = 1000.0_deg_s2,
 };
 
-
 /// Max retries of FeedToBondtech used in LoadFilament
 static constexpr uint8_t feedToBondtechMaxRetries = 2;
 
