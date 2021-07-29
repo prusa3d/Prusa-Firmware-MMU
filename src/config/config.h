@@ -31,6 +31,8 @@ static constexpr const uint16_t buttonsDebounceMs = 100;
 static constexpr const uint16_t buttonADCLimits[buttonCount][2] = { { 0, 50 }, { 80, 100 }, { 160, 180 } };
 static constexpr const uint8_t buttonsADCIndex = 5; ///< ADC index of buttons input
 
+// Motion and planning
+
 /// Do not plan moves equal or shorter than the requested steps
 static constexpr uint8_t dropSegments = 0;
 
@@ -103,5 +105,15 @@ static constexpr IdlerLimits idlerLimits = {
     .jerk = 10.0_deg_s,
     .accel = 1000.0_deg_s2,
 };
+
+// TMC2130 setup
+
+static constexpr uint8_t tmc2130_sg_thrs = 3; // @todo 7bit two's complement for the sg_thrs
+static constexpr uint32_t tmc2130_coolConf = (((uint32_t)tmc2130_sg_thrs) << 16U);
+static constexpr uint16_t tmc2130_coolStepThreshold = 400;
+static constexpr uint32_t tmc2130_PWM_AMPL = (uint32_t)(240U & 0xFFU) << 0U;
+static constexpr uint32_t tmc2130_PWM_GRAD = (uint32_t)(4U & 0xFFU) << 8U;
+static constexpr uint32_t tmc2130_PWM_FREQ = (uint32_t)(2U & 0x03U) << 16U;
+static constexpr uint32_t tmc2130_PWM_AUTOSCALE = (uint32_t)(1U & 0x01U) << 18U;
 
 } // namespace config
