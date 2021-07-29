@@ -5,7 +5,6 @@
 
 namespace modules {
 
-/// @@TODO
 /// Logic of motor handling
 /// Ideally enable stepping of motors under ISR (all timers have higher priority than serial)
 namespace motion {
@@ -38,7 +37,7 @@ static constexpr MotorMode DefaultMotorMode(const config::AxisConfig &axis) {
 }
 
 /// Static axis configuration
-static constexpr AxisParams axisParams[NUM_AXIS] = {
+static AxisParams axisParams[NUM_AXIS] = {
     // Pulley
     {
         .name = 'P',
@@ -215,6 +214,11 @@ public:
     /// stop whatever moves are being done
     void AbortPlannedMoves();
 
+    /// @returns the TMC213 driver associated with the particular axis
+    inline const hal::tmc2130::TMC2130 &DriverForAxis(Axis axis) const {
+        return axisData[axis].drv;
+    }
+
 private:
     struct AxisData {
         TMC2130 drv; ///< Motor driver
@@ -226,11 +230,7 @@ private:
     /// Helper to initialize AxisData members
     static AxisData DataForAxis(Axis axis) {
         return {
-            .drv = {
-                axisParams[axis].params,
-                axisParams[axis].currents,
-                axisParams[axis].mode,
-            },
+            .drv = {},
             .ctrl = {
                 axisParams[axis].jerk,
                 axisParams[axis].accel,

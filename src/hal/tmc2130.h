@@ -32,27 +32,24 @@ struct MotorCurrents {
     uint8_t iHold; ///< Holding current
 };
 
+struct __attribute__((packed)) ErrorFlags {
+    uint8_t reset_flag : 1; ///< driver restarted
+    uint8_t uv_cp : 1; ///< undervoltage on charge pump
+    uint8_t s2g : 1; ///< short to ground
+    uint8_t otpw : 1; ///< over temperature pre-warning
+    uint8_t ot : 1; ///< over temperature hard
+    inline ErrorFlags()
+        : reset_flag(0)
+        , uv_cp(0)
+        , s2g(0)
+        , otpw(0)
+        , ot(0) {}
+};
+
+/// TMC2130 interface - instances of this class are hidden in modules::motion::Motion::AxisData
 class TMC2130 {
-    MotorMode mode;
-    MotorCurrents currents;
-    struct __attribute__((packed)) ErrorFlags {
-        uint8_t reset_flag : 1;
-        uint8_t uv_cp : 1;
-        uint8_t s2g : 1;
-        uint8_t otpw : 1;
-        uint8_t ot : 1;
-        inline ErrorFlags()
-            : reset_flag(0)
-            , uv_cp(0)
-            , s2g(0)
-            , otpw(0)
-            , ot(0) {}
-
-    } errorFlags;
-    bool enabled = false;
-    uint8_t sg_counter;
-
 public:
+    /// TMC2130 register addresses
     enum class Registers : uint8_t {
         /// General Configuration Registers
         GCONF = 0x00,
@@ -76,27 +73,17 @@ public:
     };
 
     /// Constructor
-    TMC2130(const MotorParams &params,
-        const MotorCurrents &currents,
-        MotorMode mode);
+    TMC2130() = default;
 
     /// (re)initialization of the chip - please note this is necessary due to some HW flaws in the original MMU boards.
     /// And yes, the TMC may not get correctly initialized.
     /// @returns true if the TMC2130 was inited correctly
-    bool Init(const MotorParams &params);
-
-    /// Get the current motor mode
-    MotorMode Mode() const {
-        return mode;
-    }
+    bool Init(const MotorParams &params,
+        const MotorCurrents &currents,
+        MotorMode mode);
 
     /// Set the current motor mode
     void SetMode(const MotorParams &params, MotorMode mode);
-
-    /// Get the current motor currents
-    const MotorCurrents &Currents() const {
-        return currents;
-    }
 
     /// Set the current motor currents
     void SetCurrents(const MotorParams &params, const MotorCurrents &currents);
@@ -149,6 +136,10 @@ public:
 private:
     void _spi_tx_rx(const MotorParams &params, uint8_t (&pData)[5]);
     void _handle_spi_status(const MotorParams &params, uint8_t status);
+
+    ErrorFlags errorFlags;
+    bool enabled = false;
+    uint8_t sg_counter;
 };
 
 } // namespace tmc2130

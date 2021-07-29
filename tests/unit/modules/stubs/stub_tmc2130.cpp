@@ -3,17 +3,13 @@
 namespace hal {
 namespace tmc2130 {
 
-TMC2130::TMC2130(const MotorParams &params,
-    const MotorCurrents &currents,
-    MotorMode mode) {
-    // TODO
-}
-
 void TMC2130::SetMode(const MotorParams &params, MotorMode mode) {
     // TODO
 }
 
-bool TMC2130::Init(const MotorParams & /*params*/) {
+bool TMC2130::Init(const MotorParams &params,
+    const MotorCurrents &currents,
+    MotorMode mode) {
     // TODO
     return true;
 }

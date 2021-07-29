@@ -4,14 +4,7 @@
 namespace hal {
 namespace tmc2130 {
 
-TMC2130::TMC2130(const MotorParams &params, const MotorCurrents &currents, MotorMode mode)
-    : mode(mode)
-    , currents(currents)
-    , sg_counter(0) {
-    Init(params);
-}
-
-bool TMC2130::Init(const MotorParams &params) {
+bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, MotorMode mode) {
     gpio::Init(params.csPin, gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::high));
     gpio::Init(params.sgPin, gpio::GPIO_InitTypeDef(gpio::Mode::input, gpio::Pull::up));
     gpio::Init(params.stepPin, gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::low));
@@ -69,15 +62,11 @@ bool TMC2130::Init(const MotorParams &params) {
 }
 
 void TMC2130::SetMode(const MotorParams &params, MotorMode mode) {
-    this->mode = mode;
-
     ///0xFFF00 is used as a "Normal" mode threshold since stealthchop will be used at standstill.
     WriteRegister(params, Registers::TPWMTHRS, (mode == Stealth) ? 70 : 0xFFF00); // @todo should be configurable
 }
 
 void TMC2130::SetCurrents(const MotorParams &params, const MotorCurrents &currents) {
-    this->currents = currents;
-
     uint32_t ihold_irun = (uint32_t)(currents.iHold & 0x1F) << 0 //ihold
         | (uint32_t)(currents.iRun & 0x1F) << 8 //irun
         | (uint32_t)(15 & 0x0F) << 16; //IHOLDDELAY
