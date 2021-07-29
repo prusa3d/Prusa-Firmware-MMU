@@ -9,7 +9,7 @@ bool Motion::InitAxis(Axis axis) {
     // disable the axis and re-init the driver: this will clear the internal
     // StallGuard data as a result without special handling
     Disable(axis);
-    return axisData[axis].drv.Init(axisParams[axis].params);
+    return axisData[axis].drv.Init(axisParams[axis].params, axisParams[axis].currents, axisParams[axis].mode);
 }
 
 void Motion::SetEnabled(Axis axis, bool enabled) {

@@ -56,5 +56,5 @@ enum class ErrorCode : uint_fast16_t {
     /// TMC driver over temperature error - we really shouldn't ever reach this error.
     /// It can still be recovered if the driver cools down below 120C.
     /// The driver needs to be disabled and enabled again for operation to resume after this error is cleared.
-    TMC_OVER_TEMPERATURE_ERROR = 0xC000,
+    TMC_OVER_TEMPERATURE_ERROR = 0xC000
 };

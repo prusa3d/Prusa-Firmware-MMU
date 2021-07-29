@@ -73,5 +73,10 @@ bool Idler::Step() {
     }
 }
 
+//hal::tmc2130::MotorParams Idler::TMCDriverParams() const {
+//    return
+
+//}
+
 } // namespace idler
 } // namespace modules
