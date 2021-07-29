@@ -41,6 +41,13 @@ class TMC2130 {
         uint8_t s2g : 1;
         uint8_t otpw : 1;
         uint8_t ot : 1;
+        inline ErrorFlags()
+            : reset_flag(0)
+            , uv_cp(0)
+            , s2g(0)
+            , otpw(0)
+            , ot(0) {}
+
     } errorFlags;
     bool enabled = false;
     uint8_t sg_counter;

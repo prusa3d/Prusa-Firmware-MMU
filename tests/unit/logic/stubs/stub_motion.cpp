@@ -26,7 +26,7 @@ bool Motion::StallGuard(Axis axis) {
     return axes[axis].stallGuard;
 }
 
-void Motion::ClearStallGuardFlag(Axis axis) {
+void Motion::StallGuardReset(Axis axis) {
     axes[axis].stallGuard = false;
 }
 
