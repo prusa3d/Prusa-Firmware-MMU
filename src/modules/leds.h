@@ -136,3 +136,5 @@ extern LEDs leds;
 
 } // namespace LEDs
 } // namespace modules
+
+namespace ml = modules::leds;

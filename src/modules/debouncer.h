@@ -53,3 +53,5 @@ private:
 
 } // namespace debounce
 } // namespace modules
+
+namespace md = modules::debounce;

@@ -42,3 +42,5 @@ extern UserInput userInput;
 
 } // namespace user_input
 } // namespace modules
+
+namespace mui = modules::user_input;

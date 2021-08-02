@@ -8,13 +8,6 @@
 
 namespace logic {
 
-namespace mm = modules::motion;
-namespace mg = modules::globals;
-namespace mf = modules::finda;
-namespace mi = modules::idler;
-namespace ml = modules::leds;
-namespace mp = modules::permanent_storage;
-
 void UnloadToFinda::Reset(uint8_t maxTries) {
     this->maxTries = maxTries;
     // check the inital state of FINDA and plan the moves
@@ -32,7 +25,7 @@ bool UnloadToFinda::Step() {
     case EngagingIdler:
         if (mi::idler.Engaged()) {
             state = WaitingForFINDA;
-            int unloadSteps = mp::BowdenLength::get() + 1100;
+            int unloadSteps = mps::BowdenLength::get() + 1100;
             const int second_point = unloadSteps - 1300;
             mm::motion.PlanMove(mm::Pulley, -1400, 6000); // @@TODO constants
             mm::motion.PlanMove(mm::Pulley, -1800 + 1400, 2500); // @@TODO constants 1800-1400 = 400

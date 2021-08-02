@@ -74,9 +74,9 @@ void USART::puts(const char *str) {
 } // namespace hal
 
 ISR(USART1_RX_vect) {
-    hal::usart::usart1.ISR_RX();
+    hu::usart1.ISR_RX();
 }
 
 ISR(USART1_UDRE_vect) {
-    hal::usart::usart1.ISR_UDRE();
+    hu::usart1.ISR_UDRE();
 }

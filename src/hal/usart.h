@@ -88,7 +88,7 @@ public:
             husart->UCSRxB &= ~(1 << 5); // disable UDRE interrupt
     }
 
-    USART(hal::usart::USART::USART_TypeDef *husart)
+    USART(USART_TypeDef *husart)
         : husart(husart) {};
 
 private:
@@ -107,3 +107,5 @@ extern USART usart1;
 } // namespace hal
 
 #define USART1 ((hal::usart::USART::USART_TypeDef *)&UCSR1A)
+
+namespace hu = hal::usart;

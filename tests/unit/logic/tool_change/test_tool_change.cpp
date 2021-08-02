@@ -19,14 +19,6 @@
 
 using Catch::Matchers::Equals;
 
-namespace mm = modules::motion;
-namespace mf = modules::finda;
-namespace mi = modules::idler;
-namespace ml = modules::leds;
-namespace mb = modules::buttons;
-namespace mg = modules::globals;
-namespace ms = modules::selector;
-
 void ToolChange(uint8_t fromSlot, uint8_t toSlot) {
     ForceReinitAllAutomata();
 

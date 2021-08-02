@@ -33,3 +33,5 @@ extern FSensor fsensor;
 
 } // namespace fsensor
 } // namespace modules
+
+namespace mfs = modules::fsensor;

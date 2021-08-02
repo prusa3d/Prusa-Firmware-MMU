@@ -12,8 +12,6 @@ namespace logic {
 
 ToolChange toolChange;
 
-namespace mg = modules::globals;
-
 void ToolChange::Reset(uint8_t param) {
     if (param == mg::globals.ActiveSlot())
         return;

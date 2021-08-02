@@ -50,3 +50,5 @@ extern Globals globals;
 
 } // namespace globals
 } // namespace modules
+
+namespace mg = modules::globals;

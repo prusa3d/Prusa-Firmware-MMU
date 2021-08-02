@@ -9,8 +9,6 @@ namespace selector {
 
 Selector selector;
 
-namespace mm = modules::motion;
-
 void Selector::PrepareMoveToPlannedSlot() {
     mm::motion.PlanMoveTo<mm::Selector>(SlotPosition(plannedSlot), 1000.0_S_mm_s); // @@TODO
 }

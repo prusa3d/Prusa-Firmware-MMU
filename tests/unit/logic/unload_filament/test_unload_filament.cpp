@@ -19,14 +19,6 @@
 
 using Catch::Matchers::Equals;
 
-namespace mm = modules::motion;
-namespace mf = modules::finda;
-namespace mi = modules::idler;
-namespace ml = modules::leds;
-namespace mb = modules::buttons;
-namespace mg = modules::globals;
-namespace ms = modules::selector;
-
 #include "../helpers/helpers.ipp"
 
 void RegularUnloadFromSlot04Init(uint8_t slot, logic::UnloadFilament &uf) {

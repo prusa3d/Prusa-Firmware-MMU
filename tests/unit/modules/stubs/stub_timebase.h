@@ -11,3 +11,5 @@ extern void IncMillis(uint16_t inc = 1);
 
 } // namespace time
 } // namespace modules
+
+namespace mt = modules::time;

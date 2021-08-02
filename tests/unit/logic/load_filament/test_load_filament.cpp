@@ -19,14 +19,6 @@
 
 using Catch::Matchers::Equals;
 
-namespace mm = modules::motion;
-namespace mf = modules::finda;
-namespace mi = modules::idler;
-namespace ml = modules::leds;
-namespace mb = modules::buttons;
-namespace mg = modules::globals;
-namespace ms = modules::selector;
-
 #include "../helpers/helpers.ipp"
 
 void LoadFilamentCommonSetup(uint8_t slot, logic::LoadFilament &lf) {
@@ -73,7 +65,7 @@ void LoadFilamentSuccessful(uint8_t slot, logic::LoadFilament &lf) {
         lf,
         [&](int step) -> bool {
         if(step == 100){ // on 100th step make fsensor trigger
-            modules::fsensor::fsensor.ProcessMessage(true);
+            mfs::fsensor.ProcessMessage(true);
         }
         return lf.TopLevelState() == ProgressCode::FeedingToBondtech; },
         5000));

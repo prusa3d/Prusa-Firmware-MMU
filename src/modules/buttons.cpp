@@ -23,7 +23,7 @@ int8_t Buttons::DecodeADC(uint16_t rawADC) {
 }
 
 void Buttons::Step() {
-    uint16_t millis = modules::time::timebase.Millis();
+    uint16_t millis = mt::timebase.Millis();
     int8_t currentState = DecodeADC(hal::adc::ReadADC(config::buttonsADCIndex));
     for (uint_fast8_t b = 0; b < config::buttonCount; ++b) {
         // this button was pressed if b == currentState, released otherwise

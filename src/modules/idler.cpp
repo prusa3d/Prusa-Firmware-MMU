@@ -9,8 +9,6 @@ namespace idler {
 
 Idler idler;
 
-namespace mm = modules::motion;
-
 void Idler::PrepareMoveToPlannedSlot() {
     mm::motion.PlanMoveTo<mm::Idler>(SlotPosition(plannedSlot), 1000._I_deg_s); // @@TODO
 }

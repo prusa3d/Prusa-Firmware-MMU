@@ -2,8 +2,6 @@
 #include "idler.h"
 #include "stub_motion.h"
 
-namespace mi = modules::idler;
-
 namespace modules {
 namespace motion {
 

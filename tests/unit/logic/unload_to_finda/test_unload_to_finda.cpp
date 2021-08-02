@@ -19,14 +19,6 @@
 
 using Catch::Matchers::Equals;
 
-namespace mm = modules::motion;
-namespace mf = modules::finda;
-namespace mi = modules::idler;
-namespace ml = modules::leds;
-namespace mb = modules::buttons;
-namespace mg = modules::globals;
-namespace ms = modules::selector;
-
 namespace ha = hal::adc;
 
 TEST_CASE("unload_to_finda::regular_unload", "[unload_to_finda]") {

@@ -19,14 +19,6 @@
 
 using Catch::Matchers::Equals;
 
-namespace mm = modules::motion;
-namespace mf = modules::finda;
-namespace mi = modules::idler;
-namespace ml = modules::leds;
-namespace mb = modules::buttons;
-namespace mg = modules::globals;
-namespace ms = modules::selector;
-
 namespace ha = hal::adc;
 
 TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
@@ -66,12 +58,12 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
         fb,
         [&](int step) {
         if( step == 1000 ){
-            modules::fsensor::fsensor.ProcessMessage(true);
+            mfs::fsensor.ProcessMessage(true);
         }
         return fb.State() == FeedToBondtech::PushingFilament; },
         1500));
 
-    REQUIRE(modules::fsensor::fsensor.Pressed());
+    REQUIRE(mfs::fsensor.Pressed());
 
     //    // disengaging idler
     //    REQUIRE(fb.State() == FeedToBondtech::DisengagingIdler);

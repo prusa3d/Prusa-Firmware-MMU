@@ -41,7 +41,7 @@ bool LED::Step(bool oddPeriod) {
 }
 
 void LEDs::Step() {
-    uint16_t millis = modules::time::timebase.Millis();
+    uint16_t millis = mt::timebase.Millis();
     bool oddPeriod = ((millis / 1000U) & 0x01U) != 0;
     uint16_t result = 0;
     for (int8_t i = ledPairs * 2 - 1; i >= 0; --i) {

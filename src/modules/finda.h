@@ -25,3 +25,5 @@ extern FINDA finda;
 
 } // namespace finda
 } // namespace modules
+
+namespace mf = modules::finda;

@@ -9,13 +9,6 @@
 
 namespace logic {
 
-namespace mm = modules::motion;
-namespace mfs = modules::fsensor;
-namespace mi = modules::idler;
-namespace ml = modules::leds;
-namespace mp = modules::permanent_storage;
-namespace mg = modules::globals;
-
 void FeedToBondtech::Reset(uint8_t maxRetries) {
     state = EngagingIdler;
     this->maxRetries = maxRetries;
@@ -23,7 +16,7 @@ void FeedToBondtech::Reset(uint8_t maxRetries) {
 }
 
 bool FeedToBondtech::Step() {
-    const uint16_t steps = mp::BowdenLength::get();
+    const uint16_t steps = mps::BowdenLength::get();
 
     switch (state) {
     case EngagingIdler:

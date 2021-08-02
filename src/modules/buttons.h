@@ -59,3 +59,5 @@ extern Buttons buttons;
 
 } // namespace buttons
 } // namespace modules
+
+namespace mb = modules::buttons;

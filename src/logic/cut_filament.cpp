@@ -12,12 +12,6 @@ namespace logic {
 
 CutFilament cutFilament;
 
-namespace mm = modules::motion;
-namespace mi = modules::idler;
-namespace ml = modules::leds;
-namespace ms = modules::selector;
-namespace mg = modules::globals;
-
 void CutFilament::Reset(uint8_t param) {
     error = ErrorCode::OK;
     cutSlot = param;

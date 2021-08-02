@@ -3,10 +3,6 @@
 #include "../modules/selector.h"
 #include "../modules/motion.h"
 
-namespace mi = modules::idler;
-namespace ms = modules::selector;
-namespace mm = modules::motion;
-
 namespace logic {
 
 inline ErrorCode &operator|=(ErrorCode &a, ErrorCode b) {

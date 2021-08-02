@@ -26,53 +26,51 @@ extern uint16_t shr16_v_copy;
 #define SHR16_LEDR4 0x0080
 
 TEST_CASE("leds::single", "[leds]") {
-    using namespace modules::leds;
     using namespace hal::shr16;
-    modules::time::ReinitTimebase(); // reset timing
+    mt::ReinitTimebase(); // reset timing
 
-    LEDs leds;
+    ml::LEDs leds;
 
     uint8_t index;
-    Color color;
+    ml::Color color;
     uint16_t shr16_register;
     std::tie(index, color, shr16_register) = GENERATE(
-        std::make_tuple(0, green, SHR16_LEDG0),
-        std::make_tuple(0, red, SHR16_LEDR0),
-        std::make_tuple(1, green, SHR16_LEDG1),
-        std::make_tuple(1, red, SHR16_LEDR1),
-        std::make_tuple(2, green, SHR16_LEDG2),
-        std::make_tuple(2, red, SHR16_LEDR2),
-        std::make_tuple(3, green, SHR16_LEDG3),
-        std::make_tuple(3, red, SHR16_LEDR3),
-        std::make_tuple(4, green, SHR16_LEDG4),
-        std::make_tuple(4, red, SHR16_LEDR4));
+        std::make_tuple(0, ml::green, SHR16_LEDG0),
+        std::make_tuple(0, ml::red, SHR16_LEDR0),
+        std::make_tuple(1, ml::green, SHR16_LEDG1),
+        std::make_tuple(1, ml::red, SHR16_LEDR1),
+        std::make_tuple(2, ml::green, SHR16_LEDG2),
+        std::make_tuple(2, ml::red, SHR16_LEDR2),
+        std::make_tuple(3, ml::green, SHR16_LEDG3),
+        std::make_tuple(3, ml::red, SHR16_LEDR3),
+        std::make_tuple(4, ml::green, SHR16_LEDG4),
+        std::make_tuple(4, ml::red, SHR16_LEDR4));
 
     shr16.Init(); // clears the register for the test
 
     // turn LED on
-    leds.SetMode(index, color, on);
+    leds.SetMode(index, color, ml::on);
     leds.Step();
-    modules::time::IncMillis();
+    mt::IncMillis();
     CHECK(leds.LedOn(index, color) == true);
     CHECK(shr16_v_copy == shr16_register);
 
     // turn LED off
-    leds.SetMode(index, color, off);
+    leds.SetMode(index, color, ml::off);
     leds.Step();
-    modules::time::IncMillis();
+    mt::IncMillis();
     CHECK(leds.LedOn(index, color) == false);
     CHECK(shr16_v_copy == 0);
 }
 
-void TestBlink(uint8_t index, modules::leds::Color color, uint16_t shr16_register, bool shouldBeOn, modules::leds::Mode blinkMode) {
-    using namespace modules::leds;
+void TestBlink(uint8_t index, ml::Color color, uint16_t shr16_register, bool shouldBeOn, ml::Mode blinkMode) {
     using namespace hal::shr16;
-    modules::time::ReinitTimebase(); // reset timing
-    LEDs leds;
+    mt::ReinitTimebase(); // reset timing
+    ml::LEDs leds;
 
     leds.SetMode(index, color, blinkMode);
     leds.Step();
-    modules::time::IncMillis();
+    mt::IncMillis();
 
     REQUIRE(leds.LedOn(index, color) == shouldBeOn);
     CHECK(shr16_v_copy == (shouldBeOn ? shr16_register : 0));
@@ -80,7 +78,7 @@ void TestBlink(uint8_t index, modules::leds::Color color, uint16_t shr16_registe
     // test 4 seconds of blinking
     for (uint8_t s = 1; s < 4; ++s) {
         // one second elapsed ;)
-        modules::time::IncMillis(1000);
+        mt::IncMillis(1000);
         leds.Step();
         shouldBeOn = !shouldBeOn;
         CHECK(leds.LedOn(index, color) == shouldBeOn);
@@ -88,35 +86,34 @@ void TestBlink(uint8_t index, modules::leds::Color color, uint16_t shr16_registe
     }
 
     // turn LED off
-    leds.SetMode(index, color, off);
+    leds.SetMode(index, color, ml::off);
     leds.Step();
-    modules::time::IncMillis();
+    mt::IncMillis();
     CHECK(leds.LedOn(index, color) == false);
     CHECK(shr16_v_copy == 0);
 }
 
 TEST_CASE("leds::blink0-single", "[leds]") {
-    using namespace modules::leds;
     using namespace hal::shr16;
     uint8_t index;
-    Color color;
+    ml::Color color;
     uint16_t shr16_register;
     std::tie(index, color, shr16_register) = GENERATE(
-        std::make_tuple(0, green, SHR16_LEDG0),
-        std::make_tuple(0, red, SHR16_LEDR0),
-        std::make_tuple(1, green, SHR16_LEDG1),
-        std::make_tuple(1, red, SHR16_LEDR1),
-        std::make_tuple(2, green, SHR16_LEDG2),
-        std::make_tuple(2, red, SHR16_LEDR2),
-        std::make_tuple(3, green, SHR16_LEDG3),
-        std::make_tuple(3, red, SHR16_LEDR3),
-        std::make_tuple(4, green, SHR16_LEDG4),
-        std::make_tuple(4, red, SHR16_LEDR4));
+        std::make_tuple(0, ml::green, SHR16_LEDG0),
+        std::make_tuple(0, ml::red, SHR16_LEDR0),
+        std::make_tuple(1, ml::green, SHR16_LEDG1),
+        std::make_tuple(1, ml::red, SHR16_LEDR1),
+        std::make_tuple(2, ml::green, SHR16_LEDG2),
+        std::make_tuple(2, ml::red, SHR16_LEDR2),
+        std::make_tuple(3, ml::green, SHR16_LEDG3),
+        std::make_tuple(3, ml::red, SHR16_LEDR3),
+        std::make_tuple(4, ml::green, SHR16_LEDG4),
+        std::make_tuple(4, ml::red, SHR16_LEDR4));
 
     shr16.Init(); // clears the register for the test
 
     // set LED into blink0 mode - on in even periods of 1s intervals, starts as OFF
-    TestBlink(index, color, shr16_register, false, blink0);
+    TestBlink(index, color, shr16_register, false, ml::blink0);
 
-    TestBlink(index, color, shr16_register, true, blink1);
+    TestBlink(index, color, shr16_register, true, ml::blink1);
 }

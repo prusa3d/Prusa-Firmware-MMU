@@ -20,16 +20,16 @@
 #include <stddef.h>
 
 void main_loop() {
-    modules::buttons::buttons.Step();
-    modules::leds::leds.Step();
-    modules::finda::finda.Step();
-    modules::fsensor::fsensor.Step();
-    modules::idler::idler.Step();
-    modules::selector::selector.Step();
-    modules::motion::motion.Step();
-    modules::user_input::userInput.Step();
+    mb::buttons.Step();
+    ml::leds.Step();
+    mf::finda.Step();
+    mfs::fsensor.Step();
+    mi::idler.Step();
+    ms::selector.Step();
+    mm::motion.Step();
+    mui::userInput.Step();
 
-    modules::time::IncMillis();
+    mt::IncMillis();
 }
 
 void ForceReinitAllAutomata() {
@@ -44,13 +44,13 @@ void ForceReinitAllAutomata() {
     // As this approach might look like a standard and safer way of doing stuff, it has several drawbacks, especially
     // it needs an explicit call to the Init function every time an object like this is created - this can have negative influence on firmware's code size
 
-    new (&modules::buttons::buttons) modules::buttons::Buttons();
-    new (&modules::leds::leds) modules::leds::LEDs();
-    new (&modules::finda::finda) modules::finda::FINDA();
-    new (&modules::fsensor::fsensor) modules::fsensor::FSensor();
-    new (&modules::idler::idler) modules::idler::Idler();
-    new (&modules::selector::selector) modules::selector::Selector();
-    new (&modules::motion::motion) modules::motion::Motion();
+    new (&mb::buttons) mb::Buttons();
+    new (&ml::leds) ml::LEDs();
+    new (&mf::finda) mf::FINDA();
+    new (&mfs::fsensor) mfs::FSensor();
+    new (&mi::idler) mi::Idler();
+    new (&ms::selector) ms::Selector();
+    new (&mm::motion) mm::Motion();
 
     // no buttons involved ;)
     hal::adc::ReinitADC(config::buttonsADCIndex, hal::adc::TADCData({ 1023 }), 1);
@@ -59,23 +59,23 @@ void ForceReinitAllAutomata() {
     hal::adc::ReinitADC(config::findaADCIndex, hal::adc::TADCData({ 0 }), 1);
 
     // reinit timing
-    modules::time::ReinitTimebase();
+    mt::ReinitTimebase();
 
     // reinit axes positions
-    modules::motion::ReinitMotion();
+    mm::ReinitMotion();
 
     // let's assume we have the filament NOT loaded and active slot 0
-    modules::globals::globals.SetFilamentLoaded(false);
-    modules::globals::globals.SetActiveSlot(0);
+    mg::globals.SetFilamentLoaded(false);
+    mg::globals.SetActiveSlot(0);
 }
 
 void EnsureActiveSlotIndex(uint8_t slot) {
     // move selector to the right spot
-    modules::selector::selector.MoveToSlot(slot);
-    while (modules::selector::selector.Slot() != slot)
+    ms::selector.MoveToSlot(slot);
+    while (ms::selector.Slot() != slot)
         main_loop();
 
-    modules::globals::globals.SetActiveSlot(slot);
+    mg::globals.SetActiveSlot(slot);
 }
 
 void SetFINDAStateAndDebounce(bool press) {

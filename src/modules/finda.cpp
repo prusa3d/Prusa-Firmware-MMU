@@ -8,7 +8,7 @@ namespace finda {
 FINDA finda;
 
 void FINDA::Step() {
-    debounce::Debouncer::Step(modules::time::timebase.Millis(), hal::adc::ReadADC(config::findaADCIndex) > config::findaADCDecisionLevel);
+    debounce::Debouncer::Step(mt::timebase.Millis(), hal::adc::ReadADC(config::findaADCIndex) > config::findaADCDecisionLevel);
 }
 
 } // namespace finda

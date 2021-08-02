@@ -12,11 +12,6 @@ namespace logic {
 
 EjectFilament ejectFilament;
 
-namespace mm = modules::motion;
-namespace mi = modules::idler;
-namespace ms = modules::selector;
-namespace mg = modules::globals;
-
 void EjectFilament::Reset(uint8_t param) {
     error = ErrorCode::OK;
     slot = param;

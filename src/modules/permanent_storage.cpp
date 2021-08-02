@@ -88,7 +88,7 @@ static bool validBowdenLen(const uint16_t BowdenLength) {
 /// Returns stored value, doesn't return actual value when it is edited by increase() / decrease() unless it is stored.
 /// @return stored bowden length
 uint16_t BowdenLength::get() {
-    uint8_t filament = modules::globals::globals.ActiveSlot();
+    uint8_t filament = mg::globals.ActiveSlot();
     if (validFilament(filament)) {
         // @@TODO these reinterpret_cast expressions look horrible but I'm keeping them almost intact to respect the original code from MM_control_01
         uint16_t bowdenLength = ee::EEPROM::ReadByte(reinterpret_cast<size_t>(&(eepromBase->eepromBowdenLen[filament])));
@@ -111,7 +111,7 @@ uint16_t BowdenLength::get() {
 /// To be created on stack, new value is permanently stored when object goes out of scope.
 /// Active filament and associated bowden length is stored in member variables.
 BowdenLength::BowdenLength()
-    : filament(modules::globals::globals.ActiveSlot()) // @@TODO - verify correct initialization order
+    : filament(mg::globals.ActiveSlot()) // @@TODO - verify correct initialization order
     , length(BowdenLength::get()) // @@TODO
 {
 }

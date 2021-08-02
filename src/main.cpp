@@ -30,19 +30,6 @@
 
 #include "version.h"
 
-namespace mb = modules::buttons;
-namespace mp = modules::protocol;
-namespace mf = modules::finda;
-namespace mfs = modules::fsensor;
-namespace mi = modules::idler;
-namespace ml = modules::leds;
-namespace ms = modules::selector;
-namespace mg = modules::globals;
-namespace mu = modules::user_input;
-namespace mt = modules::time;
-
-namespace hu = hal::usart;
-
 /// Global instance of the protocol codec
 static mp::Protocol protocol;
 
@@ -158,9 +145,9 @@ bool WriteToUSART(const uint8_t *src, uint8_t len) {
     // The MMU cannot produce response messages on its own - it only responds to requests from the printer.
     // That means there is only one message in the output buffer at once as long as the printer waits for the response before sending another request.
     for (uint8_t i = 0; i < len; ++i) {
-        if (hal::usart::usart1.CanWrite()) {
+        if (hu::usart1.CanWrite()) {
             // should not block waiting for the TX buffer to drain as there was an empty spot for at least 1 byte
-            hal::usart::usart1.Write(src[i]);
+            hu::usart1.Write(src[i]);
         } else {
             //buffer full - must skip the rest of the message - the communication will drop out anyway
             return false;
@@ -265,7 +252,7 @@ void ProcessRequestMsg(const mp::RequestMsg &rq) {
     switch (rq.code) {
     case mp::RequestMsgCodes::Button:
         // behave just like if the user pressed a button
-        mu::userInput.ProcessMessage(rq.value);
+        mui::userInput.ProcessMessage(rq.value);
         break;
     case mp::RequestMsgCodes::Finda:
         // immediately report FINDA status
@@ -347,7 +334,7 @@ void loop() {
     mfs::fsensor.Step();
     mi::idler.Step();
     ms::selector.Step();
-    mu::userInput.Step();
+    mui::userInput.Step();
     currentCommand->Step();
     // add a watchdog reset
 }

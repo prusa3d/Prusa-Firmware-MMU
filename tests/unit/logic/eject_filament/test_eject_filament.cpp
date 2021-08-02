@@ -19,14 +19,6 @@
 
 using Catch::Matchers::Equals;
 
-namespace mm = modules::motion;
-namespace mf = modules::finda;
-namespace mi = modules::idler;
-namespace ml = modules::leds;
-namespace mb = modules::buttons;
-namespace mg = modules::globals;
-namespace ms = modules::selector;
-
 // temporarily disabled
 TEST_CASE("eject_filament::eject0", "[eject_filament][.]") {
     using namespace logic;
@@ -41,8 +33,8 @@ TEST_CASE("eject_filament::eject0", "[eject_filament][.]") {
 
     // it should have instructed the selector and idler to move to slot 1
     // check if the idler and selector have the right command
-    CHECK(modules::motion::axes[modules::motion::Idler].targetPos == mi::Idler::SlotPosition(0).v);
-    CHECK(modules::motion::axes[modules::motion::Selector].targetPos == ms::Selector::SlotPosition(4).v);
+    CHECK(mm::axes[mm::Idler].targetPos == mi::Idler::SlotPosition(0).v);
+    CHECK(mm::axes[mm::Selector].targetPos == ms::Selector::SlotPosition(4).v);
 
     // now cycle at most some number of cycles (to be determined yet) and then verify, that the idler and selector reached their target positions
     REQUIRE(WhileTopState(ef, ProgressCode::SelectingFilamentSlot, 5000));
