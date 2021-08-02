@@ -10,10 +10,10 @@ static constexpr const uint8_t toolCount = 5U; ///< Max number of extruders/tool
 /// Absolute positions for Idler's slots: 0-4 are the real ones, the 5th index is the idle position
 static constexpr U_deg idlerSlotPositions[toolCount + 1] = {
     45.0_deg,
-    90.0_deg,
-    135.0_deg,
-    180.0_deg,
-    225.0_deg,
+    2 * 45.0_deg,
+    3 * 45.0_deg,
+    4 * 45.0_deg,
+    5 * 45.0_deg,
     0.0_deg
 };
 
@@ -23,10 +23,10 @@ static constexpr U_deg idlerSlotPositions[toolCount + 1] = {
 static constexpr U_mm selectorSlotPositions[toolCount + 1] = {
     20.0_mm,
     20.0_mm + 14.0_mm,
-    20.0_mm + 2.0_mm * 14.0_mm,
-    20.0_mm + 3.0_mm * 14.0_mm,
-    20.0_mm + 4.0_mm * 14.0_mm,
-    20.0_mm + 5.0_mm * 14.0_mm
+    20.0_mm + 2 * 14.0_mm,
+    20.0_mm + 3 * 14.0_mm,
+    20.0_mm + 4 * 14.0_mm,
+    20.0_mm + 5 * 14.0_mm
 };
 
 // Printer's filament sensor setup
