@@ -4,85 +4,81 @@
 using Catch::Matchers::Equals;
 
 TEST_CASE("protocol::EncodeRequests", "[protocol]") {
-    using namespace modules::protocol;
-
-    RequestMsgCodes code;
+    mp::RequestMsgCodes code;
     uint8_t value;
     std::tie(code, value) = GENERATE(
-        std::make_tuple(RequestMsgCodes::Button, 0),
-        std::make_tuple(RequestMsgCodes::Button, 1),
-        std::make_tuple(RequestMsgCodes::Button, 2),
-        std::make_tuple(RequestMsgCodes::Cut, 0),
-        std::make_tuple(RequestMsgCodes::Eject, 0),
-        std::make_tuple(RequestMsgCodes::Finda, 0),
-        std::make_tuple(RequestMsgCodes::Load, 0),
-        std::make_tuple(RequestMsgCodes::Load, 1),
-        std::make_tuple(RequestMsgCodes::Load, 2),
-        std::make_tuple(RequestMsgCodes::Load, 3),
-        std::make_tuple(RequestMsgCodes::Load, 4),
-        std::make_tuple(RequestMsgCodes::Mode, 0),
-        std::make_tuple(RequestMsgCodes::Mode, 1),
-        std::make_tuple(RequestMsgCodes::Query, 0),
-        std::make_tuple(RequestMsgCodes::Reset, 0),
-        std::make_tuple(RequestMsgCodes::Tool, 0),
-        std::make_tuple(RequestMsgCodes::Tool, 1),
-        std::make_tuple(RequestMsgCodes::Tool, 2),
-        std::make_tuple(RequestMsgCodes::Tool, 3),
-        std::make_tuple(RequestMsgCodes::Tool, 4),
-        std::make_tuple(RequestMsgCodes::Unload, 0),
-        std::make_tuple(RequestMsgCodes::Version, 0),
-        std::make_tuple(RequestMsgCodes::Version, 1),
-        std::make_tuple(RequestMsgCodes::Version, 2),
-        std::make_tuple(RequestMsgCodes::Wait, 0),
-        std::make_tuple(RequestMsgCodes::unknown, 0));
+        std::make_tuple(mp::RequestMsgCodes::Button, 0),
+        std::make_tuple(mp::RequestMsgCodes::Button, 1),
+        std::make_tuple(mp::RequestMsgCodes::Button, 2),
+        std::make_tuple(mp::RequestMsgCodes::Cut, 0),
+        std::make_tuple(mp::RequestMsgCodes::Eject, 0),
+        std::make_tuple(mp::RequestMsgCodes::Finda, 0),
+        std::make_tuple(mp::RequestMsgCodes::Load, 0),
+        std::make_tuple(mp::RequestMsgCodes::Load, 1),
+        std::make_tuple(mp::RequestMsgCodes::Load, 2),
+        std::make_tuple(mp::RequestMsgCodes::Load, 3),
+        std::make_tuple(mp::RequestMsgCodes::Load, 4),
+        std::make_tuple(mp::RequestMsgCodes::Mode, 0),
+        std::make_tuple(mp::RequestMsgCodes::Mode, 1),
+        std::make_tuple(mp::RequestMsgCodes::Query, 0),
+        std::make_tuple(mp::RequestMsgCodes::Reset, 0),
+        std::make_tuple(mp::RequestMsgCodes::Tool, 0),
+        std::make_tuple(mp::RequestMsgCodes::Tool, 1),
+        std::make_tuple(mp::RequestMsgCodes::Tool, 2),
+        std::make_tuple(mp::RequestMsgCodes::Tool, 3),
+        std::make_tuple(mp::RequestMsgCodes::Tool, 4),
+        std::make_tuple(mp::RequestMsgCodes::Unload, 0),
+        std::make_tuple(mp::RequestMsgCodes::Version, 0),
+        std::make_tuple(mp::RequestMsgCodes::Version, 1),
+        std::make_tuple(mp::RequestMsgCodes::Version, 2),
+        std::make_tuple(mp::RequestMsgCodes::Wait, 0),
+        std::make_tuple(mp::RequestMsgCodes::unknown, 0));
 
     std::array<uint8_t, 3> txbuff;
 
-    CHECK(Protocol::EncodeRequest(RequestMsg(code, value), txbuff.data()) == 3);
+    CHECK(mp::Protocol::EncodeRequest(mp::RequestMsg(code, value), txbuff.data()) == 3);
     CHECK(txbuff[0] == (uint8_t)code);
     CHECK(txbuff[1] == value + '0');
     CHECK(txbuff[2] == '\n');
 }
 
 TEST_CASE("protocol::EncodeResponseCmdAR", "[protocol]") {
-    using namespace modules::protocol;
-
     auto requestMsg = GENERATE(
-        RequestMsg(RequestMsgCodes::Button, 0),
-        RequestMsg(RequestMsgCodes::Button, 1),
-        RequestMsg(RequestMsgCodes::Button, 2),
+        mp::RequestMsg(mp::RequestMsgCodes::Button, 0),
+        mp::RequestMsg(mp::RequestMsgCodes::Button, 1),
+        mp::RequestMsg(mp::RequestMsgCodes::Button, 2),
 
-        RequestMsg(RequestMsgCodes::Cut, 0),
+        mp::RequestMsg(mp::RequestMsgCodes::Cut, 0),
 
-        RequestMsg(RequestMsgCodes::Eject, 0),
-        RequestMsg(RequestMsgCodes::Eject, 1),
-        RequestMsg(RequestMsgCodes::Eject, 2),
-        RequestMsg(RequestMsgCodes::Eject, 3),
-        RequestMsg(RequestMsgCodes::Eject, 4),
+        mp::RequestMsg(mp::RequestMsgCodes::Eject, 0),
+        mp::RequestMsg(mp::RequestMsgCodes::Eject, 1),
+        mp::RequestMsg(mp::RequestMsgCodes::Eject, 2),
+        mp::RequestMsg(mp::RequestMsgCodes::Eject, 3),
+        mp::RequestMsg(mp::RequestMsgCodes::Eject, 4),
 
-        RequestMsg(RequestMsgCodes::Load, 0),
-        RequestMsg(RequestMsgCodes::Load, 1),
-        RequestMsg(RequestMsgCodes::Load, 2),
-        RequestMsg(RequestMsgCodes::Load, 3),
-        RequestMsg(RequestMsgCodes::Load, 4),
+        mp::RequestMsg(mp::RequestMsgCodes::Load, 0),
+        mp::RequestMsg(mp::RequestMsgCodes::Load, 1),
+        mp::RequestMsg(mp::RequestMsgCodes::Load, 2),
+        mp::RequestMsg(mp::RequestMsgCodes::Load, 3),
+        mp::RequestMsg(mp::RequestMsgCodes::Load, 4),
 
-        RequestMsg(RequestMsgCodes::Mode, 0),
-        RequestMsg(RequestMsgCodes::Mode, 1),
+        mp::RequestMsg(mp::RequestMsgCodes::Mode, 0),
+        mp::RequestMsg(mp::RequestMsgCodes::Mode, 1),
 
-        RequestMsg(RequestMsgCodes::Tool, 0),
-        RequestMsg(RequestMsgCodes::Tool, 1),
-        RequestMsg(RequestMsgCodes::Tool, 2),
-        RequestMsg(RequestMsgCodes::Tool, 3),
-        RequestMsg(RequestMsgCodes::Tool, 4),
+        mp::RequestMsg(mp::RequestMsgCodes::Tool, 0),
+        mp::RequestMsg(mp::RequestMsgCodes::Tool, 1),
+        mp::RequestMsg(mp::RequestMsgCodes::Tool, 2),
+        mp::RequestMsg(mp::RequestMsgCodes::Tool, 3),
+        mp::RequestMsg(mp::RequestMsgCodes::Tool, 4),
 
-        RequestMsg(RequestMsgCodes::Unload, 0),
+        mp::RequestMsg(mp::RequestMsgCodes::Unload, 0),
 
-        RequestMsg(RequestMsgCodes::Wait, 0));
+        mp::RequestMsg(mp::RequestMsgCodes::Wait, 0));
 
-    auto responseStatus = GENERATE(ResponseMsgParamCodes::Accepted, ResponseMsgParamCodes::Rejected);
+    auto responseStatus = GENERATE(mp::ResponseMsgParamCodes::Accepted, mp::ResponseMsgParamCodes::Rejected);
 
     std::array<uint8_t, 8> txbuff;
-    uint8_t msglen = Protocol::EncodeResponseCmdAR(requestMsg, responseStatus, txbuff.data());
+    uint8_t msglen = mp::Protocol::EncodeResponseCmdAR(requestMsg, responseStatus, txbuff.data());
 
     CHECK(msglen == 5);
     CHECK(txbuff[0] == (uint8_t)requestMsg.code);
@@ -93,39 +89,36 @@ TEST_CASE("protocol::EncodeResponseCmdAR", "[protocol]") {
 }
 
 TEST_CASE("protocol::EncodeResponseReadFINDA", "[protocol]") {
-    using namespace modules::protocol;
-    auto requestMsg = RequestMsg(RequestMsgCodes::Finda, 0);
+    auto requestMsg = mp::RequestMsg(mp::RequestMsgCodes::Finda, 0);
 
     uint8_t findaStatus = GENERATE(0, 1);
 
     std::array<uint8_t, 8> txbuff;
-    uint8_t msglen = Protocol::EncodeResponseReadFINDA(requestMsg, findaStatus, txbuff.data());
+    uint8_t msglen = mp::Protocol::EncodeResponseReadFINDA(requestMsg, findaStatus, txbuff.data());
 
     CHECK(msglen == 6);
     CHECK(txbuff[0] == (uint8_t)requestMsg.code);
     CHECK(txbuff[1] == requestMsg.value + '0');
     CHECK(txbuff[2] == ' ');
-    CHECK(txbuff[3] == (uint8_t)ResponseMsgParamCodes::Accepted);
+    CHECK(txbuff[3] == (uint8_t)mp::ResponseMsgParamCodes::Accepted);
     CHECK(txbuff[4] == findaStatus + '0');
     CHECK(txbuff[5] == '\n');
 }
 
 TEST_CASE("protocol::EncodeResponseVersion", "[protocol]") {
-    using namespace modules::protocol;
-
     std::uint8_t versionQueryType = GENERATE(0, 1, 2, 3);
-    auto requestMsg = RequestMsg(RequestMsgCodes::Version, versionQueryType);
+    auto requestMsg = mp::RequestMsg(mp::RequestMsgCodes::Version, versionQueryType);
 
     auto version = GENERATE(0, 1, 2, 3, 4, 10, 11, 12, 20, 99, 100, 101, 255);
 
     std::array<uint8_t, 8> txbuff;
-    uint8_t msglen = Protocol::EncodeResponseVersion(requestMsg, version, txbuff.data());
+    uint8_t msglen = mp::Protocol::EncodeResponseVersion(requestMsg, version, txbuff.data());
 
     CHECK(msglen <= 8);
     CHECK(txbuff[0] == (uint8_t)requestMsg.code);
     CHECK(txbuff[1] == requestMsg.value + '0');
     CHECK(txbuff[2] == ' ');
-    CHECK(txbuff[3] == (uint8_t)ResponseMsgParamCodes::Accepted);
+    CHECK(txbuff[3] == (uint8_t)mp::ResponseMsgParamCodes::Accepted);
 
     if (version < 10) {
         CHECK(txbuff[4] == version + '0');
@@ -142,39 +135,37 @@ TEST_CASE("protocol::EncodeResponseVersion", "[protocol]") {
 }
 
 TEST_CASE("protocol::EncodeResponseQueryOperation", "[protocol]") {
-    using namespace modules::protocol;
-
     auto requestMsg = GENERATE(
-        RequestMsg(RequestMsgCodes::Cut, 0),
+        mp::RequestMsg(mp::RequestMsgCodes::Cut, 0),
 
-        RequestMsg(RequestMsgCodes::Eject, 0),
-        RequestMsg(RequestMsgCodes::Eject, 1),
-        RequestMsg(RequestMsgCodes::Eject, 2),
-        RequestMsg(RequestMsgCodes::Eject, 3),
-        RequestMsg(RequestMsgCodes::Eject, 4),
+        mp::RequestMsg(mp::RequestMsgCodes::Eject, 0),
+        mp::RequestMsg(mp::RequestMsgCodes::Eject, 1),
+        mp::RequestMsg(mp::RequestMsgCodes::Eject, 2),
+        mp::RequestMsg(mp::RequestMsgCodes::Eject, 3),
+        mp::RequestMsg(mp::RequestMsgCodes::Eject, 4),
 
-        RequestMsg(RequestMsgCodes::Load, 0),
-        RequestMsg(RequestMsgCodes::Load, 1),
-        RequestMsg(RequestMsgCodes::Load, 2),
-        RequestMsg(RequestMsgCodes::Load, 3),
-        RequestMsg(RequestMsgCodes::Load, 4),
+        mp::RequestMsg(mp::RequestMsgCodes::Load, 0),
+        mp::RequestMsg(mp::RequestMsgCodes::Load, 1),
+        mp::RequestMsg(mp::RequestMsgCodes::Load, 2),
+        mp::RequestMsg(mp::RequestMsgCodes::Load, 3),
+        mp::RequestMsg(mp::RequestMsgCodes::Load, 4),
 
-        RequestMsg(RequestMsgCodes::Tool, 0),
-        RequestMsg(RequestMsgCodes::Tool, 1),
-        RequestMsg(RequestMsgCodes::Tool, 2),
-        RequestMsg(RequestMsgCodes::Tool, 3),
-        RequestMsg(RequestMsgCodes::Tool, 4),
+        mp::RequestMsg(mp::RequestMsgCodes::Tool, 0),
+        mp::RequestMsg(mp::RequestMsgCodes::Tool, 1),
+        mp::RequestMsg(mp::RequestMsgCodes::Tool, 2),
+        mp::RequestMsg(mp::RequestMsgCodes::Tool, 3),
+        mp::RequestMsg(mp::RequestMsgCodes::Tool, 4),
 
-        RequestMsg(RequestMsgCodes::Unload, 0),
+        mp::RequestMsg(mp::RequestMsgCodes::Unload, 0),
 
-        RequestMsg(RequestMsgCodes::Wait, 0));
+        mp::RequestMsg(mp::RequestMsgCodes::Wait, 0));
 
-    auto responseStatus = GENERATE(ResponseMsgParamCodes::Processing, ResponseMsgParamCodes::Error, ResponseMsgParamCodes::Finished);
+    auto responseStatus = GENERATE(mp::ResponseMsgParamCodes::Processing, mp::ResponseMsgParamCodes::Error, mp::ResponseMsgParamCodes::Finished);
 
     auto value = GENERATE(0, 1, 2, 3, 10, 11, 99, 100, 101, 102, 200, 255);
 
     std::array<uint8_t, 8> txbuff;
-    uint8_t msglen = Protocol::EncodeResponseQueryOperation(requestMsg, responseStatus, value, txbuff.data());
+    uint8_t msglen = mp::Protocol::EncodeResponseQueryOperation(requestMsg, responseStatus, value, txbuff.data());
 
     CHECK(msglen <= 8);
     CHECK(txbuff[0] == (uint8_t)requestMsg.code);
@@ -182,7 +173,7 @@ TEST_CASE("protocol::EncodeResponseQueryOperation", "[protocol]") {
     CHECK(txbuff[2] == ' ');
     CHECK(txbuff[3] == (uint8_t)responseStatus);
 
-    if (responseStatus == ResponseMsgParamCodes::Finished) {
+    if (responseStatus == mp::ResponseMsgParamCodes::Finished) {
         CHECK(txbuff[4] == '\n');
         CHECK(msglen == 5);
     } else {
@@ -202,8 +193,7 @@ TEST_CASE("protocol::EncodeResponseQueryOperation", "[protocol]") {
 }
 
 TEST_CASE("protocol::DecodeRequest", "[protocol]") {
-    using namespace modules::protocol;
-    Protocol p;
+    mp::Protocol p;
     const char *rxbuff = GENERATE(
         "B0\n", "B1\n", "B2\n",
         "E0\n", "E1\n", "E2\n", "E3\n", "E4\n",
@@ -226,21 +216,20 @@ TEST_CASE("protocol::DecodeRequest", "[protocol]") {
             break;
         } else if (c == '\n') {
             // regular end of message line
-            CHECK(p.DecodeRequest(c) == DecodeStatus::MessageCompleted);
+            CHECK(p.DecodeRequest(c) == mp::DecodeStatus::MessageCompleted);
         } else {
-            CHECK(p.DecodeRequest(c) == DecodeStatus::NeedMoreData);
+            CHECK(p.DecodeRequest(c) == mp::DecodeStatus::NeedMoreData);
         }
     }
 
     // check the message type
-    const RequestMsg &rq = p.GetRequestMsg();
+    const mp::RequestMsg &rq = p.GetRequestMsg();
     CHECK((uint8_t)rq.code == rxbuff[0]);
     CHECK(rq.value == rxbuff[1] - '0');
 }
 
 TEST_CASE("protocol::DecodeResponseReadFinda", "[protocol]") {
-    using namespace modules::protocol;
-    Protocol p;
+    mp::Protocol p;
     const char *rxbuff = GENERATE(
         "P0 A0\n",
         "P0 A1\n");
@@ -253,14 +242,14 @@ TEST_CASE("protocol::DecodeResponseReadFinda", "[protocol]") {
             break;
         } else if (c == '\n') {
             // regular end of message line
-            CHECK(p.DecodeResponse(c) == DecodeStatus::MessageCompleted);
+            CHECK(p.DecodeResponse(c) == mp::DecodeStatus::MessageCompleted);
         } else {
-            CHECK(p.DecodeResponse(c) == DecodeStatus::NeedMoreData);
+            CHECK(p.DecodeResponse(c) == mp::DecodeStatus::NeedMoreData);
         }
     }
 
     // check the message type
-    const ResponseMsg &rsp = p.GetResponseMsg();
+    const mp::ResponseMsg &rsp = p.GetResponseMsg();
     CHECK((uint8_t)rsp.request.code == rxbuff[0]);
     CHECK(rsp.request.value == rxbuff[1] - '0');
     CHECK((uint8_t)rsp.paramCode == rxbuff[3]);
@@ -268,8 +257,7 @@ TEST_CASE("protocol::DecodeResponseReadFinda", "[protocol]") {
 }
 
 TEST_CASE("protocol::DecodeResponseQueryOperation", "[protocol]") {
-    using namespace modules::protocol;
-    Protocol p;
+    mp::Protocol p;
     const char *cmdReference = GENERATE(
         "E0", "E1", "E2", "E3", "E4",
         "K0",
@@ -294,99 +282,96 @@ TEST_CASE("protocol::DecodeResponseQueryOperation", "[protocol]") {
             break;
         } else if (c == '\n') {
             // regular end of message line
-            CHECK(p.DecodeResponse(c) == DecodeStatus::MessageCompleted);
+            CHECK(p.DecodeResponse(c) == mp::DecodeStatus::MessageCompleted);
         } else {
-            CHECK(p.DecodeResponse(c) == DecodeStatus::NeedMoreData);
+            CHECK(p.DecodeResponse(c) == mp::DecodeStatus::NeedMoreData);
         }
     }
 
     // check the message type
-    const ResponseMsg &rsp = p.GetResponseMsg();
+    const mp::ResponseMsg &rsp = p.GetResponseMsg();
     CHECK((uint8_t)rsp.request.code == rxbuff[0]);
     CHECK(rsp.request.value == rxbuff[1] - '0');
     CHECK((uint8_t)rsp.paramCode == rxbuff[3]);
-    if ((uint8_t)rsp.paramCode != (uint8_t)ResponseMsgParamCodes::Finished) {
+    if ((uint8_t)rsp.paramCode != (uint8_t)mp::ResponseMsgParamCodes::Finished) {
         CHECK((uint8_t)rsp.paramValue == rxbuff[4] - '0');
     }
 }
 
 TEST_CASE("protocol::DecodeRequestErrors", "[protocol]") {
-    using namespace modules::protocol;
-    Protocol p;
+    mp::Protocol p;
     const char b0[] = "b0";
-    CHECK(p.DecodeRequest(b0[0]) == DecodeStatus::Error);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(b0[1]) == DecodeStatus::Error);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(b0[0]) == mp::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(b0[1]) == mp::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
 
     // reset protokol decoder
-    CHECK(p.DecodeRequest('\n') == DecodeStatus::MessageCompleted);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest('\n') == mp::DecodeStatus::MessageCompleted);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
 
     const char B1_[] = "B1 \n";
-    CHECK(p.DecodeRequest(B1_[0]) == DecodeStatus::NeedMoreData);
-    CHECK(p.DecodeRequest(B1_[1]) == DecodeStatus::NeedMoreData);
-    CHECK(p.DecodeRequest(B1_[2]) == DecodeStatus::Error);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(B1_[3]) == DecodeStatus::MessageCompleted);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(B1_[0]) == mp::DecodeStatus::NeedMoreData);
+    CHECK(p.DecodeRequest(B1_[1]) == mp::DecodeStatus::NeedMoreData);
+    CHECK(p.DecodeRequest(B1_[2]) == mp::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(B1_[3]) == mp::DecodeStatus::MessageCompleted);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
 
     const char _B2[] = " B2\n";
-    CHECK(p.DecodeRequest(_B2[0]) == DecodeStatus::Error);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(_B2[1]) == DecodeStatus::Error);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(_B2[2]) == DecodeStatus::Error);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(_B2[3]) == DecodeStatus::MessageCompleted);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(_B2[0]) == mp::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(_B2[1]) == mp::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(_B2[2]) == mp::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(_B2[3]) == mp::DecodeStatus::MessageCompleted);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
 
     const char _B0_[] = " B0 ";
-    CHECK(p.DecodeRequest(_B0_[0]) == DecodeStatus::Error);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(_B0_[1]) == DecodeStatus::Error);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(_B0_[2]) == DecodeStatus::Error);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(_B0_[3]) == DecodeStatus::Error);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest('\n') == DecodeStatus::MessageCompleted);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(_B0_[0]) == mp::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(_B0_[1]) == mp::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(_B0_[2]) == mp::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(_B0_[3]) == mp::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest('\n') == mp::DecodeStatus::MessageCompleted);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
 }
 
 TEST_CASE("protocol::DecodeResponseErrors", "[protocol]") {
-    using namespace modules::protocol;
-    Protocol p;
+    mp::Protocol p;
 
     const char b0[] = "b0 A\n";
-    CHECK(p.DecodeRequest(b0[0]) == DecodeStatus::Error);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(b0[1]) == DecodeStatus::Error);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(b0[2]) == DecodeStatus::Error);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(b0[3]) == DecodeStatus::Error);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(b0[4]) == DecodeStatus::MessageCompleted);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(b0[0]) == mp::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(b0[1]) == mp::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(b0[2]) == mp::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(b0[3]) == mp::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(b0[4]) == mp::DecodeStatus::MessageCompleted);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
 
     const char b1[] = "b0A\n";
-    CHECK(p.DecodeRequest(b1[0]) == DecodeStatus::Error);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(b1[1]) == DecodeStatus::Error);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(b1[2]) == DecodeStatus::Error);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
-    CHECK(p.DecodeRequest(b1[3]) == DecodeStatus::MessageCompleted);
-    CHECK(p.GetRequestMsg().code == RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(b1[0]) == mp::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(b1[1]) == mp::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(b1[2]) == mp::DecodeStatus::Error);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
+    CHECK(p.DecodeRequest(b1[3]) == mp::DecodeStatus::MessageCompleted);
+    CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
 }
 
 // Beware - this test makes 18M+ combinations, run only when changing the implementation of the codec
 // Therefore it is disabled [.] by default
 TEST_CASE("protocol::DecodeResponseErrorsCross", "[protocol][.]") {
-    using namespace modules::protocol;
-    Protocol p;
+    mp::Protocol p;
 
     const char *validInitialSpaces = "";
     const char *invalidInitialSpaces = GENERATE(" ", "  ");
@@ -434,12 +419,12 @@ TEST_CASE("protocol::DecodeResponseErrorsCross", "[protocol][.]") {
     bool shouldPass = viInitialSpace && viReqCode && /*viReqValue && */ viSpace && viRspCode && viTerminatingSpaces;
     bool failed = false;
     std::for_each(msg.cbegin(), msg.cend(), [&](uint8_t c) {
-        if (p.DecodeResponse(c) == DecodeStatus::Error) {
+        if (p.DecodeResponse(c) == mp::DecodeStatus::Error) {
             failed = true;
         }
     });
     CHECK(failed != shouldPass); // it must have failed!
     if (failed) {
-        CHECK(p.GetResponseMsg().paramCode == ResponseMsgParamCodes::unknown);
+        CHECK(p.GetResponseMsg().paramCode == mp::ResponseMsgParamCodes::unknown);
     }
 }

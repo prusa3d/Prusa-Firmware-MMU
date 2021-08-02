@@ -32,3 +32,5 @@ extern Timebase timebase;
 
 } // namespace time
 } // namespace modules
+
+namespace mt = modules::time;

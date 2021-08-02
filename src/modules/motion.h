@@ -254,3 +254,5 @@ extern Motion motion;
 
 } // namespace motion
 } // namespace modules
+
+namespace mm = modules::motion;

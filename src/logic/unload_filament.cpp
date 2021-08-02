@@ -11,13 +11,6 @@ namespace logic {
 
 UnloadFilament unloadFilament;
 
-namespace mm = modules::motion;
-namespace mf = modules::finda;
-namespace mi = modules::idler;
-namespace ml = modules::leds;
-namespace mg = modules::globals;
-namespace mu = modules::user_input;
-
 void UnloadFilament::Reset(uint8_t /*param*/) {
     // unloads filament from extruder - filament is above Bondtech gears
     mm::motion.InitAxis(mm::Pulley);
@@ -71,21 +64,21 @@ bool UnloadFilament::StepInner() {
     case ProgressCode::ERRDisengagingIdler: // couldn't unload to FINDA
         if (!mi::idler.Engaged()) {
             state = ProgressCode::ERRWaitingForUser;
-            mu::userInput.Clear(); // remove all buffered events if any just before we wait for some input
+            mui::userInput.Clear(); // remove all buffered events if any just before we wait for some input
         }
         return false;
     case ProgressCode::ERRWaitingForUser: {
         // waiting for user buttons and/or a command from the printer
-        mu::Event ev = mu::userInput.ConsumeEvent();
+        mui::Event ev = mui::userInput.ConsumeEvent();
         switch (ev) {
-        case mu::Event::Left: // try to manually unload just a tiny bit - help the filament with the pulley
+        case mui::Event::Left: // try to manually unload just a tiny bit - help the filament with the pulley
             state = ProgressCode::ERREngagingIdler;
             mi::idler.Engage(mg::globals.ActiveSlot());
             break;
-        case mu::Event::Middle: // try again the whole sequence
+        case mui::Event::Middle: // try again the whole sequence
             Reset(0); //@@TODO validate the reset parameter
             break;
-        case mu::Event::Right: // problem resolved - the user pulled the fillament by hand
+        case mui::Event::Right: // problem resolved - the user pulled the fillament by hand
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
             //                mm::motion.PlanMove(mm::Pulley, 450, 5000); // @@TODO constants

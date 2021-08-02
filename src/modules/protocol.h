@@ -162,3 +162,5 @@ private:
 
 } // namespace protocol
 } // namespace modules
+
+namespace mp = modules::protocol;

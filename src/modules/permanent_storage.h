@@ -99,3 +99,5 @@ private:
 
 } // namespace permanent_storage
 } // namespace modules
+
+namespace mps = modules::permanent_storage;

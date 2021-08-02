@@ -7,7 +7,7 @@ namespace fsensor {
 FSensor fsensor;
 
 void FSensor::Step() {
-    debounce::Debouncer::Step(modules::time::timebase.Millis(), reportedFSensorState);
+    debounce::Debouncer::Step(mt::timebase.Millis(), reportedFSensorState);
 }
 
 void FSensor::ProcessMessage(bool on) {

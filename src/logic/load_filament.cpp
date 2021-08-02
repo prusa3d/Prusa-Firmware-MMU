@@ -12,14 +12,6 @@ namespace logic {
 
 LoadFilament loadFilament;
 
-namespace mm = modules::motion;
-namespace mi = modules::idler;
-namespace ms = modules::selector;
-namespace mf = modules::finda;
-namespace ml = modules::leds;
-namespace mg = modules::globals;
-namespace mu = modules::user_input;
-
 void LoadFilament::Reset(uint8_t param) {
     state = ProgressCode::EngagingIdler;
     error = ErrorCode::OK;
@@ -77,23 +69,23 @@ bool LoadFilament::StepInner() {
     case ProgressCode::ERRDisengagingIdler: // couldn't unload to FINDA
         if (!mi::idler.Engaged()) {
             state = ProgressCode::ERRWaitingForUser;
-            mu::userInput.Clear(); // remove all buffered events if any just before we wait for some input
+            mui::userInput.Clear(); // remove all buffered events if any just before we wait for some input
         }
         return false;
     case ProgressCode::ERRWaitingForUser: {
         // waiting for user buttons and/or a command from the printer
-        mu::Event ev = mu::userInput.ConsumeEvent();
+        mui::Event ev = mui::userInput.ConsumeEvent();
         switch (ev) {
-        case mu::Event::Left: // try to manually load just a tiny bit - help the filament with the pulley
+        case mui::Event::Left: // try to manually load just a tiny bit - help the filament with the pulley
             state = ProgressCode::ERREngagingIdler;
             mi::idler.Engage(mg::globals.ActiveSlot());
             break;
-        case mu::Event::Middle: // try again the whole sequence
+        case mui::Event::Middle: // try again the whole sequence
             Reset(mg::globals.ActiveSlot());
             break;
-        case mu::Event::Right: // problem resolved - the user pushed the fillament by hand?
-            modules::leds::leds.SetMode(mg::globals.ActiveSlot(), modules::leds::red, modules::leds::off);
-            modules::leds::leds.SetMode(mg::globals.ActiveSlot(), modules::leds::green, modules::leds::on);
+        case mui::Event::Right: // problem resolved - the user pushed the fillament by hand?
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
             //                mm::motion.PlanMove(mm::Pulley, 450, 5000); // @@TODO constants
             state = ProgressCode::AvoidingGrind;
             break;

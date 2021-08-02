@@ -48,3 +48,5 @@ extern Selector selector;
 
 } // namespace selector
 } // namespace modules
+
+namespace ms = modules::selector;

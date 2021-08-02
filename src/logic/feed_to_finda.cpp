@@ -10,14 +10,6 @@
 
 namespace logic {
 
-namespace mm = modules::motion;
-namespace mf = modules::finda;
-namespace mi = modules::idler;
-namespace ml = modules::leds;
-namespace mg = modules::globals;
-namespace ms = modules::selector;
-namespace mu = modules::user_input;
-
 void FeedToFinda::Reset(bool feedPhaseLimited) {
     state = EngagingIdler;
     this->feedPhaseLimited = feedPhaseLimited;
@@ -33,11 +25,11 @@ bool FeedToFinda::Step() {
             state = PushingFilament;
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::blink0);
             mm::motion.PlanMove(mm::Pulley, feedPhaseLimited ? 1500 : 32767, 4000); //@@TODO constants
-            mu::userInput.Clear(); // remove all buffered events if any just before we wait for some input
+            mui::userInput.Clear(); // remove all buffered events if any just before we wait for some input
         }
         return false;
     case PushingFilament: {
-        if (mf::finda.Pressed() || (feedPhaseLimited && mu::userInput.AnyEvent())) { // @@TODO probably also a command from the printer
+        if (mf::finda.Pressed() || (feedPhaseLimited && mui::userInput.AnyEvent())) { // @@TODO probably also a command from the printer
             mm::motion.AbortPlannedMoves(); // stop pushing filament
             // FINDA triggered - that means it works and detected the filament tip
             state = UnloadBackToPTFE;

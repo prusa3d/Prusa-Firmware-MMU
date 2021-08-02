@@ -66,3 +66,5 @@ extern Idler idler;
 
 } // namespace idler
 } // namespace modules
+
+namespace mi = modules::idler;
