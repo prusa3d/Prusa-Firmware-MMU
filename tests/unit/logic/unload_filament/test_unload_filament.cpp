@@ -161,7 +161,7 @@ void FindaDidntTriggerCommonSetup(uint8_t slot, logic::UnloadFilament &uf) {
     REQUIRE(VerifyState(uf, true, slot, slot, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRDisengagingIdler));
 
     // Stage 2 - idler should get disengaged
-    REQUIRE(WhileTopState(uf, ProgressCode::ERR1DisengagingIdler, idlerEngageDisengageMaxSteps));
+    REQUIRE(WhileTopState(uf, ProgressCode::ERRDisengagingIdler, idlerEngageDisengageMaxSteps));
 
     // we still think we have filament loaded at this stage
     // idler should have been disengaged
@@ -197,7 +197,7 @@ void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
     REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERREngagingIdler));
 
     // Stage 4 - engage the idler
-    REQUIRE(WhileTopState(uf, ProgressCode::ERR1EngagingIdler, idlerEngageDisengageMaxSteps));
+    REQUIRE(WhileTopState(uf, ProgressCode::ERREngagingIdler, idlerEngageDisengageMaxSteps));
 
     // we still think we have filament loaded at this stage
     // idler should be engaged
