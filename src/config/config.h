@@ -32,6 +32,10 @@ static constexpr U_mm selectorSlotPositions[toolCount + 1] = {
 // Printer's filament sensor setup
 static constexpr const uint16_t fsensorDebounceMs = 10;
 
+// LEDS
+/// The complete period of LED's blinking (i.e. ON and OFF together)
+static constexpr uint16_t ledBlinkPeriodMs = 1000U;
+
 // FINDA setup
 static constexpr const uint16_t findaDebounceMs = 100;
 static constexpr const uint8_t findaADCIndex = 6; ///< ADC index of FINDA input
