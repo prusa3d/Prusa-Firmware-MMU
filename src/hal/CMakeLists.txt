@@ -4,6 +4,7 @@ target_sources(
           avr/usart.cpp
           avr/shr16.cpp
           avr/eeprom.cpp
+          avr/timers.cpp
           avr/tmc2130.cpp
           adc.cpp
           avr/spi.cpp

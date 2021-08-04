@@ -18,6 +18,7 @@
 #include "modules/protocol.h"
 #include "modules/selector.h"
 #include "modules/user_input.h"
+#include "modules/timebase.h"
 
 #include "logic/command_base.h"
 #include "logic/cut_filament.h"
@@ -38,6 +39,7 @@ namespace ml = modules::leds;
 namespace ms = modules::selector;
 namespace mg = modules::globals;
 namespace mu = modules::user_input;
+namespace mt = modules::time;
 
 namespace hu = hal::usart;
 
@@ -100,6 +102,8 @@ void setup() {
     using namespace hal;
 
     cpu::Init();
+
+    mt::timebase.Init();
 
     mg::globals.Init();
 
