@@ -21,9 +21,10 @@ public:
     ///  (usually the start of the firmware)
     uint16_t Millis() const;
 
+    void Isr();
+
 private:
     uint16_t ms;
-    static void Isr();
 };
 
 /// The one and only instance of Selector in the FW
