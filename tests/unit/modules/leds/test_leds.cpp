@@ -78,7 +78,7 @@ void TestBlink(uint8_t index, ml::Color color, uint16_t shr16_register, bool sho
     // test 4 seconds of blinking
     for (uint8_t s = 1; s < 4; ++s) {
         // one second elapsed ;)
-        mt::IncMillis(1000);
+        mt::IncMillis(config::ledBlinkPeriodMs / 2);
         leds.Step();
         shouldBeOn = !shouldBeOn;
         CHECK(leds.LedOn(index, color) == shouldBeOn);
