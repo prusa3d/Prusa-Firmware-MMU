@@ -80,8 +80,10 @@ bool CommandBase::CheckToolIndex(uint8_t index) {
     if (index >= config::toolCount) {
         error = ErrorCode::INVALID_TOOL;
         return false;
+    } else {
+        error = ErrorCode::OK;
+        return true;
     }
-    return true;
 }
 
 } // namespace logic
