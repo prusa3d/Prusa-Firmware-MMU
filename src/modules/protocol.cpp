@@ -215,13 +215,13 @@ uint8_t Protocol::EncodeResponseQueryOperation(const RequestMsg &msg, ResponseMs
             *dst++ = value % 10 + '0';
         } else if (value < 10000) {
             *dst++ = value / 1000 + '0';
-            *dst++ = (value / 100) % 100 + '0';
+            *dst++ = (value / 100) % 10 + '0';
             *dst++ = (value / 10) % 10 + '0';
             *dst++ = value % 10 + '0';
         } else {
             *dst++ = value / 10000 + '0';
-            *dst++ = (value / 1000) % 1000 + '0';
-            *dst++ = (value / 100) % 100 + '0';
+            *dst++ = (value / 1000) % 10 + '0';
+            *dst++ = (value / 100) % 10 + '0';
             *dst++ = (value / 10) % 10 + '0';
             *dst++ = value % 10 + '0';
         }
