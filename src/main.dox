@@ -172,3 +172,16 @@
 ///
 ///@subsection integration_sec Integration tests
 ///
+///@section power_up Powering up the board
+///
+/// Upon startup, the board tries to initialize all the necessary peripherals.
+/// The progress of initialization is visualized by individual LEDs turning green.
+/// That includes:
+/// - LED 4: shift register - however if the shift register doesn't work we really can't signalize anything, only internal variables will be accessible if the UART works.
+/// - LED 3: USART - if both shift register and the UART are dead, we are sitting ducks :(
+/// - LED 2: SPI
+/// - LED 1: TMC2130 - this may actually report some error
+/// - LED 0: ADC
+///
+/// Ideally, the board has all the green LEDs on after startup - that signalizes all the peripherals started correctly.
+///
