@@ -97,7 +97,7 @@ void setup() {
     // watchdog init
 
     shr16::shr16.Init();
-    ml::leds.SetMode(4, ml::Color::green, ml::Mode::blink0);
+    ml::leds.SetMode(4, ml::Color::green, ml::Mode::on);
     ml::leds.Step();
 
     // @@TODO if the shift register doesn't work we really can't signalize anything, only internal variables will be accessible if the UART works
