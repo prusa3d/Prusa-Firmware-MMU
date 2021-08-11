@@ -13,6 +13,10 @@ namespace logic {
 ToolChange toolChange;
 
 void ToolChange::Reset(uint8_t param) {
+    if (!CheckToolIndex(param)) {
+        return;
+    }
+
     if (param == mg::globals.ActiveSlot())
         return;
 

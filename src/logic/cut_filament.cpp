@@ -13,6 +13,10 @@ namespace logic {
 CutFilament cutFilament;
 
 void CutFilament::Reset(uint8_t param) {
+    if (!CheckToolIndex(param)) {
+        return;
+    }
+
     error = ErrorCode::OK;
     cutSlot = param;
 

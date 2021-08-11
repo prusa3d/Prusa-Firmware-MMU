@@ -19,6 +19,8 @@
 
 using Catch::Matchers::Equals;
 
+#include "../helpers/helpers.ipp"
+
 void ToolChange(uint8_t fromSlot, uint8_t toSlot) {
     ForceReinitAllAutomata();
 
@@ -77,5 +79,11 @@ TEST_CASE("tool_change::test0", "[tool_change]") {
                 NoToolChange(fromSlot, toSlot);
             }
         }
+    }
+}
+
+TEST_CASE("tool_change::invalid_slot", "[tool_change]") {
+    for (uint8_t cutSlot = 0; cutSlot < config::toolCount; ++cutSlot) {
+        InvalidSlot<logic::ToolChange>(config::toolCount, cutSlot);
     }
 }
