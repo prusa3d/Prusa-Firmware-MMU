@@ -70,12 +70,8 @@ TEST_CASE("eject_filament::eject0", "[eject_filament][.]") {
 }
 
 TEST_CASE("eject_filament::invalid_slot", "[eject_filament]") {
-    for (uint8_t cutSlot = 0; cutSlot < config::toolCount; ++cutSlot) {
-        InvalidSlot<logic::EjectFilament>(config::toolCount, cutSlot);
+    for (uint8_t activeSlot = 0; activeSlot < config::toolCount; ++activeSlot) {
+        logic::EjectFilament ef;
+        InvalidSlot<logic::EjectFilament>(ef, activeSlot, config::toolCount);
     }
 }
-
-// comments:
-// The tricky part of the whole state machine are the edge cases - filament not loaded, stall guards etc.
-// ... all the external influence we can get on the real HW
-// But the good news is we can simulate them all in the unit test and thus ensure proper handling

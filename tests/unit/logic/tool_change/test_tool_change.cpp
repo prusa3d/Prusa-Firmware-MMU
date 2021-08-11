@@ -21,10 +21,8 @@ using Catch::Matchers::Equals;
 
 #include "../helpers/helpers.ipp"
 
-void ToolChange(uint8_t fromSlot, uint8_t toSlot) {
+void ToolChange(logic::ToolChange tc, uint8_t fromSlot, uint8_t toSlot) {
     ForceReinitAllAutomata();
-
-    logic::ToolChange tc;
 
     EnsureActiveSlotIndex(fromSlot);
 
@@ -55,10 +53,8 @@ void ToolChange(uint8_t fromSlot, uint8_t toSlot) {
     REQUIRE(mg::globals.ActiveSlot() == toSlot);
 }
 
-void NoToolChange(uint8_t fromSlot, uint8_t toSlot) {
+void NoToolChange(logic::ToolChange tc, uint8_t fromSlot, uint8_t toSlot) {
     ForceReinitAllAutomata();
-
-    logic::ToolChange tc;
 
     EnsureActiveSlotIndex(fromSlot);
 
@@ -73,17 +69,35 @@ void NoToolChange(uint8_t fromSlot, uint8_t toSlot) {
 TEST_CASE("tool_change::test0", "[tool_change]") {
     for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
         for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
+            logic::ToolChange tc;
             if (fromSlot != toSlot) {
-                ToolChange(fromSlot, toSlot);
+                ToolChange(tc, fromSlot, toSlot);
             } else {
-                NoToolChange(fromSlot, toSlot);
+                NoToolChange(tc, fromSlot, toSlot);
             }
         }
     }
 }
 
 TEST_CASE("tool_change::invalid_slot", "[tool_change]") {
-    for (uint8_t cutSlot = 0; cutSlot < config::toolCount; ++cutSlot) {
-        InvalidSlot<logic::ToolChange>(config::toolCount, cutSlot);
+    for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
+        logic::ToolChange tc;
+        InvalidSlot<logic::ToolChange>(tc, fromSlot, config::toolCount);
+    }
+}
+
+TEST_CASE("tool_change::state_machine_reusal", "[tool_change]") {
+    logic::ToolChange tc;
+
+    for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
+        for (uint8_t toSlot = 0; toSlot < config::toolCount + 2; ++toSlot) {
+            if (toSlot >= config::toolCount) {
+                InvalidSlot<logic::ToolChange>(tc, fromSlot, toSlot);
+            } else if (fromSlot != toSlot) {
+                ToolChange(tc, fromSlot, toSlot);
+            } else {
+                NoToolChange(tc, fromSlot, toSlot);
+            }
+        }
     }
 }

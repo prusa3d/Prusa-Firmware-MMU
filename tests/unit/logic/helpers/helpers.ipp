@@ -1,7 +1,5 @@
-// LED checked at selector's index
-template<typename SM>
-bool VerifyState(SM &uf, bool filamentLoaded, uint8_t idlerSlotIndex, uint8_t selectorSlotIndex,
-    bool findaPressed, ml::Mode greenLEDMode, ml::Mode redLEDMode, ErrorCode err, ProgressCode topLevelProgress) {
+bool VerifyEnvironmentState(bool filamentLoaded, uint8_t idlerSlotIndex, uint8_t selectorSlotIndex,
+    bool findaPressed, ml::Mode greenLEDMode, ml::Mode redLEDMode) {
     CHECKED_ELSE(mg::globals.FilamentLoaded() == filamentLoaded) { return false; }
     CHECKED_ELSE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(idlerSlotIndex).v) { return false; }
     CHECKED_ELSE(mi::idler.Engaged() == (idlerSlotIndex < config::toolCount)) { return false; }
@@ -19,8 +17,19 @@ bool VerifyState(SM &uf, bool filamentLoaded, uint8_t idlerSlotIndex, uint8_t se
             CHECKED_ELSE(ml::leds.Mode(selectorSlotIndex, ml::green) == greenLEDMode) { return false; }
         }
     }
+    return true;
+}
 
-    CHECKED_ELSE(uf.Error() == err) { return false; }
+// LED checked at selector's index
+template<typename SM>
+bool VerifyState(SM &uf, bool filamentLoaded, uint8_t idlerSlotIndex, uint8_t selectorSlotIndex,
+    bool findaPressed, ml::Mode greenLEDMode, ml::Mode redLEDMode, ErrorCode err, ProgressCode topLevelProgress) {
+
+    VerifyEnvironmentState(filamentLoaded, idlerSlotIndex, selectorSlotIndex, findaPressed, greenLEDMode, redLEDMode);
+
+    CHECKED_ELSE(uf.Error() == err) {
+        return false;
+    }
     CHECKED_ELSE(uf.TopLevelState() == topLevelProgress) { return false; }
     return true;
 }
@@ -52,12 +61,13 @@ bool VerifyState2(SM &uf, bool filamentLoaded, uint8_t idlerSlotIndex, uint8_t s
     return true;
 }
 
+
+
 template<typename SM>
-void InvalidSlot(uint8_t invSlot, uint8_t activeSlot){
+void InvalidSlot(SM &logicSM,  uint8_t activeSlot, uint8_t invSlot){
     ForceReinitAllAutomata();
 
-    SM logicSM;
-    REQUIRE(VerifyState(logicSM, false, mi::Idler::IdleSlotIndex(), 0, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+    REQUIRE(VerifyEnvironmentState(false, mi::Idler::IdleSlotIndex(), 0, false, ml::off, ml::off));
 
     EnsureActiveSlotIndex(activeSlot);
 
