@@ -19,6 +19,8 @@
 
 using Catch::Matchers::Equals;
 
+#include "../helpers/helpers.ipp"
+
 // temporarily disabled
 TEST_CASE("eject_filament::eject0", "[eject_filament][.]") {
     using namespace logic;
@@ -65,6 +67,12 @@ TEST_CASE("eject_filament::eject0", "[eject_filament][.]") {
     REQUIRE(WhileTopState(ef, ProgressCode::ReturningSelector, 5000));
 
     // the next states are still @@TODO
+}
+
+TEST_CASE("eject_filament::invalid_slot", "[eject_filament]") {
+    for (uint8_t cutSlot = 0; cutSlot < config::toolCount; ++cutSlot) {
+        InvalidSlot<logic::EjectFilament>(config::toolCount, cutSlot);
+    }
 }
 
 // comments:

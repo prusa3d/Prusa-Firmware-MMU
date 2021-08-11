@@ -51,3 +51,16 @@ bool VerifyState2(SM &uf, bool filamentLoaded, uint8_t idlerSlotIndex, uint8_t s
     CHECKED_ELSE(uf.TopLevelState() == topLevelProgress) { return false; }
     return true;
 }
+
+template<typename SM>
+void InvalidSlot(uint8_t invSlot, uint8_t activeSlot){
+    ForceReinitAllAutomata();
+
+    SM logicSM;
+    REQUIRE(VerifyState(logicSM, false, mi::Idler::IdleSlotIndex(), 0, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+
+    EnsureActiveSlotIndex(activeSlot);
+
+    logicSM.Reset(invSlot);
+    REQUIRE(VerifyState(logicSM, false, mi::Idler::IdleSlotIndex(), activeSlot, false, ml::off, ml::off, ErrorCode::INVALID_TOOL, ProgressCode::OK));
+}

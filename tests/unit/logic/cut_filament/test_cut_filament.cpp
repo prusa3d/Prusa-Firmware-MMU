@@ -90,3 +90,9 @@ TEST_CASE("cut_filament::cut0", "[cut_filament]") {
         CutSlot(cutSlot);
     }
 }
+
+TEST_CASE("cut_filament::invalid_slot", "[cut_filament]") {
+    for (uint8_t cutSlot = 0; cutSlot < config::toolCount; ++cutSlot) {
+        InvalidSlot<logic::CutFilament>(config::toolCount, cutSlot);
+    }
+}

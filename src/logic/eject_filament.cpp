@@ -13,6 +13,10 @@ namespace logic {
 EjectFilament ejectFilament;
 
 void EjectFilament::Reset(uint8_t param) {
+    if (!CheckToolIndex(param)) {
+        return;
+    }
+
     error = ErrorCode::OK;
     slot = param;
 

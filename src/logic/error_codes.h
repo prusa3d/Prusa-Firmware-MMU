@@ -26,6 +26,8 @@ enum class ErrorCode : uint_fast16_t {
 
     FILAMENT_ALREADY_LOADED = 0x8005, ///< cannot perform operation LoadFilament or move the selector as the filament is already loaded
 
+    INVALID_TOOL = 0x8006, ///< tool/slot index out of range (typically issuing T5 into an MMU with just 5 slots - valid range 0-4)
+
     MMU_NOT_RESPONDING = 0x802e, ///< internal error of the printer - communication with the MMU is not working
 
     INTERNAL = 0x802f, ///< internal runtime error (software)

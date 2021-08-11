@@ -13,6 +13,10 @@ namespace logic {
 LoadFilament loadFilament;
 
 void LoadFilament::Reset(uint8_t param) {
+    if (!CheckToolIndex(param)) {
+        return;
+    }
+
     state = ProgressCode::EngagingIdler;
     error = ErrorCode::OK;
     mg::globals.SetActiveSlot(param);

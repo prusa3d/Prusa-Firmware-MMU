@@ -76,4 +76,12 @@ bool CommandBase::Step() {
     return StepInner();
 }
 
+bool CommandBase::CheckToolIndex(uint8_t index) {
+    if (index >= config::toolCount) {
+        error = ErrorCode::INVALID_TOOL;
+        return false;
+    }
+    return true;
+}
+
 } // namespace logic

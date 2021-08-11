@@ -159,3 +159,9 @@ TEST_CASE("load_filament::failed_load_to_finda_0-4_resolve_help_second_fail", "[
         FailedLoadToFindaResolveHelpFindaDidntTrigger(slot, lf);
     }
 }
+
+TEST_CASE("load_filament::invalid_slot", "[load_filament]") {
+    for (uint8_t cutSlot = 0; cutSlot < config::toolCount; ++cutSlot) {
+        InvalidSlot<logic::LoadFilament>(config::toolCount, cutSlot);
+    }
+}

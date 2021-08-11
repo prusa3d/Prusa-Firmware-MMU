@@ -62,6 +62,10 @@ public:
     virtual ErrorCode Error() const { return error; }
 
 protected:
+    /// @returns true if the slot/tool index is within specified range (0 - config::toolCount)
+    /// If not, it returns false and sets the error to ErrorCode::INVALID_TOOL
+    bool CheckToolIndex(uint8_t index);
+
     ProgressCode state; ///< current progress state of the state machine
     ErrorCode error; ///< current error code
 };
