@@ -1,4 +1,6 @@
 #include "catch2/catch.hpp"
+#include "../logic/error_codes.h"
+#include "../logic/progress_codes.h"
 #include "protocol.h"
 
 using Catch::Matchers::Equals;
@@ -162,12 +164,59 @@ TEST_CASE("protocol::EncodeResponseQueryOperation", "[protocol]") {
 
     auto responseStatus = GENERATE(mp::ResponseMsgParamCodes::Processing, mp::ResponseMsgParamCodes::Error, mp::ResponseMsgParamCodes::Finished);
 
-    auto value = GENERATE(0, 1, 2, 3, 10, 11, 99, 100, 101, 102, 200, 255);
+    auto value = GENERATE(
+        ProgressCode::OK,
+        ProgressCode::EngagingIdler,
+        ProgressCode::DisengagingIdler,
+        ProgressCode::UnloadingToFinda,
+        ProgressCode::UnloadingToPulley,
+        ProgressCode::FeedingToFinda,
+        ProgressCode::FeedingToBondtech,
+        ProgressCode::AvoidingGrind,
+        ProgressCode::FinishingMoves,
+        ProgressCode::ERRDisengagingIdler,
+        ProgressCode::ERREngagingIdler,
+        ProgressCode::ERRWaitingForUser,
+        ProgressCode::ERRInternal,
+        ProgressCode::ERRHelpingFilament,
+        ProgressCode::ERRTMCFailed,
+        ProgressCode::UnloadingFilament,
+        ProgressCode::LoadingFilament,
+        ProgressCode::SelectingFilamentSlot,
+        ProgressCode::PreparingBlade,
+        ProgressCode::PushingFilament,
+        ProgressCode::PerformingCut,
+        ProgressCode::ReturningSelector,
+        ProgressCode::ParkingSelector,
+        ProgressCode::EjectingFilament);
 
-    std::array<uint8_t, 8> txbuff;
-    uint8_t msglen = mp::Protocol::EncodeResponseQueryOperation(requestMsg, responseStatus, value, txbuff.data());
+    auto error = GENERATE(
+        ErrorCode::RUNNING,
+        ErrorCode::OK,
+        ErrorCode::FINDA_DIDNT_SWITCH_ON,
+        ErrorCode::FINDA_DIDNT_SWITCH_OFF,
+        ErrorCode::FSENSOR_DIDNT_SWITCH_ON,
+        ErrorCode::FSENSOR_DIDNT_SWITCH_OFF,
+        ErrorCode::FILAMENT_ALREADY_LOADED,
+        ErrorCode::MMU_NOT_RESPONDING,
+        ErrorCode::INTERNAL,
+        ErrorCode::TMC_PULLEY_BIT,
+        ErrorCode::TMC_SELECTOR_BIT,
+        ErrorCode::TMC_IDLER_BIT,
+        ErrorCode::TMC_IOIN_MISMATCH,
+        ErrorCode::TMC_RESET,
+        ErrorCode::TMC_UNDERVOLTAGE_ON_CHARGE_PUMP,
+        ErrorCode::TMC_SHORT_TO_GROUND,
+        ErrorCode::TMC_OVER_TEMPERATURE_WARN,
+        ErrorCode::TMC_OVER_TEMPERATURE_ERROR);
 
-    CHECK(msglen <= 8);
+    std::array<uint8_t, 10> txbuff;
+
+    uint16_t encodedParamValue = responseStatus == mp::ResponseMsgParamCodes::Error ? (uint16_t)error : (uint16_t)value;
+
+    uint8_t msglen = mp::Protocol::EncodeResponseQueryOperation(requestMsg, responseStatus, encodedParamValue, txbuff.data());
+
+    CHECK(msglen <= txbuff.size());
     CHECK(txbuff[0] == (uint8_t)requestMsg.code);
     CHECK(txbuff[1] == requestMsg.value + '0');
     CHECK(txbuff[2] == ' ');
@@ -177,15 +226,26 @@ TEST_CASE("protocol::EncodeResponseQueryOperation", "[protocol]") {
         CHECK(txbuff[4] == '\n');
         CHECK(msglen == 5);
     } else {
-        if (value < 10) {
-            CHECK(txbuff[4] == value + '0');
-        } else if (value < 100) {
-            CHECK(txbuff[4] == value / 10 + '0');
-            CHECK(txbuff[5] == value % 10 + '0');
+        if (encodedParamValue < 10) {
+            CHECK(txbuff[4] == encodedParamValue + '0');
+        } else if (encodedParamValue < 100) {
+            CHECK(txbuff[4] == encodedParamValue / 10 + '0');
+            CHECK(txbuff[5] == encodedParamValue % 10 + '0');
+        } else if (encodedParamValue < 1000) {
+            CHECK(txbuff[4] == encodedParamValue / 100 + '0');
+            CHECK(txbuff[5] == (encodedParamValue / 10) % 10 + '0');
+            CHECK(txbuff[6] == encodedParamValue % 10 + '0');
+        } else if (encodedParamValue < 10000) {
+            CHECK(txbuff[4] == encodedParamValue / 1000 + '0');
+            CHECK(txbuff[5] == (encodedParamValue / 100) % 10 + '0');
+            CHECK(txbuff[6] == (encodedParamValue / 10) % 10 + '0');
+            CHECK(txbuff[7] == encodedParamValue % 10 + '0');
         } else {
-            CHECK(txbuff[4] == value / 100 + '0');
-            CHECK(txbuff[5] == (value / 10) % 10 + '0');
-            CHECK(txbuff[6] == value % 10 + '0');
+            CHECK(txbuff[4] == encodedParamValue / 10000 + '0');
+            CHECK(txbuff[5] == (encodedParamValue / 1000) % 10 + '0');
+            CHECK(txbuff[6] == (encodedParamValue / 100) % 10 + '0');
+            CHECK(txbuff[7] == (encodedParamValue / 10) % 10 + '0');
+            CHECK(txbuff[8] == encodedParamValue % 10 + '0');
         }
 
         CHECK(txbuff[msglen - 1] == '\n');
@@ -262,7 +322,7 @@ TEST_CASE("protocol::DecodeResponseQueryOperation", "[protocol]") {
         "E0", "E1", "E2", "E3", "E4",
         "K0",
         "L0", "L1", "L2", "L3", "L4",
-        "T0", "T1", "T2", "T3",
+        "T0", "T1", "T2", "T3", "T4",
         "U0",
         "W0");
 
