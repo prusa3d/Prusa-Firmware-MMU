@@ -161,7 +161,24 @@ TEST_CASE("load_filament::failed_load_to_finda_0-4_resolve_help_second_fail", "[
 }
 
 TEST_CASE("load_filament::invalid_slot", "[load_filament]") {
-    for (uint8_t cutSlot = 0; cutSlot < config::toolCount; ++cutSlot) {
-        InvalidSlot<logic::LoadFilament>(config::toolCount, cutSlot);
+    for (uint8_t activeSlot = 0; activeSlot < config::toolCount; ++activeSlot) {
+        logic::LoadFilament lf;
+        InvalidSlot<logic::LoadFilament>(lf, activeSlot, config::toolCount);
+    }
+}
+
+TEST_CASE("load_filament::state_machine_reusal", "[load_filament]") {
+    logic::LoadFilament lf;
+
+    for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
+        for (uint8_t toSlot = 0; toSlot < config::toolCount + 2; ++toSlot) {
+            logic::LoadFilament lf;
+            if (toSlot >= config::toolCount) {
+                InvalidSlot<logic::LoadFilament>(lf, fromSlot, toSlot);
+            } else {
+                LoadFilamentCommonSetup(toSlot, lf);
+                LoadFilamentSuccessful(toSlot, lf);
+            }
+        }
     }
 }

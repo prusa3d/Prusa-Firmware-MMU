@@ -21,12 +21,11 @@ using Catch::Matchers::Equals;
 
 #include "../helpers/helpers.ipp"
 
-void CutSlot(uint8_t cutSlot) {
+void CutSlot(logic::CutFilament &cf, uint8_t cutSlot) {
 
     ForceReinitAllAutomata();
 
-    logic::CutFilament cf;
-    REQUIRE(VerifyState(cf, false, mi::Idler::IdleSlotIndex(), 0, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+    REQUIRE(VerifyEnvironmentState(false, mi::Idler::IdleSlotIndex(), 0, false, ml::off, ml::off));
 
     EnsureActiveSlotIndex(cutSlot);
 
@@ -87,12 +86,30 @@ void CutSlot(uint8_t cutSlot) {
 
 TEST_CASE("cut_filament::cut0", "[cut_filament]") {
     for (uint8_t cutSlot = 0; cutSlot < config::toolCount; ++cutSlot) {
-        CutSlot(cutSlot);
+        logic::CutFilament cf;
+        CutSlot(cf, cutSlot);
     }
 }
 
 TEST_CASE("cut_filament::invalid_slot", "[cut_filament]") {
+    for (uint8_t activeSlot = 0; activeSlot < config::toolCount; ++activeSlot) {
+        logic::CutFilament cf;
+        InvalidSlot<logic::CutFilament>(cf, activeSlot, config::toolCount);
+    }
+}
+
+TEST_CASE("cut_filament::state_machine_reusal", "[cut_filament]") {
+    logic::CutFilament cf;
+    for (uint8_t activeSlot = 0; activeSlot < config::toolCount; ++activeSlot) {
+        InvalidSlot<logic::CutFilament>(cf, activeSlot, config::toolCount);
+    }
+
     for (uint8_t cutSlot = 0; cutSlot < config::toolCount; ++cutSlot) {
-        InvalidSlot<logic::CutFilament>(config::toolCount, cutSlot);
+        CutSlot(cf, cutSlot);
+    }
+
+    for (uint8_t cutSlot = 0; cutSlot < config::toolCount; ++cutSlot) {
+        CutSlot(cf, cutSlot);
+        InvalidSlot<logic::CutFilament>(cf, cutSlot, config::toolCount);
     }
 }
