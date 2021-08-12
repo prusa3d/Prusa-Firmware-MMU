@@ -19,42 +19,53 @@ int main(int argc, const char *argv[]) {
     }
 
     // common settings
-    const int idlerSteps = 100;
-    const int selectorSteps = 80;
+    const Axis ax_a = Idler;
+    const int steps_a = 100;
+    const Axis ax_b = Selector;
+    const int steps_b = 80;
     const int maxFeedRate = 1000;
+    const int maxJerk = 1;
+
+    // write common parameters
+    fprintf(fd, "{\"timebase\": %lu}\n", F_CPU / config::stepTimerFrequencyDivider);
 
     for (int accel = 2000; accel <= 50000; accel *= 2) {
-        // first axis using nominal values
-        motion.SetPosition(Idler, 0);
-        motion.SetAcceleration(Idler, accel);
-        motion.PlanMoveTo(Idler, idlerSteps, maxFeedRate);
+        // first axis defines the nominal values
+        motion.SetJerk(ax_a, maxJerk);
+        motion.SetPosition(ax_a, 0);
+        motion.SetAcceleration(ax_a, accel);
+        motion.PlanMoveTo(ax_a, steps_a, maxFeedRate);
 
-        fprintf(fd, "[{\"steps\": %d, \"accel\": %d, \"maxrate\": %d}, ",
-            idlerSteps, accel, maxFeedRate);
+        fprintf(fd, "[{\"steps\": %d, \"jerk\": %d, \"accel\": %d, \"maxrate\": %d}, ",
+            steps_a, maxJerk, accel, maxFeedRate);
 
         // second axis finishes slightly sooner at triple acceleration to maximize the
         // aliasing effects
         int accel_3 = accel * 3;
-        motion.SetPosition(Selector, 0);
-        motion.SetAcceleration(Selector, accel_3);
-        motion.PlanMoveTo(Selector, selectorSteps, maxFeedRate);
+        motion.SetJerk(ax_b, 1);
+        motion.SetPosition(ax_b, 0);
+        motion.SetAcceleration(ax_b, accel_3);
+        motion.PlanMoveTo(ax_b, steps_b, maxFeedRate);
 
-        fprintf(fd, "{\"steps\": %d, \"accel\": %d, \"maxrate\": %d}]\n",
-            selectorSteps, accel_3, maxFeedRate);
+        fprintf(fd, "{\"steps\": %d, \"jerk\": %d, \"accel\": %d, \"maxrate\": %d}]\n",
+            steps_b, maxJerk, accel_3, maxFeedRate);
+
+        // initial state
+        unsigned long ts = 0;
+        st_timer_t next = 0;
+        fprintf(fd, "%lu %u %d %d\n", ts, next, motion.CurPosition(ax_a), motion.CurPosition(ax_b));
 
         // step and output time, interval and positions
-        unsigned long ts = 0;
-        st_timer_t next;
         do {
             next = motion.Step();
-            pos_t pos_idler = motion.CurPosition(Idler);
-            pos_t pos_selector = motion.CurPosition(Selector);
+            pos_t pos_idler = motion.CurPosition(ax_a);
+            pos_t pos_selector = motion.CurPosition(ax_b);
 
             fprintf(fd, "%lu %u %d %d\n", ts, next, pos_idler, pos_selector);
 
             ts += next;
         } while (next);
-        fprintf(fd, "\n\n");
+        fprintf(fd, "\n");
     }
 
     return EX_OK;
