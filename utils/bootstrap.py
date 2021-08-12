@@ -63,7 +63,7 @@ dependencies = {
         }
     },
 }
-pip_dependencies = ['pandas']
+pip_dependencies = []
 # yapf: enable
 
 
