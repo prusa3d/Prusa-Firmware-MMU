@@ -320,7 +320,7 @@ TEST_CASE("protocol::DecodeResponseQueryOperation", "[protocol]") {
     mp::Protocol p;
     const char *cmdReference = GENERATE(
         "E0", "E1", "E2", "E3", "E4",
-        "K0",
+        "K0", "K1", "K2", "K3", "K4",
         "L0", "L1", "L2", "L3", "L4",
         "T0", "T1", "T2", "T3", "T4",
         "U0",
