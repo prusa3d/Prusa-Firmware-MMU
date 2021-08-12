@@ -14,13 +14,23 @@ add_catch_test(motion_tests)
 # ramp generation tests
 add_executable(rampgen ${source_common} rampgen.cpp)
 target_include_directories(rampgen PUBLIC ${include_common})
+add_test(NAME motion::rampgen COMMAND rampgen ramp_data.txt)
 add_dependencies(tests rampgen)
 
-add_test(NAME motion::rampgen COMMAND rampgen ramp_data.txt)
-add_test(NAME motion::test_motion_ramp COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test_motion_ramp.py
-                                               ramp_data.txt
-         )
+execute_process(
+  COMMAND python3 -c "import pandas"
+  RESULT_VARIABLE PANDAS_INSTALLED
+  OUTPUT_QUIET ERROR_QUIET
+  )
+if(${PANDAS_INSTALLED} EQUAL 0)
+  # only run test_motion_ramp if pandas is installed
+  add_test(NAME motion::test_motion_ramp COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test_motion_ramp.py
+                                                 ramp_data.txt
+           )
 
-# define the ramp_data fixture to chain tests
-set_tests_properties(motion::test_motion_ramp PROPERTIES FIXTURES_REQUIRED motion::ramp_data)
-set_tests_properties(motion::rampgen PROPERTIES FIXTURES_SETUP motion::ramp_data)
+  # define the ramp_data fixture to chain tests
+  set_tests_properties(motion::test_motion_ramp PROPERTIES FIXTURES_REQUIRED motion::ramp_data)
+  set_tests_properties(motion::rampgen PROPERTIES FIXTURES_SETUP motion::ramp_data)
+else()
+  message(STATUS "pandas not available, skipping test motion::test_motion_ramp")
+endif()
