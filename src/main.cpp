@@ -219,8 +219,11 @@ void ReportRunningCommand() {
 }
 
 void PlanCommand(const mp::RequestMsg &rq) {
-    if (currentCommand->Error() == ErrorCode::OK) {
-        // we are allowed to start a new command as the previous one is in the OK finished state
+    if (currentCommand->State() == ProgressCode::OK) {
+        // We are allowed to start a new command as the previous one is in the OK finished state
+        // The previous command may be in an error state, but as long as it is in ProgressCode::OK (aka finished)
+        // we are safe here. It is the responsibility of the printer to ask for a command error code
+        // before issuing another one - if needed.
         switch (rq.code) {
         case mp::RequestMsgCodes::Cut:
             currentCommand = &logic::cutFilament;
@@ -241,6 +244,7 @@ void PlanCommand(const mp::RequestMsg &rq) {
             currentCommand = &logic::noCommand;
             break;
         }
+        currentCommandRq = rq; // save the Current Command Request for indentification of responses
         currentCommand->Reset(rq.value);
         ReportCommandAccepted(rq, mp::ResponseMsgParamCodes::Accepted);
     } else {
