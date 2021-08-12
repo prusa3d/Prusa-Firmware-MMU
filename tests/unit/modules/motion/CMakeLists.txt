@@ -14,6 +14,7 @@ add_catch_test(motion_tests)
 # ramp generation tests
 add_executable(rampgen ${source_common} rampgen.cpp)
 target_include_directories(rampgen PUBLIC ${include_common})
+add_dependencies(tests rampgen)
 
 add_test(NAME motion::rampgen COMMAND rampgen ramp_data.txt)
 add_test(NAME motion::test_motion_ramp COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test_motion_ramp.py
