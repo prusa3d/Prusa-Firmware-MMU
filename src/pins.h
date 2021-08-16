@@ -14,14 +14,14 @@ static constexpr hal::gpio::GPIO_pin SHR16_CLOCK = { GPIOC, 7 }; ///SHCP
 static constexpr hal::gpio::GPIO_pin USART_RX = { GPIOD, 2 };
 static constexpr hal::gpio::GPIO_pin USART_TX = { GPIOD, 3 };
 
-static constexpr hal::gpio::GPIO_pin IDLER_CS_PIN = { GPIOC, 6 };
-static constexpr hal::gpio::GPIO_pin IDLER_SG_PIN = { GPIOF, 4 };
-static constexpr hal::gpio::GPIO_pin IDLER_STEP_PIN = { GPIOB, 4 };
+static constexpr hal::gpio::GPIO_pin PULLEY_CS_PIN = { GPIOC, 6 };
+static constexpr hal::gpio::GPIO_pin PULLEY_SG_PIN = { GPIOF, 4 };
+static constexpr hal::gpio::GPIO_pin PULLEY_STEP_PIN = { GPIOB, 4 };
 
-static constexpr hal::gpio::GPIO_pin PULLEY_CS_PIN = { GPIOD, 7 };
-static constexpr hal::gpio::GPIO_pin PULLEY_SG_PIN = { GPIOF, 1 };
-static constexpr hal::gpio::GPIO_pin PULLEY_STEP_PIN = { GPIOD, 4 };
+static constexpr hal::gpio::GPIO_pin SELECTOR_CS_PIN = { GPIOD, 7 };
+static constexpr hal::gpio::GPIO_pin SELECTOR_SG_PIN = { GPIOF, 1 };
+static constexpr hal::gpio::GPIO_pin SELECTOR_STEP_PIN = { GPIOD, 4 };
 
-static constexpr hal::gpio::GPIO_pin SELECTOR_CS_PIN = { GPIOB, 7 };
-static constexpr hal::gpio::GPIO_pin SELECTOR_SG_PIN = { GPIOF, 0 };
-static constexpr hal::gpio::GPIO_pin SELECTOR_STEP_PIN = { GPIOD, 6 };
+static constexpr hal::gpio::GPIO_pin IDLER_CS_PIN = { GPIOB, 7 };
+static constexpr hal::gpio::GPIO_pin IDLER_SG_PIN = { GPIOF, 0 };
+static constexpr hal::gpio::GPIO_pin IDLER_STEP_PIN = { GPIOD, 6 };
