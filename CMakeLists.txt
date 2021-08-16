@@ -100,7 +100,7 @@ if(CMAKE_CROSSCOMPILING)
   add_link_options(-Wl,--gc-sections)
 
   # disable exceptions and related metadata
-  add_compile_options(-fno-exceptions -fno-unwind-tables)
+  add_compile_options(-fno-exceptions -fno-unwind-tables -fno-rtti)
   add_link_options(-Wl,--defsym,__exidx_start=0,--defsym,__exidx_end=0)
 else()
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -143,16 +143,12 @@ if(CMAKE_CROSSCOMPILING)
 
   # produce ASM listing
   add_custom_command(
-    TARGET firmware
-    POST_BUILD
-    COMMAND ${CMAKE_OBJDUMP} -CSd firmware > firmware.asm
+    TARGET firmware POST_BUILD COMMAND ${CMAKE_OBJDUMP} -CSd firmware > firmware.asm
     )
 
   # inform about the firmware's size in terminal
   add_custom_command(
-    TARGET firmware
-    POST_BUILD
-    COMMAND ${CMAKE_SIZE_UTIL} -C --mcu=atmega32u4 firmware
+    TARGET firmware POST_BUILD COMMAND ${CMAKE_SIZE_UTIL} -C --mcu=atmega32u4 firmware
     )
   report_size(firmware)
 
