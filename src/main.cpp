@@ -19,6 +19,7 @@
 #include "modules/selector.h"
 #include "modules/user_input.h"
 #include "modules/timebase.h"
+#include "modules/motion.h"
 
 #include "logic/command_base.h"
 #include "logic/cut_filament.h"
@@ -126,7 +127,7 @@ void setup() {
     ml::leds.SetMode(2, ml::Color::green, ml::Mode::on);
     ml::leds.Step();
 
-    // tmc::Init()
+    mm::Init();
     ml::leds.SetMode(1, ml::Color::green, ml::Mode::on);
     ml::leds.Step();
 

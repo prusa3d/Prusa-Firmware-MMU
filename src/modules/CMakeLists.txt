@@ -12,6 +12,7 @@ target_sources(
           movable_base.cpp
           permanent_storage.cpp
           selector.cpp
+          speed_table.cpp
           timebase.cpp
           user_input.cpp
           pulse_gen.cpp
