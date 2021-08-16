@@ -250,8 +250,8 @@ private:
     };
 };
 
-/// ISR stepping routine
-//extern void Isr();
+/// ISR initialization
+extern void Init();
 
 extern Motion motion;
 

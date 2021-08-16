@@ -1,5 +1,12 @@
 #include "motion.h"
 
+// TODO: use proper timer abstraction
+#ifdef __AVR__
+#include <avr/interrupt.h>
+#else
+//#include "../hal/timers.h"
+#endif
+
 namespace modules {
 namespace motion {
 
@@ -89,7 +96,51 @@ st_timer_t Motion::Step() {
     return next;
 }
 
-void Isr() {}
+static inline void Isr() {
+    st_timer_t next = motion.Step();
+#ifdef __AVR__
+    // TODO: use proper timer abstraction
+    if (next)
+        OCR1A = next;
+    else {
+        // Idling: plan the next interrupt after 8ms from now.
+        OCR1A = 0x4000;
+    }
+#endif
+}
+
+void Init() {
+#ifdef __AVR__
+    // TODO: use proper timer abstraction
+
+    // waveform generation = 0100 = CTC
+    TCCR1B &= ~(1 << WGM13);
+    TCCR1B |= (1 << WGM12);
+    TCCR1A &= ~(1 << WGM11);
+    TCCR1A &= ~(1 << WGM10);
+
+    // output mode = 00 (disconnected)
+    TCCR1A &= ~(3 << COM1A0);
+    TCCR1A &= ~(3 << COM1B0);
+
+    // Set the timer pre-scaler
+    // We use divider of 8, resulting in a 2MHz timer frequency on a 16MHz MCU
+    TCCR1B = (TCCR1B & ~(0x07 << CS10)) | (2 << CS10);
+
+    // Plan the first interrupt after 8ms from now.
+    OCR1A = 0x4000;
+    TCNT1 = 0;
+
+    // Enable interrupt
+    TIMSK1 |= (1 << OCIE1A);
+#endif
+}
 
 } // namespace motion
 } // namespace modules
+
+#ifdef __AVR__
+ISR(TIMER1_COMPA_vect) {
+    modules::motion::Isr();
+}
+#endif
