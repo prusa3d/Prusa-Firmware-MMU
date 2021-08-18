@@ -97,7 +97,7 @@ void setup() {
     // watchdog init
 
     shr16::shr16.Init();
-    ml::leds.SetMode(4, ml::Color::green, ml::Mode::blink0);
+    ml::leds.SetMode(0, ml::Color::green, ml::Mode::on);
     ml::leds.Step();
 
     // @@TODO if the shift register doesn't work we really can't signalize anything, only internal variables will be accessible if the UART works
@@ -108,7 +108,7 @@ void setup() {
         .baudrate = 115200,
     };
     hu::usart1.Init(&usart_conf);
-    ml::leds.SetMode(3, ml::Color::green, ml::Mode::on);
+    ml::leds.SetMode(1, ml::Color::green, ml::Mode::on);
     ml::leds.Step();
 
     // @@TODO if both shift register and the UART are dead, we are sitting ducks :(
@@ -127,12 +127,13 @@ void setup() {
     ml::leds.Step();
 
     // tmc::Init()
-    ml::leds.SetMode(1, ml::Color::green, ml::Mode::on);
+    ml::leds.SetMode(3, ml::Color::green, ml::Mode::on);
     ml::leds.Step();
 
     adc::Init();
-    ml::leds.SetMode(0, ml::Color::green, ml::Mode::on);
+    ml::leds.SetMode(4, ml::Color::green, ml::Mode::on);
     ml::leds.Step();
+
 }
 
 static constexpr const uint8_t maxMsgLen = 10;

@@ -7,6 +7,8 @@ namespace config {
 
 static constexpr const uint8_t toolCount = 5U; ///< Max number of extruders/tools/slots
 
+static constexpr const uint8_t ledCount = 10U; ///< LED count
+
 /// Absolute positions for Idler's slots: 0-4 are the real ones, the 5th index is the idle position
 static constexpr U_deg idlerSlotPositions[toolCount + 1] = {
     45.0_deg,

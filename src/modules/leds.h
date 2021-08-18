@@ -79,7 +79,7 @@ public:
     /// @param color green or red LED
     /// @param mode to set
     inline void SetMode(uint8_t slot, Color color, Mode mode) {
-        SetMode(slot * 2 + color, mode);
+        SetMode(((config::ledCount/2-1)-slot) * 2 + color, mode);
     }
 
     /// Sets the mode of a LED in a pair
