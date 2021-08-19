@@ -134,6 +134,19 @@ void setup() {
     ml::leds.SetMode(4, ml::Color::green, ml::Mode::on);
     ml::leds.Step();
 
+    // Turn off all LEDs after init
+    ml::leds.SetMode(0, ml::Color::green, ml::Mode::off);
+    ml::leds.SetMode(1, ml::Color::green, ml::Mode::off);
+    ml::leds.SetMode(2, ml::Color::green, ml::Mode::off);
+    ml::leds.SetMode(3, ml::Color::green, ml::Mode::off);
+    ml::leds.SetMode(4, ml::Color::green, ml::Mode::off);
+    ml::leds.SetMode(0, ml::Color::red, ml::Mode::off);
+    ml::leds.SetMode(1, ml::Color::red, ml::Mode::off);
+    ml::leds.SetMode(2, ml::Color::red, ml::Mode::off);
+    ml::leds.SetMode(3, ml::Color::red, ml::Mode::off);
+    ml::leds.SetMode(4, ml::Color::red, ml::Mode::off);
+    ml::leds.Step();
+
 }
 
 static constexpr const uint8_t maxMsgLen = 10;
