@@ -7,31 +7,33 @@ namespace hal {
 /// 16bit shift register (2x74595) interface
 ///
 /// The pinout is hard coded as follows:
-/// SHR16_CLK: signal d13 - PC7
-/// SHR16_LAT: signal d10 - PB6
-/// SHR16_DAT: signal d9  - PB5
+///                         32u4 port   Schematics
+/// SHR16_CLK: signal       D13 - PC7   U4 -> U2/U9 - SHCP and P6 - Pin2
+/// SHR16_LAT: signal       D10 - PB6   U4 -> U2/9  - STCP and P6 - Pin3
+/// SHR16_DAT: signal       D9  - PB5   U4 -> U2 - DS
 ///
 /// Shift register outputs:
-/// LEDS - hardcoded
-/// SHR16_LEDG0 = 0x0100
-/// SHR16_LEDR0 = 0x0200
-/// SHR16_LEDG1 = 0x0400
-/// SHR16_LEDR1 = 0x0800
-/// SHR16_LEDG2 = 0x1000
-/// SHR16_LEDR2 = 0x2000
-/// SHR16_LEDG3 = 0x4000
-/// SHR16_LEDR3 = 0x8000
-/// SHR16_LEDG4 = 0x0040
-/// SHR16_LEDR4 = 0x0080
+/// LEDS - hardcoded        74HC595     Schematics
+/// SHR16_LEDG4 = 0x0100    Q0          U9 -> D14 clostest LED to usb port J1
+/// SHR16_LEDR4 = 0x0200    Q1          U9 -> D15
+/// SHR16_LEDG3 = 0x0400    Q2          U9 -> D16
+/// SHR16_LEDR3 = 0x0800    Q3          U9 -> D17
+/// SHR16_LEDG2 = 0x1000    Q4          U9 -> D18
+/// SHR16_LEDR2 = 0x2000    Q5          U9 -> D19
+/// SHR16_LEDG1 = 0x4000    Q6          U9 -> D20
+/// SHR16_LEDR1 = 0x8000    Q7          U9 -> D21
+/// SHR16_LEDG0 = 0x0040    Q6          U2 -> D22
+/// SHR16_LEDR0 = 0x0080    Q7          U2 -> D23 closest LED to Button S2
 /// SHR16_LED_MSK = 0xffc0
 ///
 /// TMC2130 Direction/Enable signals - hardcoded
-/// SHR16_DIR_0 = 0x0001
-/// SHR16_ENA_0 = 0x0002
-/// SHR16_DIR_1 = 0x0004
-/// SHR16_ENA_1 = 0x0008
-/// SHR16_DIR_2 = 0x0010
-/// SHR16_ENA_2 = 0x0020
+///                         74HC595     Schematics
+/// SHR16_DIR_0 = 0x0001    Q1          U2 -> U5 - DIR
+/// SHR16_ENA_0 = 0x0002    Q2          U2 -> U5 - DRV-ENN
+/// SHR16_DIR_1 = 0x0004    Q3          U2 -> U6 - DIR
+/// SHR16_ENA_1 = 0x0008    Q4          U2 -> U6 - DRV-ENN
+/// SHR16_DIR_2 = 0x0010    Q5          U2 -> U7 - DIR
+/// SHR16_ENA_2 = 0x0020    Q6          U2 -> U7 - DRV-ENN
 ///
 /// SHR16_DIR_MSK = (SHR16_DIR_0 + SHR16_DIR_1 + SHR16_DIR_2)
 /// SHR16_ENA_MSK = (SHR16_ENA_0 + SHR16_ENA_1 + SHR16_ENA_2)
