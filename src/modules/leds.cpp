@@ -44,7 +44,7 @@ void LEDs::Step() {
     uint16_t millis = mt::timebase.Millis();
     bool oddPeriod = ((millis / (config::ledBlinkPeriodMs / 2)) & 0x01U) != 0;
     uint16_t result = 0;
-    for (int8_t i = ledPairs * 2 - 1; i >= 0; --i) {
+    for (uint8_t i = 0; i < ledPairs * 2; i++) {
         result <<= 1;
         result |= leds[i].Step(oddPeriod);
     }
