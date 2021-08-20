@@ -28,8 +28,8 @@ enum Mode {
 
 /// Enum of LEDs color - green or red
 enum Color {
-    green = 0,
-    red = 1
+    red = 0,
+    green = 1
 };
 
 /// A single LED
