@@ -133,6 +133,13 @@ void setup() {
     adc::Init();
     ml::leds.SetMode(0, ml::Color::green, ml::Mode::on);
     ml::leds.Step();
+
+    /// Turn off all leds
+    for (uint8_t i = 0; i < config::toolCount; i++) {
+        ml::leds.SetMode(i, ml::Color::green, ml::Mode::off);
+        ml::leds.SetMode(i, ml::Color::red, ml::Mode::off);
+    }
+    ml::leds.Step();
 }
 
 static constexpr const uint8_t maxMsgLen = 10;
