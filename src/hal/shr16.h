@@ -13,16 +13,16 @@ namespace hal {
 ///
 /// Shift register outputs:
 /// LEDS - hardcoded
-/// SHR16_LEDG0 = 0x0100
-/// SHR16_LEDR0 = 0x0200
-/// SHR16_LEDG1 = 0x0400
-/// SHR16_LEDR1 = 0x0800
-/// SHR16_LEDG2 = 0x1000
+/// SHR16_LEDR0 = 0x0080
+/// SHR16_LEDG0 = 0x0040
+/// SHR16_LEDR1 = 0x8000
+/// SHR16_LEDG1 = 0x4000
 /// SHR16_LEDR2 = 0x2000
-/// SHR16_LEDG3 = 0x4000
-/// SHR16_LEDR3 = 0x8000
-/// SHR16_LEDG4 = 0x0040
-/// SHR16_LEDR4 = 0x0080
+/// SHR16_LEDG2 = 0x1000
+/// SHR16_LEDR3 = 0x0800
+/// SHR16_LEDG3 = 0x0400
+/// SHR16_LEDR4 = 0x0200
+/// SHR16_LEDG4 = 0x0100
 /// SHR16_LED_MSK = 0xffc0
 ///
 /// TMC2130 Direction/Enable signals - hardcoded
