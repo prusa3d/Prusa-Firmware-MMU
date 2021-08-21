@@ -14,16 +14,16 @@ extern uint16_t shr16_v_copy;
 } // namespace hal
 
 /// LEDS - hardcoded
-#define SHR16_LEDG0 0x0100
-#define SHR16_LEDR0 0x0200
-#define SHR16_LEDG1 0x0400
-#define SHR16_LEDR1 0x0800
-#define SHR16_LEDG2 0x1000
+#define SHR16_LEDR0 0x0080
+#define SHR16_LEDG0 0x0040
+#define SHR16_LEDR1 0x8000
+#define SHR16_LEDG1 0x4000
 #define SHR16_LEDR2 0x2000
-#define SHR16_LEDG3 0x4000
-#define SHR16_LEDR3 0x8000
-#define SHR16_LEDG4 0x0040
-#define SHR16_LEDR4 0x0080
+#define SHR16_LEDG2 0x1000
+#define SHR16_LEDR3 0x0800
+#define SHR16_LEDG3 0x0400
+#define SHR16_LEDR4 0x0200
+#define SHR16_LEDG4 0x0100
 
 TEST_CASE("leds::single", "[leds]") {
     using namespace hal::shr16;
