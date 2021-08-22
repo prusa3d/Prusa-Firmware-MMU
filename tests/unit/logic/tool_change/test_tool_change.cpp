@@ -33,7 +33,7 @@ void ToolChange(logic::ToolChange tc, uint8_t fromSlot, uint8_t toSlot) {
         tc,
         [&](int step) -> bool {
         if(step == 2000){ // on 2000th step make FINDA trigger
-            hal::adc::SetADC(config::findaADCIndex, 0);
+            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
         }
         return tc.TopLevelState() == ProgressCode::UnloadingFilament; },
         200000UL));
@@ -43,7 +43,7 @@ void ToolChange(logic::ToolChange tc, uint8_t fromSlot, uint8_t toSlot) {
         tc,
         [&](int step) -> bool {
         if(step == 1000){ // on 1000th step make FINDA trigger
-            hal::adc::SetADC(config::findaADCIndex, 900);
+            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
         }
         return tc.TopLevelState() == ProgressCode::LoadingFilament; },
         200000UL));
