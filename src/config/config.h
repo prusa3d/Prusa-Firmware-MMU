@@ -2,6 +2,10 @@
 #include <stdint.h>
 #include "axis.h"
 
+/// Define Debug mode to add additional serial output
+
+//#define DEBUG_FINDA
+
 /// Wrangler for assorted compile-time configuration and constants.
 namespace config {
 

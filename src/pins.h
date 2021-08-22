@@ -25,3 +25,5 @@ static constexpr hal::gpio::GPIO_pin SELECTOR_STEP_PIN = { GPIOD, 4 };
 static constexpr hal::gpio::GPIO_pin IDLER_CS_PIN = { GPIOB, 7 };
 static constexpr hal::gpio::GPIO_pin IDLER_SG_PIN = { GPIOF, 0 };
 static constexpr hal::gpio::GPIO_pin IDLER_STEP_PIN = { GPIOD, 6 };
+
+static constexpr hal::gpio::GPIO_pin FINDA_PIN = { GPIOF, 6 };                  /// PF6     A1      ADC6/TDI
