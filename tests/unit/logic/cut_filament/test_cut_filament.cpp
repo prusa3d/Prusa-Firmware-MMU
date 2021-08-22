@@ -47,7 +47,7 @@ void CutSlot(logic::CutFilament &cf, uint8_t cutSlot) {
         cf,
         [&](int step) -> bool {
         if( step == 100 ){ // simulate FINDA trigger - will get pressed in 100 steps (due to debouncing)
-            hal::adc::SetADC(config::findaADCIndex, 900);
+            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
         }
         return cf.TopLevelState() == ProgressCode::FeedingToFinda; }, 5000));
 
@@ -61,7 +61,7 @@ void CutSlot(logic::CutFilament &cf, uint8_t cutSlot) {
         cf,
         [&](int step) -> bool {
         if( step == 100 ){ // simulate FINDA trigger - will get depressed in 100 steps
-            hal::adc::SetADC(config::findaADCIndex, 0);
+            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
         }
         return cf.TopLevelState() == ProgressCode::UnloadingToPulley; }, 5000));
 
