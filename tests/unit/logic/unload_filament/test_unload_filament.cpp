@@ -55,7 +55,7 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
         uf,
         [&](int step) -> bool {
         if(step == 100){ // on 100th step make FINDA trigger
-            hal::adc::SetADC(config::findaADCIndex, 0);
+            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
         }
         return uf.TopLevelState() == ProgressCode::UnloadingToFinda; },
         50000));
@@ -205,7 +205,7 @@ void FindaDidntTriggerResolveHelpFindaTriggered(uint8_t slot, logic::UnloadFilam
         uf,
         [&](int step) -> bool {
         if(step == 100){ // on 100th step make FINDA trigger
-            hal::adc::SetADC(config::findaADCIndex, 0);
+            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
         }
         return uf.TopLevelState() == ProgressCode::ERRHelpingFilament; },
         5000));

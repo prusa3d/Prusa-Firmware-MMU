@@ -44,7 +44,7 @@ TEST_CASE("eject_filament::eject0", "[eject_filament][.]") {
     // idler and selector reached their target positions and the CF automaton will start feeding to FINDA as the next step
     REQUIRE(ef.TopLevelState() == ProgressCode::FeedingToFinda);
     // prepare for simulated finda trigger
-    hal::adc::ReinitADC(config::findaADCIndex, hal::adc::TADCData({ 0, 0, 0, 0, 600, 700, 800, 900 }), 10);
+    hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
     REQUIRE(WhileTopState(ef, ProgressCode::FeedingToFinda, 50000));
 
     // filament fed into FINDA, cutting...
