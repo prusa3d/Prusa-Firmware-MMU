@@ -56,7 +56,7 @@ void ForceReinitAllAutomata() {
     hal::adc::ReinitADC(config::buttonsADCIndex, hal::adc::TADCData({ 1023 }), 1);
 
     // finda OFF
-    hal::adc::ReinitADC(config::findaADCIndex, hal::adc::TADCData({ 0 }), 1);
+    hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
 
     // reinit timing
     mt::ReinitTimebase();
@@ -79,7 +79,7 @@ void EnsureActiveSlotIndex(uint8_t slot) {
 }
 
 void SetFINDAStateAndDebounce(bool press) {
-    hal::adc::SetADC(config::findaADCIndex, press ? config::findaADCDecisionLevel + 1 : config::findaADCDecisionLevel - 1);
+    hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
     for (size_t i = 0; i < config::findaDebounceMs + 1; ++i)
         main_loop();
 }
