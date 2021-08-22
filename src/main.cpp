@@ -171,6 +171,15 @@ void ReportCommandAccepted(const mp::RequestMsg &rq, mp::ResponseMsgParamCodes s
 }
 
 void ReportFINDA(const mp::RequestMsg &rq) {
+    #ifdef DEBUG_FINDA
+        using namespace hal;
+        hu::usart1.puts("FINDA:");
+        if (hal::gpio::ReadPin(FINDA_PIN) == hal::gpio::Level::high) {
+            hu::usart1.puts(" TIRGGERED\n");
+        } else {
+            hu::usart1.puts(" NOT TRIGGERED\n");
+        }
+    #endif //DEBUG_FINDA
     uint8_t rsp[maxMsgLen];
     uint8_t len = protocol.EncodeResponseReadFINDA(rq, mf::finda.Pressed(), rsp);
     WriteToUSART(rsp, len);

@@ -1,6 +1,7 @@
 #include "finda.h"
-#include "../hal/adc.h"
 #include "timebase.h"
+#include "../hal/gpio.h"
+#include "../pins.h"
 
 namespace modules {
 namespace finda {
@@ -8,7 +9,8 @@ namespace finda {
 FINDA finda;
 
 void FINDA::Step() {
-    debounce::Debouncer::Step(mt::timebase.Millis(), hal::adc::ReadADC(config::findaADCIndex) > config::findaADCDecisionLevel);
+
+    debounce::Debouncer::Step(mt::timebase.Millis(), hal::gpio::ReadPin(FINDA_PIN) == hal::gpio::Level::high);
 }
 
 } // namespace finda
