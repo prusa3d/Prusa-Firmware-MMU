@@ -48,7 +48,7 @@ TEST_CASE("unload_to_finda::regular_unload", "[unload_to_finda]") {
 
     // now pulling the filament until finda triggers
     REQUIRE(ff.State() == logic::UnloadToFinda::WaitingForFINDA);
-    hal::adc::ReinitADC(config::findaADCIndex, hal::adc::TADCData({ 1023, 900, 800, 500, 0 }), 10);
+    hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
     REQUIRE(WhileCondition(
         ff,
         [&](int) { return mf::finda.Pressed(); },
