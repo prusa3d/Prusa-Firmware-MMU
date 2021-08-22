@@ -53,7 +53,7 @@ void LoadFilamentSuccessful(uint8_t slot, logic::LoadFilament &lf) {
         lf,
         [&](int step) -> bool {
         if(step == 100){ // on 100th step make FINDA trigger
-            hal::adc::SetADC(config::findaADCIndex, 1023);
+            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
         }
         return lf.TopLevelState() == ProgressCode::FeedingToFinda; },
         5000));
@@ -125,7 +125,7 @@ void FailedLoadToFindaResolveHelpFindaTriggered(uint8_t slot, logic::LoadFilamen
         lf,
         [&](int step) -> bool {
         if(step == 100){ // on 100th step make FINDA trigger
-            hal::adc::SetADC(config::findaADCIndex, 1023);
+            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
         }
         return lf.TopLevelState() == ProgressCode::ERRHelpingFilament; },
         5000));
