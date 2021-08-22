@@ -46,8 +46,6 @@ static constexpr uint16_t ledBlinkPeriodMs = 1000U;
 
 // FINDA setup
 static constexpr const uint16_t findaDebounceMs = 100;
-static constexpr const uint8_t findaADCIndex = 6; ///< ADC index of FINDA input
-static constexpr const uint16_t findaADCDecisionLevel = 512; ///< ADC decision level when a FINDA is considered pressed/not pressed
 
 // Buttons setup
 static constexpr const uint8_t buttonCount = 3; ///< number of buttons currently supported
