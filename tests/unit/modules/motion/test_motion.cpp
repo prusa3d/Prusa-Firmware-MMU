@@ -31,6 +31,24 @@ TEST_CASE("motion::basic", "[motion]") {
     REQUIRE(motion.Position(Idler) == 10);
 }
 
+TEST_CASE("motion::auto_axis_enable", "[motion]") {
+    // by default the axis should start disabled
+    REQUIRE(motion.Enabled(Pulley) == false);
+
+    // enable manually the axis
+    motion.SetEnabled(Pulley, true);
+    REQUIRE(motion.Enabled(Pulley) == true);
+
+    // now disable
+    motion.SetEnabled(Pulley, false);
+    REQUIRE(motion.Enabled(Pulley) == false);
+
+    // planning a move should enable the axis automatically
+    REQUIRE(motion.QueueEmpty());
+    motion.PlanMove<Pulley>(1.0_mm, 100.0_mm_s);
+    REQUIRE(motion.Enabled(Pulley) == true);
+}
+
 TEST_CASE("motion::unit", "[motion]") {
     // test AxisUnit conversion in the PlanMove and PlanMoveTo.
     REQUIRE(motion.QueueEmpty());
