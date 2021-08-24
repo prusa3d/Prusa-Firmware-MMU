@@ -38,7 +38,7 @@ TEST_CASE("pulse_gen::basic", "[pulse_gen]") {
         .csPin = IDLER_CS_PIN,
         .stepPin = IDLER_STEP_PIN,
         .sgPin = IDLER_SG_PIN,
-        .uSteps = config::idler.uSteps
+        .mRes = config::idler.mRes
     };
 
     PulseGen pg(10, 100);
@@ -67,7 +67,7 @@ TEST_CASE("pulse_gen::step_dir", "[pulse_gen]") {
         .csPin = IDLER_CS_PIN,
         .stepPin = IDLER_STEP_PIN,
         .sgPin = IDLER_SG_PIN,
-        .uSteps = config::idler.uSteps
+        .mRes = config::idler.mRes
     };
 
     PulseGen pg(10, 100);
@@ -102,7 +102,7 @@ TEST_CASE("pulse_gen::step_count", "[pulse_gen]") {
         .csPin = IDLER_CS_PIN,
         .stepPin = IDLER_STEP_PIN,
         .sgPin = IDLER_SG_PIN,
-        .uSteps = config::idler.uSteps
+        .mRes = config::idler.mRes
     };
 
     PulseGen pg(10, 100);
@@ -140,7 +140,7 @@ TEST_CASE("pulse_gen::queue_position", "[pulse_gen]") {
         .csPin = IDLER_CS_PIN,
         .stepPin = IDLER_STEP_PIN,
         .sgPin = IDLER_SG_PIN,
-        .uSteps = config::idler.uSteps
+        .mRes = config::idler.mRes
     };
 
     PulseGen pg(10, 100);
@@ -208,7 +208,7 @@ TEST_CASE("pulse_gen::queue_step", "[pulse_gen]") {
         .csPin = IDLER_CS_PIN,
         .stepPin = IDLER_STEP_PIN,
         .sgPin = IDLER_SG_PIN,
-        .uSteps = config::idler.uSteps
+        .mRes = config::idler.mRes
     };
 
     PulseGen pg(10, 100);
@@ -234,7 +234,7 @@ TEST_CASE("pulse_gen::queue_abort", "[pulse_gen]") {
         .csPin = IDLER_CS_PIN,
         .stepPin = IDLER_STEP_PIN,
         .sgPin = IDLER_SG_PIN,
-        .uSteps = config::idler.uSteps
+        .mRes = config::idler.mRes
     };
 
     PulseGen pg(10, 100);
@@ -266,7 +266,7 @@ TEST_CASE("pulse_gen::accel_ramp", "[pulse_gen]") {
         .csPin = IDLER_CS_PIN,
         .stepPin = IDLER_STEP_PIN,
         .sgPin = IDLER_SG_PIN,
-        .uSteps = config::idler.uSteps
+        .mRes = config::idler.mRes
     };
 
     // TODO: output ramps still to be checked

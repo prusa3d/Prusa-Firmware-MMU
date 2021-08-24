@@ -70,56 +70,56 @@ static constexpr uint8_t stepTimerQuantum = 16;
 
 /// Pulley axis configuration
 static constexpr AxisConfig pulley = {
-    .dirOn = true,
-    .uSteps = 4, //x16
+    .dirOn = false,
+    .mRes = MRes_2,
     .vSense = false,
     .iRun = 20,
     .iHold = 20,
     .stealth = false,
-    .stepsPerUnit = 100,
+    .stepsPerUnit = 161.3,
 };
 
 /// Pulley motion limits
 static constexpr PulleyLimits pulleyLimits = {
-    .lenght = 100.0_mm,
-    .jerk = 10.0_mm_s,
-    .accel = 1000.0_mm_s2,
+    .lenght = 1000.0_mm, // TODO
+    .jerk = 4.0_mm_s,
+    .accel = 800.0_mm_s2,
 };
 
 /// Selector configuration
 static constexpr AxisConfig selector = {
     .dirOn = true,
-    .uSteps = 4, //x16
+    .mRes = MRes_2,
     .vSense = false,
     .iRun = 20,
     .iHold = 20,
     .stealth = false,
-    .stepsPerUnit = 100,
+    .stepsPerUnit = (200 * 2 / 8.),
 };
 
 /// Selector motion limits
 static constexpr SelectorLimits selectorLimits = {
-    .lenght = 100.0_mm,
-    .jerk = 10.0_mm_s,
-    .accel = 1000.0_mm_s2,
+    .lenght = 75.0_mm,
+    .jerk = 1.0_mm_s,
+    .accel = 200.0_mm_s2,
 };
 
 /// Idler configuration
 static constexpr AxisConfig idler = {
     .dirOn = true,
-    .uSteps = 4, //x16
+    .mRes = MRes_16,
     .vSense = false,
     .iRun = 20,
     .iHold = 20,
     .stealth = false,
-    .stepsPerUnit = 100,
+    .stepsPerUnit = (200 * 16 / 360.),
 };
 
 /// Idler motion limits
 static constexpr IdlerLimits idlerLimits = {
-    .lenght = 360.0_deg,
-    .jerk = 10.0_deg_s,
-    .accel = 1000.0_deg_s2,
+    .lenght = 270.0_deg,
+    .jerk = 0.1_deg_s,
+    .accel = 10.0_deg_s2,
 };
 
 /// Max retries of FeedToBondtech used in LoadFilament
