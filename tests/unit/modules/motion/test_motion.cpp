@@ -73,42 +73,43 @@ TEST_CASE("motion::auto_axis_enable", "[motion]") {
 
 TEST_CASE("motion::unit", "[motion]") {
     // test AxisUnit conversion in the PlanMove and PlanMoveTo.
+    // Use Selector explicitly, as it has an exact unit/step conversion.
     REQUIRE(motion.QueueEmpty());
-    REQUIRE(motion.Position(Pulley) == 0);
+    REQUIRE(motion.Position(Selector) == 0);
 
     // move with AxisUnit
-    pos_t target = config::pulley.stepsPerUnit * 10;
-    motion.PlanMoveTo<Pulley>(10.0_P_mm, 100.0_P_mm_s);
+    pos_t target = config::selector.stepsPerUnit * 10;
+    motion.PlanMoveTo<Selector>(10.0_S_mm, 100.0_S_mm_s);
     CHECK(stepUntilDone());
-    REQUIRE(motion.Position(Pulley) == target);
+    REQUIRE(motion.Position(Selector) == target);
 
     // move directly with physical units
-    motion.PlanMoveTo<Pulley>(10.0_mm, 100.0_mm_s);
+    motion.PlanMoveTo<Selector>(10.0_mm, 100.0_mm_s);
     REQUIRE(stepUntilDone() == 0);
-    REQUIRE(motion.Position(Pulley) == target);
+    REQUIRE(motion.Position(Selector) == target);
 
     // relative move with AxisUnit
-    motion.PlanMove<Pulley>(-5.0_P_mm, 100.0_P_mm_s);
+    motion.PlanMove<Selector>(-5.0_S_mm, 100.0_S_mm_s);
     CHECK(stepUntilDone());
-    REQUIRE(motion.Position(Pulley) == target / 2);
+    REQUIRE(motion.Position(Selector) == target / 2);
 
     // relative move with physical unit
-    motion.PlanMove<Pulley>(-5.0_mm, 100.0_mm_s);
+    motion.PlanMove<Selector>(-5.0_mm, 100.0_mm_s);
     CHECK(stepUntilDone());
-    REQUIRE(motion.Position(Pulley) == 0);
+    REQUIRE(motion.Position(Selector) == 0);
 
     // now test remaining axes
-    target = config::selector.stepsPerUnit * 10;
-    motion.PlanMoveTo<Selector>(10.0_S_mm, 100.0_S_mm_s);
-    motion.PlanMove<Selector>(10.0_mm, 100.0_mm_s);
+    target = config::pulley.stepsPerUnit * 10;
+    motion.PlanMoveTo<Pulley>(10.0_P_mm, 100.0_P_mm_s);
+    motion.PlanMove<Pulley>(10.0_mm, 100.0_mm_s);
     CHECK(stepUntilDone());
-    REQUIRE(motion.Position(Selector) == target * 2);
+    REQUIRE(abs(motion.Position(Pulley) - target * 2) <= 1);
 
     target = config::idler.stepsPerUnit * 10;
     motion.PlanMoveTo<Idler>(10.0_I_deg, 100.0_I_deg_s);
     motion.PlanMove<Idler>(10.0_deg, 100.0_deg_s);
     CHECK(stepUntilDone());
-    REQUIRE(motion.Position(Idler) == target * 2);
+    REQUIRE(abs(motion.Position(Idler) - target * 2) <= 1);
 }
 
 TEST_CASE("motion::dual_move_fwd", "[motion]") {
