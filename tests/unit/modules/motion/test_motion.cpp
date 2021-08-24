@@ -3,6 +3,17 @@
 
 using namespace modules::motion;
 
+namespace hal {
+namespace shr16 {
+extern uint8_t shr16_tmc_ena;
+} // namespace shr16
+} // namespace hal
+
+// Conveniently read the enable state set into the lower-level shift register
+bool getTMCEnabled(const MotorParams &mp) {
+    return (hal::shr16::shr16_tmc_ena & (1 << mp.idx));
+}
+
 // Perform Step() until all moves are completed, returning the number of steps performed.
 // Ensure the move doesn't run forever, making the test fail reliably.
 ssize_t stepUntilDone(size_t maxSteps = 100000) {
@@ -34,19 +45,23 @@ TEST_CASE("motion::basic", "[motion]") {
 TEST_CASE("motion::auto_axis_enable", "[motion]") {
     // by default the axis should start disabled
     REQUIRE(motion.Enabled(Pulley) == false);
+    REQUIRE(getTMCEnabled(axisParams[Pulley].params) == false);
 
     // enable manually the axis
     motion.SetEnabled(Pulley, true);
     REQUIRE(motion.Enabled(Pulley) == true);
+    REQUIRE(getTMCEnabled(axisParams[Pulley].params) == true);
 
     // now disable
     motion.SetEnabled(Pulley, false);
     REQUIRE(motion.Enabled(Pulley) == false);
+    REQUIRE(getTMCEnabled(axisParams[Pulley].params) == false);
 
     // planning a move should enable the axis automatically
     REQUIRE(motion.QueueEmpty());
     motion.PlanMove<Pulley>(1.0_mm, 100.0_mm_s);
     REQUIRE(motion.Enabled(Pulley) == true);
+    REQUIRE(getTMCEnabled(axisParams[Pulley].params) == true);
 }
 
 TEST_CASE("motion::unit", "[motion]") {
