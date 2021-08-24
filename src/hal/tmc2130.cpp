@@ -1,5 +1,5 @@
-#include "../tmc2130.h"
-#include "../../config/config.h"
+#include "tmc2130.h"
+#include "../config/config.h"
 
 namespace hal {
 namespace tmc2130 {
