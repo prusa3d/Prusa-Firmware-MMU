@@ -74,7 +74,7 @@ void TMC2130::SetCurrents(const MotorParams &params, const MotorCurrents &curren
 }
 
 void TMC2130::SetEnabled(const MotorParams &params, bool enabled) {
-    hal::shr16::shr16.SetTMCDir(params.idx, enabled);
+    hal::shr16::shr16.SetTMCEnabled(params.idx, enabled);
     if (this->enabled != enabled)
         ClearStallguard(params);
     this->enabled = enabled;

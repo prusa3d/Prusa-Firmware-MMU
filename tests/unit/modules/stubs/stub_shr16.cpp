@@ -7,10 +7,12 @@ SHR16 shr16;
 
 uint16_t shr16_v_copy;
 uint8_t shr16_tmc_dir;
+uint8_t shr16_tmc_ena;
 
 void SHR16::Init() {
     shr16_v_copy = 0;
     shr16_tmc_dir = 0;
+    shr16_tmc_ena = 0;
 }
 
 void SHR16::SetLED(uint16_t led) {
@@ -18,7 +20,11 @@ void SHR16::SetLED(uint16_t led) {
 }
 
 void SHR16::SetTMCEnabled(uint8_t index, bool ena) {
-    // do nothing right now
+    // this is using another array for testing convenience
+    if (ena)
+        shr16_tmc_ena |= (1 << index);
+    else
+        shr16_tmc_ena &= ~(1 << index);
 }
 
 void SHR16::SetTMCDir(uint8_t index, bool dir) {
