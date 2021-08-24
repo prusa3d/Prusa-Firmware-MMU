@@ -77,6 +77,9 @@ public:
     /// @returns true if the init was successful (TMC2130 responded ok)
     bool InitAxis(Axis axis);
 
+    /// Return the axis power status.
+    bool Enabled(Axis axis) const { return axisData[axis].enabled; }
+
     /// Set axis power status. One must manually ensure no moves are currently being
     /// performed by calling QueueEmpty().
     void SetEnabled(Axis axis, bool enabled);
