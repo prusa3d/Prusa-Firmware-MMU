@@ -1,4 +1,5 @@
 #pragma once
+#include "../config/config.h"
 #include "../hal/gpio.h"
 #include "../hal/shr16.h"
 #include "../hal/spi.h"
@@ -23,7 +24,7 @@ struct MotorParams {
     gpio::GPIO_pin csPin; ///< CS pin
     gpio::GPIO_pin stepPin; ///< step pin
     gpio::GPIO_pin sgPin; ///< stallguard pin
-    uint8_t uSteps; ///< microstep resolution (mres)
+    config::MRes mRes; ///< microstep resolution
 };
 
 struct MotorCurrents {

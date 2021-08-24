@@ -6,10 +6,23 @@ namespace config {
 
 using namespace unit;
 
+/// Available microstepping resolutions
+enum MRes : uint8_t {
+    MRes_256 = 0,
+    MRes_128 = 1,
+    MRes_64 = 2,
+    MRes_32 = 3,
+    MRes_16 = 4,
+    MRes_8 = 5,
+    MRes_4 = 6,
+    MRes_2 = 7,
+    MRes_1 = 8
+};
+
 /// Axis configuration data
 struct AxisConfig {
     bool dirOn; ///< direction ON state (for inversion)
-    uint8_t uSteps; ///< microstepping [0-8, where 0 is x256 and 8 is fullstepping]
+    MRes mRes; ///< microstepping [0-8, where 0 is x256 and 8 is fullstepping]
     bool vSense; ///< vSense scaling
     uint8_t iRun; ///< running current
     uint8_t iHold; ///< holding current

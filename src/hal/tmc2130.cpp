@@ -26,9 +26,9 @@ bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, Mot
         | (uint32_t)(1U & 0x0FU) << 7U //hend
         | (uint32_t)(2U & 0x03U) << 15U //tbl
         | (uint32_t)(currents.vSense & 0x01U) << 17U //vsense
-        | (uint32_t)(params.uSteps & 0x0FU) << 24U //mres
-        | (uint32_t)((bool)params.uSteps) << 28U //intpol
-        | (uint32_t)(1U & 0x01) << 29U; //dedge
+        | (uint32_t)(params.mRes & 0x0FU) << 24U //mres
+        | (uint32_t)(1U & 0x01) << 28U //intpol (always true)
+        | (uint32_t)(1U & 0x01) << 29U; //dedge (always true)
     WriteRegister(params, Registers::CHOPCONF, chopconf);
 
     ///apply currents
@@ -82,7 +82,7 @@ void TMC2130::SetEnabled(const MotorParams &params, bool enabled) {
 
 void TMC2130::ClearStallguard(const MotorParams &params) {
     // @todo: maximum resolution right now is x256/4 (uint8_t / 4)
-    sg_counter = 4 * (1 << (8 - params.uSteps)) - 1; /// one electrical full step (4 steps when fullstepping)
+    sg_counter = 4 * (1 << (8 - params.mRes)) - 1; /// one electrical full step (4 steps when fullstepping)
 }
 
 bool TMC2130::CheckForErrors(const MotorParams &params) {
@@ -116,7 +116,7 @@ void TMC2130::Isr(const MotorParams &params) {
     if (sg_counter) {
         if (SampleDiag(params))
             sg_counter--;
-        else if (sg_counter < (4 * (1 << (8 - params.uSteps)) - 1))
+        else if (sg_counter < (4 * (1 << (8 - params.mRes)) - 1))
             sg_counter++;
     }
 }
