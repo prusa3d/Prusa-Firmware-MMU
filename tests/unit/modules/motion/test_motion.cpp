@@ -43,24 +43,31 @@ TEST_CASE("motion::basic", "[motion]") {
 }
 
 TEST_CASE("motion::auto_axis_enable", "[motion]") {
+    // TODO: the low-level test performed by getTMCEnabled should be inside a dedicated
+    // TMC2130 test, not within regular motion tests (although doesn't harm).
+
     // by default the axis should start disabled
     REQUIRE(motion.Enabled(Pulley) == false);
+    REQUIRE(motion.DriverForAxis(Pulley).Enabled() == false);
     REQUIRE(getTMCEnabled(axisParams[Pulley].params) == false);
 
     // enable manually the axis
     motion.SetEnabled(Pulley, true);
     REQUIRE(motion.Enabled(Pulley) == true);
+    REQUIRE(motion.DriverForAxis(Pulley).Enabled() == true);
     REQUIRE(getTMCEnabled(axisParams[Pulley].params) == true);
 
     // now disable
     motion.SetEnabled(Pulley, false);
     REQUIRE(motion.Enabled(Pulley) == false);
+    REQUIRE(motion.DriverForAxis(Pulley).Enabled() == false);
     REQUIRE(getTMCEnabled(axisParams[Pulley].params) == false);
 
     // planning a move should enable the axis automatically
     REQUIRE(motion.QueueEmpty());
     motion.PlanMove<Pulley>(1.0_mm, 100.0_mm_s);
     REQUIRE(motion.Enabled(Pulley) == true);
+    REQUIRE(motion.DriverForAxis(Pulley).Enabled() == true);
     REQUIRE(getTMCEnabled(axisParams[Pulley].params) == true);
 }
 
