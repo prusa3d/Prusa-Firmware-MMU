@@ -10,7 +10,7 @@ inline ErrorCode &operator|=(ErrorCode &a, ErrorCode b) {
 }
 
 static ErrorCode TMC2130ToErrorCode(const hal::tmc2130::TMC2130 &tmc, uint8_t tmcIndex) {
-    ErrorCode e = ErrorCode::OK;
+    ErrorCode e = ErrorCode::RUNNING;
 
     if (tmc.GetErrorFlags().reset_flag) {
         e |= ErrorCode::TMC_RESET;
@@ -28,7 +28,7 @@ static ErrorCode TMC2130ToErrorCode(const hal::tmc2130::TMC2130 &tmc, uint8_t tm
         e |= ErrorCode::TMC_OVER_TEMPERATURE_ERROR;
     }
 
-    if (e != ErrorCode::OK) {
+    if (e != ErrorCode::RUNNING) {
         switch (tmcIndex) {
         case config::Axis::Pulley:
             e |= ErrorCode::TMC_PULLEY_BIT;
@@ -48,7 +48,7 @@ static ErrorCode TMC2130ToErrorCode(const hal::tmc2130::TMC2130 &tmc, uint8_t tm
 }
 
 bool CommandBase::Step() {
-    ErrorCode tmcErr = ErrorCode::OK;
+    ErrorCode tmcErr = ErrorCode::RUNNING;
     // check the global HW errors - may be we should avoid the modules layer and check for the HAL layer errors directly
     if (mi::idler.State() == mi::Idler::Failed) {
         state = ProgressCode::ERRTMCFailed;
@@ -68,7 +68,7 @@ bool CommandBase::Step() {
     // @@TODO not sure how to prevent losing the previously accumulated error ... or do I really need to do it?
     // May be the TMC error word just gets updated with new flags as the motion proceeds
     // And how about the logical errors like FINDA_DIDNT_SWITCH_ON?
-    if (tmcErr != ErrorCode::OK) {
+    if (tmcErr != ErrorCode::RUNNING) {
         error |= tmcErr;
         return true;
     }

@@ -39,11 +39,11 @@ void LoadFilamentCommonSetup(uint8_t slot, logic::LoadFilament &lf) {
     // no change in selector's position
     // FINDA off
     // green LED should blink, red off
-    REQUIRE(VerifyState(lf, false, mi::Idler::IdleSlotIndex(), slot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::EngagingIdler));
+    REQUIRE(VerifyState(lf, false, mi::Idler::IdleSlotIndex(), slot, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::EngagingIdler));
 
     // Stage 1 - engaging idler
     REQUIRE(WhileTopState(lf, ProgressCode::EngagingIdler, idlerEngageDisengageMaxSteps));
-    REQUIRE(VerifyState(lf, false, slot, slot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::FeedingToFinda));
+    REQUIRE(VerifyState(lf, false, slot, slot, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
 }
 
 void LoadFilamentSuccessful(uint8_t slot, logic::LoadFilament &lf) {
@@ -57,7 +57,7 @@ void LoadFilamentSuccessful(uint8_t slot, logic::LoadFilament &lf) {
         }
         return lf.TopLevelState() == ProgressCode::FeedingToFinda; },
         5000));
-    REQUIRE(VerifyState(lf, false, slot, slot, true, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::FeedingToBondtech));
+    REQUIRE(VerifyState(lf, false, slot, slot, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToBondtech));
 
     // Stage 3 - feeding to bondtech
     // we'll make a fsensor switch during the process
@@ -69,7 +69,7 @@ void LoadFilamentSuccessful(uint8_t slot, logic::LoadFilament &lf) {
         }
         return lf.TopLevelState() == ProgressCode::FeedingToBondtech; },
         5000));
-    REQUIRE(VerifyState(lf, false, slot, slot, true, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::DisengagingIdler));
+    REQUIRE(VerifyState(lf, false, slot, slot, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
 
     // Stage 4 - disengaging idler
     REQUIRE(WhileTopState(lf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
@@ -130,7 +130,7 @@ void FailedLoadToFindaResolveHelpFindaTriggered(uint8_t slot, logic::LoadFilamen
         return lf.TopLevelState() == ProgressCode::ERRHelpingFilament; },
         5000));
 
-    REQUIRE(VerifyState(lf, false, slot, slot, true, ml::off, ml::blink0, ErrorCode::OK, ProgressCode::FeedingToBondtech));
+    REQUIRE(VerifyState(lf, false, slot, slot, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::FeedingToBondtech));
 }
 
 void FailedLoadToFindaResolveHelpFindaDidntTrigger(uint8_t slot, logic::LoadFilament &lf) {

@@ -17,7 +17,7 @@ void EjectFilament::Reset(uint8_t param) {
         return;
     }
 
-    error = ErrorCode::OK;
+    error = ErrorCode::RUNNING;
     slot = param;
 
     if (mg::globals.FilamentLoaded()) {
@@ -62,6 +62,7 @@ bool EjectFilament::StepInner() {
         if (!mi::idler.Engaged()) { // idler disengaged
             mm::motion.Disable(mm::Pulley);
             state = ProgressCode::OK;
+            error = ErrorCode::OK;
         }
         break;
     case ProgressCode::OK:

@@ -47,7 +47,7 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA on
     // green LED should blink, red off
-    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::UnloadingToFinda));
+    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
 
     // run the automaton
     // Stage 1 - unloading to FINDA
@@ -65,7 +65,7 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA triggered off
     // green LED should blink
-    REQUIRE(VerifyState(uf, true, slot, slot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::DisengagingIdler));
+    REQUIRE(VerifyState(uf, true, slot, slot, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
 
     // Stage 2 - idler was engaged, disengage it
     REQUIRE(WhileTopState(uf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
@@ -75,7 +75,7 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA still triggered off
     // green LED should blink
-    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::AvoidingGrind));
+    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::AvoidingGrind));
 
     // Stage 3 - avoiding grind (whatever is that @@TODO)
     REQUIRE(WhileTopState(uf, ProgressCode::AvoidingGrind, 5000));
@@ -85,7 +85,7 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA still triggered off
     // green LED should blink
-    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, false, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::FinishingMoves));
+    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FinishingMoves));
 
     // Stage 4 - finishing moves and setting global state correctly
     REQUIRE(WhileTopState(uf, ProgressCode::FinishingMoves, 5000));
@@ -138,7 +138,7 @@ void FindaDidntTriggerCommonSetup(uint8_t slot, logic::UnloadFilament &uf) {
     // FINDA triggered off
     // green LED should blink
     // no error so far
-    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::UnloadingToFinda));
+    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
 
     // run the automaton
     // Stage 1 - unloading to FINDA - do NOT let it trigger - keep it pressed, the automaton should finish all moves with the pulley
@@ -215,7 +215,7 @@ void FindaDidntTriggerResolveHelpFindaTriggered(uint8_t slot, logic::UnloadFilam
     // no change in selector's position
     // FINDA depressed
     // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, true, slot, slot, false, ml::off, ml::blink0, ErrorCode::OK, ProgressCode::DisengagingIdler));
+    REQUIRE(VerifyState(uf, true, slot, slot, false, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
 }
 
 void FindaDidntTriggerResolveHelpFindaDidntTrigger(uint8_t slot, logic::UnloadFilament &uf) {
@@ -270,7 +270,7 @@ void FindaDidntTriggerResolveTryAgain(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA still on
     // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::UnloadingToFinda));
+    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
 }
 
 TEST_CASE("unload_filament::finda_didnt_trigger_resolve_try_again", "[unload_filament]") {

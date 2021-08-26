@@ -17,7 +17,7 @@ void CutFilament::Reset(uint8_t param) {
         return;
     }
 
-    error = ErrorCode::OK;
+    error = ErrorCode::RUNNING;
     cutSlot = param;
 
     if (mg::globals.FilamentLoaded()) {
@@ -90,6 +90,7 @@ bool CutFilament::StepInner() {
     case ProgressCode::ReturningSelector:
         if (ms::selector.Slot() == 5) { // selector returned to position, feed the filament back to FINDA
             state = ProgressCode::OK;
+            error = ErrorCode::OK;
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
             feed.Reset(true);
