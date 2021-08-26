@@ -18,7 +18,7 @@ void LoadFilament::Reset(uint8_t param) {
     }
 
     state = ProgressCode::EngagingIdler;
-    error = ErrorCode::OK;
+    error = ErrorCode::RUNNING;
     mg::globals.SetActiveSlot(param);
     mi::idler.Engage(mg::globals.ActiveSlot());
     ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
@@ -63,6 +63,7 @@ bool LoadFilament::StepInner() {
     case ProgressCode::DisengagingIdler:
         if (!mi::idler.Engaged()) {
             state = ProgressCode::OK;
+            error = ErrorCode::OK;
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
             mg::globals.SetFilamentLoaded(true);
@@ -108,7 +109,7 @@ bool LoadFilament::StepInner() {
         if (mf::finda.Pressed()) {
             // the help was enough to press the FINDA, we are ok, continue normally
             state = ProgressCode::FeedingToBondtech;
-            error = ErrorCode::OK;
+            error = ErrorCode::RUNNING;
         } else if (mm::motion.QueueEmpty()) {
             // helped a bit, but FINDA didn't trigger, return to the main error state
             state = ProgressCode::ERRDisengagingIdler;

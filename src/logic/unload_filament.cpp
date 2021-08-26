@@ -15,7 +15,7 @@ void UnloadFilament::Reset(uint8_t /*param*/) {
     // unloads filament from extruder - filament is above Bondtech gears
     mm::motion.InitAxis(mm::Pulley);
     state = ProgressCode::UnloadingToFinda;
-    error = ErrorCode::OK;
+    error = ErrorCode::RUNNING;
     unl.Reset(maxRetries);
     ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
     ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
@@ -56,6 +56,7 @@ bool UnloadFilament::StepInner() {
     case ProgressCode::FinishingMoves:
         if (mm::motion.QueueEmpty()) {
             state = ProgressCode::OK;
+            error = ErrorCode::OK;
             mm::motion.Disable(mm::Pulley);
             mg::globals.SetFilamentLoaded(false); // filament unloaded
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
@@ -99,7 +100,7 @@ bool UnloadFilament::StepInner() {
         if (!mf::finda.Pressed()) {
             // the help was enough to depress the FINDA, we are ok, continue normally
             state = ProgressCode::DisengagingIdler;
-            error = ErrorCode::OK;
+            error = ErrorCode::RUNNING;
         } else if (mm::motion.QueueEmpty()) {
             // helped a bit, but FINDA didn't trigger, return to the main error state
             state = ProgressCode::ERRDisengagingIdler;

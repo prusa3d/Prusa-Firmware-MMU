@@ -48,6 +48,7 @@ bool ToolChange::StepInner() {
             // as LoadFilament should handle all the possible error states on its own
             // There is no way the LoadFilament to finish in an error state
             state = ProgressCode::OK;
+            error = ErrorCode::OK;
         }
         break;
     case ProgressCode::OK:
