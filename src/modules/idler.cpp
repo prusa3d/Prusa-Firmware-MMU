@@ -51,10 +51,7 @@ bool Idler::Home() {
 bool Idler::Step() {
     switch (state) {
     case Moving:
-        if (mm::motion.QueueEmpty(mm::Idler)) {
-            // move finished
-            state = Ready;
-        }
+        PerformMove(mm::Idler);
         return false;
     case Ready:
         currentlyEngaged = plannedEngage;

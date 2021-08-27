@@ -36,10 +36,7 @@ bool Selector::Home() {
 bool Selector::Step() {
     switch (state) {
     case Moving:
-        if (mm::motion.QueueEmpty(mm::Selector)) {
-            // move finished
-            state = Ready;
-        }
+        PerformMove(mm::Selector);
         return false;
     case Ready:
         currentSlot = plannedSlot;

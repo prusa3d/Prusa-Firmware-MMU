@@ -50,6 +50,8 @@ protected:
     virtual void PrepareMoveToPlannedSlot() = 0;
 
     OperationResult InitMovement(config::Axis axis);
+
+    void PerformMove(config::Axis axis);
 };
 
 } // namespace motion

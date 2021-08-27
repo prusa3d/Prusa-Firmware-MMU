@@ -45,6 +45,7 @@ struct __attribute__((packed)) ErrorFlags {
         , s2g(0)
         , otpw(0)
         , ot(0) {}
+    inline bool Good() const { return reset_flag == 0 && uv_cp == 0 && s2g == 0 && otpw == 0 && ot == 0; }
 };
 
 /// TMC2130 interface - instances of this class are hidden in modules::motion::Motion::AxisData

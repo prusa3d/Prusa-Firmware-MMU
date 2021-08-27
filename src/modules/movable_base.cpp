@@ -15,5 +15,15 @@ MovableBase::OperationResult MovableBase::InitMovement(config::Axis axis) {
     }
 }
 
+void MovableBase::PerformMove(config::Axis axis) {
+    if (!mm::motion.DriverForAxis(axis).GetErrorFlags().Good()) {
+        // TMC2130 entered some error state, the planned move couldn't have been finished - result of operation is Failed
+        state = Failed;
+    } else if (mm::motion.QueueEmpty(axis)) {
+        // move finished
+        state = Ready;
+    }
+}
+
 } // namespace motion
 } // namespace modules
