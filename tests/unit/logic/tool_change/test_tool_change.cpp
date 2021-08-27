@@ -56,7 +56,12 @@ void ToolChange(logic::ToolChange tc, uint8_t fromSlot, uint8_t toSlot) {
 void NoToolChange(logic::ToolChange tc, uint8_t fromSlot, uint8_t toSlot) {
     ForceReinitAllAutomata();
 
+    // the filament is LOADED
+    mg::globals.SetFilamentLoaded(true);
+
     EnsureActiveSlotIndex(fromSlot);
+
+    REQUIRE(VerifyEnvironmentState(true, mi::Idler::IdleSlotIndex(), toSlot, false, ml::off, ml::off));
 
     // restart the automaton
     tc.Reset(toSlot);
@@ -64,6 +69,31 @@ void NoToolChange(logic::ToolChange tc, uint8_t fromSlot, uint8_t toSlot) {
     // should not do anything
     REQUIRE(tc.TopLevelState() == ProgressCode::OK);
     REQUIRE(tc.Error() == ErrorCode::OK);
+}
+
+void JustLoadFilament(logic::ToolChange tc, uint8_t slot) {
+    ForceReinitAllAutomata();
+
+    EnsureActiveSlotIndex(slot);
+
+    // verify filament NOT loaded
+    REQUIRE(VerifyEnvironmentState(false, mi::Idler::IdleSlotIndex(), slot, false, ml::off, ml::off));
+
+    // restart the automaton
+    tc.Reset(slot);
+
+    REQUIRE(WhileCondition(
+        tc,
+        [&](int step) -> bool {
+        if(step == 1000){ // on 1000th step make FINDA trigger
+            hal::adc::SetADC(config::findaADCIndex, 900);
+        }
+        return tc.TopLevelState() == ProgressCode::LoadingFilament; },
+        200000UL));
+
+    REQUIRE(tc.TopLevelState() == ProgressCode::OK);
+    REQUIRE(mg::globals.FilamentLoaded() == true);
+    REQUIRE(mg::globals.ActiveSlot() == slot);
 }
 
 TEST_CASE("tool_change::test0", "[tool_change]") {
@@ -99,5 +129,12 @@ TEST_CASE("tool_change::state_machine_reusal", "[tool_change]") {
                 NoToolChange(tc, fromSlot, toSlot);
             }
         }
+    }
+}
+
+TEST_CASE("tool_change::same_slot_just_unloaded_filament", "[tool_change]") {
+    for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
+        logic::ToolChange tc;
+        JustLoadFilament(tc, toSlot);
     }
 }
