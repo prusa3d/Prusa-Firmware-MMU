@@ -65,6 +65,10 @@ bool Motion::QueueEmpty() const {
     return true;
 }
 
+bool Motion::QueueEmpty(Axis axis) const {
+    return axes[axis].pos == axes[axis].targetPos;
+}
+
 void Motion::AbortPlannedMoves(bool halt) {
     for (uint8_t i = 0; i < 3; ++i) {
         axes[i].targetPos = axes[i].pos; // leave the axis where it was at the time of abort

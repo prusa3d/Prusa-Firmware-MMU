@@ -51,8 +51,7 @@ bool Idler::Home() {
 bool Idler::Step() {
     switch (state) {
     case Moving:
-        if (mm::motion.QueueEmpty()) { //@@TODO this will block until all axes made their movements,
-            // not sure if that is something we want
+        if (mm::motion.QueueEmpty(mm::Idler)) {
             // move finished
             state = Ready;
         }
@@ -70,11 +69,6 @@ bool Idler::Step() {
         return true;
     }
 }
-
-//hal::tmc2130::MotorParams Idler::TMCDriverParams() const {
-//    return
-
-//}
 
 } // namespace idler
 } // namespace modules

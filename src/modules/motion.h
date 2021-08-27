@@ -239,7 +239,7 @@ public:
 
     /// @returns true if all planned moves have been finished for one axis
     /// @param axis requested
-    bool QueueEmpty(Axis axis) const { return axisData[axis].ctrl.QueueEmpty(); }
+    bool QueueEmpty(Axis axis) const;
 
     /// @returns false if new moves can still be planned for one axis
     /// @param axis axis requested
