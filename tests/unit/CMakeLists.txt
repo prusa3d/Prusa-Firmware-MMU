@@ -1,6 +1,8 @@
 # first, let's create a symbolic target for all tests
 add_custom_target(tests)
 
+add_compile_definitions(UNITTEST)
+
 # include catch_discover_tests function from Catch2
 include(${Catch2_SOURCE_DIR}/contrib/Catch.cmake)
 
