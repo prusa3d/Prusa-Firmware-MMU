@@ -10,7 +10,7 @@ namespace selector {
 Selector selector;
 
 void Selector::PrepareMoveToPlannedSlot() {
-    mm::motion.PlanMoveTo<mm::Selector>(SlotPosition(plannedSlot), 1000.0_S_mm_s); // @@TODO
+    mm::motion.PlanMoveTo<mm::Selector>(SlotPosition(plannedSlot), mm::unitToAxisUnit<mm::S_speed_t>(config::selectorFeedrate));
 }
 
 Selector::OperationResult Selector::MoveToSlot(uint8_t slot) {

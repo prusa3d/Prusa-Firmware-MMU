@@ -10,7 +10,7 @@ namespace idler {
 Idler idler;
 
 void Idler::PrepareMoveToPlannedSlot() {
-    mm::motion.PlanMoveTo<mm::Idler>(SlotPosition(plannedSlot), 1000._I_deg_s); // @@TODO
+    mm::motion.PlanMoveTo<mm::Idler>(SlotPosition(plannedSlot), mm::unitToAxisUnit<mm::I_speed_t>(config::idlerFeedrate));
 }
 
 Idler::OperationResult Idler::Disengage() {

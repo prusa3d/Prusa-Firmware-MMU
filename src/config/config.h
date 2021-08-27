@@ -17,6 +17,8 @@ static constexpr U_deg idlerSlotPositions[toolCount + 1] = {
     0.0_deg
 };
 
+static constexpr U_deg_s idlerFeedrate = 1000._deg_s;
+
 // Selector's setup
 
 /// slots 0-4 are the real ones, the 5th is the farthest parking positions
@@ -28,6 +30,8 @@ static constexpr U_mm selectorSlotPositions[toolCount + 1] = {
     20.0_mm + 4 * 14.0_mm,
     20.0_mm + 5 * 14.0_mm
 };
+
+static constexpr U_mm_s selectorFeedrate = 1000._mm_s;
 
 // Printer's filament sensor setup
 static constexpr const uint16_t fsensorDebounceMs = 10;
