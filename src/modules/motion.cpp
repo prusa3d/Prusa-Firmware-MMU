@@ -62,6 +62,10 @@ bool Motion::QueueEmpty() const {
     return true;
 }
 
+bool Motion::QueueEmpty(config::Axis axis) const {
+    return axisData[axis].ctrl.QueueEmpty();
+}
+
 void Motion::AbortPlannedMoves(bool halt) {
     for (uint8_t i = 0; i != NUM_AXIS; ++i)
         axisData[i].ctrl.AbortPlannedMoves(halt);
