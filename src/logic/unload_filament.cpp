@@ -58,7 +58,7 @@ bool UnloadFilament::StepInner() {
             state = ProgressCode::OK;
             mm::motion.Disable(mm::Pulley);
             mg::globals.SetFilamentLoaded(false); // filament unloaded
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
         }
         return false;
     case ProgressCode::ERRDisengagingIdler: // couldn't unload to FINDA
