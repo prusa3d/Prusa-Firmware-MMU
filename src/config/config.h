@@ -76,7 +76,7 @@ static constexpr AxisConfig pulley = {
     .iRun = 20,
     .iHold = 20,
     .stealth = false,
-    .stepsPerUnit = (2 * 8.75),
+    .stepsPerUnit = (200 * 2 / 10.08125),
 };
 
 /// Pulley motion limits
