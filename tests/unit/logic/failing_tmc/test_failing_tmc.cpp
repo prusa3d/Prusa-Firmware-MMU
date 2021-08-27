@@ -56,26 +56,32 @@ void FailingIdler(hal::tmc2130::ErrorFlags ef, ErrorCode ec) {
 
     REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), 0, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
 
+    int failingStep = 5;
     REQUIRE(WhileCondition(
         uf,
         [&](int step) -> bool {
-        if(step == 5){ // on 5th step make the TMC report some error
+        if(step == failingStep){ // on 5th step make the TMC report some error
             CauseTMCError(mm::Idler, ef);
         }
         return uf.TopLevelState() == ProgressCode::UnloadingToFinda; },
         5000));
 
-    // and this must cause the state machine to run into a TMC error state and report the error correctly
-    // Please note we are leaving the Idler in an intermediate position due to the TMC failure,
-    // so we cannot use the usual VerifyState(), but have to check the stuff manually
-    // REQUIRE(VerifyState(uf, true, raw_6, 0, false, ml::blink0, ml::blink0, ec, ProgressCode::ERRTMCFailed));
-    REQUIRE(mm::axes[mm::Idler].pos == 6);
-    REQUIRE(ml::leds.Mode(0, ml::red) == ml::off);
-    REQUIRE(ml::leds.Mode(0, ml::green) == ml::blink0);
-    REQUIRE(uf.Error() == ec);
-    REQUIRE(uf.TopLevelState() == ProgressCode::ERRTMCFailed);
+    REQUIRE(mm::axes[mm::Idler].pos == failingStep + 1); // the simulated motion may proceed, but I don't care here. In reality no one really knows what the TMC does
 
     // repeated calls to step this logic automaton shall produce no change
+    for (int i = 0; i < 5; ++i) {
+        // and this must cause the state machine to run into a TMC error state and report the error correctly
+        // Please note we are leaving the Idler in an intermediate position due to the TMC failure,
+        // so we cannot use the usual VerifyState(), but have to check the stuff manually
+        // REQUIRE(VerifyState(uf, true, raw_6, 0, false, ml::blink0, ml::blink0, ec, ProgressCode::ERRTMCFailed));
+        REQUIRE(ml::leds.Mode(0, ml::red) == ml::off);
+        REQUIRE(ml::leds.Mode(0, ml::green) == ml::blink0);
+        REQUIRE(uf.Error() == ec);
+        REQUIRE(uf.TopLevelState() == ProgressCode::ERRTMCFailed);
+
+        main_loop();
+        uf.Step();
+    }
 }
 
 TEST_CASE("failing_tmc::failing_idler", "[failing_tmc]") {
