@@ -17,9 +17,13 @@ void ToolChange::Reset(uint8_t param) {
         return;
     }
 
-    if (param == mg::globals.ActiveSlot())
+    if (param == mg::globals.ActiveSlot() && mg::globals.FilamentLoaded()) {
+        // we are already at the correct slot and the filament is loaded - nothing to do
         return;
+    }
 
+    // we are either already at the correct slot, just the filament is not loaded - load the filament directly
+    // or we are standing at another slot ...
     plannedSlot = param;
 
     if (mg::globals.FilamentLoaded()) {
