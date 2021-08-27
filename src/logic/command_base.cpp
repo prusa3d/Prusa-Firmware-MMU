@@ -62,7 +62,7 @@ bool CommandBase::Step() {
     //    if (ms::selector.State() == ms::Selector::Failed) {
     //        state = ProgressCode::ERRTMCFailed;
     //        error |= TMC2130ToErrorCode(mm::motion.DriverForAxis(mm::Axis::Selector), mm::Axis::Selector);
-    //        return true; // the HW error prevents us from continuing with the with the state machine - the MMU must be restarted/fixed before continuing
+    //        return true; // the HW error prevents us from continuing with the state machine - the MMU must be restarted/fixed before continuing
     //    }
 
     // @@TODO not sure how to prevent losing the previously accumulated error ... or do I really need to do it?

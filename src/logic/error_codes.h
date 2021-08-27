@@ -14,7 +14,7 @@
 /// TMC_PULLEY_BIT, TMC_SELECTOR_BIT, TMC_IDLER_BIT,
 /// The resulting error is a bitwise OR over 3 TMC drivers and their status, which should cover most of the situations correctly.
 enum class ErrorCode : uint_fast16_t {
-    RUNNING = 0x0000, ///< the operation is still running
+    RUNNING = 0x0000, ///< the operation is still running - keep this value as ZERO as it is used for initialization of error codes as well
     OK = 0x0001, ///< the operation finished OK
 
     /// Unload Filament related error codes
