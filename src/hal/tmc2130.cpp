@@ -15,7 +15,7 @@ bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, Mot
     // if the version is incorrect or a bit always set to 1 is suddenly 0
     // (the supposed SD_MODE pin that doesn't exist on this driver variant)
     if (((IOIN >> 24U) != 0x11) | !(IOIN & (1U << 6U)))
-        return true; // @todo return some kind of failure
+        return true; // @@TODO return some kind of failure
 
     ///clear reset_flag as we are (re)initializing
     errorFlags.reset_flag = false;
@@ -63,7 +63,7 @@ bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, Mot
 
 void TMC2130::SetMode(const MotorParams &params, MotorMode mode) {
     ///0xFFF00 is used as a "Normal" mode threshold since stealthchop will be used at standstill.
-    WriteRegister(params, Registers::TPWMTHRS, (mode == Stealth) ? 70 : 0xFFF00); // @todo should be configurable
+    WriteRegister(params, Registers::TPWMTHRS, (mode == Stealth) ? 70 : 0xFFF00); // @@TODO should be configurable
 }
 
 void TMC2130::SetCurrents(const MotorParams &params, const MotorCurrents &currents) {
@@ -81,7 +81,7 @@ void TMC2130::SetEnabled(const MotorParams &params, bool enabled) {
 }
 
 void TMC2130::ClearStallguard(const MotorParams &params) {
-    // @todo: maximum resolution right now is x256/4 (uint8_t / 4)
+    // @@TODO maximum resolution right now is x256/4 (uint8_t / 4)
     sg_counter = 4 * (1 << (8 - params.mRes)) - 1; /// one electrical full step (4 steps when fullstepping)
 }
 
@@ -132,6 +132,7 @@ void TMC2130::_spi_tx_rx(const MotorParams &params, uint8_t (&pData)[5]) {
 }
 
 void TMC2130::_handle_spi_status(const MotorParams &params, uint8_t status) {
+    //@@TODO
     // errorFlags.reset_flag |= status & (1 << 0);
     // errorFlags.driver_error |= status & (1 << 1);
 }

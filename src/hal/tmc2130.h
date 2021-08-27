@@ -140,7 +140,7 @@ private:
 
     ErrorFlags errorFlags;
     bool enabled = false;
-    uint8_t sg_counter;
+    uint8_t sg_counter = 0;
 };
 
 } // namespace tmc2130
