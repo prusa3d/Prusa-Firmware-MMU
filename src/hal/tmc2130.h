@@ -126,6 +126,14 @@ public:
         return errorFlags;
     }
 
+#ifdef UNITTEST
+    /// A very brutal way of fiddling with the error flags from the outside of this class
+    /// Intended only for the UNIT TESTS!
+    inline void SetErrorFlags(ErrorFlags ef) {
+        errorFlags = ef;
+    }
+#endif
+
     /// Reads a driver register and updates the status flags
     uint32_t ReadRegister(const MotorParams &params, Registers reg);
 

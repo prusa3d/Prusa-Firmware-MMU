@@ -13,3 +13,5 @@ add_subdirectory(load_filament)
 add_subdirectory(tool_change)
 
 add_subdirectory(unload_filament)
+
+add_subdirectory(failing_tmc)
