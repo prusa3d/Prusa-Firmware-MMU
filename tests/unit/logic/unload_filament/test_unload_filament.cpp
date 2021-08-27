@@ -94,8 +94,8 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
     // idler should have been disengaged
     // no change in selector's position
     // FINDA still triggered off
-    // green LED should be ON
-    REQUIRE(VerifyState(uf, false, mi::Idler::IdleSlotIndex(), slot, false, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
+    // green LED should be OFF
+    REQUIRE(VerifyState(uf, false, mi::Idler::IdleSlotIndex(), slot, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
 
     // Stage 5 - repeated calls to TopLevelState should return "OK"
     REQUIRE(uf.TopLevelState() == ProgressCode::OK);
