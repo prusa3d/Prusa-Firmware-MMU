@@ -167,7 +167,6 @@ def main():
     # test each set
     for run in runs:
         check_run(info, run)
-        break
 
 
 if __name__ == '__main__':
