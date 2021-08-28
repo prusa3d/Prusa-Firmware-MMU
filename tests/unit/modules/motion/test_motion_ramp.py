@@ -36,7 +36,7 @@ def load_data(data):
     return info, runs
 
 
-def check_axis(info, ax_info, data):
+def check_axis(info, ax_info, data, fine_check):
     tb = info['timebase']
 
     # remove duplicate positions (meaning another axis was moved, not the current)
@@ -92,7 +92,7 @@ def check_axis(info, ax_info, data):
     startrate = data['rate'].iat[2]  # skip first two null values
     endrate = data['rate'].iat[-1]
 
-    maxdev_coarse = (maxrate - startrate) / 20  # 5% speed deviation
+    maxdev_coarse = (maxrate - startrate) / 10  # 10% speed deviation
     maxdev_fine = 20  # absolute maximum deviation
     maxdev_acc = 0.05  # 5% acceleration deviation
 
@@ -108,12 +108,14 @@ def check_axis(info, ax_info, data):
     # acceleration (fine)
     acc_data['exp_fine'] = acc_data['rate'].iat[0] + acc_data['ts_s'] \
         / acc_time * (acc_data['rate'].iat[-1] - startrate)
-    assert ((acc_data['exp_fine'] - acc_data['rate']).abs().max() <
-            maxdev_fine)
+    if fine_check:
+        assert ((acc_data['exp_fine'] - acc_data['rate']).abs().max() <
+                maxdev_fine)
 
     # check effective acceleration rate
     acc_vel = (acc_data['rate'].iat[-1] - acc_data['rate'].iat[0]) / acc_time
-    assert (abs(acc_vel - ax_info['accel']) / ax_info['accel'] < 0.05)
+    if fine_check:
+        assert (abs(acc_vel - ax_info['accel']) / ax_info['accel'] < 0.05)
 
     # deceleration (coarse)
     dec_data = data[(data['pos'] > (data['pos'].iat[-1] - acc_dist))][2:]
@@ -127,21 +129,25 @@ def check_axis(info, ax_info, data):
     # deceleration (fine)
     dec_data['exp_fine'] = dec_data['rate'].iat[0] - dec_data['ts_s'] \
         / dec_time * (dec_data['rate'].iat[0] - endrate)
-    assert ((dec_data['exp_fine'] - dec_data['rate']).abs().max() <
-            maxdev_fine)
+    if fine_check:
+        assert ((dec_data['exp_fine'] - dec_data['rate']).abs().max() <
+                maxdev_fine)
 
     # check effective deceleration rate
-    dec_vel = (dec_data['rate'].iat[-1] - dec_data['rate'].iat[0]) / dec_time
-    print(abs(dec_vel - ax_info['accel']) / ax_info['accel'] < 0.05)
+    dec_vel = (dec_data['rate'].iat[0] - dec_data['rate'].iat[-1]) / dec_time
+    if fine_check:
+        # TODO: deceleration rate is not as accurate as acceleration!
+        assert (abs(dec_vel - ax_info['accel']) / ax_info['accel'] < 0.15)
 
 
 def check_run(info, run):
     # unpack the axis data
     ax_info, data = run
+    ax_count = len(ax_info)
 
     # split axis information
     ax_data = []
-    for ax in range(2):
+    for ax in range(len(ax_info)):
         ax_info[ax]['name'] = ax
         tmp = []
         for i in range(len(data)):
@@ -150,9 +156,11 @@ def check_run(info, run):
 
         ax_data.append(pd.DataFrame(tmp, columns=['ts', 'int', 'pos']))
 
-    # check each axis independently
-    for ax in range(2):
-        check_axis(info, ax_info[ax], ax_data[ax])
+    # check each axis independently, but only perform fine-grained checks when a single
+    # axis is run due to stepperTimerQuantum introducing discretization noise
+    fine_check = ax_count == 1
+    for ax in range(ax_count):
+        check_axis(info, ax_info[ax], ax_data[ax], fine_check)
 
 
 def main():
