@@ -74,10 +74,14 @@ st_timer_t Motion::Step() {
     for (uint8_t i = 0; i != NUM_AXIS; ++i) {
         timers[i] = axisData[i].residual;
         if (timers[i] <= config::stepTimerQuantum) {
-            timers[i] += axisData[i].ctrl.Step(axisParams[i].params);
+            if (timers[i] || !axisData[i].ctrl.QueueEmpty()) {
+                if (st_timer_t next = axisData[i].ctrl.Step(axisParams[i].params)) {
+                    timers[i] += next;
 
-            // axis has been moved, run the tmc2130 Isr for this axis
-            axisData[i].drv.Isr(axisParams[i].params);
+                    // axis has been moved, run the tmc2130 Isr for this axis
+                    axisData[i].drv.Isr(axisParams[i].params);
+                }
+            }
         }
     }
 
