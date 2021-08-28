@@ -9,19 +9,19 @@
 // AVR libc doesn't support cmath
 #include <math.h>
 
-// Use builtin functions for min/max/abs
 template <typename T>
 static inline const T min(T a, T b) {
-    return __builtin_min((a, b));
+    return a <= b ? a : b;
 }
 
 template <typename T>
 static inline const T max(T a, T b) {
-    return __builtin_max((a, b));
+    return a > b ? a : b;
 }
 
 template <typename T>
 static inline const T abs(T n) {
+    // Use builtin function when available
     return __builtin_abs((n));
 }
 
