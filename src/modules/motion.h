@@ -18,8 +18,8 @@ using pulse_gen::st_timer_t;
 // Check for configuration invariants
 static_assert(
     (1. / (F_CPU / config::stepTimerFrequencyDivider) * config::stepTimerQuantum)
-        < (1. / config::maxStepFrequency / 2),
-    "stepTimerQuantum must be smaller than the maximal stepping frequency interval");
+        > (1. / config::maxStepFrequency),
+    "stepTimerQuantum must be larger than the maximal stepping frequency interval");
 
 /// Main axis enumeration
 struct AxisParams {
