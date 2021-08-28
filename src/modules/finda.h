@@ -14,7 +14,7 @@ public:
     inline constexpr FINDA()
         : debounce::Debouncer(config::findaDebounceMs) {};
 
-    /// Performs one step of the state machine - reads the ADC, processes debouncing, updates states of FINDA
+    /// Performs one step of the state machine - reads the digital pin, processes debouncing, updates states of FINDA
     void Step();
 
     using debounce::Debouncer::Pressed;
