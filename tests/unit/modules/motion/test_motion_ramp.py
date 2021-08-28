@@ -115,7 +115,8 @@ def check_axis(info, ax_info, data, fine_check):
     # check effective acceleration rate
     acc_vel = (acc_data['rate'].iat[-1] - acc_data['rate'].iat[0]) / acc_time
     if fine_check:
-        assert (abs(acc_vel - ax_info['accel']) / ax_info['accel'] < 0.05)
+        assert (abs(acc_vel - ax_info['accel']) / ax_info['accel'] <
+                maxdev_acc)
 
     # deceleration (coarse)
     dec_data = data[(data['pos'] > (data['pos'].iat[-1] - acc_dist))][2:]
@@ -147,7 +148,7 @@ def check_run(info, run):
 
     # split axis information
     ax_data = []
-    for ax in range(len(ax_info)):
+    for ax in range(ax_count):
         ax_info[ax]['name'] = ax
         tmp = []
         for i in range(len(data)):
