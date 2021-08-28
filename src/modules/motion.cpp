@@ -101,8 +101,8 @@ st_timer_t Motion::Step() {
 }
 
 static inline void Isr() {
-    st_timer_t next = motion.Step();
 #ifdef __AVR__
+    st_timer_t next = motion.Step();
     // TODO: use proper timer abstraction
     if (next)
         OCR1A = next;
