@@ -5,12 +5,13 @@
 using namespace modules::motion;
 
 int main(int argc, const char *argv[]) {
-    const char *output = argv[1];
-    if (!argv[1]) {
+    if (argc != 2 || !argv[1]) {
         fprintf(stderr, "Usage: %s <output>\n", argv[0]);
         return EX_USAGE;
     }
 
+    // "parse" arguments
+    const char *output = argv[1];
     FILE *fd = fopen(output, "w");
     if (!fd) {
         fprintf(stderr, "%s: can't open output file %s: ", argv[0], output);
@@ -29,43 +30,49 @@ int main(int argc, const char *argv[]) {
     // write common parameters
     fprintf(fd, "{\"timebase\": %lu}\n", F_CPU / config::stepTimerFrequencyDivider);
 
-    for (int accel = 2000; accel <= 50000; accel *= 2) {
-        // first axis defines the nominal values
-        motion.SetJerk(ax_a, maxJerk);
-        motion.SetPosition(ax_a, 0);
-        motion.SetAcceleration(ax_a, accel);
-        motion.PlanMoveTo(ax_a, steps_a, maxFeedRate);
+    for (int ax_cnt = 0; ax_cnt != 2; ++ax_cnt) {
+        for (int accel = 2000; accel <= 50000; accel *= 2) {
+            // first axis defines the nominal values
+            motion.SetJerk(ax_a, maxJerk);
+            motion.SetPosition(ax_a, 0);
+            motion.SetAcceleration(ax_a, accel);
+            motion.PlanMoveTo(ax_a, steps_a, maxFeedRate);
 
-        fprintf(fd, "[{\"steps\": %d, \"jerk\": %d, \"accel\": %d, \"maxrate\": %d}, ",
-            steps_a, maxJerk, accel, maxFeedRate);
+            fprintf(fd, "[{\"steps\": %d, \"jerk\": %d, \"accel\": %d, \"maxrate\": %d}",
+                steps_a, maxJerk, accel, maxFeedRate);
 
-        // second axis finishes slightly sooner at triple acceleration to maximize the
-        // aliasing effects
-        int accel_3 = accel * 3;
-        motion.SetJerk(ax_b, 1);
-        motion.SetPosition(ax_b, 0);
-        motion.SetAcceleration(ax_b, accel_3);
-        motion.PlanMoveTo(ax_b, steps_b, maxFeedRate);
+            if (ax_cnt > 1) {
+                // second axis finishes slightly sooner at triple acceleration to maximize the
+                // aliasing effects
+                int accel_3 = accel * 3;
+                motion.SetJerk(ax_b, 1);
+                motion.SetPosition(ax_b, 0);
+                motion.SetAcceleration(ax_b, accel_3);
+                motion.PlanMoveTo(ax_b, steps_b, maxFeedRate);
 
-        fprintf(fd, "{\"steps\": %d, \"jerk\": %d, \"accel\": %d, \"maxrate\": %d}]\n",
-            steps_b, maxJerk, accel_3, maxFeedRate);
+                fprintf(fd, ", {\"steps\": %d, \"jerk\": %d, \"accel\": %d, \"maxrate\": %d}",
+                    steps_b, maxJerk, accel_3, maxFeedRate);
+            }
 
-        // initial state
-        unsigned long ts = 0;
-        st_timer_t next = 0;
-        fprintf(fd, "%lu %u %d %d\n", ts, next, motion.CurPosition(ax_a), motion.CurPosition(ax_b));
+            fprintf(fd, "]\n");
 
-        // step and output time, interval and positions
-        do {
-            next = motion.Step();
-            pos_t pos_idler = motion.CurPosition(ax_a);
-            pos_t pos_selector = motion.CurPosition(ax_b);
+            // initial state
+            unsigned long ts = 0;
+            st_timer_t next = 0;
+            fprintf(fd, "%lu %u %d %d\n", ts, next, motion.CurPosition(ax_a), motion.CurPosition(ax_b));
 
-            fprintf(fd, "%lu %u %d %d\n", ts, next, pos_idler, pos_selector);
+            // step and output time, interval and positions
+            do {
+                next = motion.Step();
+                pos_t pos_idler = motion.CurPosition(ax_a);
+                pos_t pos_selector = motion.CurPosition(ax_b);
 
-            ts += next;
-        } while (next);
-        fprintf(fd, "\n");
+                fprintf(fd, "%lu %u %d %d\n", ts, next, pos_idler, pos_selector);
+
+                ts += next;
+            } while (next);
+            fprintf(fd, "\n");
+        }
     }
 
     return EX_OK;
