@@ -70,7 +70,7 @@ __attribute__((always_inline)) inline Level ReadPin(const GPIO_pin portPin) {
 __attribute__((always_inline)) inline void TogglePin(const GPIO_pin portPin) {
 #ifdef __AVR__
     // Optimized path for AVR, resulting in a pin toggle
-    portPin.port->PINx |= (1 << portPin.pin);
+    portPin.port->PINx = (1 << portPin.pin);
 #else
     WritePin(portPin, (Level)(ReadPin(portPin) != Level::high));
 #endif
