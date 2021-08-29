@@ -60,6 +60,10 @@ public:
     /// @param x position to set
     void SetPosition(pos_t x) { position = x; }
 
+    /// Fetch the target rate of the last planned segment, or the current effective rate
+    /// when the move has been aborted.
+    steps_t Rate() const { return last_rate; }
+
     /// @returns true if all planned moves have been finished
     bool QueueEmpty() const { return block_index.empty(); }
 
@@ -173,6 +177,7 @@ private:
     pos_t position; ///< Current axis position
     steps_t max_jerk; ///< Axis jerk (could be constant)
     steps_t acceleration; ///< Current axis acceleration
+    steps_t last_rate; ///< Target speed at the last junction
 
     // Step parameters
     rate_t acceleration_time, deceleration_time;
