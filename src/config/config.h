@@ -77,9 +77,9 @@ static constexpr uint16_t stepTimerQuantum = 256; // 256 = 128us
 static constexpr AxisConfig pulley = {
     .dirOn = false,
     .mRes = MRes_2,
-    .vSense = false,
-    .iRun = 20,
-    .iHold = 20,
+    .vSense = true,
+    .iRun = 30,
+    .iHold = 1,
     .stealth = false,
     .stepsPerUnit = 161.3,
 };
@@ -96,8 +96,8 @@ static constexpr AxisConfig selector = {
     .dirOn = true,
     .mRes = MRes_2,
     .vSense = false,
-    .iRun = 20,
-    .iHold = 20,
+    .iRun = 17,
+    .iHold = 5,
     .stealth = false,
     .stepsPerUnit = (200 * 2 / 8.),
 };
@@ -114,8 +114,8 @@ static constexpr AxisConfig idler = {
     .dirOn = true,
     .mRes = MRes_16,
     .vSense = false,
-    .iRun = 20,
-    .iHold = 20,
+    .iRun = 23,
+    .iHold = 11,
     .stealth = false,
     .stepsPerUnit = (200 * 16 / 360.),
 };
