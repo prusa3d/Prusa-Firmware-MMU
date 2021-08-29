@@ -60,7 +60,20 @@ def check_axis(info, ax_info, data, fine_check):
     # convert timestamps to seconds
     data['ts_s'] = data['ts'] / tb
     data['int_s'] = data['int'] / tb
-    data['rate'] = 1 / data['int_s']
+
+    maxdev_fine = 20  # absolute maximum deviation
+    maxdev_acc = 0.05  # 5% acceleration deviation
+    maxdev_coarse = 0.1  # 10% speed deviation
+    ramp_smp_skip = 3  # skip initial null values
+
+    if fine_check:
+        # exact rate
+        data['rate'] = 1 / data['int_s']
+
+    else:
+        # reconstruct the rate from 3 samples
+        data['rate'] = 1 / data.rolling(3)['int_s'].median()
+        data['rate'].bfill(inplace=True)
 
     # ensure we never _exceed_ max feedrate
     assert ((data['rate'][2:] <= ax_info['maxrate']).all())
@@ -80,7 +93,8 @@ def check_axis(info, ax_info, data, fine_check):
         # check cruising speed
         cruise_data = data[(data['pos'] > acc_dist + 2)
                            & (data['pos'] < acc_dist + 2 + c_dist)]
-        assert ((cruise_data['rate'] - maxrate).abs().max() < 1)
+        cruise_maxdev = 1 if fine_check else maxrate * maxdev_coarse
+        assert ((cruise_data['rate'] - maxrate).abs().max() < cruise_maxdev)
 
     # checking acceleration segments require a decent number of samples for good results
     if acc_dist < 10:
@@ -89,21 +103,17 @@ def check_axis(info, ax_info, data, fine_check):
     # TODO: minrate is currently hardcoded in the FW as a function of the timer type (we
     # can't represent infinitely-long intervals, to the slowest speed itself is limited).
     # We recover the minrate here directly from the trace, but perhaps we shouldn't
-    startrate = data['rate'].iat[2]  # skip first two null values
+    startrate = data['rate'].iat[ramp_smp_skip]
     endrate = data['rate'].iat[-1]
 
-    maxdev_coarse = (maxrate - startrate) / 10  # 10% speed deviation
-    maxdev_fine = 20  # absolute maximum deviation
-    maxdev_acc = 0.05  # 5% acceleration deviation
-
     # check acceleration segment (coarse)
-    acc_data = data[(data['pos'] < acc_dist)][2:]
+    acc_data = data[(data['pos'] < acc_dist)][ramp_smp_skip:]
     acc_data['ts_s'] -= acc_data['ts_s'].iat[0]
     acc_time = acc_data['ts_s'].iat[-1]
     acc_data['exp_rate'] = startrate + acc_data['ts_s'] \
         / acc_time * (maxrate - startrate)
     assert ((acc_data['exp_rate'] - acc_data['rate']).abs().max() <
-            maxdev_coarse)
+            maxrate * maxdev_coarse)
 
     # acceleration (fine)
     acc_data['exp_fine'] = acc_data['rate'].iat[0] + acc_data['ts_s'] \
@@ -125,7 +135,7 @@ def check_axis(info, ax_info, data, fine_check):
     dec_data['exp_rate'] = maxrate - dec_data['ts_s'] \
         / dec_time * (maxrate - endrate)
     assert ((dec_data['exp_rate'] - dec_data['rate']).abs().max() <
-            maxdev_coarse)
+            maxrate * maxdev_coarse)
 
     # deceleration (fine)
     dec_data['exp_fine'] = dec_data['rate'].iat[0] - dec_data['ts_s'] \

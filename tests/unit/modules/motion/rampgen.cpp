@@ -41,7 +41,7 @@ int main(int argc, const char *argv[]) {
             fprintf(fd, "[{\"steps\": %d, \"jerk\": %d, \"accel\": %d, \"maxrate\": %d}",
                 steps_a, maxJerk, accel, maxFeedRate);
 
-            if (ax_cnt > 1) {
+            if (ax_cnt > 0) {
                 // second axis finishes slightly sooner at triple acceleration to maximize the
                 // aliasing effects
                 int accel_3 = accel * 3;
