@@ -3,7 +3,11 @@
 #pragma once
 
 #ifndef __AVR__
-#include <cmath>
+#include <cmath> // abs
+
+#include <algorithm>
+using std::max;
+using std::min;
 #else
 
 // AVR libc doesn't support cmath
