@@ -66,8 +66,10 @@ void PulseGen::CalculateTrapezoid(block_t *block, steps_t entry_speed, steps_t e
                 accelerate_steps += acceleration_x2;
             accelerate_steps /= acceleration_x4;
             accelerate_steps += (block->steps >> 1);
-            if (accelerate_steps > block->steps)
+            if (accelerate_steps > block->steps) {
                 accelerate_steps = block->steps;
+                final_rate = sqrt(acceleration_x2 * accelerate_steps + initial_rate_sqr);
+            }
         } else {
             decelerate_steps = initial_rate_sqr - final_rate_sqr;
             if (block->steps & 1)
@@ -86,7 +88,7 @@ void PulseGen::CalculateTrapezoid(block_t *block, steps_t entry_speed, steps_t e
     block->final_rate = final_rate;
 }
 
-bool PulseGen::PlanMoveTo(pos_t target, steps_t feed_rate) {
+bool PulseGen::PlanMoveTo(pos_t target, rate_t feed_rate, rate_t end_rate) {
     // Prepare to set up new block
     if (block_index.full())
         return false;
@@ -106,6 +108,13 @@ bool PulseGen::PlanMoveTo(pos_t target, steps_t feed_rate) {
     // Acceleration of the segment, in steps/sec^2
     block->acceleration = acceleration;
     block->acceleration_rate = block->acceleration * (rate_t)((float)F_CPU / (F_CPU / config::stepTimerFrequencyDivider));
+
+    // Simplified forward jerk: do not handle reversals
+    steps_t entry_speed;
+    if (feed_rate >= last_rate)
+        entry_speed = last_rate + min(feed_rate - last_rate, max_jerk);
+    else
+        entry_speed = last_rate - min(last_rate - feed_rate, max_jerk);
 
     // Perform the trapezoid calculations
     CalculateTrapezoid(block, entry_speed, end_rate);

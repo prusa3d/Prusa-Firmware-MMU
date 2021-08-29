@@ -39,9 +39,10 @@ public:
     /// Enqueue a single move in steps starting and ending at zero speed with maximum
     /// feedrate. Moves can only be enqueued if the axis is not Full().
     /// @param pos target position
-    /// @param feedrate maximum feedrate
+    /// @param feed_rate maximum feedrate
+    /// @param end_rate endding feedrate (may not be reached!)
     /// @returns true if the move has been enqueued
-    bool PlanMoveTo(pos_t pos, steps_t feedrate);
+    bool PlanMoveTo(pos_t pos, rate_t feed_rate, rate_t end_rate = 0);
 
     /// Stop whatever moves are being done
     /// @param halt When true, also abruptly stop axis movement.

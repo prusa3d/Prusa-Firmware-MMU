@@ -105,15 +105,17 @@ public:
     /// feedrate. Moves can only be enqueued if the axis is not Full().
     /// @param axis axis affected
     /// @param pos target position
-    /// @param feedrate maximum feedrate
-    void PlanMoveTo(Axis axis, pos_t pos, steps_t feedrate);
+    /// @param feed_rate maximum feedrate
+    /// @param end_rate endding feedrate (may not be reached!)
+    void PlanMoveTo(Axis axis, pos_t pos, steps_t feed_rate, steps_t end_rate = 0);
 
     /// Enqueue a single axis move using PlanMoveTo, but using AxisUnit. The Axis needs to
     /// be supplied as the first template argument: PlanMoveTo<axis>(pos, rate).
     /// @see PlanMoveTo, unitToSteps
     template <Axis A>
-    constexpr void PlanMoveTo(AxisUnit<pos_t, A, Lenght> pos, AxisUnit<steps_t, A, Speed> feedrate) {
-        PlanMoveTo(A, pos.v, feedrate.v);
+    constexpr void PlanMoveTo(AxisUnit<pos_t, A, Lenght> pos,
+        AxisUnit<steps_t, A, Speed> feed_rate, AxisUnit<steps_t, A, Speed> end_rate = { 0 }) {
+        PlanMoveTo(A, pos.v, feed_rate.v, end_rate.v);
     }
 
     /// Enqueue a single axis move using PlanMoveTo, but using physical units. The Axis
@@ -121,27 +123,30 @@ public:
     /// @see PlanMoveTo, unitToSteps
     template <Axis A, config::UnitBase B>
     constexpr void PlanMoveTo(config::Unit<long double, B, Lenght> pos,
-        config::Unit<long double, B, Speed> feedrate) {
+        config::Unit<long double, B, Speed> feed_rate, config::Unit<long double, B, Speed> end_rate = { 0 }) {
         PlanMoveTo<A>(
             unitToAxisUnit<AxisUnit<pos_t, A, Lenght>>(pos),
-            unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(feedrate));
+            unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(feed_rate),
+            unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(end_rate));
     }
 
     /// Enqueue a single axis move in steps starting and ending at zero speed with maximum
     /// feedrate. Moves can only be enqueued if the axis is not Full().
     /// @param axis axis affected
     /// @param delta relative to current position
-    /// @param feedrate maximum feedrate
-    void PlanMove(Axis axis, pos_t delta, steps_t feedrate) {
-        PlanMoveTo(axis, Position(axis) + delta, feedrate);
+    /// @param feed_rate maximum feedrate
+    /// @param end_rate endding feedrate (may not be reached!)
+    void PlanMove(Axis axis, pos_t delta, steps_t feed_rate, steps_t end_rate = 0) {
+        PlanMoveTo(axis, Position(axis) + delta, feed_rate, end_rate);
     }
 
     /// Enqueue a single axis move using PlanMove, but using AxisUnit. The Axis needs to
     /// be supplied as the first template argument: PlanMove<axis>(pos, rate).
     /// @see PlanMove, unitToSteps
     template <Axis A>
-    constexpr void PlanMove(AxisUnit<pos_t, A, Lenght> delta, AxisUnit<steps_t, A, Speed> feedrate) {
-        PlanMove(A, delta.v, feedrate.v);
+    constexpr void PlanMove(AxisUnit<pos_t, A, Lenght> delta,
+        AxisUnit<steps_t, A, Speed> feed_rate, AxisUnit<steps_t, A, Speed> end_rate = { 0 }) {
+        PlanMove(A, delta.v, feed_rate.v, end_rate.v);
     }
 
     /// Enqueue a single axis move using PlanMove, but using physical units. The Axis needs to
@@ -149,10 +154,11 @@ public:
     /// @see PlanMove, unitToSteps
     template <Axis A, config::UnitBase B>
     constexpr void PlanMove(config::Unit<long double, B, Lenght> delta,
-        config::Unit<long double, B, Speed> feedrate) {
+        config::Unit<long double, B, Speed> feed_rate, config::Unit<long double, B, Speed> end_rate = { 0 }) {
         PlanMove<A>(
             unitToAxisUnit<AxisUnit<pos_t, A, Lenght>>(delta),
-            unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(feedrate));
+            unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(feed_rate),
+            unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(end_rate));
     }
 
     /// @returns head position of an axis (last enqueued position)
