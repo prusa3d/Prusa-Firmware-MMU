@@ -32,7 +32,7 @@ void Motion::StallGuardReset(Axis axis) {
     axes[axis].stallGuard = false;
 }
 
-void Motion::PlanMoveTo(Axis axis, pos_t pos, steps_t feedrate) {
+void Motion::PlanMoveTo(Axis axis, pos_t pos, steps_t feed_rate, steps_t end_rate) {
     axes[axis].targetPos = pos;
 }
 
