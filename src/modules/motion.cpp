@@ -62,9 +62,9 @@ bool Motion::QueueEmpty() const {
     return true;
 }
 
-void Motion::AbortPlannedMoves() {
+void Motion::AbortPlannedMoves(bool halt) {
     for (uint8_t i = 0; i != NUM_AXIS; ++i)
-        axisData[i].ctrl.AbortPlannedMoves();
+        axisData[i].ctrl.AbortPlannedMoves(halt);
 }
 
 st_timer_t Motion::Step() {

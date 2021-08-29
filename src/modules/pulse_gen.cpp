@@ -136,15 +136,20 @@ pos_t PulseGen::CurPosition() const {
     return cur_pos;
 }
 
-void PulseGen::AbortPlannedMoves() {
+void PulseGen::AbortPlannedMoves(bool halt) {
     // always update to effective position
     position = CurPosition();
 
     // destroy the current block
     if (current_block) {
+        last_rate = acc_step_rate;
         current_block = nullptr;
         block_index.pop();
     }
+
+    // truncate the last rate if halting
+    if (halt)
+        last_rate = 0;
 }
 
 } // namespace motor
