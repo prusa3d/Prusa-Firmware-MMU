@@ -185,6 +185,23 @@ public:
         axisData[axis].ctrl.SetAcceleration(accel);
     }
 
+    /// Set acceleration for the selected axis, but using AxisUnit. The Axis needs to
+    /// be supplied as the first template argument: SetAcceleration<axis>(accel).
+    /// @see SetAcceleration, unitToSteps
+    template <Axis A>
+    void SetAcceleration(AxisUnit<steps_t, A, Accel> accel) {
+        SetAcceleration(A, accel.v);
+    }
+
+    /// Set acceleration for the selected axis, but using physical units. The Axis needs to
+    /// be supplied as the first template argument: SetAcceleration<axis>(accel).
+    /// @param axis axis affected
+    /// @param accel acceleration
+    template <Axis A, config::UnitBase B>
+    void SetAcceleration(config::Unit<long double, B, Accel> accel) {
+        SetAcceleration<A>(unitToAxisUnit<AxisUnit<steps_t, A, Accel>>(accel));
+    }
+
     /// Get current jerk for the selected axis
     /// @param axis axis affected
     /// @returns jerk
