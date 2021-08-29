@@ -44,7 +44,8 @@ public:
     bool PlanMoveTo(pos_t pos, steps_t feedrate);
 
     /// Stop whatever moves are being done
-    void AbortPlannedMoves();
+    /// @param halt When true, also abruptly stop axis movement.
+    void AbortPlannedMoves(bool halt = true);
 
     /// @returns the head position of the axis at the end of all moves
     pos_t Position() const { return position; }

@@ -240,7 +240,8 @@ public:
     bool Full(Axis axis) const { return axisData[axis].ctrl.Full(); }
 
     /// stop whatever moves are being done
-    void AbortPlannedMoves();
+    /// @param halt When true, also abruptly stop axis movement.
+    void AbortPlannedMoves(bool halt = true);
 
     /// @returns the TMC213 driver associated with the particular axis
     inline const hal::tmc2130::TMC2130 &DriverForAxis(Axis axis) const {
