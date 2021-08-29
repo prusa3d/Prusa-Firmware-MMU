@@ -216,6 +216,14 @@ public:
         return axisData[axis].ctrl.SetJerk(max_jerk);
     }
 
+    /// Fetch the target rate of the last planned segment for the requested axis, or the
+    /// current effective rate when the move has been aborted.
+    /// @param axis axis affected
+    /// @returns last rate
+    steps_t Rate(Axis axis) const {
+        return axisData[axis].ctrl.Rate();
+    }
+
     /// State machine doing all the planning and stepping. Called by the stepping ISR.
     /// @returns the interval for the next tick
     st_timer_t Step();

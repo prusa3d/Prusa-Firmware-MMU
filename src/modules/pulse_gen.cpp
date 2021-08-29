@@ -6,6 +6,7 @@ namespace pulse_gen {
 PulseGen::PulseGen(steps_t max_jerk, steps_t acceleration) {
     // Axis status
     position = 0;
+    last_rate = 0;
     this->max_jerk = max_jerk;
     this->acceleration = acceleration;
 
@@ -107,9 +108,10 @@ bool PulseGen::PlanMoveTo(pos_t target, steps_t feed_rate) {
     block->acceleration_rate = block->acceleration * (rate_t)((float)F_CPU / (F_CPU / config::stepTimerFrequencyDivider));
 
     // Perform the trapezoid calculations
-    CalculateTrapezoid(block, max_jerk, max_jerk);
+    CalculateTrapezoid(block, entry_speed, end_rate);
+    last_rate = block->final_rate;
 
-    // Move forward
+    // Move forward and update the state
     block_index.push();
     position = target;
     return true;
