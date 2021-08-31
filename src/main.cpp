@@ -271,6 +271,13 @@ void PlanCommand(const mp::RequestMsg &rq) {
     }
 }
 
+void SetMode(uint8_t m) {
+    mm::MotorMode mode = (m == 0) ? mm::Normal : mm::Stealth;
+    mm::motion.SetMode(mm::Pulley, mode);
+    mm::motion.SetMode(mm::Selector, mode);
+    mm::motion.SetMode(mm::Idler, mode);
+}
+
 void ProcessRequestMsg(const mp::RequestMsg &rq) {
     switch (rq.code) {
     case mp::RequestMsgCodes::Button:
@@ -283,7 +290,7 @@ void ProcessRequestMsg(const mp::RequestMsg &rq) {
         break;
     case mp::RequestMsgCodes::Mode:
         // immediately switch to normal/stealth as requested
-        // modules::motion::SetMode();
+        SetMode(rq.value);
         break;
     case mp::RequestMsgCodes::Query:
         // immediately report progress of currently running command
