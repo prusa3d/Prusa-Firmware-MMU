@@ -15,7 +15,7 @@ bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, Mot
     // if the version is incorrect or a bit always set to 1 is suddenly 0
     // (the supposed SD_MODE pin that doesn't exist on this driver variant)
     if (((IOIN >> 24U) != 0x11) | !(IOIN & (1U << 6U)))
-        return true; // @@TODO return some kind of failure
+        return false; // @@TODO return some kind of failure
 
     ///clear reset_flag as we are (re)initializing
     errorFlags.reset_flag = false;
@@ -58,7 +58,7 @@ bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, Mot
     /// Stallguard is also disabled if the velocity falls below this.
     /// Should be set as high as possible when homing.
     SetMode(params, mode);
-    return false;
+    return true;
 }
 
 void TMC2130::SetMode(const MotorParams &params, MotorMode mode) {
