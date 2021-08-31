@@ -31,6 +31,8 @@
 
 #include "version.h"
 
+#include "panic.h"
+
 /// Global instance of the protocol codec
 static mp::Protocol protocol;
 
@@ -329,6 +331,10 @@ bool CheckMsgs() {
         }
     }
     return false;
+}
+
+void Panic(ErrorCode ec) {
+    currentCommand->Panic(ec);
 }
 
 /// Main loop of the firmware

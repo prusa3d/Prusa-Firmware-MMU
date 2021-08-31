@@ -61,6 +61,14 @@ public:
     /// Please see ErrorCode for more details
     virtual ErrorCode Error() const { return error; }
 
+    /// Switches the state machine into an error state of code ec.
+    /// It shall be used to halt the firmware while retaining the capability of reporting the error state to the printer
+    /// - a kind of similar to runtime assertions.
+    /// Called from main.cpp's global funtion Panic() .
+    /// The derived state machines have no (implemented) way of getting out of this state (intentionally).
+    /// The only way out is to reset the board.
+    void Panic(ErrorCode ec);
+
 protected:
     /// @returns true if the slot/tool index is within specified range (0 - config::toolCount)
     /// If not, it returns false and sets the error to ErrorCode::INVALID_TOOL

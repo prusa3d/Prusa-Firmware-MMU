@@ -2,6 +2,7 @@
 #include "../modules/idler.h"
 #include "../modules/selector.h"
 #include "../modules/motion.h"
+#include "../modules/leds.h"
 
 namespace logic {
 
@@ -74,6 +75,15 @@ bool CommandBase::Step() {
     }
 
     return StepInner();
+}
+
+void CommandBase::Panic(ErrorCode ec) {
+    state = ProgressCode::ERRInternal;
+    error = ec;
+    for (uint8_t i = 0; i < config::toolCount; ++i) {
+        ml::leds.SetMode(i, ml::green, ml::blink0);
+        ml::leds.SetMode(i, ml::red, ml::blink0);
+    }
 }
 
 bool CommandBase::CheckToolIndex(uint8_t index) {
