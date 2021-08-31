@@ -9,22 +9,22 @@ inline ErrorCode &operator|=(ErrorCode &a, ErrorCode b) {
     return a = (ErrorCode)((uint16_t)a | (uint16_t)b);
 }
 
-static ErrorCode TMC2130ToErrorCode(const hal::tmc2130::TMC2130 &tmc, uint8_t tmcIndex) {
+static ErrorCode TMC2130ToErrorCode(const hal::tmc2130::ErrorFlags &ef, uint8_t tmcIndex) {
     ErrorCode e = ErrorCode::RUNNING;
 
-    if (tmc.GetErrorFlags().reset_flag) {
+    if (ef.reset_flag) {
         e |= ErrorCode::TMC_RESET;
     }
-    if (tmc.GetErrorFlags().uv_cp) {
+    if (ef.uv_cp) {
         e |= ErrorCode::TMC_UNDERVOLTAGE_ON_CHARGE_PUMP;
     }
-    if (tmc.GetErrorFlags().s2g) {
+    if (ef.s2g) {
         e |= ErrorCode::TMC_SHORT_TO_GROUND;
     }
-    if (tmc.GetErrorFlags().otpw) {
+    if (ef.otpw) {
         e |= ErrorCode::TMC_OVER_TEMPERATURE_WARN;
     }
-    if (tmc.GetErrorFlags().ot) {
+    if (ef.ot) {
         e |= ErrorCode::TMC_OVER_TEMPERATURE_ERROR;
     }
 
@@ -52,11 +52,11 @@ bool CommandBase::Step() {
     // check the global HW errors - may be we should avoid the modules layer and check for the HAL layer errors directly
     if (mi::idler.State() == mi::Idler::Failed) {
         state = ProgressCode::ERRTMCFailed;
-        tmcErr |= TMC2130ToErrorCode(mm::motion.DriverForAxis(mm::Axis::Idler), mm::Axis::Idler);
+        tmcErr |= TMC2130ToErrorCode(mi::idler.TMCErrorFlags(), mm::Axis::Idler);
     }
     if (ms::selector.State() == ms::Selector::Failed) {
         state = ProgressCode::ERRTMCFailed;
-        tmcErr |= TMC2130ToErrorCode(mm::motion.DriverForAxis(mm::Axis::Selector), mm::Axis::Selector);
+        tmcErr |= TMC2130ToErrorCode(ms::selector.TMCErrorFlags(), mm::Axis::Selector);
     }
     // may be we should model the Pulley as well...
     //    if (ms::selector.State() == ms::Selector::Failed) {
