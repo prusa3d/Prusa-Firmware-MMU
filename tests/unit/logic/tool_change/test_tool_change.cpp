@@ -86,7 +86,7 @@ void JustLoadFilament(logic::ToolChange tc, uint8_t slot) {
         tc,
         [&](int step) -> bool {
         if(step == 1000){ // on 1000th step make FINDA trigger
-            hal::adc::SetADC(config::findaADCIndex, 900);
+            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
         }
         return tc.TopLevelState() == ProgressCode::LoadingFilament; },
         200000UL));
