@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include "../config/axis.h"
+#include "../hal/tmc2130.h"
 
 namespace modules {
 namespace motion {
@@ -37,6 +38,8 @@ public:
     /// @returns internal state of the state machine
     inline uint8_t State() const { return state; }
 
+    inline hal::tmc2130::ErrorFlags TMCErrorFlags() const { return tmcErrorFlags; }
+
 protected:
     /// internal state of the automaton
     uint8_t state;
@@ -46,6 +49,9 @@ protected:
 
     /// current slot
     uint8_t currentSlot;
+
+    /// cached TMC2130 error flags - being read only if the axis is enabled and doing something (moving)
+    hal::tmc2130::ErrorFlags tmcErrorFlags;
 
     virtual void PrepareMoveToPlannedSlot() = 0;
 

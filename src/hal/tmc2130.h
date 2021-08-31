@@ -39,7 +39,7 @@ struct __attribute__((packed)) ErrorFlags {
     uint8_t s2g : 1; ///< short to ground
     uint8_t otpw : 1; ///< over temperature pre-warning
     uint8_t ot : 1; ///< over temperature hard
-    inline ErrorFlags()
+    inline constexpr ErrorFlags()
         : reset_flag(0)
         , uv_cp(0)
         , s2g(0)

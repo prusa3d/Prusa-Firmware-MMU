@@ -16,8 +16,9 @@ MovableBase::OperationResult MovableBase::InitMovement(config::Axis axis) {
 }
 
 void MovableBase::PerformMove(config::Axis axis) {
-    if (!mm::motion.DriverForAxis(axis).GetErrorFlags().Good()) {
+    if (!mm::motion.DriverForAxis(axis).GetErrorFlags().Good()) { // @@TODO check occasionally, i.e. not every time?
         // TMC2130 entered some error state, the planned move couldn't have been finished - result of operation is Failed
+        tmcErrorFlags = mm::motion.DriverForAxis(axis).GetErrorFlags(); // save the failed state
         state = Failed;
     } else if (mm::motion.QueueEmpty(axis)) {
         // move finished
