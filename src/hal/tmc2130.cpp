@@ -51,7 +51,8 @@ bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, Mot
     constexpr uint32_t pwmconf = ((uint32_t)(config::tmc2130_PWM_AMPL) << 0U)
         | ((uint32_t)(config::tmc2130_PWM_GRAD) << 8U)
         | ((uint32_t)(config::tmc2130_PWM_FREQ) << 16U)
-        | ((uint32_t)(config::tmc2130_PWM_AUTOSCALE & 0x01U) << 18U);
+        | ((uint32_t)(config::tmc2130_PWM_AUTOSCALE & 0x01U) << 18U)
+        | ((uint32_t)(config::tmc2130_freewheel & 0x03U) << 20U); //special freewheeling mode only active in stealthchop when IHOLD=0 and CS=0 (actual current)
     WriteRegister(params, Registers::PWMCONF, pwmconf);
 
     /// TPWMTHRS: switching velocity between stealthChop and spreadCycle.
