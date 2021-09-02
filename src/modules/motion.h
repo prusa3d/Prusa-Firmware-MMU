@@ -92,6 +92,9 @@ public:
     /// being performed by calling QueueEmpty().
     void SetMode(Axis axis, MotorMode mode);
 
+    /// Set the same mode of TMC/motors operation for all axes. @see SetMode
+    void SetMode(MotorMode mode);
+
     /// @returns true if a stall guard event occurred recently on the axis
     bool StallGuard(Axis axis);
 
