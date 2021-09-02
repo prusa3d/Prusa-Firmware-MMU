@@ -28,8 +28,8 @@ enum class ErrorCode : uint_fast16_t {
 
     INVALID_TOOL = 0x8006, ///< tool/slot index out of range (typically issuing T5 into an MMU with just 5 slots - valid range 0-4)
 
+    QUEUE_FULL = 0x802d, ///< internal logic error - attempt to move with a full queue
     MMU_NOT_RESPONDING = 0x802e, ///< internal error of the printer - communication with the MMU is not working
-
     INTERNAL = 0x802f, ///< internal runtime error (software)
 
     // TMC bit masks

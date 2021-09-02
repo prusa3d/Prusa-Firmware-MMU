@@ -1,4 +1,5 @@
 #include "motion.h"
+#include "panic.h"
 
 // TODO: use proper timer abstraction
 #ifdef __AVR__
@@ -48,6 +49,9 @@ void Motion::PlanMoveTo(Axis axis, pos_t pos, steps_t feed_rate, steps_t end_rat
         // move was queued, prepare the axis
         if (!axisData[axis].enabled)
             SetEnabled(axis, true);
+    } else {
+        // queue is full: queue mishandling! trigger a panic
+        Panic(ErrorCode::QUEUE_FULL);
     }
 }
 
