@@ -1,5 +1,5 @@
 #include "motion.h"
-#include "panic.h"
+#include "../panic.h"
 
 // TODO: use proper timer abstraction
 #ifdef __AVR__

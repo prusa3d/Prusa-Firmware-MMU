@@ -1,4 +1,4 @@
-#include "panic.h"
+#include "../panic.h"
 
 // For retrival during tests
 ErrorCode panic_code = ErrorCode::RUNNING;

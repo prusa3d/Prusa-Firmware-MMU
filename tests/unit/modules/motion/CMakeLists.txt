@@ -1,7 +1,5 @@
 # common include and source directories
-set(include_common ${CMAKE_SOURCE_DIR}/src/modules ${CMAKE_SOURCE_DIR}/src/hal
-                   ${CMAKE_SOURCE_DIR}/src
-    )
+set(include_common ${CMAKE_SOURCE_DIR}/src/modules ${CMAKE_SOURCE_DIR}/src/hal)
 set(source_common
     ${CMAKE_SOURCE_DIR}/src/modules/motion.cpp
     ${CMAKE_SOURCE_DIR}/src/modules/speed_table.cpp
