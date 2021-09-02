@@ -272,6 +272,9 @@ void PlanCommand(const mp::RequestMsg &rq) {
 }
 
 void SetMode(uint8_t m) {
+    mg::globals.SetMotorsMode(m != 0); // remember the last mode set
+
+    // distribute the mode to all motors immediately
     mm::MotorMode mode = (m == 0) ? mm::Normal : mm::Stealth;
     mm::motion.SetMode(mm::Pulley, mode);
     mm::motion.SetMode(mm::Selector, mode);

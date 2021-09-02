@@ -36,5 +36,10 @@ void Globals::IncDriveErrors() {
     mps::DriveError::increment();
 }
 
+void Globals::SetMotorsMode(bool stealth) {
+    stealthMode = stealth;
+    // @@TODO store into EEPROM
+}
+
 } // namespace globals
 } // namespace modules
