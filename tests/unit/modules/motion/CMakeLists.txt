@@ -1,10 +1,13 @@
 # common include and source directories
-set(include_common ${CMAKE_SOURCE_DIR}/src/modules ${CMAKE_SOURCE_DIR}/src/hal)
+set(include_common ${CMAKE_SOURCE_DIR}/src/modules ${CMAKE_SOURCE_DIR}/src/hal
+                   ${CMAKE_SOURCE_DIR}/src
+    )
 set(source_common
     ${CMAKE_SOURCE_DIR}/src/modules/motion.cpp
     ${CMAKE_SOURCE_DIR}/src/modules/speed_table.cpp
     ${CMAKE_SOURCE_DIR}/src/modules/pulse_gen.cpp
     ${MODULES_STUBS_DIR}/stub_gpio.cpp
+    ${MODULES_STUBS_DIR}/stub_panic.cpp
     ${CMAKE_SOURCE_DIR}/src/hal/tmc2130.cpp
     ${MODULES_STUBS_DIR}/stub_shr16.cpp
     ${MODULES_STUBS_DIR}/stub_spi.cpp
