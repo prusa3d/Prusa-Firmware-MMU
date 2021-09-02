@@ -80,8 +80,8 @@ static constexpr AxisConfig pulley = {
     .dirOn = false,
     .mRes = MRes_2,
     .vSense = true,
-    .iRun = 30,
-    .iHold = 1,
+    .iRun = 20, /// 348mA
+    .iHold = 0, /// 17mA in SpreadCycle, freewheel in StealthChop
     .stealth = false,
     .stepsPerUnit = (200 * 2 / 19.147274),
 };
@@ -97,9 +97,9 @@ static constexpr PulleyLimits pulleyLimits = {
 static constexpr AxisConfig selector = {
     .dirOn = true,
     .mRes = MRes_2,
-    .vSense = false,
-    .iRun = 17,
-    .iHold = 5,
+    .vSense = true,
+    .iRun = 18, /// 315mA
+    .iHold = 5, /// 99mA
     .stealth = false,
     .stepsPerUnit = (200 * 2 / 8.),
 };
@@ -115,9 +115,9 @@ static constexpr SelectorLimits selectorLimits = {
 static constexpr AxisConfig idler = {
     .dirOn = true,
     .mRes = MRes_16,
-    .vSense = false,
-    .iRun = 23,
-    .iHold = 11,
+    .vSense = true,
+    .iRun = 31, /// 530mA
+    .iHold = 23, /// 398mA
     .stealth = false,
     .stepsPerUnit = (200 * 16 / 360.),
 };
@@ -151,5 +151,13 @@ static_assert(tmc2130_PWM_FREQ <= 3, "tmc2130_PWM_GRAD out of range");
 
 static constexpr uint32_t tmc2130_PWM_AUTOSCALE = 1;
 static_assert(tmc2130_PWM_AUTOSCALE <= 1, "tmc2130_PWM_AUTOSCALE out of range");
+
+/// Freewheel options for standstill:
+/// 0: Normal operation (IHOLD is supplied to the motor at standstill)
+/// 1: Freewheeling (as if the driver was disabled, no breaking except for detent torque)
+/// 2: Coil shorted using LS drivers (stronger passive breaking)
+/// 3: Coil shorted using HS drivers (weaker passive breaking)
+static constexpr uint32_t tmc2130_freewheel = 1;
+static_assert(tmc2130_PWM_AUTOSCALE <= 3, "tmc2130_freewheel out of range");
 
 } // namespace config
