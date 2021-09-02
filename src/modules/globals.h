@@ -40,9 +40,19 @@ public:
     /// Increment MMU errors by 1
     void IncDriveErrors();
 
+    /// Set normal or stealth mode for all of the motors
+    /// Used to keep track of the last set mode to be able to return to it properly
+    /// after homing sequences and/or after restarting the MMU
+    /// @param stealth true means use stealth mode, false means use normal mode
+    void SetMotorsMode(bool stealth);
+
+    /// @returns true if the motors are to be operated in stealth mode
+    bool MotorsStealth() const { return stealthMode; }
+
 private:
     uint8_t activeSlot;
     bool filamentLoaded;
+    bool stealthMode;
 };
 
 /// The one and only instance of global state variables
