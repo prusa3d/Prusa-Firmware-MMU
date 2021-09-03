@@ -63,7 +63,7 @@ bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, Mot
 }
 
 void TMC2130::SetMode(const MotorParams &params, MotorMode mode) {
-    ///0xFFF00 is used as a "Normal" mode threshold since stealthchop will be used at standstill.
+    ///0xFFFF0 is used as a "Normal" mode threshold since stealthchop will be used at standstill.
     WriteRegister(params, Registers::TPWMTHRS, (mode == Stealth) ? 70 : 0xFFFF0); // @@TODO should be configurable
 }
 

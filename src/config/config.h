@@ -154,9 +154,9 @@ static_assert(tmc2130_PWM_AUTOSCALE <= 1, "tmc2130_PWM_AUTOSCALE out of range");
 
 /// Freewheel options for standstill:
 /// 0: Normal operation (IHOLD is supplied to the motor at standstill)
-/// 1: Freewheeling (as if the driver was disabled, no breaking except for detent torque)
-/// 2: Coil shorted using LS drivers (stronger passive breaking)
-/// 3: Coil shorted using HS drivers (weaker passive breaking)
+/// 1: Freewheeling (as if the driver was disabled, no braking except for detent torque)
+/// 2: Coil shorted using LS drivers (stronger passive braking)
+/// 3: Coil shorted using HS drivers (weaker passive braking)
 static constexpr uint32_t tmc2130_freewheel = 1;
 static_assert(tmc2130_PWM_AUTOSCALE <= 3, "tmc2130_freewheel out of range");
 
