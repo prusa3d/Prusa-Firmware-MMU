@@ -96,12 +96,12 @@ static constexpr PulleyLimits pulleyLimits = {
 /// Selector configuration
 static constexpr AxisConfig selector = {
     .dirOn = true,
-    .mRes = MRes_2,
+    .mRes = MRes_8,
     .vSense = true,
-    .iRun = 18, /// 315mA
+    .iRun = 31, /// 530mA
     .iHold = 5, /// 99mA
     .stealth = false,
-    .stepsPerUnit = (200 * 2 / 8.),
+    .stepsPerUnit = (200 * 8 / 8.),
 };
 
 /// Selector motion limits
