@@ -255,7 +255,12 @@ public:
     /// @param axis axis requested
     bool Full(Axis axis) const { return axisData[axis].ctrl.Full(); }
 
-    /// stop whatever moves are being done
+    /// Stop whatever moves are being done for one axis
+    /// @param axis axis requested
+    /// @param halt When true, also abruptly stop axis movement.
+    void AbortPlannedMoves(Axis axis, bool halt = true);
+
+    /// Stop whatever moves are being done on all axes
     /// @param halt When true, also abruptly stop axis movement.
     void AbortPlannedMoves(bool halt = true);
 

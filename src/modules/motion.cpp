@@ -70,9 +70,13 @@ bool Motion::QueueEmpty() const {
     return true;
 }
 
+void Motion::AbortPlannedMoves(Axis axis, bool halt) {
+    axisData[axis].ctrl.AbortPlannedMoves(halt);
+}
+
 void Motion::AbortPlannedMoves(bool halt) {
     for (uint8_t i = 0; i != NUM_AXIS; ++i)
-        axisData[i].ctrl.AbortPlannedMoves(halt);
+        AbortPlannedMoves((Axis)i, halt);
 }
 
 st_timer_t Motion::Step() {
