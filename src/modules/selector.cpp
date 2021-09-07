@@ -14,7 +14,7 @@ void Selector::PrepareMoveToPlannedSlot() {
 }
 
 void Selector::PlanHomingMove() {
-    mm::motion.PlanMove<mm::Selector>(mm::unitToAxisUnit<mm::S_pos_t>(-100.0_mm), mm::unitToAxisUnit<mm::S_speed_t>(config::selectorFeedrate));
+    mm::motion.PlanMove<mm::Selector>(mm::unitToAxisUnit<mm::S_pos_t>(config::selectorLimits.lenght * 2), mm::unitToAxisUnit<mm::S_speed_t>(config::selectorFeedrate));
 }
 
 Selector::OperationResult Selector::MoveToSlot(uint8_t slot) {

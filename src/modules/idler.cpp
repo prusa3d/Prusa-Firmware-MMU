@@ -14,7 +14,7 @@ void Idler::PrepareMoveToPlannedSlot() {
 }
 
 void Idler::PlanHomingMove() {
-    mm::motion.PlanMove<mm::Idler>(mm::unitToAxisUnit<mm::I_pos_t>(-360.0_deg), mm::unitToAxisUnit<mm::I_speed_t>(config::idlerFeedrate));
+    mm::motion.PlanMove<mm::Idler>(mm::unitToAxisUnit<mm::I_pos_t>(-config::idlerLimits.lenght * 2), mm::unitToAxisUnit<mm::I_speed_t>(config::idlerFeedrate));
 }
 
 Idler::OperationResult Idler::Disengage() {
