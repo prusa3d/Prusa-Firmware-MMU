@@ -205,3 +205,47 @@ TEST_CASE("motion::triple_move", "[motion]") {
     REQUIRE(motion.Position(Selector) == 20);
     REQUIRE(motion.Position(Pulley) == 30);
 }
+
+TEST_CASE("motion::queue_abort", "[motion]") {
+    // queue should start empty
+    REQUIRE(motion.QueueEmpty());
+
+    // enqueue two moves
+    motion.PlanMoveTo(Pulley, 10, 1);
+    motion.PlanMoveTo(Idler, 10, 1);
+    REQUIRE(!motion.QueueEmpty(Pulley));
+    REQUIRE(!motion.QueueEmpty(Idler));
+    REQUIRE(motion.QueueEmpty(Selector));
+    REQUIRE(!motion.QueueEmpty());
+
+    // step ~1/3 way through
+    REQUIRE(stepUntilDone(3) == -1);
+
+    // abort the whole queue
+    motion.AbortPlannedMoves();
+    REQUIRE(motion.QueueEmpty(Pulley));
+    REQUIRE(motion.QueueEmpty(Idler));
+    REQUIRE(motion.QueueEmpty());
+}
+
+TEST_CASE("motion::queue_abort_1", "[motion]") {
+    // queue should start empty
+    REQUIRE(motion.QueueEmpty());
+
+    // enqueue two moves
+    motion.PlanMoveTo(Pulley, 10, 1);
+    motion.PlanMoveTo(Idler, 10, 1);
+    REQUIRE(!motion.QueueEmpty(Pulley));
+    REQUIRE(!motion.QueueEmpty(Idler));
+    REQUIRE(motion.QueueEmpty(Selector));
+    REQUIRE(!motion.QueueEmpty());
+
+    // step ~1/3 way through
+    REQUIRE(stepUntilDone(3) == -1);
+
+    // abort one axis only
+    motion.AbortPlannedMoves(Pulley);
+    REQUIRE(motion.QueueEmpty(Pulley));
+    REQUIRE(!motion.QueueEmpty(Idler));
+    REQUIRE(!motion.QueueEmpty());
+}

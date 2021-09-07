@@ -242,13 +242,13 @@ public:
 
     /// @returns true if all planned moves have been finished for one axis
     /// @param axis requested
-    bool QueueEmpty(Axis axis) const
-#ifndef UNITTEST
-    {
+#if !defined(UNITTEST) || defined(UNITTEST_MOTION)
+    bool QueueEmpty(Axis axis) const {
         return axisData[axis].ctrl.QueueEmpty();
     }
 #else
-        ;
+    // Force STUB for testing
+    bool QueueEmpty(Axis axis) const;
 #endif
 
     /// @returns false if new moves can still be planned for one axis

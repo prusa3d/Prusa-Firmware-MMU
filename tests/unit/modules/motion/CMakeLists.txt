@@ -1,4 +1,5 @@
 # common include and source directories
+add_compile_definitions(UNITTEST_MOTION)
 set(include_common ${CMAKE_SOURCE_DIR}/src/modules ${CMAKE_SOURCE_DIR}/src/hal)
 set(source_common
     ${CMAKE_SOURCE_DIR}/src/modules/motion.cpp
