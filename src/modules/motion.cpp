@@ -44,10 +44,6 @@ void Motion::StallGuardReset(Axis axis) {
     axisData[axis].drv.ClearStallguard(axisParams[axis].params);
 }
 
-// TODO: not implemented
-void Motion::Home(Axis axis, bool direction) {
-}
-
 void Motion::PlanMoveTo(Axis axis, pos_t pos, steps_t feed_rate, steps_t end_rate) {
     if (axisData[axis].ctrl.PlanMoveTo(pos, feed_rate, end_rate)) {
         // move was queued, prepare the axis

@@ -40,9 +40,9 @@ pos_t Motion::Position(Axis axis) const {
     return axes[axis].pos;
 }
 
-void Motion::Home(Axis axis, bool direction) {
-    axes[Pulley].homed = true;
-}
+//void Motion::Home(Axis axis, bool direction) {
+//    axes[Pulley].homed = true;
+//}
 
 void Motion::SetMode(Axis axis, hal::tmc2130::MotorMode mode) {
 }

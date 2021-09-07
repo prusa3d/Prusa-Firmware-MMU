@@ -101,9 +101,6 @@ public:
     /// clear stall guard flag reported on an axis
     void StallGuardReset(Axis axis);
 
-    /// Enqueue performing of homing of an axis
-    void Home(Axis axis, bool direction);
-
     /// Enqueue a single axis move in steps starting and ending at zero speed with maximum
     /// feedrate. Moves can only be enqueued if the axis is not Full().
     /// @param axis axis affected
