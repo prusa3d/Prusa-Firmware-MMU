@@ -1,8 +1,20 @@
 #include "movable_base.h"
+#include "globals.h"
 #include "motion.h"
 
 namespace modules {
 namespace motion {
+
+void MovableBase::PlanHome(config::Axis axis) {
+    // switch to normal mode on this axis
+    state = Homing;
+    mm::motion.InitAxis(axis);
+    mm::motion.SetMode(axis, mm::Normal);
+    mm::motion.StallGuardReset(axis);
+
+    // plan move at least as long as the axis can go from one side to the other
+    PlanHomingMove(); // mm::motion.PlanMove(axis, delta, 1000);
+}
 
 MovableBase::OperationResult MovableBase::InitMovement(config::Axis axis) {
     if (motion.InitAxis(axis)) {
@@ -23,6 +35,18 @@ void MovableBase::PerformMove(config::Axis axis) {
     } else if (mm::motion.QueueEmpty(axis)) {
         // move finished
         state = Ready;
+    }
+}
+
+void MovableBase::PerformHome(config::Axis axis) {
+    if (mm::motion.StallGuard(axis)) {
+        // we have reached the end of the axis - homed ok
+        mm::motion.SetMode(axis, mg::globals.MotorsStealth() ? mm::Stealth : mm::Normal);
+        state = Ready;
+    } else if (mm::motion.QueueEmpty(axis)) {
+        // we ran out of planned moves but no StallGuard event has occurred - homing failed
+        mm::motion.SetMode(axis, mg::globals.MotorsStealth() ? mm::Stealth : mm::Normal);
+        state = Failed;
     }
 }
 

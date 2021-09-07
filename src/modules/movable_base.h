@@ -13,6 +13,7 @@ public:
     enum {
         Ready = 0, // intentionally set as zero in order to allow zeroing the Idler structure upon startup -> avoid explicit initialization code
         Moving,
+        Homing,
         Failed
     };
 
@@ -40,6 +41,9 @@ public:
 
     inline hal::tmc2130::ErrorFlags TMCErrorFlags() const { return tmcErrorFlags; }
 
+    /// Prepare a homing move of the axis
+    void PlanHome(config::Axis axis);
+
 protected:
     /// internal state of the automaton
     uint8_t state;
@@ -54,10 +58,13 @@ protected:
     hal::tmc2130::ErrorFlags tmcErrorFlags;
 
     virtual void PrepareMoveToPlannedSlot() = 0;
+    virtual void PlanHomingMove() = 0;
 
     OperationResult InitMovement(config::Axis axis);
 
     void PerformMove(config::Axis axis);
+
+    void PerformHome(config::Axis axis);
 };
 
 } // namespace motion

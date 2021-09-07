@@ -13,6 +13,10 @@ void Idler::PrepareMoveToPlannedSlot() {
     mm::motion.PlanMoveTo<mm::Idler>(SlotPosition(plannedSlot), mm::unitToAxisUnit<mm::I_speed_t>(config::idlerFeedrate));
 }
 
+void Idler::PlanHomingMove() {
+    mm::motion.PlanMove<mm::Idler>(mm::unitToAxisUnit<mm::I_pos_t>(-360.0_deg), mm::unitToAxisUnit<mm::I_speed_t>(config::idlerFeedrate));
+}
+
 Idler::OperationResult Idler::Disengage() {
     if (state == Moving)
         return OperationResult::Refused;
@@ -43,8 +47,7 @@ bool Idler::Home() {
     if (state == Moving)
         return false;
     plannedEngage = false;
-    mm::motion.InitAxis(mm::Idler);
-    mm::motion.Home(mm::Idler, false);
+    PlanHome(mm::Idler);
     return true;
 }
 
@@ -52,6 +55,9 @@ bool Idler::Step() {
     switch (state) {
     case Moving:
         PerformMove(mm::Idler);
+        return false;
+    case Homing:
+        PerformHome(mm::Idler);
         return false;
     case Ready:
         currentlyEngaged = plannedEngage;
