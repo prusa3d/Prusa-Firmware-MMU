@@ -26,6 +26,7 @@
 #include "logic/eject_filament.h"
 #include "logic/load_filament.h"
 #include "logic/no_command.h"
+#include "logic/set_mode.h"
 #include "logic/tool_change.h"
 #include "logic/unload_filament.h"
 
@@ -259,6 +260,9 @@ void PlanCommand(const mp::RequestMsg &rq) {
         case mp::RequestMsgCodes::Unload:
             currentCommand = &logic::unloadFilament;
             break;
+        case mp::RequestMsgCodes::Mode:
+            currentCommand = &logic::setMode;
+            break;
         default:
             currentCommand = &logic::noCommand;
             break;
@@ -271,12 +275,6 @@ void PlanCommand(const mp::RequestMsg &rq) {
     }
 }
 
-void SetMode(uint8_t m) {
-    mg::globals.SetMotorsMode(m != 0); // remember the last mode set
-    // distribute the mode to all motors immediately
-    mm::motion.SetMode((m == 0) ? mm::Normal : mm::Stealth);
-}
-
 void ProcessRequestMsg(const mp::RequestMsg &rq) {
     switch (rq.code) {
     case mp::RequestMsgCodes::Button:
@@ -286,10 +284,6 @@ void ProcessRequestMsg(const mp::RequestMsg &rq) {
     case mp::RequestMsgCodes::Finda:
         // immediately report FINDA status
         ReportFINDA(rq);
-        break;
-    case mp::RequestMsgCodes::Mode:
-        // immediately switch to normal/stealth as requested
-        SetMode(rq.value);
         break;
     case mp::RequestMsgCodes::Query:
         // immediately report progress of currently running command
