@@ -41,7 +41,7 @@ void MovableBase::PerformMove(config::Axis axis) {
 void MovableBase::PerformHome(config::Axis axis) {
     if (mm::motion.StallGuard(axis)) {
         // we have reached the end of the axis - homed ok
-        mm::motion.AbortPlannedMoves(true);
+        mm::motion.AbortPlannedMoves(axis, true);
         mm::motion.SetMode(axis, mg::globals.MotorsStealth() ? mm::Stealth : mm::Normal);
         state = Ready;
     } else if (mm::motion.QueueEmpty(axis)) {
