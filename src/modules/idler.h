@@ -48,10 +48,9 @@ public:
     /// @returns the index of idle position of the idler, usually 5 in case of 0-4 valid indices of filament slots
     inline static constexpr uint8_t IdleSlotIndex() { return config::toolCount; }
 
-    //    hal::tmc2130::MotorParams TMCDriverParams()const;
-
 protected:
     virtual void PrepareMoveToPlannedSlot() override;
+    virtual void PlanHomingMove() override;
 
 private:
     /// direction of travel - engage/disengage
