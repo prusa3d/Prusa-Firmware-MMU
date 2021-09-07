@@ -75,39 +75,6 @@ void Motion::AbortPlannedMoves(bool halt) {
         AbortPlannedMoves((Axis)i, halt);
 }
 
-st_timer_t Motion::Step() {
-    st_timer_t timers[NUM_AXIS];
-
-    // step and calculate interval for each new move
-    for (uint8_t i = 0; i != NUM_AXIS; ++i) {
-        timers[i] = axisData[i].residual;
-        if (timers[i] <= config::stepTimerQuantum) {
-            if (timers[i] || !axisData[i].ctrl.QueueEmpty()) {
-                if (st_timer_t next = axisData[i].ctrl.Step(axisParams[i].params)) {
-                    timers[i] += next;
-
-                    // axis has been moved, run the tmc2130 Isr for this axis
-                    axisData[i].drv.Isr(axisParams[i].params);
-                }
-            }
-        }
-    }
-
-    // plan next closest interval
-    st_timer_t next = timers[0];
-    for (uint8_t i = 1; i != NUM_AXIS; ++i) {
-        if (timers[i] && (!next || timers[i] < next))
-            next = timers[i];
-    }
-
-    // update residuals
-    for (uint8_t i = 0; i != NUM_AXIS; ++i) {
-        axisData[i].residual = (timers[i] ? timers[i] - next : 0);
-    }
-
-    return next;
-}
-
 static inline void Isr() {
 #ifdef __AVR__
     st_timer_t next = motion.Step();
