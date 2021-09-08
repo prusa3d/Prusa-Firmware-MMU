@@ -15,7 +15,7 @@ int8_t Buttons::DecodeADC(uint16_t rawADC) {
     // Doesn't handle multiple pressed buttons at once
 
     for (int8_t buttonIndex = 0; buttonIndex < config::buttonCount; ++buttonIndex) {
-        if (rawADC > config::buttonADCLimits[buttonIndex][0] && rawADC <= config::buttonADCLimits[buttonIndex][1])
+        if (rawADC >= config::buttonADCLimits[buttonIndex][0] && rawADC <= config::buttonADCLimits[buttonIndex][1])
             return buttonIndex;
     }
 
