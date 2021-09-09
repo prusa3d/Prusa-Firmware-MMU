@@ -76,10 +76,12 @@ DecodeStatus Protocol::DecodeRequest(uint8_t c) {
 }
 
 uint8_t Protocol::EncodeRequest(const RequestMsg &msg, uint8_t *txbuff) {
+    constexpr uint8_t reqSize = 3;
     txbuff[0] = (uint8_t)msg.code;
     txbuff[1] = msg.value + '0';
     txbuff[2] = '\n';
-    return 3;
+    return reqSize;
+    static_assert(reqSize <= MaxRequestSize(), "Request message length exceeded the maximum size, increase the magic constant in MaxRequestSize()");
 }
 
 DecodeStatus Protocol::DecodeResponse(uint8_t c) {

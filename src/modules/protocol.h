@@ -96,6 +96,10 @@ public:
     /// @returns number of bytes written into txbuff
     static uint8_t EncodeRequest(const RequestMsg &msg, uint8_t *txbuff);
 
+    /// @returns the maximum byte length necessary to encode a request message
+    /// Beneficial in case of pre-allocating a buffer for enconding a RequestMsg.
+    static constexpr uint8_t MaxRequestSize() { return 3; }
+
     /// Encode generic response Command Accepted or Rejected
     /// @param msg source request message for this response
     /// @param ar code of response parameter
@@ -130,6 +134,16 @@ public:
 
     /// @returns the most recently lexed response message
     inline const ResponseMsg GetResponseMsg() const { return responseMsg; }
+
+    /// resets the internal request decoding state (typically after an error)
+    void ResetRequestDecoder() {
+        rqState = RequestStates::Code;
+    }
+
+    /// resets the internal response decoding state (typically after an error)
+    void ResetResponseDecoder() {
+        rspState = ResponseStates::RequestCode;
+    }
 
 private:
     enum class RequestStates : uint8_t {
