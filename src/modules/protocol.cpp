@@ -104,6 +104,10 @@ DecodeStatus Protocol::DecodeResponse(uint8_t c) {
             responseMsg.request.value = 0;
             rspState = ResponseStates::RequestValue;
             return DecodeStatus::NeedMoreData;
+        case 0x0a:
+        case 0x0d:
+            // skip leading whitespace if any (makes integration with other SW easier/tolerant)
+            return DecodeStatus::NeedMoreData;
         default:
             rspState = ResponseStates::Error;
             return DecodeStatus::Error;
