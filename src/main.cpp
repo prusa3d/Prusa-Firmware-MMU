@@ -41,8 +41,13 @@ static mp::Protocol protocol;
 /// A command that resulted in the currently on-going operation
 logic::CommandBase *currentCommand = &logic::noCommand;
 
-/// remember the request message that started the currently running command
-mp::RequestMsg currentCommandRq(mp::RequestMsgCodes::unknown, 0);
+/// Remember the request message that started the currently running command
+/// For the start we report "Reset finished" which in fact corresponds with the MMU state pretty closely
+/// and plays nicely even with the protocol implementation.
+/// And, since the default startup command is the noCommand, which always returns "Finished"
+/// the implementation is clean and straightforward - the response to the first Q0 messages
+/// will look like "X0 F" until a command (T, L, U ...) has been issued.
+mp::RequestMsg currentCommandRq(mp::RequestMsgCodes::Reset, 0);
 
 // examples and test code shall be located here
 void TmpPlayground() {
