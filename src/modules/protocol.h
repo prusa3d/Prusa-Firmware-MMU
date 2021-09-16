@@ -23,7 +23,8 @@ enum class RequestMsgCodes : uint8_t {
     Button = 'B',
     Eject = 'E',
     Wait = 'W',
-    Cut = 'K'
+    Cut = 'K',
+    FilamentSensor = 'F'
 };
 
 /// Definition of response message parameter codes
