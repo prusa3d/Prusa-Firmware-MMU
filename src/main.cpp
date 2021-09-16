@@ -313,9 +313,10 @@ void ProcessRequestMsg(const mp::RequestMsg &rq) {
     case mp::RequestMsgCodes::Unload:
         PlanCommand(rq);
         break;
-        //    case mp::RequestMsgCodes::SetVar: //@@TODO - this is where e.g. printer's fsensor gets updated
-        //        SetVar(rq);
-        //        break;
+    case mp::RequestMsgCodes::FilamentSensor: // set filament sensor state in the printer
+        mfs::fsensor.ProcessMessage(rq.value != 0);
+        ReportCommandAccepted(rq, mp::ResponseMsgParamCodes::Accepted);
+        break;
     default:
         // respond with an error message
         break;
