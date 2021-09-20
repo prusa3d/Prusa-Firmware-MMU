@@ -118,13 +118,13 @@ void EVENT_USB_Device_ControlRequest(void) {
  *  \param[in] CDCInterfaceInfo  Pointer to the CDC class interface configuration structure being referenced
  */
 void EVENT_CDC_Device_ControLineStateChanged(USB_ClassInfo_CDC_Device_t *const CDCInterfaceInfo) {
-    hal::usart::usart1.puts("EVENT_CDC_Device_ControLineStateChanged\n");
     /* You can get changes to the virtual CDC lines in this callback; a common
 	   use-case is to use the Data Terminal Ready (DTR) flag to enable and
 	   disable CDC communications in your application when set to avoid the
 	   application blocking while waiting for a host to become ready and read
 	   in the pending data from the USB endpoints.
 	*/
+    hal::usart::usart1.puts("EVENT_CDC_Device_ControLineStateChanged ");
     bool HostReady = (CDCInterfaceInfo->State.ControlLineStates.HostToDevice & CDC_CONTROL_LINE_OUT_DTR) != 0;
     char str[50];
     sprintf_P(str, PSTR("DTR:%hu\n"), HostReady);
@@ -132,6 +132,7 @@ void EVENT_CDC_Device_ControLineStateChanged(USB_ClassInfo_CDC_Device_t *const C
 }
 
 void EVENT_CDC_Device_LineEncodingChanged(USB_ClassInfo_CDC_Device_t *const CDCInterfaceInfo) {
+    hal::usart::usart1.puts("EVENT_CDC_Device_LineEncodingChanged ");
     char str[50];
     sprintf_P(str, PSTR("baud:%lu\n"), CDCInterfaceInfo->State.LineEncoding.BaudRateBPS);
     hal::usart::usart1.puts(str);
