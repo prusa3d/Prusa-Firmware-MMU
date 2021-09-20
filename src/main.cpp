@@ -100,10 +100,10 @@ void EVENT_USB_Device_ConfigurationChanged(void) {
     ConfigSuccess &= CDC_Device_ConfigureEndpoints(&VirtualSerial_CDC_Interface);
 
     // LEDs_SetAllLEDs(ConfigSuccess ? LEDMASK_USB_READY : LEDMASK_USB_ERROR);
-    char str1[] = "ready\n";
-    char str0[] = "error\n";
-    hal::usart::usart1.puts("EVENT_USB_Device_ConfigurationChanged:");
-    hal::usart::usart1.puts(ConfigSuccess ? str1 : str0);
+    // char str1[] = "ready\n";
+    // char str0[] = "error\n";
+    // hal::usart::usart1.puts("EVENT_USB_Device_ConfigurationChanged:");
+    // hal::usart::usart1.puts(ConfigSuccess ? str1 : str0);
 }
 
 /** Event handler for the library USB Control Request reception event. */
@@ -118,27 +118,28 @@ void EVENT_USB_Device_ControlRequest(void) {
  *  \param[in] CDCInterfaceInfo  Pointer to the CDC class interface configuration structure being referenced
  */
 void EVENT_CDC_Device_ControLineStateChanged(USB_ClassInfo_CDC_Device_t *const CDCInterfaceInfo) {
-    /* You can get changes to the virtual CDC lines in this callback; a common
-	   use-case is to use the Data Terminal Ready (DTR) flag to enable and
-	   disable CDC communications in your application when set to avoid the
-	   application blocking while waiting for a host to become ready and read
-	   in the pending data from the USB endpoints.
-	*/
-    hal::usart::usart1.puts("EVENT_CDC_Device_ControLineStateChanged ");
-    bool HostReady = (CDCInterfaceInfo->State.ControlLineStates.HostToDevice & CDC_CONTROL_LINE_OUT_DTR) != 0;
-    char str[50];
-    sprintf_P(str, PSTR("DTR:%hu\n"), HostReady);
-    hal::usart::usart1.puts(str);
+    // Printing to serial from here will make Windows commit suicide when opening the port
+
+    // hal::usart::usart1.puts("EVENT_CDC_Device_ControLineStateChanged ");
+    // bool HostReady = (CDCInterfaceInfo->State.ControlLineStates.HostToDevice & CDC_CONTROL_LINE_OUT_DTR) != 0;
+    // char str[50];
+    // sprintf_P(str, PSTR("DTR:%hu\n"), HostReady);
+    // hal::usart::usart1.puts(str);
 }
 
 void EVENT_CDC_Device_LineEncodingChanged(USB_ClassInfo_CDC_Device_t *const CDCInterfaceInfo) {
-    hal::usart::usart1.puts("EVENT_CDC_Device_LineEncodingChanged ");
-    char str[50];
-    sprintf_P(str, PSTR("baud:%lu\n"), CDCInterfaceInfo->State.LineEncoding.BaudRateBPS);
-    hal::usart::usart1.puts(str);
+    // Printing to serial from here will make Windows commit suicide when opening the port
+
+    // hal::usart::usart1.puts("EVENT_CDC_Device_LineEncodingChanged ");
+    // char str[50];
+    // sprintf_P(str, PSTR("baud:%lu\n"), CDCInterfaceInfo->State.LineEncoding.BaudRateBPS);
+    // hal::usart::usart1.puts(str);
+    
     if (CDCInterfaceInfo->State.LineEncoding.BaudRateBPS == 1200) {
-        *(uint16_t *)0x0800U = 0x7777;
-        hal::cpu::Reset();
+        // *(uint16_t *)0x0800U = 0x7777; //old bootloader?
+        *(uint16_t *)(RAMEND-1) = 0x7777;
+        hal::cpu::resetPending = true;
+        hal::watchdog::Enable(hal::watchdog::configuration::compute(250));
     }
 }
 }
@@ -250,6 +251,8 @@ void setup() {
     ml::leds.Step();
 
     USB_Init();
+
+    _delay_ms(100);
 
     /// Turn off all leds
     for (uint8_t i = 0; i < config::toolCount; i++) {
@@ -477,7 +480,9 @@ void loop() {
     ms::selector.Step();
     mui::userInput.Step();
     currentCommand->Step();
+    hal::cpu::Step();
 
+    CDC_Device_ReceiveByte(&VirtualSerial_CDC_Interface);
     CDC_Device_USBTask(&VirtualSerial_CDC_Interface);
     USB_USBTask();
 

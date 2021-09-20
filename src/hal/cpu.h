@@ -10,9 +10,12 @@ namespace cpu {
 #define F_CPU (16000000ul)
 #endif
 
+extern bool resetPending;
+
 /// CPU init routines (not really necessary for the AVR)
 void Init();
 void Reset();
+void Step();
 
 } // namespace cpu
 } // namespace hal
