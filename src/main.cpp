@@ -4,6 +4,7 @@
 #include "hal/shr16.h"
 #include "hal/spi.h"
 #include "hal/usart.h"
+#include "hal/watchdog.h"
 
 #include "pins.h"
 #include <avr/interrupt.h>
@@ -95,6 +96,8 @@ void setup() {
     cpu::Init();
 
     mt::timebase.Init();
+
+    watchdog::Enable(watchdog::configuration::compute(8000)); //set 8s timeout
 
     mg::globals.Init();
 
@@ -291,12 +294,13 @@ void ProcessRequestMsg(const mp::RequestMsg &rq) {
         break;
     case mp::RequestMsgCodes::Reset:
         // immediately reset the board - there is no response in this case
-        break; // @@TODO
+        hal::cpu::Reset();
+        break;
     case mp::RequestMsgCodes::Version:
         ReportVersion(rq);
         break;
     case mp::RequestMsgCodes::Wait:
-        break; // @@TODO
+        break; // @@TODO - not used anywhere yet
     case mp::RequestMsgCodes::Cut:
     case mp::RequestMsgCodes::Eject:
     case mp::RequestMsgCodes::Load:
@@ -363,7 +367,8 @@ void loop() {
     ms::selector.Step();
     mui::userInput.Step();
     currentCommand->Step();
-    // add a watchdog reset
+
+    hal::watchdog::Reset();
 }
 
 int main() {

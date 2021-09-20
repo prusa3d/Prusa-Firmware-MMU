@@ -8,4 +8,5 @@ target_sources(
           tmc2130.cpp
           adc.cpp
           avr/spi.cpp
+          avr/watchdog.cpp
   )

@@ -12,6 +12,7 @@ namespace cpu {
 
 /// CPU init routines (not really necessary for the AVR)
 void Init();
+void Reset();
 
 } // namespace cpu
 } // namespace hal
