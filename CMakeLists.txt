@@ -91,7 +91,7 @@ if(CMAKE_CROSSCOMPILING)
   endif()
 
   # mcu related settings
-  set(MCU_FLAGS -mmcu=atmega32u4 -DF_CPU=16000000L)
+  set(MCU_FLAGS -mmcu=atmega32u4 -DF_CPU=16000000L -DF_USB=F_CPU)
   add_compile_options(${MCU_FLAGS})
   add_link_options(${MCU_FLAGS})
 
