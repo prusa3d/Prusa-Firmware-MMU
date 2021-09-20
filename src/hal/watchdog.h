@@ -23,15 +23,24 @@ struct configuration {
     uint16_t reload;
 
 public:
-    static constexpr configuration compute(float timeout) {
+    static constexpr configuration compute(uint16_t timeout) {
+        // uint8_t prescalerBits = 0;
+        // uint32_t ticks = timeout * F_WDT / (basePrescaler * (1 << prescalerBits));
+        // while ((ticks >= (1 << reloadBits)) && (prescalerBits < maxPrescaler)) {
+        //     prescalerBits++;
+        //     ticks >>= 1;
+        // }
+        // if ((prescalerBits == 0) && (ticks == 0))
+        //     ticks = 1; //1 tick is minimum
+        // configuration config = { prescalerBits, static_cast<uint16_t>(ticks - 1) };
+        // return config;
         uint8_t prescalerBits = 0;
-        uint32_t ticks = timeout * F_WDT / (basePrescaler * (1 << prescalerBits));
-        while ((ticks >= (1 << reloadBits)) && (prescalerBits < maxPrescaler)) {
-            prescalerBits++;
-            ticks >>= 1;
+        uint32_t ticks = 1;
+        switch (timeout) {
+        case 8000:
+            prescalerBits = 9;
         }
-        if ((prescalerBits == 0) && (ticks == 0))
-            ticks = 1; //1 tick is minimum
+
         configuration config = { prescalerBits, static_cast<uint16_t>(ticks - 1) };
         return config;
     }
