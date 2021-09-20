@@ -68,9 +68,12 @@ bool Step_Basic_One_Button(hal::adc::TADCData &&d, uint8_t testedButtonIndex) {
     return Step_Basic_One_Button_Test(b, oversampleFactor, testedButtonIndex, otherButton1, otherButton2);
 }
 
+constexpr uint16_t M1(uint16_t v) {
+    return static_cast<uint16_t>(v - 1U);
+}
 TEST_CASE("buttons::Step-basic-button", "[buttons]") {
     for (uint8_t i = 0; i < config::buttonCount; ++i) {
-        CHECK(Step_Basic_One_Button({ config::buttonADCLimits[i][0],
+        CHECK(Step_Basic_One_Button({ M1(config::buttonADCLimits[i][0]),
                                         config::buttonADCLimits[i][1],
                                         adcMaxValue },
             i));
@@ -81,9 +84,9 @@ TEST_CASE("buttons::Step-basic-button", "[buttons]") {
 /// and the Buttons class should press first button and release, then the second one and then the third one
 /// without being reinitialized.
 TEST_CASE("buttons::Step-basic-button-one-after-other", "[buttons]") {
-    hal::adc::TADCData d({ config::buttonADCLimits[0][0], config::buttonADCLimits[0][0] + 1, adcMaxValue,
-        config::buttonADCLimits[1][0], config::buttonADCLimits[1][0] + 1, adcMaxValue,
-        config::buttonADCLimits[2][0], config::buttonADCLimits[2][0] + 1, adcMaxValue });
+    hal::adc::TADCData d({ M1(config::buttonADCLimits[0][0]), config::buttonADCLimits[0][0] + 1, adcMaxValue,
+        M1(config::buttonADCLimits[1][0]), config::buttonADCLimits[1][0] + 1, adcMaxValue,
+        M1(config::buttonADCLimits[2][0]), config::buttonADCLimits[2][0] + 1, adcMaxValue });
     mb::Buttons b;
 
     // need to oversample the data as debouncing takes 100 cycles to accept a pressed button
