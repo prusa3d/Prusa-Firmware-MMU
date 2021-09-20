@@ -136,6 +136,10 @@ void EVENT_CDC_Device_LineEncodingChanged(USB_ClassInfo_CDC_Device_t *const CDCI
     char str[50];
     sprintf_P(str, PSTR("baud:%lu\n"), CDCInterfaceInfo->State.LineEncoding.BaudRateBPS);
     hal::usart::usart1.puts(str);
+    if (CDCInterfaceInfo->State.LineEncoding.BaudRateBPS == 1200) {
+        *(uint16_t *)0x0800U = 0x7777;
+        hal::cpu::Reset();
+    }
 }
 }
 
