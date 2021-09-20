@@ -6,6 +6,12 @@
 #include "hal/usart.h"
 #include "hal/watchdog.h"
 
+extern "C" {
+#include "lufa_config.h"
+#include "Descriptors.h"
+#include "lufa/LUFA/Drivers/USB/USB.h"
+}
+
 #include "pins.h"
 #include <avr/interrupt.h>
 #include <util/delay.h>
@@ -34,6 +40,100 @@
 #include "version.h"
 
 #include "panic.h"
+
+extern "C" {
+
+/** LUFA CDC Class driver interface configuration and state information. This structure is
+ *  passed to all CDC Class driver functions, so that multiple instances of the same class
+ *  within a device can be differentiated from one another.
+ */
+USB_ClassInfo_CDC_Device_t VirtualSerial_CDC_Interface =
+	{
+		.Config =
+			{
+				.ControlInterfaceNumber   = INTERFACE_ID_CDC_CCI,
+				.DataINEndpoint           =
+					{
+						.Address          = CDC_TX_EPADDR,
+						.Size             = CDC_TXRX_EPSIZE,
+                        .Type = EP_TYPE_BULK,
+						.Banks            = 1,
+					},
+				.DataOUTEndpoint =
+					{
+						.Address          = CDC_RX_EPADDR,
+						.Size             = CDC_TXRX_EPSIZE,
+                        .Type = EP_TYPE_BULK,
+						.Banks            = 1,
+					},
+				.NotificationEndpoint =
+					{
+						.Address          = CDC_NOTIFICATION_EPADDR,
+						.Size             = CDC_NOTIFICATION_EPSIZE,
+                        .Type = EP_TYPE_INTERRUPT,
+						.Banks            = 1,
+					},
+			},
+	};
+
+void testFunc(uint8_t i) {
+    char str[30];
+    sprintf_P(str, PSTR("testFunc(%hu)\n"), i);
+    hal::usart::usart1.puts(str);
+}
+
+/** Event handler for the library USB Connection event. */
+void EVENT_USB_Device_Connect(void)
+{
+	hal::usart::usart1.puts("EVENT_USB_Device_Connect\n");
+}
+
+/** Event handler for the library USB Disconnection event. */
+void EVENT_USB_Device_Disconnect(void)
+{
+	hal::usart::usart1.puts("EVENT_USB_Device_Disconnect\n");
+}
+
+/** Event handler for the library USB Configuration Changed event. */
+void EVENT_USB_Device_ConfigurationChanged(void)
+{
+	bool ConfigSuccess = true;
+
+	ConfigSuccess &= CDC_Device_ConfigureEndpoints(&VirtualSerial_CDC_Interface);
+
+	// LEDs_SetAllLEDs(ConfigSuccess ? LEDMASK_USB_READY : LEDMASK_USB_ERROR);
+    char str1[] = "ready";
+    char str0[] = "error";
+    hal::usart::usart1.puts("EVENT_USB_Device_ConfigurationChanged:");
+    hal::usart::usart1.puts(ConfigSuccess ? str1 : str0);
+}
+
+/** Event handler for the library USB Control Request reception event. */
+void EVENT_USB_Device_ControlRequest(void)
+{
+    hal::usart::usart1.puts("EVENT_USB_Device_ControlRequest\n");
+	CDC_Device_ProcessControlRequest(&VirtualSerial_CDC_Interface);
+}
+
+/** CDC class driver callback function the processing of changes to the virtual
+ *  control lines sent from the host..
+ *
+ *  \param[in] CDCInterfaceInfo  Pointer to the CDC class interface configuration structure being referenced
+ */
+void EVENT_CDC_Device_ControLineStateChanged(USB_ClassInfo_CDC_Device_t *const CDCInterfaceInfo)
+{
+	/* You can get changes to the virtual CDC lines in this callback; a common
+	   use-case is to use the Data Terminal Ready (DTR) flag to enable and
+	   disable CDC communications in your application when set to avoid the
+	   application blocking while waiting for a host to become ready and read
+	   in the pending data from the USB endpoints.
+	*/
+	bool HostReady = (CDCInterfaceInfo->State.ControlLineStates.HostToDevice & CDC_CONTROL_LINE_OUT_DTR) != 0;
+
+	(void)HostReady;
+}
+
+}
 
 /// Global instance of the protocol codec
 static mp::Protocol protocol;
@@ -140,6 +240,8 @@ void setup() {
     adc::Init();
     ml::leds.SetMode(0, ml::Color::green, ml::Mode::on);
     ml::leds.Step();
+
+    USB_Init();
 
     /// Turn off all leds
     for (uint8_t i = 0; i < config::toolCount; i++) {
@@ -367,6 +469,9 @@ void loop() {
     ms::selector.Step();
     mui::userInput.Step();
     currentCommand->Step();
+    
+    CDC_Device_USBTask(&VirtualSerial_CDC_Interface);
+    USB_USBTask();
 
     hal::watchdog::Reset();
 }

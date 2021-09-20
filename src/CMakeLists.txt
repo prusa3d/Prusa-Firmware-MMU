@@ -3,6 +3,8 @@ target_sources(
   PRIVATE main.cpp
 )
 
+target_link_libraries(firmware LUFA)
+
 set_property(
   SOURCE src/version.c
   APPEND
