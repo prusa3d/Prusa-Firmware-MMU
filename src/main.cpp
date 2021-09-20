@@ -76,11 +76,17 @@ USB_ClassInfo_CDC_Device_t VirtualSerial_CDC_Interface =
 			},
 	};
 
-void testFunc(uint8_t i) {
-    char str[30];
-    sprintf_P(str, PSTR("testFunc(%hu)\n"), i);
-    hal::usart::usart1.puts(str);
-}
+// void testFunc1(uint8_t i) {
+//     char str[30];
+//     sprintf_P(str, PSTR("testFunc1(%hu)\n"), i);
+//     hal::usart::usart1.puts(str);
+// }
+
+// void testFunc2(uint8_t i) {
+//     char str[30];
+//     sprintf_P(str, PSTR("testFunc2(%hu)\n"), i);
+//     hal::usart::usart1.puts(str);
+// }
 
 /** Event handler for the library USB Connection event. */
 void EVENT_USB_Device_Connect(void)
@@ -102,8 +108,8 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 	ConfigSuccess &= CDC_Device_ConfigureEndpoints(&VirtualSerial_CDC_Interface);
 
 	// LEDs_SetAllLEDs(ConfigSuccess ? LEDMASK_USB_READY : LEDMASK_USB_ERROR);
-    char str1[] = "ready";
-    char str0[] = "error";
+    char str1[] = "ready\n";
+    char str0[] = "error\n";
     hal::usart::usart1.puts("EVENT_USB_Device_ConfigurationChanged:");
     hal::usart::usart1.puts(ConfigSuccess ? str1 : str0);
 }

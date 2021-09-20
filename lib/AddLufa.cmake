@@ -9,7 +9,6 @@ add_library(
   lufa/LUFA/Drivers/USB/Core/Events.c
   lufa/LUFA/Drivers/USB/Core/DeviceStandardReq.c
   lufa/LUFA/Drivers/USB/Core/USBTask.c
-  lufa/LUFA/CodeTemplates/DeviceTemplate/Descriptors.c
   lufa/LUFA/Drivers/USB/Core/AVR8/EndpointStream_AVR8.c
   Descriptors.c
 )
