@@ -8,4 +8,4 @@ add_library(
   lufa/LUFA/Drivers/USB/Core/Events.c
   )
 
-# target_compile_features(LUFA PUBLIC cxx_std_14)
+target_compile_features(LUFA PUBLIC c_std_11)
