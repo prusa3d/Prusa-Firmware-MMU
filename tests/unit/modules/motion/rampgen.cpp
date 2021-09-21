@@ -1,5 +1,11 @@
 #include <cstdio>
+#ifndef __WIN32__
 #include <sysexits.h>
+#else
+#define EX_OK 0
+#define EX_USAGE 64
+#define EX_OSERR 71
+#endif
 
 #include "motion.h"
 using namespace modules::motion;
