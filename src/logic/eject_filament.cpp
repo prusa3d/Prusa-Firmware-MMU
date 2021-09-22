@@ -49,7 +49,7 @@ bool EjectFilament::StepInner() {
         if (mm::motion.QueueEmpty()) { // selector parked aside
             state = ProgressCode::EjectingFilament;
             mm::motion.InitAxis(mm::Pulley);
-            mm::motion.PlanMove<mm::Pulley>(ejectLength, ejectSpeed);
+            mm::motion.PlanMove<mm::Pulley>(-config::FilamentMinLoadedToMMU, config::pulleyFeedrate);
         }
         break;
     case ProgressCode::EjectingFilament:
