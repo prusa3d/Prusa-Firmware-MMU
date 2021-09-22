@@ -11,32 +11,6 @@ namespace config {
 
 static constexpr const uint8_t toolCount = 5U; ///< Max number of extruders/tools/slots
 
-/// Absolute positions for Idler's slots: 0-4 are the real ones, the 5th index is the idle position
-static constexpr U_deg idlerSlotPositions[toolCount + 1] = {
-    45.0_deg,
-    2 * 45.0_deg,
-    3 * 45.0_deg,
-    4 * 45.0_deg,
-    5 * 45.0_deg,
-    0.0_deg
-};
-
-static constexpr U_deg_s idlerFeedrate = 1000._deg_s;
-
-// Selector's setup
-
-/// slots 0-4 are the real ones, the 5th is the farthest parking positions
-static constexpr U_mm selectorSlotPositions[toolCount + 1] = {
-    20.0_mm,
-    20.0_mm + 14.0_mm,
-    20.0_mm + 2 * 14.0_mm,
-    20.0_mm + 3 * 14.0_mm,
-    20.0_mm + 4 * 14.0_mm,
-    20.0_mm + 5 * 14.0_mm
-};
-
-static constexpr U_mm_s selectorFeedrate = 1000._mm_s;
-
 // Printer's filament sensor setup
 static constexpr const uint16_t fsensorDebounceMs = 10;
 
@@ -75,7 +49,28 @@ static constexpr uint8_t stepTimerFrequencyDivider = 8;
 /// while accelerating: with 3 axes this yields a required minimum of 75us
 static constexpr uint16_t stepTimerQuantum = 256; // 256 = 128us
 
-/// Pulley axis configuration
+/// Max retries of FeedToBondtech used in LoadFilament
+static constexpr uint8_t feedToBondtechMaxRetries = 2;
+
+/// Distances
+static constexpr U_mm PulleyToCuttingEdge = 33.0_mm; /// 33.0_mm /// Pulley to cutting edge.
+/// Case 1: FINDA working: This should be the max retraction after FINDA un-triggers.
+/// Case 2: FINDA not working: calculate retraction from printer to this point.
+static constexpr U_mm FilamentMinLoadedToMMU = 20.0_mm; /// 20.0_mm ??? /// Limit of retraction. @TODO find correct distance.
+static constexpr U_mm EjectFromCuttingEdge = 40.0_mm; /// Eject should ignore FilamentMinLoadedToMMU and retract 
+static constexpr U_mm CuttingEdgeRetract = 3.0_mm; /// 3.0_mm /// Cutting retraction distance (filament should be flush with outlet) @TODO find correct distance.
+static constexpr U_mm CuttingEdgeToFINDA = 18.5_mm; /// 18.5_mm -1.0_mm /// Cutting edge to FINDA MMU2 side -1mm tolerance should be ~18.5. FINDA shouldn't trigger here.
+static constexpr U_mm FINDAtriggerDistance = 4.5_mm; /// 9.0_mm /// FINDA trigger distance +1.0_mm tolerance.
+static constexpr U_mm CuttingEdgeToFINDAmidpoint = 22.85_mm; /// Cutting edge to Midpoint of FINDA should be 22.85_mm.
+static constexpr U_mm FINDAtoCoupler = 12.0_mm; /// 12.0_mm /// FINDA Coupler side to coupler screw.
+static constexpr U_mm CouplerToBowden = 3.5_mm; /// 3.5_mm /// FINDA Coupler screw to bowden mmu2s side (in coupling).
+static constexpr U_mm DefaultBowdenLength = 427.0_mm; /// ~427.0_mm /// Default Bowden length. @TODO Should be stored in EEPROM.
+static constexpr U_mm MinimumBowdenLength = 341.0_mm; /// ~341.0_mm /// Minimum bowden length. @TODO Should be stored in EEPROM.
+static constexpr U_mm MaximumBowdenLength = 792.0_mm;/// ~792.0_mm /// Maximum bowden length. @TODO Should be stored in EEPROM.
+static constexpr U_mm FeedToFINDA = CuttingEdgeToFINDAmidpoint+FilamentMinLoadedToMMU;
+static constexpr U_mm CutLength = 8.0_mm;
+
+/// Begin: Pulley axis configuration
 static constexpr AxisConfig pulley = {
     .dirOn = false,
     .mRes = MRes_2,
@@ -92,8 +87,10 @@ static constexpr PulleyLimits pulleyLimits = {
     .jerk = 4.0_mm_s,
     .accel = 800.0_mm_s2,
 };
+static constexpr U_mm_s pulleyFeedrate = 20._mm_s;
+/// End: Pulley axis configuration
 
-/// Selector configuration
+/// Begin: Selector configuration
 static constexpr AxisConfig selector = {
     .dirOn = true,
     .mRes = MRes_8,
@@ -111,7 +108,37 @@ static constexpr SelectorLimits selectorLimits = {
     .accel = 200.0_mm_s2,
 };
 
-/// Idler configuration
+static constexpr U_mm SelectorSlotDistance = 14.0_mm; /// Selector distance between two slots
+static constexpr U_mm SelectorOffsetFromMax = 1.0_mm; /// Selector offset from home max to slot 0
+//static constexpr U_mm SelectorOffsetFromMin = 75.5_mm; /// Selector offset from home min to slot 0
+
+/// slots 0-4 are the real ones, the 5th is the farthest parking positions
+/// selector.dirOn = true = Home at max: selector hits left side of the MMU2S body
+/// selector.dirOn = false = Home at min: selector POM nut hit the selector motor
+static constexpr U_mm selectorSlotPositions[toolCount + 1] = {
+ 
+///selctor max positions
+    SelectorOffsetFromMax + 0 * SelectorSlotDistance, ///1.0_mm + 0 * 14.0_mm = 1.0_mm
+    SelectorOffsetFromMax + 1 * SelectorSlotDistance, ///1.0_mm + 1 * 14.0_mm = 15.0_mm
+    SelectorOffsetFromMax + 2 * SelectorSlotDistance, ///1.0_mm + 2 * 14.0_mm = 29.0_mm
+    SelectorOffsetFromMax + 3 * SelectorSlotDistance, ///1.0_mm + 3 * 14.0_mm = 43.0_mm
+    SelectorOffsetFromMax + 4 * SelectorSlotDistance, ///1.0_mm + 4 * 14.0_mm = 57.0_mm
+    SelectorOffsetFromMax + 5 * SelectorSlotDistance ///1.0_mm + 5 * 14.0_mm = 71.0_mm
+/*
+///selector min positions
+    SelectorOffsetFromMin - 1.0_mm - 0 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 0 * 14.0_mm = 74.5_mm
+    SelectorOffsetFromMin - 1.0_mm - 1 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 1 * 14.0_mm = 60.5_mm
+    SelectorOffsetFromMin - 1.0_mm - 2 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 2 * 14.0_mm = 46.5_mm 
+    SelectorOffsetFromMin - 1.0_mm - 3 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 3 * 14.0_mm = 32.5_mm
+    SelectorOffsetFromMin - 1.0_mm - 4 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 4 * 14.0_mm = 18.5_mm
+    SelectorOffsetFromMin - 1.0_mm - 5 * SelectorSlotDistance ///75.5_mm - 1.0_mm - 5 * 14.0_mm = 4.5_mm 
+*/
+};
+
+static constexpr U_mm_s selectorFeedrate = 20._mm_s;
+/// End: Selector configuration
+
+/// Begin: Idler configuration
 static constexpr AxisConfig idler = {
     .dirOn = true,
     .mRes = MRes_16,
@@ -129,8 +156,24 @@ static constexpr IdlerLimits idlerLimits = {
     .accel = 10.0_deg_s2,
 };
 
-/// Max retries of FeedToBondtech used in LoadFilament
-static constexpr uint8_t feedToBondtechMaxRetries = 2;
+static constexpr U_deg IdlerSlotDistance = 40.0_deg; /// Idler distance between two slots
+static constexpr U_deg IdlerOffsetFromHome = 18.0_deg; /// Idler offset from home to slots
+
+/// Absolute positions for Idler's slots: 0-4 are the real ones, the 5th index is the idle position
+/// Home ccw with 5th idler bearing facing selector
+static constexpr U_deg idlerSlotPositions[toolCount + 1] = {
+    IdlerOffsetFromHome + 5 * IdlerSlotDistance, /// Slot 0 at 218 degree after homing ///18.0_deg + 5 * 40.0_deg = 218.0_deg
+    IdlerOffsetFromHome + 4 * IdlerSlotDistance, /// Slot 1 at 178 degree after homing ///18.0_deg + 4 * 40.0_deg = 178.0_deg
+    IdlerOffsetFromHome + 3 * IdlerSlotDistance, /// Slot 2 at 138 degree after homing ///18.0_deg + 3 * 40.0_deg = 138.0_deg
+    IdlerOffsetFromHome + 2 * IdlerSlotDistance, /// Slot 3 at 98 degree after homing ///18.0_deg + 2 * 40.0_deg = 98.0_deg
+    IdlerOffsetFromHome + 1 * IdlerSlotDistance, /// Slot 4 at 58 degree after homing ///18.0_deg + 1 * 40.0_deg = 58.0_deg
+    IdlerOffsetFromHome ///18.0_deg Fully disengaged all slots
+};
+
+static constexpr U_deg idlerParkPositionDelta = -IdlerSlotDistance + 5.0_deg / 2; ///@TODO verify
+
+static constexpr U_deg_s idlerFeedrate = 1000._deg_s;
+/// End: Idler configuration
 
 // TMC2130 setup
 
