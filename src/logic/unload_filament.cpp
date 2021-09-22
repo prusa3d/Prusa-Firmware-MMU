@@ -17,8 +17,8 @@ void UnloadFilament::Reset(uint8_t /*param*/) {
     state = ProgressCode::UnloadingToFinda;
     error = ErrorCode::RUNNING;
     unl.Reset(maxRetries);
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::Mode::off);
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::Mode::off);
 }
 
 bool UnloadFilament::StepInner() {
@@ -30,8 +30,8 @@ bool UnloadFilament::StepInner() {
                 // couldn't unload to FINDA, report error and wait for user to resolve it
                 state = ProgressCode::ERRDisengagingIdler;
                 error = ErrorCode::FINDA_DIDNT_SWITCH_OFF;
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0);
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
+                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::Mode::off);
+                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::Mode::blink0);
             } else {
                 state = ProgressCode::DisengagingIdler;
             }
@@ -59,7 +59,8 @@ bool UnloadFilament::StepInner() {
             error = ErrorCode::OK;
             mm::motion.Disable(mm::Pulley);
             mg::globals.SetFilamentLoaded(false); // filament unloaded
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::Mode::off);
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::Mode::off);
         }
         return false;
     case ProgressCode::ERRDisengagingIdler: // couldn't unload to FINDA
@@ -80,8 +81,8 @@ bool UnloadFilament::StepInner() {
             Reset(0); //@@TODO validate the reset parameter
             break;
         case mui::Event::Right: // problem resolved - the user pulled the fillament by hand
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::Mode::off);
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::Mode::on);
             //                mm::motion.PlanMove(mm::Pulley, 450, 5000); // @@TODO constants
             state = ProgressCode::AvoidingGrind;
             break;
