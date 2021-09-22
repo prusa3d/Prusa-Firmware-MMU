@@ -12,6 +12,7 @@ namespace logic {
 void FeedToBondtech::Reset(uint8_t maxRetries) {
     state = EngagingIdler;
     this->maxRetries = maxRetries;
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::Mode::blink0);
     mi::idler.Engage(mg::globals.ActiveSlot());
 }
 
@@ -22,16 +23,15 @@ bool FeedToBondtech::Step() {
     case EngagingIdler:
         if (mi::idler.Engaged()) {
             state = PushingFilament;
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
-            mm::motion.PlanMove(mm::Pulley, steps, 4500); //@@TODO constants - there was some strange acceleration sequence in the original FW,
+            mm::motion.PlanMove<mm::Pulley>(config::DefaultBowdenLength, config::pulleyFeedrate); //@@TODO constants - there was some strange acceleration sequence in the original FW,
             // we can probably hand over some array of constants for hand-tuned acceleration + leverage some smoothing in the stepper as well
         }
         return false;
     case PushingFilament:
         if (mfs::fsensor.Pressed()) {
             mm::motion.AbortPlannedMoves(); // stop pushing filament
-            //            mi::idler.Disengage();
-            state = OK;
+            mi::idler.Disengage();
+            state = DisengagingIdler;
         } else if (mm::motion.StallGuard(mm::Pulley)) {
             // stall guard occurred during movement - the filament got stuck
             state = Failed; // @@TODO may be even report why it failed
@@ -39,12 +39,12 @@ bool FeedToBondtech::Step() {
             state = Failed;
         }
         return false;
-        //    case DisengagingIdler:
-        //        if (!mi::idler.Engaged()) {
-        //            state = OK;
-        //            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
-        //        }
-        //        return false;
+    case DisengagingIdler:
+        if (!mi::idler.Engaged()) {
+            state = OK;
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
+        }
+        return false;
     case OK:
     case Failed:
     default:
