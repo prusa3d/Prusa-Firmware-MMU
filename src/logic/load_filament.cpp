@@ -60,12 +60,13 @@ bool LoadFilament::StepInner() {
                 state = ProgressCode::DisengagingIdler;
             }
         }
+        break;
     case ProgressCode::DisengagingIdler:
         if (!mi::idler.Engaged()) {
             state = ProgressCode::OK;
             error = ErrorCode::OK;
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
             mg::globals.SetFilamentLoaded(true);
         }
         break;
