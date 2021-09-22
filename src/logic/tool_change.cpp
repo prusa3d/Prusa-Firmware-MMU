@@ -7,6 +7,11 @@
 #include "../modules/motion.h"
 #include "../modules/permanent_storage.h"
 #include "../modules/selector.h"
+#ifdef DEBUG_LOGIC
+    #include "../hal/usart.h"
+    #include <string.h>
+    #include <stdio.h>
+#endif //DEBUG_LOGIC
 
 namespace logic {
 
@@ -19,6 +24,9 @@ void ToolChange::Reset(uint8_t param) {
 
     if (param == mg::globals.ActiveSlot() && mg::globals.FilamentLoaded()) {
         // we are already at the correct slot and the filament is loaded - nothing to do
+        #ifdef DEBUG_LOGIC
+            hu::usart1.puts("we are already at the correct slot and the filament is loaded - nothing to do\n");
+        #endif //DEBUG_LOGIC
         return;
     }
 
@@ -27,10 +35,16 @@ void ToolChange::Reset(uint8_t param) {
     plannedSlot = param;
 
     if (mg::globals.FilamentLoaded()) {
+        #ifdef DEBUG_LOGIC
+            hu::usart1.puts("Filament is loaded --> unload\n");
+        #endif //DEBUG_LOGIC
         state = ProgressCode::UnloadingFilament;
         unl.Reset(mg::globals.ActiveSlot());
     } else {
         state = ProgressCode::LoadingFilament;
+        #ifdef DEBUG_LOGIC
+            hu::usart1.puts("Filament is not loaded --> load\n");
+        #endif //DEBUG_LOGIC
         load.Reset(plannedSlot);
     }
 }

@@ -5,6 +5,7 @@
 /// Define Debug mode to add additional serial output
 
 //#define DEBUG_FINDA
+//#define DEBUG_LOGIC
 
 /// Wrangler for assorted compile-time configuration and constants.
 namespace config {
