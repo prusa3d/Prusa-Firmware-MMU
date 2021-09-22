@@ -8,29 +8,29 @@
 enum class ProgressCode : uint_fast8_t {
     OK = 0, ///< finished ok
 
-    EngagingIdler,
-    DisengagingIdler,
-    UnloadingToFinda,
-    UnloadingToPulley,
-    FeedingToFinda,
-    FeedingToBondtech,
-    AvoidingGrind,
-    FinishingMoves,
+    EngagingIdler, // P1
+    DisengagingIdler, // P2
+    UnloadingToFinda, // P3
+    UnloadingToPulley, //P4
+    FeedingToFinda, // P5
+    FeedingToBondtech, // P6
+    AvoidingGrind, // P7
+    FinishingMoves, // P8
 
-    ERRDisengagingIdler,
-    ERREngagingIdler,
-    ERRWaitingForUser,
-    ERRInternal,
-    ERRHelpingFilament,
-    ERRTMCFailed,
+    ERRDisengagingIdler, // P9
+    ERREngagingIdler, // P10
+    ERRWaitingForUser, // P11
+    ERRInternal, // P12
+    ERRHelpingFilament, // P13
+    ERRTMCFailed, // P14
 
-    UnloadingFilament,
-    LoadingFilament,
-    SelectingFilamentSlot,
-    PreparingBlade,
-    PushingFilament,
-    PerformingCut,
-    ReturningSelector,
-    ParkingSelector,
-    EjectingFilament,
+    UnloadingFilament, // P15
+    LoadingFilament, // P16
+    SelectingFilamentSlot, // P17
+    PreparingBlade, // P18
+    PushingFilament, // P19
+    PerformingCut, // P20
+    ReturningSelector, // P21
+    ParkingSelector, // P22
+    EjectingFilament, // P23
 };
