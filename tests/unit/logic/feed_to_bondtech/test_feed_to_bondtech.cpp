@@ -52,7 +52,7 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
     // idler engaged, selector in position, we'll start pushing filament
     REQUIRE(fb.State() == FeedToBondtech::PushingFilament);
     // at least at the beginning the LED should shine green (it should be blinking, but this mode has been already verified in the LED's unit test)
-    REQUIRE(ml::leds.LedOn(mg::globals.ActiveSlot(), ml::Color::green));
+    REQUIRE(ml::leds.LedOn(mg::globals.ActiveSlot(), ml::green));
 
     REQUIRE(WhileCondition(
         fb,
@@ -77,7 +77,7 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
 
     // state machine finished ok, the green LED should be on
     REQUIRE(fb.State() == FeedToBondtech::OK);
-    //    REQUIRE(ml::leds.LedOn(mg::globals.ActiveSlot(), ml::Color::green));
+    //    REQUIRE(ml::leds.LedOn(mg::globals.ActiveSlot(), ml::green));
 
     REQUIRE(fb.Step() == true); // the automaton finished its work, any consecutive calls to Step must return true
 }
