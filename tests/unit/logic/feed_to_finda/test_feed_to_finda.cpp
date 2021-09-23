@@ -71,11 +71,11 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
         5000));
 
     // disengaging idler
-        REQUIRE(ff.State() == FeedToFinda::DisengagingIdler);
-        REQUIRE(WhileCondition(
-            ff,
-            [&](int) { return mi::idler.Engaged(); },
-            5000));
+    REQUIRE(ff.State() == FeedToFinda::DisengagingIdler);
+    REQUIRE(WhileCondition(
+        ff,
+        [&](int) { return mi::idler.Engaged(); },
+        5000));
 
     CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5).v); // @@TODO constants
     CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(0).v);
