@@ -95,12 +95,13 @@ void setup() {
 
     mt::timebase.Init();
 
+    // watchdog init
     hwd::Enable(hwd::configuration::compute(8000)); //set 8s timeout
 
     mg::globals.Init();
 
     hal::shr16::shr16.Init();
-    ml::leds.SetMode(4, ml::Color::green, ml::Mode::on);
+    ml::leds.SetMode(4, ml::green, ml::on);
     ml::leds.Step();
 
     // if the shift register doesn't work we really can't signalize anything, only internal variables will be accessible if the UART works
@@ -110,7 +111,7 @@ void setup() {
         .baudrate = 115200,
     };
     hu::usart1.Init(&usart_conf);
-    ml::leds.SetMode(3, ml::Color::green, ml::Mode::on);
+    ml::leds.SetMode(3, ml::green, ml::on);
     ml::leds.Step();
 
     // @@TODO if both shift register and the UART are dead, we are sitting ducks :(
@@ -125,15 +126,15 @@ void setup() {
         .cpol = 1,
     };
     hal::spi::Init(SPI0, &spi_conf);
-    ml::leds.SetMode(2, ml::Color::green, ml::Mode::on);
+    ml::leds.SetMode(2, ml::green, ml::on);
     ml::leds.Step();
 
     mm::Init();
-    ml::leds.SetMode(1, ml::Color::green, ml::Mode::on);
+    ml::leds.SetMode(1, ml::green, ml::on);
     ml::leds.Step();
 
     ha::Init();
-    ml::leds.SetMode(0, ml::Color::green, ml::Mode::on);
+    ml::leds.SetMode(0, ml::green, ml::on);
     ml::leds.Step();
 
     mu::cdc.Init();
@@ -142,8 +143,8 @@ void setup() {
 
     /// Turn off all leds
     for (uint8_t i = 0; i < config::toolCount; i++) {
-        ml::leds.SetMode(i, ml::Color::green, ml::Mode::off);
-        ml::leds.SetMode(i, ml::Color::red, ml::Mode::off);
+        ml::leds.SetMode(i, ml::green, ml::off);
+        ml::leds.SetMode(i, ml::red, ml::off);
     }
     ml::leds.Step();
 }
