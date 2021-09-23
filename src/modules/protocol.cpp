@@ -100,7 +100,7 @@ DecodeStatus Protocol::DecodeResponse(uint8_t c) {
         case 'E':
         case 'W':
         case 'K':
-        case 'F':
+        case 'f':
             responseMsg.request.code = (RequestMsgCodes)c;
             responseMsg.request.value = 0;
             rspState = ResponseStates::RequestValue;
