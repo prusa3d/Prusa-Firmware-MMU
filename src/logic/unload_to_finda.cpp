@@ -25,7 +25,7 @@ bool UnloadToFinda::Step() {
     case EngagingIdler:
         if (mg::globals.FilamentLoaded()) {
             state = UnloadingToFinda;
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::Mode::blink0);
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
         } else {
             state = Failed;
         }
@@ -41,7 +41,7 @@ bool UnloadToFinda::Step() {
             // detected end of filament
             state = OK;
             mm::motion.AbortPlannedMoves(); // stop rotating the pulley
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::Mode::off);
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
         } else if (/*tmc2130_read_gstat() &&*/ mm::motion.QueueEmpty()) {
             // we reached the end of move queue, but the FINDA didn't switch off
             // two possible causes - grinded filament or malfunctioning FINDA
