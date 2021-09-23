@@ -8,9 +8,9 @@
 #include "../modules/selector.h"
 #include "../modules/user_input.h"
 #ifdef DEBUG_LOGIC
-    #include "../hal/usart.h"
-    #include <string.h>
-    #include <stdio.h>
+#include "../hal/usart.h"
+#include <string.h>
+#include <stdio.h>
 #endif //DEBUG_LOGIC
 
 namespace logic {
@@ -21,9 +21,9 @@ void LoadFilament::Reset(uint8_t param) {
     if (!CheckToolIndex(param)) {
         return;
     }
-    #ifdef DEBUG_LOGIC
-        hu::usart1.puts("Load Filament\n\n");
-    #endif //DEBUG_LOGIC
+#ifdef DEBUG_LOGIC
+    hu::usart1.puts("Load Filament\n\n");
+#endif //DEBUG_LOGIC
     state = ProgressCode::EngagingIdler;
     error = ErrorCode::RUNNING;
     mg::globals.SetActiveSlot(param);

@@ -46,7 +46,7 @@ bool FeedToFinda::Step() {
         if (mm::motion.QueueEmpty()) { // all moves have been finished
             state = DisengagingIdler;
             mi::idler.Disengage();
-            }
+        }
         return false;
     case DisengagingIdler:
         if (!mi::idler.Engaged()) {

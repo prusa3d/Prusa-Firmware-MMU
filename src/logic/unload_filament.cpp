@@ -7,9 +7,9 @@
 #include "../modules/permanent_storage.h"
 #include "../modules/user_input.h"
 #ifdef DEBUG_LOGIC
-    #include "../hal/usart.h"
-    #include <string.h>
-    #include <stdio.h>
+#include "../hal/usart.h"
+#include <string.h>
+#include <stdio.h>
 #endif //DEBUG_LOGIC
 
 namespace logic {
