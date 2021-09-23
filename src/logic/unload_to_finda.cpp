@@ -30,7 +30,7 @@ bool UnloadToFinda::Step() {
             mm::motion.PlanMove(mm::Pulley, -1400, 6000); // @@TODO constants
             mm::motion.PlanMove(mm::Pulley, -1800 + 1400, 2500); // @@TODO constants 1800-1400 = 400
             mm::motion.PlanMove(mm::Pulley, -second_point + 1800, 550); // @@TODO constants
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::blink0);
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
         }
         return false;
     case WaitingForFINDA:

@@ -22,7 +22,7 @@ bool FeedToBondtech::Step() {
     case EngagingIdler:
         if (mi::idler.Engaged()) {
             state = PushingFilament;
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::blink0);
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
             mm::motion.PlanMove(mm::Pulley, steps, 4500); //@@TODO constants - there was some strange acceleration sequence in the original FW,
             // we can probably hand over some array of constants for hand-tuned acceleration + leverage some smoothing in the stepper as well
         }
@@ -42,7 +42,7 @@ bool FeedToBondtech::Step() {
         //    case DisengagingIdler:
         //        if (!mi::idler.Engaged()) {
         //            state = OK;
-        //            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::on);
+        //            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
         //        }
         //        return false;
     case OK:

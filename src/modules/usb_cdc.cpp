@@ -36,18 +36,6 @@ USB_ClassInfo_CDC_Device_t VirtualSerial_CDC_Interface = {
     },
 };
 
-// void testFunc1(uint8_t i) {
-//     char str[30];
-//     sprintf_P(str, PSTR("testFunc1(%hu)\n"), i);
-//     hal::usart::usart1.puts(str);
-// }
-
-// void testFunc2(uint8_t i) {
-//     char str[30];
-//     sprintf_P(str, PSTR("testFunc2(%hu)\n"), i);
-//     hal::usart::usart1.puts(str);
-// }
-
 /** Event handler for the library USB Connection event. */
 void EVENT_USB_Device_Connect(void) {
     hal::usart::usart1.puts("EVENT_USB_Device_Connect\n");

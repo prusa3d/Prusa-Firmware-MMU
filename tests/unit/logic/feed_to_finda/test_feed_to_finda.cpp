@@ -52,7 +52,7 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
     // idler engaged, selector in position, we'll start pushing filament
     REQUIRE(ff.State() == FeedToFinda::PushingFilament);
     // at least at the beginning the LED should shine green (it should be blinking, but this mode has been already verified in the LED's unit test)
-    REQUIRE(ml::leds.LedOn(mg::globals.ActiveSlot(), ml::Color::green));
+    REQUIRE(ml::leds.LedOn(mg::globals.ActiveSlot(), ml::green));
 
     // now let the filament be pushed into the FINDA - do 500 steps without triggering the condition
     hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
@@ -117,7 +117,7 @@ TEST_CASE("feed_to_finda::FINDA_failed", "[feed_to_finda]") {
     // idler engaged, we'll start pushing filament
     REQUIRE(ff.State() == FeedToFinda::PushingFilament);
     // at least at the beginning the LED should shine green (it should be blinking, but this mode has been already verified in the LED's unit test)
-    REQUIRE(ml::leds.Mode(mg::globals.ActiveSlot(), ml::Color::green) == ml::blink0);
+    REQUIRE(ml::leds.Mode(mg::globals.ActiveSlot(), ml::green) == ml::blink0);
 
     // now let the filament be pushed into the FINDA - but we make sure the FINDA doesn't trigger at all
     hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
@@ -129,8 +129,8 @@ TEST_CASE("feed_to_finda::FINDA_failed", "[feed_to_finda]") {
 
     // the FINDA didn't trigger, we should be in the Failed state
     REQUIRE(ff.State() == FeedToFinda::Failed);
-    REQUIRE(ml::leds.Mode(mg::globals.ActiveSlot(), ml::Color::green) == ml::off);
-    REQUIRE(ml::leds.Mode(mg::globals.ActiveSlot(), ml::Color::red) == ml::blink0);
+    REQUIRE(ml::leds.Mode(mg::globals.ActiveSlot(), ml::green) == ml::off);
+    REQUIRE(ml::leds.Mode(mg::globals.ActiveSlot(), ml::red) == ml::blink0);
 
     REQUIRE(ff.Step() == true); // the automaton finished its work, any consecutive calls to Step must return true
 }
