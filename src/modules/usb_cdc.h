@@ -8,16 +8,16 @@ namespace usb {
 
 class CDC {
 public:
-    constexpr inline CDC() {}
+    constexpr inline CDC() = default;
 
+    /// Calls USB_Init from the LUFA library
     void Init();
 
+    /// Calls USB_USBTask from the LUFA library - basically takes care about the runtime of USB CDC operation
     void Step();
-
-private:
 };
 
-/// The one and only instance of Selector in the FW
+/// The one and only instance of USB CDC in the FW
 extern CDC cdc;
 
 } // namespace usb
