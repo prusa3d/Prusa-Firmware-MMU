@@ -1,6 +1,6 @@
 #pragma once
 #include <stddef.h>
-#include "../limits.h"
+#include "../intlimits.h"
 
 /// A generic circular index class which can be used to build circular buffers
 /// Can hold up to size elements

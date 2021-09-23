@@ -100,7 +100,8 @@ if(CMAKE_CROSSCOMPILING)
   add_link_options(-Wl,--gc-sections)
 
   # disable exceptions and related metadata
-  add_compile_options(-fno-exceptions -fno-unwind-tables -fno-rtti)
+  add_compile_options(-fno-exceptions -fno-unwind-tables)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
   add_link_options(-Wl,--defsym,__exidx_start=0,--defsym,__exidx_end=0)
 else()
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -158,7 +159,7 @@ endif()
 
 # add_link_dependency(firmware "${LINKER_SCRIPT}")
 
-target_include_directories(firmware PRIVATE src)
+target_include_directories(firmware PRIVATE src lib)
 
 target_compile_options(firmware PRIVATE -Wdouble-promotion)
 

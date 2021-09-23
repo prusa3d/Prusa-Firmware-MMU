@@ -12,3 +12,5 @@ uint16_t ReadADC(uint8_t channel);
 
 } // namespace adc
 } // namespace hal
+
+namespace ha = hal::adc;

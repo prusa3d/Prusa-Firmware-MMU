@@ -37,8 +37,12 @@ public:
         uint8_t prescalerBits = 0;
         uint32_t ticks = 1;
         switch (timeout) {
+        case 250:
+            prescalerBits = 4;
+            break;
         case 8000:
             prescalerBits = 9;
+            break;
         }
 
         configuration config = { prescalerBits, static_cast<uint16_t>(ticks - 1) };
@@ -53,3 +57,5 @@ void Reset();
 
 } // namespace watchdog
 } // namespace hal
+
+namespace hwd = hal::watchdog;

@@ -21,6 +21,7 @@
 #include "modules/user_input.h"
 #include "modules/timebase.h"
 #include "modules/motion.h"
+#include "modules/usb_cdc.h"
 
 #include "logic/command_base.h"
 #include "logic/cut_filament.h"
@@ -32,7 +33,6 @@
 #include "logic/unload_filament.h"
 
 #include "version.h"
-
 #include "panic.h"
 
 /// Global instance of the protocol codec
@@ -91,24 +91,20 @@ void TmpPlayground() {
 /// Called before entering the loop() function
 /// Green LEDs signalize the progress of initialization. If anything goes wrong we shall turn on a red LED
 void setup() {
-    using namespace hal;
-
-    cpu::Init();
+    hal::cpu::Init();
 
     mt::timebase.Init();
 
-    watchdog::Enable(watchdog::configuration::compute(8000)); //set 8s timeout
+    // watchdog init
+    hwd::Enable(hwd::configuration::compute(8000)); //set 8s timeout
 
     mg::globals.Init();
 
-    // watchdog init
-
-    shr16::shr16.Init();
+    hal::shr16::shr16.Init();
     ml::leds.SetMode(4, ml::green, ml::on);
     ml::leds.Step();
 
-    // @@TODO if the shift register doesn't work we really can't signalize anything, only internal variables will be accessible if the UART works
-
+    // if the shift register doesn't work we really can't signalize anything, only internal variables will be accessible if the UART works
     hu::USART::USART_InitTypeDef usart_conf = {
         .rx_pin = USART_RX,
         .tx_pin = USART_TX,
@@ -120,7 +116,7 @@ void setup() {
 
     // @@TODO if both shift register and the UART are dead, we are sitting ducks :(
 
-    spi::SPI_InitTypeDef spi_conf = {
+    hal::spi::SPI_InitTypeDef spi_conf = {
         .miso_pin = TMC2130_SPI_MISO_PIN,
         .mosi_pin = TMC2130_SPI_MOSI_PIN,
         .sck_pin = TMC2130_SPI_SCK_PIN,
@@ -129,7 +125,7 @@ void setup() {
         .cpha = 1,
         .cpol = 1,
     };
-    spi::Init(SPI0, &spi_conf);
+    hal::spi::Init(SPI0, &spi_conf);
     ml::leds.SetMode(2, ml::green, ml::on);
     ml::leds.Step();
 
@@ -137,9 +133,13 @@ void setup() {
     ml::leds.SetMode(1, ml::green, ml::on);
     ml::leds.Step();
 
-    adc::Init();
+    ha::Init();
     ml::leds.SetMode(0, ml::green, ml::on);
     ml::leds.Step();
+
+    mu::cdc.Init();
+
+    _delay_ms(100);
 
     /// Turn off all leds
     for (uint8_t i = 0; i < config::toolCount; i++) {
@@ -367,6 +367,8 @@ void loop() {
     ms::selector.Step();
     mui::userInput.Step();
     currentCommand->Step();
+    hal::cpu::Step();
+    mu::cdc.Step();
 
     hal::watchdog::Reset();
 }
