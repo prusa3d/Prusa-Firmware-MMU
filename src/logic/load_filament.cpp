@@ -41,8 +41,8 @@ bool LoadFilament::StepInner() {
                 state = ProgressCode::ERRDisengagingIdler;
                 error = ErrorCode::FINDA_DIDNT_SWITCH_ON;
                 mi::idler.Disengage();
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::Mode::off);
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::red, ml::Mode::blink0); // signal loading error
+                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
+                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0); // signal loading error
             } else {
                 state = ProgressCode::FeedingToBondtech;
                 james.Reset(config::feedToBondtechMaxRetries);
