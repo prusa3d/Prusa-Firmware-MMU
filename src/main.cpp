@@ -6,12 +6,6 @@
 #include "hal/usart.h"
 #include "hal/watchdog.h"
 
-extern "C" {
-#include "lufa_config.h"
-#include "Descriptors.h"
-#include "lufa/LUFA/Drivers/USB/USB.h"
-}
-
 #include "pins.h"
 #include <avr/interrupt.h>
 #include <util/delay.h>
@@ -27,6 +21,7 @@ extern "C" {
 #include "modules/user_input.h"
 #include "modules/timebase.h"
 #include "modules/motion.h"
+#include "modules/usb_cdc.h"
 
 #include "logic/command_base.h"
 #include "logic/cut_filament.h"
@@ -38,111 +33,7 @@ extern "C" {
 #include "logic/unload_filament.h"
 
 #include "version.h"
-
 #include "panic.h"
-
-extern "C" {
-
-/** LUFA CDC Class driver interface configuration and state information. This structure is
- *  passed to all CDC Class driver functions, so that multiple instances of the same class
- *  within a device can be differentiated from one another.
- */
-USB_ClassInfo_CDC_Device_t VirtualSerial_CDC_Interface = {
-    .Config = {
-        .ControlInterfaceNumber = INTERFACE_ID_CDC_CCI,
-        .DataINEndpoint = {
-            .Address = CDC_TX_EPADDR,
-            .Size = CDC_TXRX_EPSIZE,
-            .Type = EP_TYPE_BULK,
-            .Banks = 1,
-        },
-        .DataOUTEndpoint = {
-            .Address = CDC_RX_EPADDR,
-            .Size = CDC_TXRX_EPSIZE,
-            .Type = EP_TYPE_BULK,
-            .Banks = 1,
-        },
-        .NotificationEndpoint = {
-            .Address = CDC_NOTIFICATION_EPADDR,
-            .Size = CDC_NOTIFICATION_EPSIZE,
-            .Type = EP_TYPE_INTERRUPT,
-            .Banks = 1,
-        },
-    },
-};
-
-// void testFunc1(uint8_t i) {
-//     char str[30];
-//     sprintf_P(str, PSTR("testFunc1(%hu)\n"), i);
-//     hal::usart::usart1.puts(str);
-// }
-
-// void testFunc2(uint8_t i) {
-//     char str[30];
-//     sprintf_P(str, PSTR("testFunc2(%hu)\n"), i);
-//     hal::usart::usart1.puts(str);
-// }
-
-/** Event handler for the library USB Connection event. */
-void EVENT_USB_Device_Connect(void) {
-    hal::usart::usart1.puts("EVENT_USB_Device_Connect\n");
-}
-
-/** Event handler for the library USB Disconnection event. */
-void EVENT_USB_Device_Disconnect(void) {
-    hal::usart::usart1.puts("EVENT_USB_Device_Disconnect\n");
-}
-
-/** Event handler for the library USB Configuration Changed event. */
-void EVENT_USB_Device_ConfigurationChanged(void) {
-    bool ConfigSuccess = true;
-
-    ConfigSuccess &= CDC_Device_ConfigureEndpoints(&VirtualSerial_CDC_Interface);
-
-    // LEDs_SetAllLEDs(ConfigSuccess ? LEDMASK_USB_READY : LEDMASK_USB_ERROR);
-    // char str1[] = "ready\n";
-    // char str0[] = "error\n";
-    // hal::usart::usart1.puts("EVENT_USB_Device_ConfigurationChanged:");
-    // hal::usart::usart1.puts(ConfigSuccess ? str1 : str0);
-}
-
-/** Event handler for the library USB Control Request reception event. */
-void EVENT_USB_Device_ControlRequest(void) {
-    // hal::usart::usart1.puts("EVENT_USB_Device_ControlRequest\n");
-    CDC_Device_ProcessControlRequest(&VirtualSerial_CDC_Interface);
-}
-
-/** CDC class driver callback function the processing of changes to the virtual
- *  control lines sent from the host..
- *
- *  \param[in] CDCInterfaceInfo  Pointer to the CDC class interface configuration structure being referenced
- */
-void EVENT_CDC_Device_ControLineStateChanged(USB_ClassInfo_CDC_Device_t *const CDCInterfaceInfo) {
-    // Printing to serial from here will make Windows commit suicide when opening the port
-
-    // hal::usart::usart1.puts("EVENT_CDC_Device_ControLineStateChanged ");
-    // bool HostReady = (CDCInterfaceInfo->State.ControlLineStates.HostToDevice & CDC_CONTROL_LINE_OUT_DTR) != 0;
-    // char str[50];
-    // sprintf_P(str, PSTR("DTR:%hu\n"), HostReady);
-    // hal::usart::usart1.puts(str);
-}
-
-void EVENT_CDC_Device_LineEncodingChanged(USB_ClassInfo_CDC_Device_t *const CDCInterfaceInfo) {
-    // Printing to serial from here will make Windows commit suicide when opening the port
-
-    // hal::usart::usart1.puts("EVENT_CDC_Device_LineEncodingChanged ");
-    // char str[50];
-    // sprintf_P(str, PSTR("baud:%lu\n"), CDCInterfaceInfo->State.LineEncoding.BaudRateBPS);
-    // hal::usart::usart1.puts(str);
-    
-    if (CDCInterfaceInfo->State.LineEncoding.BaudRateBPS == 1200) {
-        // *(uint16_t *)0x0800U = 0x7777; //old bootloader?
-        *(uint16_t *)(RAMEND-1) = 0x7777;
-        hal::cpu::resetPending = true;
-        hal::watchdog::Enable(hal::watchdog::configuration::compute(250));
-    }
-}
-}
 
 /// Global instance of the protocol codec
 static mp::Protocol protocol;
@@ -200,24 +91,19 @@ void TmpPlayground() {
 /// Called before entering the loop() function
 /// Green LEDs signalize the progress of initialization. If anything goes wrong we shall turn on a red LED
 void setup() {
-    using namespace hal;
-
-    cpu::Init();
+    hal::cpu::Init();
 
     mt::timebase.Init();
 
-    watchdog::Enable(watchdog::configuration::compute(8000)); //set 8s timeout
+    hwd::Enable(hwd::configuration::compute(8000)); //set 8s timeout
 
     mg::globals.Init();
 
-    // watchdog init
-
-    shr16::shr16.Init();
+    hal::shr16::shr16.Init();
     ml::leds.SetMode(4, ml::Color::green, ml::Mode::on);
     ml::leds.Step();
 
-    // @@TODO if the shift register doesn't work we really can't signalize anything, only internal variables will be accessible if the UART works
-
+    // if the shift register doesn't work we really can't signalize anything, only internal variables will be accessible if the UART works
     hu::USART::USART_InitTypeDef usart_conf = {
         .rx_pin = USART_RX,
         .tx_pin = USART_TX,
@@ -229,7 +115,7 @@ void setup() {
 
     // @@TODO if both shift register and the UART are dead, we are sitting ducks :(
 
-    spi::SPI_InitTypeDef spi_conf = {
+    hal::spi::SPI_InitTypeDef spi_conf = {
         .miso_pin = TMC2130_SPI_MISO_PIN,
         .mosi_pin = TMC2130_SPI_MOSI_PIN,
         .sck_pin = TMC2130_SPI_SCK_PIN,
@@ -238,7 +124,7 @@ void setup() {
         .cpha = 1,
         .cpol = 1,
     };
-    spi::Init(SPI0, &spi_conf);
+    hal::spi::Init(SPI0, &spi_conf);
     ml::leds.SetMode(2, ml::Color::green, ml::Mode::on);
     ml::leds.Step();
 
@@ -246,11 +132,11 @@ void setup() {
     ml::leds.SetMode(1, ml::Color::green, ml::Mode::on);
     ml::leds.Step();
 
-    adc::Init();
+    ha::Init();
     ml::leds.SetMode(0, ml::Color::green, ml::Mode::on);
     ml::leds.Step();
 
-    USB_Init();
+    mu::cdc.Init();
 
     _delay_ms(100);
 
@@ -481,10 +367,7 @@ void loop() {
     mui::userInput.Step();
     currentCommand->Step();
     hal::cpu::Step();
-
-    CDC_Device_ReceiveByte(&VirtualSerial_CDC_Interface);
-    CDC_Device_USBTask(&VirtualSerial_CDC_Interface);
-    USB_USBTask();
+    mu::cdc.Step();
 
     hal::watchdog::Reset();
 }

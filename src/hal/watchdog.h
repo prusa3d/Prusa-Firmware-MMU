@@ -57,3 +57,5 @@ void Reset();
 
 } // namespace watchdog
 } // namespace hal
+
+namespace hwd = hal::watchdog;
