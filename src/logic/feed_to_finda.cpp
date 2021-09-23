@@ -13,7 +13,7 @@ namespace logic {
 void FeedToFinda::Reset(bool feedPhaseLimited) {
     state = EngagingIdler;
     this->feedPhaseLimited = feedPhaseLimited;
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::Mode::blink0);
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
     mi::idler.Engage(mg::globals.ActiveSlot());
     // We can't get any FINDA readings if the selector is at the wrong spot - move it accordingly if necessary
     ms::selector.MoveToSlot(mg::globals.ActiveSlot());

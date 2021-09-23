@@ -20,7 +20,7 @@ void FeedToBondtech::Reset(uint8_t maxRetries) {
 #endif //DEBUG_LOGIC
     state = EngagingIdler;
     this->maxRetries = maxRetries;
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::Color::green, ml::Mode::blink0);
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
     mi::idler.Engage(mg::globals.ActiveSlot());
 }
 
