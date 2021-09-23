@@ -129,10 +129,10 @@ static constexpr U_mm selectorSlotPositions[toolCount + 1] = {
 ///selector min positions
     SelectorOffsetFromMin - 1.0_mm - 0 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 0 * 14.0_mm = 74.5_mm
     SelectorOffsetFromMin - 1.0_mm - 1 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 1 * 14.0_mm = 60.5_mm
-    SelectorOffsetFromMin - 1.0_mm - 2 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 2 * 14.0_mm = 46.5_mm 
+    SelectorOffsetFromMin - 1.0_mm - 2 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 2 * 14.0_mm = 46.5_mm
     SelectorOffsetFromMin - 1.0_mm - 3 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 3 * 14.0_mm = 32.5_mm
     SelectorOffsetFromMin - 1.0_mm - 4 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 4 * 14.0_mm = 18.5_mm
-    SelectorOffsetFromMin - 1.0_mm - 5 * SelectorSlotDistance ///75.5_mm - 1.0_mm - 5 * 14.0_mm = 4.5_mm 
+    SelectorOffsetFromMin - 1.0_mm - 5 * SelectorSlotDistance ///75.5_mm - 1.0_mm - 5 * 14.0_mm = 4.5_mm
 */
 };
 
