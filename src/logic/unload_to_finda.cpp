@@ -33,9 +33,7 @@ bool UnloadToFinda::Step() {
     case UnloadingToFinda:
         if (mi::idler.Engaged()) {
             state = WaitingForFINDA;
-            int unloadSteps = mps::BowdenLength::get() + 1100;
-            const int second_point = unloadSteps - 1300;
-            mm::motion.PlanMove<mm::Pulley>(-config::DefaultBowdenLength - config::FeedToFINDA - config::FilamentMinLoadedToMMU, config::pulleyFeedrate); // @@TODO constants
+            mm::motion.PlanMove<mm::Pulley>(-config::defaultBowdenLength - config::feedToFinda - config::filamentMinLoadedToMMU, config::pulleyFeedrate); // @@TODO constants
         }
         return false;
     case WaitingForFINDA:

@@ -54,22 +54,22 @@ static constexpr uint16_t stepTimerQuantum = 256; // 256 = 128us
 static constexpr uint8_t feedToBondtechMaxRetries = 2;
 
 /// Distances
-static constexpr U_mm PulleyToCuttingEdge = 33.0_mm; /// 33.0_mm /// Pulley to cutting edge.
+static constexpr U_mm pulleyToCuttingEdge = 33.0_mm; /// 33.0_mm /// Pulley to cutting edge.
 /// Case 1: FINDA working: This should be the max retraction after FINDA un-triggers.
 /// Case 2: FINDA not working: calculate retraction from printer to this point.
-static constexpr U_mm FilamentMinLoadedToMMU = 20.0_mm; /// 20.0_mm ??? /// Limit of retraction. @TODO find correct distance.
-static constexpr U_mm EjectFromCuttingEdge = 40.0_mm; /// Eject should ignore FilamentMinLoadedToMMU and retract
-static constexpr U_mm CuttingEdgeRetract = 3.0_mm; /// 3.0_mm /// Cutting retraction distance (filament should be flush with outlet) @TODO find correct distance.
-static constexpr U_mm CuttingEdgeToFINDA = 18.5_mm; /// 18.5_mm -1.0_mm /// Cutting edge to FINDA MMU2 side -1mm tolerance should be ~18.5. FINDA shouldn't trigger here.
-static constexpr U_mm FINDAtriggerDistance = 4.5_mm; /// 9.0_mm /// FINDA trigger distance +1.0_mm tolerance.
-static constexpr U_mm CuttingEdgeToFINDAmidpoint = 22.85_mm; /// Cutting edge to Midpoint of FINDA should be 22.85_mm.
-static constexpr U_mm FINDAtoCoupler = 12.0_mm; /// 12.0_mm /// FINDA Coupler side to coupler screw.
-static constexpr U_mm CouplerToBowden = 3.5_mm; /// 3.5_mm /// FINDA Coupler screw to bowden mmu2s side (in coupling).
-static constexpr U_mm DefaultBowdenLength = 427.0_mm; /// ~427.0_mm /// Default Bowden length. @TODO Should be stored in EEPROM.
-static constexpr U_mm MinimumBowdenLength = 341.0_mm; /// ~341.0_mm /// Minimum bowden length. @TODO Should be stored in EEPROM.
-static constexpr U_mm MaximumBowdenLength = 792.0_mm; /// ~792.0_mm /// Maximum bowden length. @TODO Should be stored in EEPROM.
-static constexpr U_mm FeedToFINDA = CuttingEdgeToFINDAmidpoint + FilamentMinLoadedToMMU;
-static constexpr U_mm CutLength = 8.0_mm;
+static constexpr U_mm filamentMinLoadedToMMU = 20.0_mm; /// 20.0_mm ??? /// Limit of retraction. @TODO find correct distance.
+static constexpr U_mm ejectFromCuttingEdge = 40.0_mm; /// Eject should ignore FilamentMinLoadedToMMU and retract
+static constexpr U_mm cuttingEdgeRetract = 3.0_mm; /// 3.0_mm /// Cutting retraction distance (filament should be flush with outlet) @TODO find correct distance.
+static constexpr U_mm cuttingEdgeToFinda = 18.5_mm; /// 18.5_mm -1.0_mm /// Cutting edge to FINDA MMU2 side -1mm tolerance should be ~18.5. FINDA shouldn't trigger here.
+static constexpr U_mm findaTriggerDistance = 4.5_mm; /// 9.0_mm /// FINDA trigger distance +1.0_mm tolerance.
+static constexpr U_mm cuttingEdgeToFindaMidpoint = 22.85_mm; /// Cutting edge to Midpoint of FINDA should be 22.85_mm.
+static constexpr U_mm findaToCoupler = 12.0_mm; /// 12.0_mm /// FINDA Coupler side to coupler screw.
+static constexpr U_mm couplerToBowden = 3.5_mm; /// 3.5_mm /// FINDA Coupler screw to bowden mmu2s side (in coupling).
+static constexpr U_mm defaultBowdenLength = 427.0_mm; /// ~427.0_mm /// Default Bowden length. @TODO Should be stored in EEPROM.
+static constexpr U_mm minimumBowdenLength = 341.0_mm; /// ~341.0_mm /// Minimum bowden length. @TODO Should be stored in EEPROM.
+static constexpr U_mm maximumBowdenLength = 792.0_mm; /// ~792.0_mm /// Maximum bowden length. @TODO Should be stored in EEPROM.
+static constexpr U_mm feedToFinda = cuttingEdgeToFindaMidpoint + filamentMinLoadedToMMU;
+static constexpr U_mm cutLength = 8.0_mm;
 
 /// Begin: Pulley axis configuration
 static constexpr AxisConfig pulley = {

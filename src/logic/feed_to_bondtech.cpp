@@ -25,8 +25,6 @@ void FeedToBondtech::Reset(uint8_t maxRetries) {
 }
 
 bool FeedToBondtech::Step() {
-    const uint16_t steps = mps::BowdenLength::get();
-
     switch (state) {
     case EngagingIdler:
         if (mi::idler.Engaged()) {
@@ -37,7 +35,7 @@ bool FeedToBondtech::Step() {
             hu::usart1.puts(str);
 #endif //DEBUG_LOGIC
             state = PushingFilament;
-            mm::motion.PlanMove<mm::Pulley>(config::DefaultBowdenLength, config::pulleyFeedrate); //@@TODO constants - there was some strange acceleration sequence in the original FW,
+            mm::motion.PlanMove<mm::Pulley>(config::defaultBowdenLength, config::pulleyFeedrate); //@@TODO constants - there was some strange acceleration sequence in the original FW,
             // we can probably hand over some array of constants for hand-tuned acceleration + leverage some smoothing in the stepper as well
         }
         return false;
