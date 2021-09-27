@@ -46,7 +46,11 @@ public:
     /// @param c character to be pushed into the TX buffer (to be sent)
     void Write(uint8_t c);
     /// @param str c string to be sent. NL is appended
+    /// Works on RAM strings
     void puts(const char *str);
+    /// @param str c string to be sent. NL is appended
+    /// Works on PROGMEM strings
+    void puts_P(const char *str);
     /// @returns true if there is at least one byte free in the TX buffer (i.e. some space to add a character to be sent)
     bool CanWrite() const {
         return !tx_buf.full();
