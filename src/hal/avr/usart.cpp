@@ -1,5 +1,6 @@
 #include "../usart.h"
 #include <avr/interrupt.h>
+#include <avr/pgmspace.h>
 
 namespace hal {
 namespace usart {
@@ -67,6 +68,13 @@ void USART::Flush() {
 void USART::puts(const char *str) {
     while (*str) {
         Write(*str++);
+    }
+}
+
+void USART::puts_P(const char *str) {
+    char c;
+    while ((c = pgm_read_byte(*str++)) != 0) {
+        Write(c);
     }
 }
 
