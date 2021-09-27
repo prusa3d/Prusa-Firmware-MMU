@@ -21,7 +21,7 @@ using Catch::Matchers::Equals;
 
 namespace ha = hal::adc;
 
-TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
+TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
     using namespace logic;
 
     ForceReinitAllAutomata();
