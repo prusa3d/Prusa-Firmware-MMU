@@ -3,11 +3,7 @@
 #include "leds.h"
 #include "motion.h"
 #include "permanent_storage.h"
-#ifdef DEBUG_LOGIC
-#include "../hal/usart.h"
-#include <string.h>
-#include <stdio.h>
-#endif //DEBUG_LOGIC
+#include "../debug.h"
 
 namespace modules {
 namespace idler {
@@ -16,34 +12,24 @@ Idler idler;
 
 void Idler::PrepareMoveToPlannedSlot() {
     mm::motion.PlanMoveTo<mm::Idler>(SlotPosition(plannedSlot), mm::unitToAxisUnit<mm::I_speed_t>(config::idlerFeedrate));
-#ifdef DEBUG_LOGIC
-    char str[30];
-    sprintf_P(str, PSTR("Prepare Move Idler slot %d\n"), plannedSlot);
-    hu::usart1.puts(str);
-#endif //DEBUG_LOGIC
+    dbg_logic_sprintf_P(PSTR("Prepare Move Idler slot %d\n"), plannedSlot);
 }
 
 void Idler::PlanHomingMove() {
     mm::motion.PlanMove<mm::Idler>(mm::unitToAxisUnit<mm::I_pos_t>(-config::idlerLimits.lenght * 2), mm::unitToAxisUnit<mm::I_speed_t>(config::idlerFeedrate));
-#ifdef DEBUG_LOGIC
-    hu::usart1.puts("Plan Homing Idler\n");
-#endif //DEBUG_LOGIC
+    dbg_logic_P(PSTR("Plan Homing Idler\n"));
 }
 
 Idler::OperationResult Idler::Disengage() {
     if (state == Moving) {
-#ifdef DEBUG_LOGIC
-        hu::usart1.puts("Moving --> Disengage refused\n");
-#endif //DEBUG_LOGIC
+        dbg_logic_P(PSTR("Moving --> Disengage refused\n"));
         return OperationResult::Refused;
     }
     plannedSlot = IdleSlotIndex();
     plannedEngage = false;
 
     if (!Engaged()) {
-#ifdef DEBUG_LOGIC
-        hu::usart1.puts("Disengage Idler\n");
-#endif //DEBUG_LOGIC
+        dbg_logic_P(PSTR("Disengage Idler\n"));
         return OperationResult::Accepted;
     }
     return InitMovement(mm::Idler);
@@ -51,9 +37,7 @@ Idler::OperationResult Idler::Disengage() {
 
 Idler::OperationResult Idler::Engage(uint8_t slot) {
     if (state == Moving) {
-#ifdef DEBUG_LOGIC
-        hu::usart1.puts("Moving --> Engage refused\n");
-#endif //DEBUG_LOGIC
+        dbg_logic_P(PSTR("Moving --> Engage refused\n"));
         return OperationResult::Refused;
     }
 
@@ -61,9 +45,7 @@ Idler::OperationResult Idler::Engage(uint8_t slot) {
     plannedEngage = true;
 
     if (Engaged()) {
-#ifdef DEBUG_LOGIC
-        hu::usart1.puts("Engage Idler\n");
-#endif //DEBUG_LOGIC
+        dbg_logic_P(PSTR("Engage Idler\n"));
         return OperationResult::Accepted;
     }
 
@@ -81,21 +63,15 @@ bool Idler::Home() {
 bool Idler::Step() {
     switch (state) {
     case Moving:
-#ifdef DEBUG_LOGIC
-        //hu::usart1.puts("Moving Idler\n");
-#endif //DEBUG_LOGIC
+        // dbg_logic_P(PSTR("Moving Idler\n"));
         PerformMove(mm::Idler);
         return false;
     case Homing:
-#ifdef DEBUG_LOGIC
-        hu::usart1.puts("Homing Idler\n");
-#endif //DEBUG_LOGIC
+        dbg_logic_P(PSTR("Homing Idler\n"));
         PerformHome(mm::Idler);
         return false;
     case Ready:
-#ifdef DEBUG_LOGIC
-        //hu::usart1.puts("Idler Ready\n");
-#endif //DEBUG_LOGIC
+        // dbg_logic_P(PSTR("Idler Ready\n"));
         currentlyEngaged = plannedEngage;
         currentSlot = plannedSlot;
 
@@ -104,9 +80,7 @@ bool Idler::Step() {
 
         return true;
     case Failed:
-#ifdef DEBUG_LOGIC
-        hu::usart1.puts("Idler Failed\n");
-#endif //DEBUG_LOGIC
+        dbg_logic_P(PSTR("Idler Failed\n"));
     default:
         return true;
     }

@@ -1,10 +1,6 @@
 #include "motion.h"
 #include "../panic.h"
-#ifdef DEBUG_LOGIC
-#include "../hal/usart.h"
-#include <string.h>
-#include <stdio.h>
-#endif //DEBUG_LOGIC
+#include "../debug.h"
 
 // TODO: use proper timer abstraction
 #ifdef __AVR__
@@ -50,11 +46,7 @@ void Motion::StallGuardReset(Axis axis) {
 }
 
 void Motion::PlanMoveTo(Axis axis, pos_t pos, steps_t feed_rate, steps_t end_rate) {
-#ifdef DEBUG_LOGIC
-    char str[30];
-    sprintf_P(str, PSTR("Move axis %d to %u\n"), axis, pos);
-    hu::usart1.puts(str);
-#endif //DEBUG_LOGIC
+    dbg_logic_sprintf_P(PSTR("Move axis %d to %u\n"), axis, pos);
 
     if (axisData[axis].ctrl.PlanMoveTo(pos, feed_rate, end_rate)) {
         // move was queued, prepare the axis

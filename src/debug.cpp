@@ -31,6 +31,15 @@ void dbg_usart_P(const char *layer_P, const char *s_P) {
     hu::usart1.puts_P(s_P);
 }
 
+void dbg_usart_sprintf_P(const char *fmt_P, ...) {
+    char tmp[30];
+    va_list argptr;
+    va_start(argptr, fmt_P);
+    vsprintf(tmp, fmt_P, argptr);
+    va_end(argptr);
+    dbg_logic(tmp);
+}
+
 } // namespace debug
 
 #endif
