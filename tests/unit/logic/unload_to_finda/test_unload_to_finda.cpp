@@ -26,6 +26,8 @@ TEST_CASE("unload_to_finda::regular_unload", "[unload_to_finda]") {
 
     // we need finda ON
     SetFINDAStateAndDebounce(true);
+    // and MMU "thinks" it has the filament loaded
+    mg::globals.SetFilamentLoaded(true);
 
     logic::UnloadToFinda ff;
 
@@ -75,6 +77,8 @@ TEST_CASE("unload_to_finda::unload_without_FINDA_trigger", "[unload_to_finda]") 
 
     // we need finda ON
     SetFINDAStateAndDebounce(true);
+    // and MMU "thinks" it has the filament loaded
+    mg::globals.SetFilamentLoaded(true);
 
     logic::UnloadToFinda ff;
 
