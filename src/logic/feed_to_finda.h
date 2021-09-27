@@ -7,6 +7,7 @@ namespace logic {
 ///
 /// Continuously feed filament until FINDA is not switched ON
 /// and than retract to align filament 600 steps away from FINDA.
+/// Leaves the Idler engaged for chaining potential next operations.
 struct FeedToFinda {
     /// internal states of the state machine
     enum {
