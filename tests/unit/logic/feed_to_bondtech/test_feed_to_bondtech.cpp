@@ -65,19 +65,19 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
 
     REQUIRE(mfs::fsensor.Pressed());
 
-    //    // disengaging idler
-    //    REQUIRE(fb.State() == FeedToBondtech::DisengagingIdler);
-    //    REQUIRE(WhileCondition(
-    //        fb,
-    //        [&](int) { return fb.State() == FeedToBondtech::DisengagingIdler; },
-    //        5000));
+    // disengaging idler
+    REQUIRE(fb.State() == FeedToBondtech::DisengagingIdler);
+    REQUIRE(WhileCondition(
+        fb,
+        [&](int) { return fb.State() == FeedToBondtech::DisengagingIdler; },
+        5000));
 
-    //    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5)); // @@TODO constants
+    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5).v);
     CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(0).v);
 
     // state machine finished ok, the green LED should be on
     REQUIRE(fb.State() == FeedToBondtech::OK);
-    //    REQUIRE(ml::leds.LedOn(mg::globals.ActiveSlot(), ml::green));
+    REQUIRE(ml::leds.LedOn(mg::globals.ActiveSlot(), ml::green));
 
     REQUIRE(fb.Step() == true); // the automaton finished its work, any consecutive calls to Step must return true
 }
