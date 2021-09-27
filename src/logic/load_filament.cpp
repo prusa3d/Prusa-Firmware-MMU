@@ -51,20 +51,22 @@ bool LoadFilament::StepInner() {
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0); // signal loading error
             } else {
-                state = ProgressCode::FeedingToBondtech;
-                james.Reset(config::feedToBondtechMaxRetries);
+                state = ProgressCode::RetractingFromFinda;
+                retract.Reset();
             }
         }
         break;
-    case ProgressCode::FeedingToBondtech:
-        if (james.Step()) { // No, Mr. Bond, I expect you to FEED
-            switch (james.State()) {
-            case FeedToBondtech::Failed:
-
-            case FeedToBondtech::OK:
-                mm::motion.Disable(mm::Pulley);
+    case ProgressCode::RetractingFromFinda:
+        if (retract.Step()) {
+            if (retract.State() == RetractFromFinda::Failed) {
+                state = ProgressCode::ERRDisengagingIdler;
+                error = ErrorCode::FINDA_DIDNT_SWITCH_OFF;
                 mi::idler.Disengage();
+                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
+                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0); // signal loading error
+            } else {
                 state = ProgressCode::DisengagingIdler;
+                mi::idler.Disengage();
             }
         }
         break;

@@ -63,26 +63,26 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
         1500));
     // From now on the FINDA is reported as ON
 
-    // unloading back to PTFE
-    REQUIRE(ff.State() == FeedToFinda::UnloadBackToPTFE);
-    REQUIRE(WhileCondition(
-        ff,
-        [&](int) { return ff.State() == FeedToFinda::UnloadBackToPTFE; },
-        5000));
+    //    // unloading back to PTFE
+    //    REQUIRE(ff.State() == FeedToFinda::UnloadBackToPTFE);
+    //    REQUIRE(WhileCondition(
+    //        ff,
+    //        [&](int) { return ff.State() == FeedToFinda::UnloadBackToPTFE; },
+    //        5000));
 
-    // disengaging idler
-    REQUIRE(ff.State() == FeedToFinda::DisengagingIdler);
-    REQUIRE(WhileCondition(
-        ff,
-        [&](int) { return mi::idler.Engaged(); },
-        5000));
+    //    // disengaging idler
+    //    REQUIRE(ff.State() == FeedToFinda::DisengagingIdler);
+    //    REQUIRE(WhileCondition(
+    //        ff,
+    //        [&](int) { return mi::idler.Engaged(); },
+    //        5000));
 
-    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5).v); // @@TODO constants
+    //    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5).v); // @@TODO constants
     CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(0).v);
 
-    // state machine finished ok, the green LED should be on
+    // state machine finished ok, the green LED should be blinking
     REQUIRE(ff.State() == FeedToFinda::OK);
-    REQUIRE(ml::leds.Mode(mg::globals.ActiveSlot(), ml::green) == ml::off);
+    REQUIRE(ml::leds.Mode(mg::globals.ActiveSlot(), ml::green) == ml::blink0);
 
     REQUIRE(ff.Step() == true); // the automaton finished its work, any consecutive calls to Step must return true
 }

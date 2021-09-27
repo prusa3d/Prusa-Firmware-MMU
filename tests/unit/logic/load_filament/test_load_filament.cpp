@@ -57,23 +57,23 @@ void LoadFilamentSuccessful(uint8_t slot, logic::LoadFilament &lf) {
         }
         return lf.TopLevelState() == ProgressCode::FeedingToFinda; },
         5000));
-    REQUIRE(VerifyState(lf, false, slot, slot, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToBondtech));
+    REQUIRE(VerifyState(lf, false, slot, slot, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
 
-    // Stage 3 - feeding to bondtech
-    // we'll make a fsensor switch during the process
+    // Stage 3 - retracting from finda
+    // we'll assume the finda is working correctly here
     REQUIRE(WhileCondition(
         lf,
         [&](int step) -> bool {
-        if(step == 100){ // on 100th step make fsensor trigger
-            mfs::fsensor.ProcessMessage(true);
+        if(step == 50){ // on 50th step make FINDA trigger
+            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
         }
-        return lf.TopLevelState() == ProgressCode::FeedingToBondtech; },
+        return lf.TopLevelState() == ProgressCode::RetractingFromFinda; },
         5000));
-    REQUIRE(VerifyState(lf, false, slot, slot, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
+    REQUIRE(VerifyState(lf, false, slot, slot, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
 
     // Stage 4 - disengaging idler
     REQUIRE(WhileTopState(lf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
-    REQUIRE(VerifyState(lf, true, mi::Idler::IdleSlotIndex(), slot, true, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+    REQUIRE(VerifyState(lf, true, mi::Idler::IdleSlotIndex(), slot, false, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
 }
 
 TEST_CASE("load_filament::regular_load_to_slot_0-4", "[load_filament]") {

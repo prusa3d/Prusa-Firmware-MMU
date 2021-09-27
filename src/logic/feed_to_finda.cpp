@@ -32,28 +32,13 @@ bool FeedToFinda::Step() {
         if (mf::finda.Pressed() || (feedPhaseLimited && mui::userInput.AnyEvent())) { // @@TODO probably also a command from the printer
             mm::motion.AbortPlannedMoves(); // stop pushing filament
             // FINDA triggered - that means it works and detected the filament tip
-            state = UnloadBackToPTFE;
-            mm::motion.PlanMove<mm::Pulley>(-config::cuttingEdgeToFindaMidpoint, config::pulleyFeedrate);
+            state = OK;
         } else if (mm::motion.QueueEmpty()) { // all moves have been finished and FINDA didn't switch on
             state = Failed;
-            // @@TODO - shall we disengage the idler?
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0);
         }
     }
-        return false;
-    case UnloadBackToPTFE:
-        if (mm::motion.QueueEmpty()) { // all moves have been finished
-            state = DisengagingIdler;
-            mi::idler.Disengage();
-        }
-        return false;
-    case DisengagingIdler:
-        if (!mi::idler.Engaged()) {
-            state = OK;
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
-        }
-        // @@TODO FINDA must be reported as OFF again as we are pulling the filament from it - is this correct?
         return false;
     case OK:
     case Failed:

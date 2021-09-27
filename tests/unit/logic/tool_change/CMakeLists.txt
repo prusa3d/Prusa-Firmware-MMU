@@ -5,6 +5,7 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/src/logic/feed_to_bondtech.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/feed_to_finda.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/load_filament.cpp
+  ${CMAKE_SOURCE_DIR}/src/logic/retract_from_finda.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/tool_change.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/unload_filament.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/unload_to_finda.cpp
