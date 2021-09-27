@@ -81,11 +81,8 @@ bool LoadFilament::StepInner() {
         break;
     case ProgressCode::OK:
         return true;
-    case ProgressCode::ERRDisengagingIdler: // couldn't unload to FINDA
-        if (!mi::idler.Engaged()) {
-            state = ProgressCode::ERRWaitingForUser;
-            mui::userInput.Clear(); // remove all buffered events if any just before we wait for some input
-        }
+    case ProgressCode::ERRDisengagingIdler: // couldn't load to FINDA
+        ErrDisengagingIdler();
         return false;
     case ProgressCode::ERRWaitingForUser: {
         // waiting for user buttons and/or a command from the printer

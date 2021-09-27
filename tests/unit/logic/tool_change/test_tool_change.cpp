@@ -21,6 +21,32 @@ using Catch::Matchers::Equals;
 
 #include "../helpers/helpers.ipp"
 
+void FeedingToFinda(logic::ToolChange &tc, uint8_t toSlot) {
+    // feeding to finda
+    REQUIRE(WhileCondition(
+        tc,
+        [&](int step) -> bool {
+        if(step == 1000){ // on 1000th step make FINDA trigger
+            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
+        }
+        return tc.TopLevelState() == ProgressCode::FeedingToFinda; },
+        200000UL));
+    REQUIRE(VerifyState(tc, false, toSlot, toSlot, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToBondtech));
+}
+
+void FeedingToBondtech(logic::ToolChange &tc, uint8_t toSlot) {
+    // james is feeding
+    REQUIRE(WhileCondition(
+        tc,
+        [&](int step) -> bool {
+        if(step == 5000){ // on 5000th step make filament sensor trigger
+            mfs::fsensor.ProcessMessage(true);
+        }
+        return tc.TopLevelState() == ProgressCode::FeedingToBondtech; },
+        200000UL));
+    REQUIRE(VerifyState(tc, true, mi::Idler::IdleSlotIndex(), toSlot, true, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
+}
+
 void ToolChange(logic::ToolChange tc, uint8_t fromSlot, uint8_t toSlot) {
     ForceReinitAllAutomata();
 
@@ -39,14 +65,9 @@ void ToolChange(logic::ToolChange tc, uint8_t fromSlot, uint8_t toSlot) {
         200000UL));
     REQUIRE(mg::globals.FilamentLoaded() == false);
 
-    REQUIRE(WhileCondition(
-        tc,
-        [&](int step) -> bool {
-        if(step == 1000){ // on 1000th step make FINDA trigger
-            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
-        }
-        return tc.TopLevelState() == ProgressCode::LoadingFilament; },
-        200000UL));
+    FeedingToFinda(tc, toSlot);
+
+    FeedingToBondtech(tc, toSlot);
 
     REQUIRE(tc.TopLevelState() == ProgressCode::OK);
     REQUIRE(mg::globals.FilamentLoaded() == true);
@@ -82,14 +103,9 @@ void JustLoadFilament(logic::ToolChange tc, uint8_t slot) {
     // restart the automaton
     tc.Reset(slot);
 
-    REQUIRE(WhileCondition(
-        tc,
-        [&](int step) -> bool {
-        if(step == 1000){ // on 1000th step make FINDA trigger
-            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
-        }
-        return tc.TopLevelState() == ProgressCode::LoadingFilament; },
-        200000UL));
+    FeedingToFinda(tc, slot);
+
+    FeedingToBondtech(tc, slot);
 
     REQUIRE(tc.TopLevelState() == ProgressCode::OK);
     REQUIRE(mg::globals.FilamentLoaded() == true);

@@ -2,7 +2,8 @@
 #include <stdint.h>
 #include "command_base.h"
 #include "unload_filament.h"
-#include "load_filament.h"
+#include "feed_to_finda.h"
+#include "feed_to_bondtech.h"
 
 namespace logic {
 
@@ -25,7 +26,8 @@ public:
 
 private:
     UnloadFilament unl; ///< a high-level command/operation may be used as a building block of other operations as well
-    LoadFilament load;
+    FeedToFinda feed;
+    FeedToBondtech james; // bond ;)
     uint8_t plannedSlot;
 };
 
