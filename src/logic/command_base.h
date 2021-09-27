@@ -74,6 +74,9 @@ protected:
     /// If not, it returns false and sets the error to ErrorCode::INVALID_TOOL
     bool CheckToolIndex(uint8_t index);
 
+    /// Common error processing - disengaging idler
+    void ErrDisengagingIdler();
+
     ProgressCode state; ///< current progress state of the state machine
     ErrorCode error; ///< current error code
 };

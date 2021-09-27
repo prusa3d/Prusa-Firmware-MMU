@@ -3,6 +3,7 @@
 #include "../modules/selector.h"
 #include "../modules/motion.h"
 #include "../modules/leds.h"
+#include "../modules/user_input.h"
 
 namespace logic {
 
@@ -93,6 +94,13 @@ bool CommandBase::CheckToolIndex(uint8_t index) {
     } else {
         error = ErrorCode::OK;
         return true;
+    }
+}
+
+void CommandBase::ErrDisengagingIdler() {
+    if (!mi::idler.Engaged()) {
+        state = ProgressCode::ERRWaitingForUser;
+        mui::userInput.Clear(); // remove all buffered events if any just before we wait for some input
     }
 }
 
