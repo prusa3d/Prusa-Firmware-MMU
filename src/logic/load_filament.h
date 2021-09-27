@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include "command_base.h"
 #include "feed_to_finda.h"
-#include "feed_to_bondtech.h"
+#include "retract_from_finda.h"
 
 namespace logic {
 
@@ -21,7 +21,7 @@ public:
 
 private:
     FeedToFinda feed;
-    FeedToBondtech james; // bond ;)
+    RetractFromFinda retract;
 };
 
 /// The one and only instance of LoadFilament state machine in the FW
