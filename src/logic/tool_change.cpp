@@ -8,11 +8,7 @@
 #include "../modules/permanent_storage.h"
 #include "../modules/selector.h"
 #include "../modules/user_input.h"
-#ifdef DEBUG_LOGIC
-#include "../hal/usart.h"
-#include <string.h>
-#include <stdio.h>
-#endif //DEBUG_LOGIC
+#include "../debug.h"
 
 namespace logic {
 
@@ -24,10 +20,8 @@ void ToolChange::Reset(uint8_t param) {
     }
 
     if (param == mg::globals.ActiveSlot() && mg::globals.FilamentLoaded()) {
-// we are already at the correct slot and the filament is loaded - nothing to do
-#ifdef DEBUG_LOGIC
-        hu::usart1.puts("we are already at the correct slot and the filament is loaded - nothing to do\n");
-#endif //DEBUG_LOGIC
+        // we are already at the correct slot and the filament is loaded - nothing to do
+        dbg_logic_P(PSTR("we are already at the correct slot and the filament is loaded - nothing to do\n"));
         return;
     }
 
@@ -36,17 +30,13 @@ void ToolChange::Reset(uint8_t param) {
     plannedSlot = param;
 
     if (mg::globals.FilamentLoaded()) {
-#ifdef DEBUG_LOGIC
-        hu::usart1.puts("Filament is loaded --> unload\n");
-#endif //DEBUG_LOGIC
+        dbg_logic_P(PSTR("Filament is loaded --> unload\n"));
         state = ProgressCode::UnloadingFilament;
         unl.Reset(mg::globals.ActiveSlot());
     } else {
         state = ProgressCode::FeedingToFinda;
         error = ErrorCode::RUNNING;
-#ifdef DEBUG_LOGIC
-        hu::usart1.puts("Filament is not loaded --> load\n");
-#endif //DEBUG_LOGIC
+        dbg_logic_P(PSTR("Filament is not loaded --> load\n"));
         mg::globals.SetActiveSlot(plannedSlot);
         feed.Reset(true);
     }

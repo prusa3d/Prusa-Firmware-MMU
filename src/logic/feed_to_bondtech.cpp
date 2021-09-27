@@ -6,18 +6,12 @@
 #include "../modules/leds.h"
 #include "../modules/motion.h"
 #include "../modules/permanent_storage.h"
-#ifdef DEBUG_LOGIC
-#include "../hal/usart.h"
-#include <string.h>
-#include <stdio.h>
-#endif //DEBUG_LOGIC
+#include "../debug.h"
 
 namespace logic {
 
 void FeedToBondtech::Reset(uint8_t maxRetries) {
-#ifdef DEBUG_LOGIC
-    hu::usart1.puts("\nFeed to Bondtech\n\n");
-#endif //DEBUG_LOGIC
+    dbg_logic_P(PSTR("\nFeed to Bondtech\n\n"));
     state = EngagingIdler;
     this->maxRetries = maxRetries;
     ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
@@ -28,21 +22,14 @@ bool FeedToBondtech::Step() {
     switch (state) {
     case EngagingIdler:
         if (mi::idler.Engaged()) {
-#ifdef DEBUG_LOGIC
-            uint16_t startSteps = mm::motion.CurPosition(mm::Pulley);
-            char str[30];
-            sprintf_P(str, PSTR("\nPulley start steps %u\n\n"), startSteps);
-            hu::usart1.puts(str);
-#endif //DEBUG_LOGIC
+            dbg_logic_sprintf_P(PSTR("\nPulley start steps %u\n\n"), mm::motion.CurPosition(mm::Pulley));
             state = PushingFilament;
             mm::motion.PlanMove<mm::Pulley>(config::defaultBowdenLength, config::pulleyFeedrate); //@@TODO constants - there was some strange acceleration sequence in the original FW,
             // we can probably hand over some array of constants for hand-tuned acceleration + leverage some smoothing in the stepper as well
         }
         return false;
     case PushingFilament:
-#ifdef DEBUG_LOGIC
-        hu::usart1.puts("\nFeed to Bondtech --> Pushing\n\n");
-#endif //DEBUG_LOGIC
+        dbg_logic_P(PSTR("\nFeed to Bondtech --> Pushing\n\n"));
         if (mfs::fsensor.Pressed()) {
             mm::motion.AbortPlannedMoves(); // stop pushing filament
             mi::idler.Disengage();
@@ -55,22 +42,16 @@ bool FeedToBondtech::Step() {
         }
         return false;
     case DisengagingIdler:
-#ifdef DEBUG_LOGIC
-        hu::usart1.puts("\nFeed to Bondtech --> DisengagingIdler\n\n");
-#endif //DEBUG_LOGIC
+        dbg_logic_P(PSTR("\nFeed to Bondtech --> DisengagingIdler\n\n"));
         if (!mi::idler.Engaged()) {
             state = OK;
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
         }
         return false;
     case OK:
-#ifdef DEBUG_LOGIC
-        hu::usart1.puts("\nFeed to Bondtech\n\n");
-#endif //DEBUG_LOGIC
+        dbg_logic_P(PSTR("\nFeed to Bondtech\n\n"));
     case Failed:
-#ifdef DEBUG_LOGIC
-        hu::usart1.puts("\nFeed to Bondtech FAILED\n\n");
-#endif //DEBUG_LOGIC
+        dbg_logic_P(PSTR("\nFeed to Bondtech FAILED\n\n"));
     default:
         return true;
     }
