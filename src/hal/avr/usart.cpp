@@ -69,6 +69,7 @@ void USART::puts(const char *str) {
     while (*str) {
         Write(*str++);
     }
+    Write('\n');
 }
 
 void USART::puts_P(const char *str) {
@@ -76,6 +77,7 @@ void USART::puts_P(const char *str) {
     while ((c = pgm_read_byte(*str++)) != 0) {
         Write(c);
     }
+    Write('\n');
 }
 
 } // namespace usart
