@@ -65,18 +65,26 @@ void USART::Flush() {
     // the hardware finished tranmission (TXC is set).
 }
 
-void USART::puts(const char *str) {
-    while (*str) {
+void USART::WriteS(const char *str) {
+    while (*str != 0) {
         Write(*str++);
     }
+}
+
+void USART::WriteS_P(const char *str_P) {
+    char c = 0;
+    while ((c = pgm_read_byte(str_P++)) != 0) {
+        Write(c);
+    }
+}
+
+void USART::puts(const char *str) {
+    WriteS(str);
     Write('\n');
 }
 
-void USART::puts_P(const char *str) {
-    char c;
-    while ((c = pgm_read_byte(*str++)) != 0) {
-        Write(c);
-    }
+void USART::puts_P(const char *str_P) {
+    WriteS_P(str_P);
     Write('\n');
 }
 
