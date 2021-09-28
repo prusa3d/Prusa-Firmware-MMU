@@ -22,12 +22,12 @@ const char hal[] PROGMEM = "hal:";
 #endif
 
 void dbg_usart(const char *layer_P, const char *s) {
-    hu::usart1.puts_P(layer_P);
+    hu::usart1.WriteS_P(layer_P);
     hu::usart1.puts(s);
 }
 
 void dbg_usart_P(const char *layer_P, const char *s_P) {
-    hu::usart1.puts_P(layer_P);
+    hu::usart1.WriteS_P(layer_P);
     hu::usart1.puts_P(s_P);
 }
 
