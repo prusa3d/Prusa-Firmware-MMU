@@ -34,6 +34,7 @@ bool FeedToFinda::Step() {
         if (mf::finda.Pressed() || (feedPhaseLimited && mui::userInput.AnyEvent())) { // @@TODO probably also a command from the printer
             mm::motion.AbortPlannedMoves(); // stop pushing filament
             // FINDA triggered - that means it works and detected the filament tip
+            mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InSelector);
             state = OK;
         } else if (mm::motion.QueueEmpty()) { // all moves have been finished and FINDA didn't switch on
             state = Failed;
