@@ -18,23 +18,16 @@ void LoadFilament::Reset(uint8_t param) {
         return;
     }
     dbg_logic_P(PSTR("Load Filament"));
-    state = ProgressCode::EngagingIdler;
+    state = ProgressCode::FeedingToFinda;
     error = ErrorCode::RUNNING;
     mg::globals.SetActiveSlot(param);
-    mi::idler.Engage(mg::globals.ActiveSlot());
+    feed.Reset(true);
     ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
     ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
 }
 
 bool LoadFilament::StepInner() {
     switch (state) {
-    case ProgressCode::EngagingIdler:
-        if (mi::idler.Engaged()) {
-            mm::motion.InitAxis(mm::Pulley);
-            state = ProgressCode::FeedingToFinda;
-            feed.Reset(true);
-        }
-        break;
     case ProgressCode::FeedingToFinda:
         if (feed.Step()) {
             if (feed.State() == FeedToFinda::Failed) {
@@ -60,7 +53,6 @@ bool LoadFilament::StepInner() {
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0); // signal loading error
             } else {
                 state = ProgressCode::DisengagingIdler;
-                mi::idler.Disengage();
             }
         }
         break;
