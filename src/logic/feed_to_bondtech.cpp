@@ -22,7 +22,7 @@ bool FeedToBondtech::Step() {
     switch (state) {
     case EngagingIdler:
         if (mi::idler.Engaged()) {
-            dbg_logic_sprintf_P(PSTR("\nPulley start steps %u\n\n"), mm::motion.CurPosition(mm::Pulley));
+            dbg_logic_sprintf_P(PSTR("Pulley start steps %u"), mm::motion.CurPosition(mm::Pulley));
             state = PushingFilament;
             mm::motion.InitAxis(mm::Pulley);
             mm::motion.PlanMove<mm::Pulley>(config::defaultBowdenLength, config::pulleyFeedrate); //@@TODO constants - there was some strange acceleration sequence in the original FW,
@@ -30,7 +30,7 @@ bool FeedToBondtech::Step() {
         }
         return false;
     case PushingFilament:
-        dbg_logic_P(PSTR("\nFeed to Bondtech --> Pushing\n\n"));
+        dbg_logic_P(PSTR("Feed to Bondtech --> Pushing"));
         if (mfs::fsensor.Pressed()) {
             mm::motion.AbortPlannedMoves(); // stop pushing filament
             mi::idler.Disengage();
@@ -43,7 +43,7 @@ bool FeedToBondtech::Step() {
         }
         return false;
     case DisengagingIdler:
-        dbg_logic_P(PSTR("\nFeed to Bondtech --> DisengagingIdler\n\n"));
+        dbg_logic_P(PSTR("Feed to Bondtech --> DisengagingIdler"));
         if (!mi::idler.Engaged()) {
             state = OK;
             mm::motion.Disable(mm::Pulley);
@@ -51,9 +51,9 @@ bool FeedToBondtech::Step() {
         }
         return false;
     case OK:
-        dbg_logic_P(PSTR("\nFeed to Bondtech\n\n"));
+        dbg_logic_P(PSTR("Feed to Bondtech"));
     case Failed:
-        dbg_logic_P(PSTR("\nFeed to Bondtech FAILED\n\n"));
+        dbg_logic_P(PSTR("Feed to Bondtech FAILED"));
     default:
         return true;
     }

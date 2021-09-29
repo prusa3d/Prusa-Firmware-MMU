@@ -46,7 +46,7 @@ void Motion::StallGuardReset(Axis axis) {
 }
 
 void Motion::PlanMoveTo(Axis axis, pos_t pos, steps_t feed_rate, steps_t end_rate) {
-    dbg_logic_sprintf_P(PSTR("Move axis %d to %u\n"), axis, pos);
+    dbg_logic_sprintf_P(PSTR("Move axis %d to %u"), axis, pos);
 
     if (axisData[axis].ctrl.PlanMoveTo(pos, feed_rate, end_rate)) {
         // move was queued, prepare the axis

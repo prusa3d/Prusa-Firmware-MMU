@@ -30,13 +30,13 @@ void ToolChange::Reset(uint8_t param) {
     plannedSlot = param;
 
     if (mg::globals.FilamentLoaded()) {
-        dbg_logic_P(PSTR("Filament is loaded --> unload\n"));
+        dbg_logic_P(PSTR("Filament is loaded --> unload"));
         state = ProgressCode::UnloadingFilament;
         unl.Reset(mg::globals.ActiveSlot());
     } else {
         state = ProgressCode::FeedingToFinda;
         error = ErrorCode::RUNNING;
-        dbg_logic_P(PSTR("Filament is not loaded --> load\n"));
+        dbg_logic_P(PSTR("Filament is not loaded --> load"));
         mg::globals.SetActiveSlot(plannedSlot);
         feed.Reset(true);
     }
