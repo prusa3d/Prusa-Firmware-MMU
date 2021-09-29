@@ -38,7 +38,6 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
     // check if the idler and selector have the right command
     CHECK(mm::axes[mm::Idler].targetPos == mi::Idler::SlotPosition(0).v);
     CHECK(mm::axes[mm::Selector].targetPos == ms::Selector::SlotPosition(0).v);
-    CHECK(mm::axes[mm::Idler].enabled == true);
 
     // engaging idler
     REQUIRE(WhileCondition(
@@ -48,6 +47,7 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
 
     CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(0).v);
     CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(0).v);
+    CHECK(mm::axes[mm::Pulley].enabled == true);
 
     // idler engaged, selector in position, we'll start pushing filament
     REQUIRE(ff.State() == FeedToFinda::PushingFilament);
@@ -79,6 +79,7 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
 
     //    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5).v); // @@TODO constants
     CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(0).v);
+    CHECK(mm::axes[mm::Pulley].enabled == true);
 
     // state machine finished ok, the green LED should be blinking
     REQUIRE(ff.State() == FeedToFinda::OK);

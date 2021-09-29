@@ -90,6 +90,10 @@ void ReinitMotion() {
         false, false, false }); // idler
 }
 
+bool PulleyEnabled() {
+    return axes[0].enabled;
+}
+
 /// probably higher-level operations knowing the semantic meaning of axes
 
 } // namespace motion
