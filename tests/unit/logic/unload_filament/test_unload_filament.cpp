@@ -28,13 +28,13 @@ void RegularUnloadFromSlot04Init(uint8_t slot, logic::UnloadFilament &uf) {
     // change the startup to what we need here
     EnsureActiveSlotIndex(slot);
 
-    mg::globals.SetFilamentLoaded(true);
+    mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InNozzle);
 
     // set FINDA ON + debounce
     SetFINDAStateAndDebounce(true);
 
     // verify startup conditions
-    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InNozzle, mi::Idler::IdleSlotIndex(), slot, true, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
 
     // restart the automaton
     uf.Reset(slot);
@@ -47,7 +47,8 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA on
     // green LED should blink, red off
-    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
+    REQUIRE(VerifyState(uf, (mg::FilamentLoadState)(mg::FilamentLoadState::InNozzle | mg::FilamentLoadState::InSelector),
+        mi::Idler::IdleSlotIndex(), slot, true, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
 
     // run the automaton
     // Stage 1 - unloading to FINDA
@@ -65,7 +66,7 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA triggered off
     // green LED should be off
-    REQUIRE(VerifyState(uf, true, slot, slot, false, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, slot, slot, false, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
 
     // Stage 2 - idler was engaged, disengage it
     REQUIRE(WhileTopState(uf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
@@ -75,7 +76,7 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA still triggered off
     // green LED should be off
-    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, false, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::AvoidingGrind));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::AvoidingGrind));
 
     // Stage 3 - avoiding grind (whatever is that @@TODO)
     REQUIRE(WhileTopState(uf, ProgressCode::AvoidingGrind, 5000));
@@ -85,7 +86,7 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA still triggered off
     // green LED should be off
-    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, false, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::FinishingMoves));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::FinishingMoves));
 
     // Stage 4 - finishing moves and setting global state correctly
     REQUIRE(WhileTopState(uf, ProgressCode::FinishingMoves, 5000));
@@ -95,11 +96,11 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA still triggered off
     // green LED should be OFF
-    REQUIRE(VerifyState(uf, false, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
 
     // Stage 5 - repeated calls to TopLevelState should return "OK"
     REQUIRE(uf.TopLevelState() == ProgressCode::OK);
-    REQUIRE(mg::globals.FilamentLoaded() == false);
+    REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::AtPulley);
     REQUIRE(mf::finda.Pressed() == false);
     REQUIRE(uf.Error() == ErrorCode::OK); // no error
 }
@@ -123,10 +124,10 @@ void FindaDidntTriggerCommonSetup(uint8_t slot, logic::UnloadFilament &uf) {
     // set FINDA ON + debounce
     SetFINDAStateAndDebounce(true);
 
-    mg::globals.SetFilamentLoaded(true);
+    mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InNozzle);
 
     // verify startup conditions
-    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InNozzle, mi::Idler::IdleSlotIndex(), slot, true, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
 
     // restart the automaton
     uf.Reset(slot);
@@ -138,7 +139,7 @@ void FindaDidntTriggerCommonSetup(uint8_t slot, logic::UnloadFilament &uf) {
     // FINDA triggered off
     // green LED should be off
     // no error so far
-    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InNozzle, mi::Idler::IdleSlotIndex(), slot, true, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
 
     // run the automaton
     // Stage 1 - unloading to FINDA - do NOT let it trigger - keep it pressed, the automaton should finish all moves with the pulley
@@ -150,7 +151,7 @@ void FindaDidntTriggerCommonSetup(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA still on
     // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, true, slot, slot, true, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRDisengagingIdler));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRDisengagingIdler));
 
     // Stage 2 - idler should get disengaged
     REQUIRE(WhileTopState(uf, ProgressCode::ERRDisengagingIdler, idlerEngageDisengageMaxSteps));
@@ -161,7 +162,7 @@ void FindaDidntTriggerCommonSetup(uint8_t slot, logic::UnloadFilament &uf) {
     // FINDA still on
     // red LED should blink
     // green LED should be off
-    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRWaitingForUser));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRWaitingForUser));
 }
 
 void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
@@ -186,7 +187,7 @@ void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA still on
     // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERREngagingIdler));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERREngagingIdler));
 
     // Stage 4 - engage the idler
     REQUIRE(WhileTopState(uf, ProgressCode::ERREngagingIdler, idlerEngageDisengageMaxSteps));
@@ -196,7 +197,7 @@ void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA still on
     // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, true, slot, slot, true, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRHelpingFilament));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRHelpingFilament));
 }
 
 void FindaDidntTriggerResolveHelpFindaTriggered(uint8_t slot, logic::UnloadFilament &uf) {
@@ -215,7 +216,7 @@ void FindaDidntTriggerResolveHelpFindaTriggered(uint8_t slot, logic::UnloadFilam
     // no change in selector's position
     // FINDA depressed
     // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, true, slot, slot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, slot, slot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
 }
 
 void FindaDidntTriggerResolveHelpFindaDidntTrigger(uint8_t slot, logic::UnloadFilament &uf) {
@@ -227,7 +228,7 @@ void FindaDidntTriggerResolveHelpFindaDidntTrigger(uint8_t slot, logic::UnloadFi
     // no change in selector's position
     // FINDA still pressed
     // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, true, slot, slot, true, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRDisengagingIdler));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRDisengagingIdler));
 }
 
 TEST_CASE("unload_filament::finda_didnt_trigger_resolve_help_second_ok", "[unload_filament]") {
@@ -270,7 +271,7 @@ void FindaDidntTriggerResolveTryAgain(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA still on
     // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), slot, true, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
 }
 
 TEST_CASE("unload_filament::finda_didnt_trigger_resolve_try_again", "[unload_filament]") {

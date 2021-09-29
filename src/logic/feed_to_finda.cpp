@@ -26,6 +26,7 @@ bool FeedToFinda::Step() {
             state = PushingFilament;
             mm::motion.InitAxis(mm::Pulley);
             mm::motion.PlanMove<mm::Pulley>(config::feedToFinda, config::pulleyFeedrate);
+            mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InSelector);
             mui::userInput.Clear(); // remove all buffered events if any just before we wait for some input
         }
         return false;

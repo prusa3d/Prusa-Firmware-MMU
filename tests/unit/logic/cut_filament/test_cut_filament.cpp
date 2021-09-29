@@ -25,7 +25,7 @@ void CutSlot(logic::CutFilament &cf, uint8_t cutSlot) {
 
     ForceReinitAllAutomata();
 
-    REQUIRE(VerifyEnvironmentState(false, mi::Idler::IdleSlotIndex(), 0, false, false, ml::off, ml::off));
+    REQUIRE(VerifyEnvironmentState(mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), 0, false, false, ml::off, ml::off));
 
     EnsureActiveSlotIndex(cutSlot);
 
@@ -33,14 +33,14 @@ void CutSlot(logic::CutFilament &cf, uint8_t cutSlot) {
     cf.Reset(cutSlot);
 
     // check initial conditions
-    REQUIRE(VerifyState(cf, false, mi::Idler::IdleSlotIndex(), cutSlot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::SelectingFilamentSlot));
+    REQUIRE(VerifyState(cf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), cutSlot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::SelectingFilamentSlot));
 
     // now cycle at most some number of cycles (to be determined yet) and then verify, that the idler and selector reached their target positions
     // Beware - with the real positions of the selector, the number of steps needed to finish some states grows, so the ~40K steps here has a reason
     REQUIRE(WhileTopState(cf, ProgressCode::SelectingFilamentSlot, selectorMoveMaxSteps));
 
     // idler and selector reached their target positions and the CF automaton will start feeding to FINDA as the next step
-    REQUIRE(VerifyState(cf, false, cutSlot, cutSlot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
+    REQUIRE(VerifyState(cf, mg::FilamentLoadState::AtPulley, cutSlot, cutSlot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
 
     // prepare for simulated finda trigger
     REQUIRE(WhileCondition(
@@ -52,9 +52,7 @@ void CutSlot(logic::CutFilament &cf, uint8_t cutSlot) {
         return cf.TopLevelState() == ProgressCode::FeedingToFinda; }, 5000));
 
     // filament fed to FINDA
-    //@@TODO filament loaded flag - decide whether the filament loaded flag means really loaded into the printer or just a piece of filament
-    // stuck out of the pulley to prevent movement of the selector
-    REQUIRE(VerifyState(cf, /*true*/ false, cutSlot, cutSlot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToPulley));
+    REQUIRE(VerifyState(cf, mg::FilamentLoadState::InSelector, cutSlot, cutSlot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToPulley));
 
     // pull it back to the pulley + simulate FINDA depress
     REQUIRE(WhileCondition(
@@ -65,23 +63,23 @@ void CutSlot(logic::CutFilament &cf, uint8_t cutSlot) {
         }
         return cf.TopLevelState() == ProgressCode::UnloadingToPulley; }, 5000));
 
-    REQUIRE(VerifyState(cf, /*true*/ false, cutSlot, cutSlot, false, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::PreparingBlade));
+    REQUIRE(VerifyState(cf, mg::FilamentLoadState::AtPulley, cutSlot, cutSlot, false, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::PreparingBlade));
 
     // now move the selector aside, prepare for cutting
     REQUIRE(WhileTopState(cf, ProgressCode::PreparingBlade, 5000));
-    REQUIRE(VerifyState2(cf, /*true*/ false, cutSlot, cutSlot + 1, false, true, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::PushingFilament));
+    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, cutSlot, cutSlot + 1, false, true, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::PushingFilament));
 
     // pushing filament a bit for a cut
     REQUIRE(WhileTopState(cf, ProgressCode::PushingFilament, 5000));
-    REQUIRE(VerifyState2(cf, /*true*/ false, cutSlot, cutSlot + 1, false, true, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::PerformingCut));
+    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, cutSlot, cutSlot + 1, false, true, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::PerformingCut));
 
     // cutting
     REQUIRE(WhileTopState(cf, ProgressCode::PerformingCut, selectorMoveMaxSteps));
-    REQUIRE(VerifyState2(cf, /*true*/ false, cutSlot, 0, false, true, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::ReturningSelector));
+    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, cutSlot, 0, false, true, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::ReturningSelector));
 
     // moving selector to the other end of its axis
     REQUIRE(WhileTopState(cf, ProgressCode::ReturningSelector, selectorMoveMaxSteps));
-    REQUIRE(VerifyState2(cf, /*true*/ false, cutSlot, ms::Selector::IdleSlotIndex(), false, true, cutSlot, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::OK));
+    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, cutSlot, ms::Selector::IdleSlotIndex(), false, true, cutSlot, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::OK));
 }
 
 TEST_CASE("cut_filament::cut0", "[cut_filament]") {

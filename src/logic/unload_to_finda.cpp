@@ -23,7 +23,7 @@ void UnloadToFinda::Reset(uint8_t maxTries) {
 bool UnloadToFinda::Step() {
     switch (state) {
     case EngagingIdler:
-        if (mg::globals.FilamentLoaded()) {
+        if (mg::globals.FilamentLoaded() >= mg::FilamentLoadState::InSelector) {
             state = UnloadingToFinda;
             mm::motion.InitAxis(mm::Pulley);
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
@@ -34,6 +34,7 @@ bool UnloadToFinda::Step() {
     case UnloadingToFinda:
         if (mi::idler.Engaged()) {
             state = WaitingForFINDA;
+            mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InSelector);
             mm::motion.PlanMove<mm::Pulley>(-config::defaultBowdenLength - config::feedToFinda - config::filamentMinLoadedToMMU, config::pulleyFeedrate); // @@TODO constants
         }
         return false;

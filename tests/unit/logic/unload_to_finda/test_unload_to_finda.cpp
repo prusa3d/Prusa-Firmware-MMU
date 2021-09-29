@@ -27,7 +27,7 @@ TEST_CASE("unload_to_finda::regular_unload", "[unload_to_finda]") {
     // we need finda ON
     SetFINDAStateAndDebounce(true);
     // and MMU "thinks" it has the filament loaded
-    mg::globals.SetFilamentLoaded(true);
+    mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InNozzle);
 
     logic::UnloadToFinda ff;
 
@@ -57,6 +57,7 @@ TEST_CASE("unload_to_finda::regular_unload", "[unload_to_finda]") {
         50000));
 
     REQUIRE(ff.State() == logic::UnloadToFinda::OK);
+    REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::InSelector);
 }
 
 TEST_CASE("unload_to_finda::no_sense_FINDA_upon_start", "[unload_to_finda]") {
@@ -78,7 +79,7 @@ TEST_CASE("unload_to_finda::unload_without_FINDA_trigger", "[unload_to_finda]") 
     // we need finda ON
     SetFINDAStateAndDebounce(true);
     // and MMU "thinks" it has the filament loaded
-    mg::globals.SetFilamentLoaded(true);
+    mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InNozzle);
 
     logic::UnloadToFinda ff;
 
@@ -109,4 +110,5 @@ TEST_CASE("unload_to_finda::unload_without_FINDA_trigger", "[unload_to_finda]") 
         50000));
 
     REQUIRE(ff.State() == logic::UnloadToFinda::Failed);
+    REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::InSelector);
 }

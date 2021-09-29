@@ -1,6 +1,6 @@
-bool VerifyEnvironmentState(bool filamentLoaded, uint8_t idlerSlotIndex, uint8_t selectorSlotIndex,
+bool VerifyEnvironmentState(mg::FilamentLoadState fls, uint8_t idlerSlotIndex, uint8_t selectorSlotIndex,
     bool findaPressed, bool pulleyEnabled, ml::Mode greenLEDMode, ml::Mode redLEDMode) {
-    CHECKED_ELSE(mg::globals.FilamentLoaded() == filamentLoaded) {
+    CHECKED_ELSE(mg::globals.FilamentLoaded() & fls) { // beware - abusing the values as bit masks to detect multiple situations at once
     return false;
     }
     CHECKED_ELSE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(idlerSlotIndex).v) {
@@ -45,10 +45,10 @@ bool VerifyEnvironmentState(bool filamentLoaded, uint8_t idlerSlotIndex, uint8_t
 
 // LED checked at selector's index
 template<typename SM>
-bool VerifyState(SM &uf, bool filamentLoaded, uint8_t idlerSlotIndex, uint8_t selectorSlotIndex,
+bool VerifyState(SM &uf, mg::FilamentLoadState fls, uint8_t idlerSlotIndex, uint8_t selectorSlotIndex,
     bool findaPressed, bool pulleyEnabled, ml::Mode greenLEDMode, ml::Mode redLEDMode, ErrorCode err, ProgressCode topLevelProgress) {
 
-    VerifyEnvironmentState(filamentLoaded, idlerSlotIndex, selectorSlotIndex, findaPressed, pulleyEnabled, greenLEDMode, redLEDMode);
+    VerifyEnvironmentState(fls, idlerSlotIndex, selectorSlotIndex, findaPressed, pulleyEnabled, greenLEDMode, redLEDMode);
 
     CHECKED_ELSE(uf.Error() == err) {
         return false;
@@ -61,9 +61,9 @@ bool VerifyState(SM &uf, bool filamentLoaded, uint8_t idlerSlotIndex, uint8_t se
 
 // LED checked at their own ledCheckIndex index
 template<typename SM>
-bool VerifyState2(SM &uf, bool filamentLoaded, uint8_t idlerSlotIndex, uint8_t selectorSlotIndex,
+bool VerifyState2(SM &uf, mg::FilamentLoadState fls, uint8_t idlerSlotIndex, uint8_t selectorSlotIndex,
     bool findaPressed, bool pulleyEnabled, uint8_t ledCheckIndex, ml::Mode greenLEDMode, ml::Mode redLEDMode, ErrorCode err, ProgressCode topLevelProgress) {
-    CHECKED_ELSE(mg::globals.FilamentLoaded() == filamentLoaded) {
+    CHECKED_ELSE(mg::globals.FilamentLoaded() & fls) {
     return false;
     }
     CHECKED_ELSE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(idlerSlotIndex).v) {
@@ -117,10 +117,10 @@ template<typename SM>
 void InvalidSlot(SM &logicSM,  uint8_t activeSlot, uint8_t invSlot){
     ForceReinitAllAutomata();
 
-    REQUIRE(VerifyEnvironmentState(false, mi::Idler::IdleSlotIndex(), 0, false, false, ml::off, ml::off));
+    REQUIRE(VerifyEnvironmentState(mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), 0, false, false, ml::off, ml::off));
 
     EnsureActiveSlotIndex(activeSlot);
 
     logicSM.Reset(invSlot);
-    REQUIRE(VerifyState(logicSM, false, mi::Idler::IdleSlotIndex(), activeSlot, false, false, ml::off, ml::off, ErrorCode::INVALID_TOOL, ProgressCode::OK));
+    REQUIRE(VerifyState(logicSM, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), activeSlot, false, false, ml::off, ml::off, ErrorCode::INVALID_TOOL, ProgressCode::OK));
 }
