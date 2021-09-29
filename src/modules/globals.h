@@ -13,8 +13,9 @@ namespace globals {
 enum FilamentLoadState : uint8_t {
     // NotLoaded = 0, ///< not loaded in the MMU at all @@TODO still need to decide whether this state is of any use to us
     AtPulley = 1, ///< loaded to mmu (idler and pulley can grab it)
-    InSelector = 2, ///< loaded in selector (i.e. unsure where the filament is while doing some operation)
-    InNozzle = 4, ///< loaded into printer's filament sensor/nozzle
+    InSelector = 2, ///< 'P1' loaded in selector (i.e. unsure where the filament is while doing some operation)
+    InFSensor = 4, ///< 'f1' loaded into printer's filament sensor
+    InNozzle = 8, ///< 'f2' loaded into printer's nozzle
 };
 
 static_assert(
