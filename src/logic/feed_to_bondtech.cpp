@@ -24,6 +24,7 @@ bool FeedToBondtech::Step() {
         if (mi::idler.Engaged()) {
             dbg_logic_sprintf_P(PSTR("\nPulley start steps %u\n\n"), mm::motion.CurPosition(mm::Pulley));
             state = PushingFilament;
+            mm::motion.InitAxis(mm::Pulley);
             mm::motion.PlanMove<mm::Pulley>(config::defaultBowdenLength, config::pulleyFeedrate); //@@TODO constants - there was some strange acceleration sequence in the original FW,
             // we can probably hand over some array of constants for hand-tuned acceleration + leverage some smoothing in the stepper as well
         }
@@ -45,6 +46,7 @@ bool FeedToBondtech::Step() {
         dbg_logic_P(PSTR("\nFeed to Bondtech --> DisengagingIdler\n\n"));
         if (!mi::idler.Engaged()) {
             state = OK;
+            mm::motion.Disable(mm::Pulley);
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
         }
         return false;

@@ -31,7 +31,7 @@ void FeedingToFinda(logic::ToolChange &tc, uint8_t toSlot) {
         }
         return tc.TopLevelState() == ProgressCode::FeedingToFinda; },
         200000UL));
-    REQUIRE(VerifyState(tc, false, toSlot, toSlot, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToBondtech));
+    REQUIRE(VerifyState(tc, false, toSlot, toSlot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToBondtech));
 }
 
 void FeedingToBondtech(logic::ToolChange &tc, uint8_t toSlot) {
@@ -44,7 +44,7 @@ void FeedingToBondtech(logic::ToolChange &tc, uint8_t toSlot) {
         }
         return tc.TopLevelState() == ProgressCode::FeedingToBondtech; },
         200000UL));
-    REQUIRE(VerifyState(tc, true, mi::Idler::IdleSlotIndex(), toSlot, true, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
+    REQUIRE(VerifyState(tc, true, mi::Idler::IdleSlotIndex(), toSlot, true, false, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
 }
 
 void ToolChange(logic::ToolChange tc, uint8_t fromSlot, uint8_t toSlot) {
@@ -82,7 +82,7 @@ void NoToolChange(logic::ToolChange tc, uint8_t fromSlot, uint8_t toSlot) {
 
     EnsureActiveSlotIndex(fromSlot);
 
-    REQUIRE(VerifyEnvironmentState(true, mi::Idler::IdleSlotIndex(), toSlot, false, ml::off, ml::off));
+    REQUIRE(VerifyEnvironmentState(true, mi::Idler::IdleSlotIndex(), toSlot, false, false, ml::off, ml::off));
 
     // restart the automaton
     tc.Reset(toSlot);
@@ -98,7 +98,7 @@ void JustLoadFilament(logic::ToolChange tc, uint8_t slot) {
     EnsureActiveSlotIndex(slot);
 
     // verify filament NOT loaded
-    REQUIRE(VerifyEnvironmentState(false, mi::Idler::IdleSlotIndex(), slot, false, ml::off, ml::off));
+    REQUIRE(VerifyEnvironmentState(false, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off));
 
     // restart the automaton
     tc.Reset(slot);

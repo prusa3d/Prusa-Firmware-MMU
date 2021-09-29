@@ -48,6 +48,7 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
 
     CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(0).v);
     CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(0).v);
+    CHECK(mm::axes[mm::Pulley].enabled);
 
     // idler engaged, selector in position, we'll start pushing filament
     REQUIRE(fb.State() == FeedToBondtech::PushingFilament);
@@ -74,6 +75,7 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
 
     CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5).v);
     CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(0).v);
+    CHECK_FALSE(mm::axes[mm::Pulley].enabled);
 
     // state machine finished ok, the green LED should be on
     REQUIRE(fb.State() == FeedToBondtech::OK);

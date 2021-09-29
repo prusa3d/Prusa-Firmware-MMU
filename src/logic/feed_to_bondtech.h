@@ -7,6 +7,7 @@ namespace logic {
 ///
 /// Continuously feed filament until the printer detects the filament in its filament sensor.
 /// Disengages the Idler after finishing the feed.
+/// Disables the Pulley axis after disengaging the idler.
 struct FeedToBondtech {
     /// internal states of the state machine
     enum {

@@ -49,12 +49,12 @@ void FailingIdler(hal::tmc2130::ErrorFlags ef, ErrorCode ec) {
     logic::UnloadFilament uf;
 
     // verify startup conditions
-    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), 0, true, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), 0, true, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
 
     // UnloadFilament starts by engaging the idler (through the UnloadToFinda state machine)
     uf.Reset(0);
 
-    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), 0, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
+    REQUIRE(VerifyState(uf, true, mi::Idler::IdleSlotIndex(), 0, true, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
 
     int failingStep = 5;
     REQUIRE(WhileCondition(

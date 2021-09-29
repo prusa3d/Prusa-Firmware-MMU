@@ -25,6 +25,7 @@ bool UnloadToFinda::Step() {
     case EngagingIdler:
         if (mg::globals.FilamentLoaded()) {
             state = UnloadingToFinda;
+            mm::motion.InitAxis(mm::Pulley);
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
         } else {
             state = Failed;

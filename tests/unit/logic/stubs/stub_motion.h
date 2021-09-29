@@ -15,6 +15,7 @@ struct AxisSim {
 extern AxisSim axes[3];
 
 extern void ReinitMotion();
+bool PulleyEnabled();
 
 } // namespace motion
 } // namespace modules

@@ -40,13 +40,13 @@ TEST_CASE("unload_to_finda::regular_unload", "[unload_to_finda]") {
     // check if the idler and selector have the right command
     CHECK(mm::axes[mm::Idler].targetPos == mi::Idler::SlotPosition(0).v);
     CHECK(mm::axes[mm::Selector].targetPos == ms::Selector::SlotPosition(0).v);
-    CHECK(mm::axes[mm::Idler].enabled == true);
 
     // engaging idler
     REQUIRE(WhileCondition(
         ff,
         [&](int) { return !mi::idler.Engaged(); },
         5000));
+    CHECK(mm::axes[mm::Pulley].enabled == true);
 
     // now pulling the filament until finda triggers
     REQUIRE(ff.State() == logic::UnloadToFinda::WaitingForFINDA);

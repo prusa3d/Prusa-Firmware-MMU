@@ -24,6 +24,7 @@ bool FeedToFinda::Step() {
     case EngagingIdler:
         if (mi::idler.Engaged() && ms::selector.Slot() == mg::globals.ActiveSlot()) {
             state = PushingFilament;
+            mm::motion.InitAxis(mm::Pulley);
             mm::motion.PlanMove<mm::Pulley>(config::feedToFinda, config::pulleyFeedrate);
             mui::userInput.Clear(); // remove all buffered events if any just before we wait for some input
         }
