@@ -58,6 +58,12 @@ TEST_CASE("protocol::EncodeResponseCmdAR", "[protocol]") {
         mp::RequestMsg(mp::RequestMsgCodes::Eject, 3),
         mp::RequestMsg(mp::RequestMsgCodes::Eject, 4),
 
+        mp::RequestMsg(mp::RequestMsgCodes::FilamentType, 0),
+        mp::RequestMsg(mp::RequestMsgCodes::FilamentType, 1),
+
+        mp::RequestMsg(mp::RequestMsgCodes::FilamentSensor, 0),
+        mp::RequestMsg(mp::RequestMsgCodes::FilamentSensor, 1),
+
         mp::RequestMsg(mp::RequestMsgCodes::Load, 0),
         mp::RequestMsg(mp::RequestMsgCodes::Load, 1),
         mp::RequestMsg(mp::RequestMsgCodes::Load, 2),
@@ -257,6 +263,8 @@ TEST_CASE("protocol::DecodeRequest", "[protocol]") {
     const char *rxbuff = GENERATE(
         "B0\n", "B1\n", "B2\n",
         "E0\n", "E1\n", "E2\n", "E3\n", "E4\n",
+        "F0\n", "F1\n",
+        "f0\n", "f1\n",
         "K0\n",
         "L0\n", "L1\n", "L2\n", "L3\n", "L4\n",
         "M0\n", "M1\n",
@@ -437,8 +445,8 @@ TEST_CASE("protocol::DecodeResponseErrorsCross", "[protocol][.]") {
     const char *invalidInitialSpaces = GENERATE(" ", "  ");
     bool viInitialSpace = GENERATE(true, false);
 
-    const char *validReqCode = GENERATE("B", "E", "K", "L", "M", "P", "Q", "S", "T", "U", "W", "X");
-    const char *invalidReqCode = GENERATE("A", "R", "F");
+    const char *validReqCode = GENERATE("B", "E", "F", "f", "K", "L", "M", "P", "Q", "S", "T", "U", "W", "X");
+    const char *invalidReqCode = GENERATE("A", "R");
     bool viReqCode = GENERATE(true, false);
 
     const char *validReqValue = GENERATE("0", "1", "2", "3", "4");
