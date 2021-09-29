@@ -69,7 +69,7 @@ bool LoadFilament::StepInner() {
             state = ProgressCode::OK;
             error = ErrorCode::OK;
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
             mm::motion.Disable(mm::Pulley);
         }
         break;
