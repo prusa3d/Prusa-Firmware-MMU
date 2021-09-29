@@ -29,7 +29,7 @@ Idler::OperationResult Idler::Disengage() {
     plannedEngage = false;
 
     if (!Engaged()) {
-        dbg_logic_P(PSTR("Disengage Idler"));
+        dbg_logic_P(PSTR("Idler Disengaged"));
         return OperationResult::Accepted;
     }
     return InitMovement(mm::Idler);
@@ -45,7 +45,7 @@ Idler::OperationResult Idler::Engage(uint8_t slot) {
     plannedEngage = true;
 
     if (Engaged()) {
-        dbg_logic_P(PSTR("Engage Idler"));
+        dbg_logic_P(PSTR("Idler Engaged"));
         return OperationResult::Accepted;
     }
 
