@@ -73,7 +73,7 @@ void LoadFilamentSuccessful(uint8_t slot, logic::LoadFilament &lf) {
 
     // Stage 4 - disengaging idler
     REQUIRE(WhileTopState(lf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
-    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
 }
 
 TEST_CASE("load_filament::regular_load_to_slot_0-4", "[load_filament]") {
