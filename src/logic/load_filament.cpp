@@ -71,7 +71,6 @@ bool LoadFilament::StepInner() {
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
             mm::motion.Disable(mm::Pulley);
-            mg::globals.SetFilamentLoaded(true);
         }
         break;
     case ProgressCode::OK:
