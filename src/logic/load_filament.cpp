@@ -17,7 +17,7 @@ void LoadFilament::Reset(uint8_t param) {
     if (!CheckToolIndex(param)) {
         return;
     }
-    dbg_logic_P(PSTR("Load Filament\n\n"));
+    dbg_logic_P(PSTR("Load Filament"));
     state = ProgressCode::EngagingIdler;
     error = ErrorCode::RUNNING;
     mg::globals.SetActiveSlot(param);

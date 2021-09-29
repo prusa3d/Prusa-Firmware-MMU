@@ -12,23 +12,23 @@ Selector selector;
 
 void Selector::PrepareMoveToPlannedSlot() {
     mm::motion.PlanMoveTo<mm::Selector>(SlotPosition(plannedSlot), mm::unitToAxisUnit<mm::S_speed_t>(config::selectorFeedrate));
-    dbg_logic_sprintf_P(PSTR("Prepare Move Selector slot %d\n"), plannedSlot);
+    dbg_logic_sprintf_P(PSTR("Prepare Move Selector slot %d"), plannedSlot);
 }
 
 void Selector::PlanHomingMove() {
     mm::motion.PlanMove<mm::Selector>(mm::unitToAxisUnit<mm::S_pos_t>(config::selectorLimits.lenght * 2), mm::unitToAxisUnit<mm::S_speed_t>(config::selectorFeedrate));
-    dbg_logic_P(PSTR("Plan Homing Selector\n"));
+    dbg_logic_P(PSTR("Plan Homing Selector"));
 }
 
 Selector::OperationResult Selector::MoveToSlot(uint8_t slot) {
     if (state == Moving) {
-        dbg_logic_P(PSTR("Moving --> Selector refused\n"));
+        dbg_logic_P(PSTR("Moving --> Selector refused"));
         return OperationResult::Refused;
     }
     plannedSlot = slot;
 
     if (currentSlot == slot) {
-        dbg_logic_P(PSTR("Moving Selector\n"));
+        dbg_logic_P(PSTR("Moving Selector"));
         return OperationResult::Accepted;
     }
     return InitMovement(mm::Selector);
@@ -45,19 +45,19 @@ bool Selector::Step() {
     switch (state) {
     case Moving:
         PerformMove(mm::Selector);
-        //dbg_logic_P(PSTR("Moving Selector\n"));
+        //dbg_logic_P(PSTR("Moving Selector"));
         return false;
     case Homing:
-        dbg_logic_P(PSTR("Homing Selector\n"));
+        dbg_logic_P(PSTR("Homing Selector"));
         PerformHome(mm::Selector);
         return false;
     case Ready:
-        //dbg_logic_P(PSTR("Selector Ready\n"));
+        //dbg_logic_P(PSTR("Selector Ready"));
         currentSlot = plannedSlot;
         mm::motion.Disable(mm::Selector); // turn off selector motor's power every time
         return true;
     case Failed:
-        dbg_logic_P(PSTR("Selector Failed\n"));
+        dbg_logic_P(PSTR("Selector Failed"));
     default:
         return true;
     }

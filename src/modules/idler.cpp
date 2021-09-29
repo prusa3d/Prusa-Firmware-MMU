@@ -12,24 +12,24 @@ Idler idler;
 
 void Idler::PrepareMoveToPlannedSlot() {
     mm::motion.PlanMoveTo<mm::Idler>(SlotPosition(plannedSlot), mm::unitToAxisUnit<mm::I_speed_t>(config::idlerFeedrate));
-    dbg_logic_sprintf_P(PSTR("Prepare Move Idler slot %d\n"), plannedSlot);
+    dbg_logic_sprintf_P(PSTR("Prepare Move Idler slot %d"), plannedSlot);
 }
 
 void Idler::PlanHomingMove() {
     mm::motion.PlanMove<mm::Idler>(mm::unitToAxisUnit<mm::I_pos_t>(-config::idlerLimits.lenght * 2), mm::unitToAxisUnit<mm::I_speed_t>(config::idlerFeedrate));
-    dbg_logic_P(PSTR("Plan Homing Idler\n"));
+    dbg_logic_P(PSTR("Plan Homing Idler"));
 }
 
 Idler::OperationResult Idler::Disengage() {
     if (state == Moving) {
-        dbg_logic_P(PSTR("Moving --> Disengage refused\n"));
+        dbg_logic_P(PSTR("Moving --> Disengage refused"));
         return OperationResult::Refused;
     }
     plannedSlot = IdleSlotIndex();
     plannedEngage = false;
 
     if (!Engaged()) {
-        dbg_logic_P(PSTR("Disengage Idler\n"));
+        dbg_logic_P(PSTR("Disengage Idler"));
         return OperationResult::Accepted;
     }
     return InitMovement(mm::Idler);
@@ -37,7 +37,7 @@ Idler::OperationResult Idler::Disengage() {
 
 Idler::OperationResult Idler::Engage(uint8_t slot) {
     if (state == Moving) {
-        dbg_logic_P(PSTR("Moving --> Engage refused\n"));
+        dbg_logic_P(PSTR("Moving --> Engage refused"));
         return OperationResult::Refused;
     }
 
@@ -45,7 +45,7 @@ Idler::OperationResult Idler::Engage(uint8_t slot) {
     plannedEngage = true;
 
     if (Engaged()) {
-        dbg_logic_P(PSTR("Engage Idler\n"));
+        dbg_logic_P(PSTR("Engage Idler"));
         return OperationResult::Accepted;
     }
 
@@ -63,15 +63,15 @@ bool Idler::Home() {
 bool Idler::Step() {
     switch (state) {
     case Moving:
-        // dbg_logic_P(PSTR("Moving Idler\n"));
+        // dbg_logic_P(PSTR("Moving Idler"));
         PerformMove(mm::Idler);
         return false;
     case Homing:
-        dbg_logic_P(PSTR("Homing Idler\n"));
+        dbg_logic_P(PSTR("Homing Idler"));
         PerformHome(mm::Idler);
         return false;
     case Ready:
-        // dbg_logic_P(PSTR("Idler Ready\n"));
+        // dbg_logic_P(PSTR("Idler Ready"));
         currentlyEngaged = plannedEngage;
         currentSlot = plannedSlot;
 
@@ -80,7 +80,7 @@ bool Idler::Step() {
 
         return true;
     case Failed:
-        dbg_logic_P(PSTR("Idler Failed\n"));
+        dbg_logic_P(PSTR("Idler Failed"));
     default:
         return true;
     }
