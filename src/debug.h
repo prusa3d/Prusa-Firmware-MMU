@@ -2,7 +2,7 @@
 #include <stdint.h>
 
 /// Enable DEBUG_LOGIC to compile debugging and error messages (beware of code base size ;) ) for the logic layer
-#define DEBUG_LOGIC
+//#define DEBUG_LOGIC
 
 /// Enable DEBUG_LOGIC to compile debugging and error messages (beware of code base size ;) ) for the logic layer
 //#define DEBUG_MODULES
@@ -36,6 +36,7 @@ extern const char modules[];
 #else
 #define dbg_modules(x) /* */
 #define dbg_modules_P(x) /* */
+
 #endif
 
 #if defined(DEBUG_HAL) && defined(__AVR__)
