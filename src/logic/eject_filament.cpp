@@ -20,7 +20,7 @@ void EjectFilament::Reset(uint8_t param) {
     error = ErrorCode::RUNNING;
     slot = param;
 
-    if (mg::globals.FilamentLoaded()) {
+    if (mg::globals.FilamentLoaded() >= mg::FilamentLoadState::InSelector) {
         state = ProgressCode::UnloadingFilament;
         unl.Reset(param); //@@TODO probably act on active extruder only
     } else {

@@ -6,6 +6,24 @@ namespace modules {
 /// The globals namespace provides all necessary facilities related to keeping track of global state of the firmware.
 namespace globals {
 
+/// Different stages of filament load.
+/// Beware:
+/// - the firmware depends on the order of these values to check for various situations.
+/// - the unit tests abuse the bitmask-like values to check for multiple situations easily
+enum FilamentLoadState : uint8_t {
+    // NotLoaded = 0, ///< not loaded in the MMU at all @@TODO still need to decide whether this state is of any use to us
+    AtPulley = 1, ///< loaded to mmu (idler and pulley can grab it)
+    InSelector = 2, ///< loaded in selector (i.e. unsure where the filament is while doing some operation)
+    InNozzle = 4, ///< loaded into printer's filament sensor/nozzle
+};
+
+static_assert(
+    /*(FilamentLoadState::NotLoaded < FilamentLoadState::AtPulley)
+&&*/
+    (FilamentLoadState::AtPulley < FilamentLoadState::InSelector)
+        && (FilamentLoadState::InSelector < FilamentLoadState::InNozzle),
+    "incorrect order of Slot Filament Load States");
+
 /// Globals keep track of global state variables in the firmware.
 /// So far only Active slot and Filament loaded variables are used.
 class Globals {
@@ -23,15 +41,12 @@ public:
     void SetActiveSlot(uint8_t newActiveSlot);
 
     /// @returns true if filament is considered as loaded
-    ///  @@TODO this may change meaning slightly as the MMU is primarily concerned
-    ///  about whether a piece of filament is stock up of a PTFE tube.
-    ///  If that's true, we cannot move the selector.
-    bool FilamentLoaded() const;
+    FilamentLoadState FilamentLoaded() const;
 
     /// Sets the filament loaded flag value, usually after some command/operation.
     /// Also updates the EEPROM records accordingly
     /// @param newFilamentLoaded new state
-    void SetFilamentLoaded(bool newFilamentLoaded);
+    void SetFilamentLoaded(FilamentLoadState newFilamentLoaded);
 
     /// @returns the total number of MMU errors so far
     /// Errors are stored in the EEPROM
@@ -51,7 +66,7 @@ public:
 
 private:
     uint8_t activeSlot;
-    bool filamentLoaded;
+    FilamentLoadState filamentLoaded;
     bool stealthMode;
 };
 

@@ -34,6 +34,7 @@ bool FeedToBondtech::Step() {
         if (mfs::fsensor.Pressed()) {
             mm::motion.AbortPlannedMoves(); // stop pushing filament
             mi::idler.Disengage();
+            mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InNozzle);
             state = DisengagingIdler;
         } else if (mm::motion.StallGuard(mm::Pulley)) {
             // stall guard occurred during movement - the filament got stuck
@@ -48,7 +49,6 @@ bool FeedToBondtech::Step() {
             state = OK;
             mm::motion.Disable(mm::Pulley);
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
-            mg::globals.SetFilamentLoaded(true);
         }
         return false;
     case OK:

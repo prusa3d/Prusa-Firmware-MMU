@@ -20,7 +20,7 @@ void CutFilament::Reset(uint8_t param) {
     error = ErrorCode::RUNNING;
     cutSlot = param;
 
-    if (mg::globals.FilamentLoaded()) {
+    if (mg::globals.FilamentLoaded() >= mg::FilamentLoadState::InSelector) {
         state = ProgressCode::UnloadingFilament;
         unl.Reset(cutSlot);
     } else {
@@ -67,6 +67,7 @@ bool CutFilament::StepInner() {
         if (mm::motion.QueueEmpty()) { // idler and selector finished their moves
             // move selector aside - prepare the blade into active position
             state = ProgressCode::PreparingBlade;
+            mg::globals.SetFilamentLoaded(mg::FilamentLoadState::AtPulley);
             ms::selector.MoveToSlot(cutSlot + 1);
         }
     case ProgressCode::PreparingBlade:

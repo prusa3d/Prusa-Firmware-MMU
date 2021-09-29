@@ -59,7 +59,7 @@ bool UnloadFilament::StepInner() {
             state = ProgressCode::OK;
             error = ErrorCode::OK;
             mm::motion.Disable(mm::Pulley);
-            mg::globals.SetFilamentLoaded(false); // filament unloaded
+            mg::globals.SetFilamentLoaded(mg::FilamentLoadState::AtPulley); // filament unloaded
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
         }

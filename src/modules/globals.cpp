@@ -20,11 +20,11 @@ void Globals::SetActiveSlot(uint8_t newActiveSlot) {
     mps::FilamentLoaded::set(activeSlot);
 }
 
-bool Globals::FilamentLoaded() const {
+FilamentLoadState Globals::FilamentLoaded() const {
     return filamentLoaded;
 }
 
-void Globals::SetFilamentLoaded(bool newFilamentLoaded) {
+void Globals::SetFilamentLoaded(FilamentLoadState newFilamentLoaded) {
     filamentLoaded = newFilamentLoaded;
 }
 
