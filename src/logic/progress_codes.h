@@ -1,3 +1,4 @@
+/// @file progress_codes.h
 #pragma once
 #include <stdint.h>
 

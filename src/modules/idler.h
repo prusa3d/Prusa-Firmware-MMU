@@ -20,11 +20,11 @@ public:
 
     /// Plan engaging of the idler to a specific filament slot
     /// @param slot index to be activated
-    /// @returns #EngageDisengage
+    /// @returns #OperationResult
     OperationResult Engage(uint8_t slot);
 
     /// Plan disengaging of the idler, i.e. parking the idler
-    /// @returns #EngageDisengage
+    /// @returns #OperationResult
     OperationResult Disengage();
 
     /// Plan homing of the idler axis
