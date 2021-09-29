@@ -1,3 +1,4 @@
+/// @file main.cpp
 #include "hal/cpu.h"
 #include "hal/adc.h"
 #include "hal/gpio.h"

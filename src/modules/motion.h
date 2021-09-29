@@ -201,7 +201,8 @@ public:
 
     /// Set acceleration for the selected axis, but using physical units. The Axis needs to
     /// be supplied as the first template argument: SetAcceleration<axis>(accel).
-    /// @param axis axis affected
+    /// @tparam A axis affected
+    /// @tparam B unit base for the axis
     /// @param accel acceleration
     template <Axis A, config::UnitBase B>
     void SetAcceleration(config::Unit<long double, B, Accel> accel) {

@@ -6,7 +6,7 @@
 namespace modules {
 namespace motion {
 
-/// Base class for movable modules - #Idler and #Selector contains the common code
+/// Base class for movable modules - #modules::idler::Idler and #modules::selector::Selector contains the common code
 class MovableBase {
 public:
     /// Internal states of the state machine

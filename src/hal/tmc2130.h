@@ -9,7 +9,6 @@ namespace hal {
 /// TMC2130 interface
 /// There are multiple TMC2130 on our board, so there will be multiple
 /// instances of this class
-/// @@TODO @leptun - design some lightweight TMC2130 interface
 namespace tmc2130 {
 
 enum MotorMode : uint8_t {
