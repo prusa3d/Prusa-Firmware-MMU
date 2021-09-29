@@ -5,7 +5,14 @@
 /// Define Debug mode to add additional serial output
 
 //#define DEBUG_FINDA
+/// Enable DEBUG_LOGIC to compile debugging and error messages (beware of code base size ;) ) for the logic layer
 //#define DEBUG_LOGIC
+
+/// Enable DEBUG_LOGIC to compile debugging and error messages (beware of code base size ;) ) for the logic layer
+//#define DEBUG_MODULES
+
+/// Enable DEBUG_HAL to compile debugging and error messages (beware of code base size ;) ) for the logic layer
+//#define DEBUG_HAL
 
 /// Wrangler for assorted compile-time configuration and constants.
 namespace config {
