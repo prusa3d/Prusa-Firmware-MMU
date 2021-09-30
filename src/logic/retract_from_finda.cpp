@@ -25,13 +25,11 @@ bool RetractFromFinda::Step() {
         }
         return false;
     case UnloadBackToPTFE:
-        dbg_logic_P(PSTR("Unload back to PTFE --> Pulling"));
+        //dbg_logic_P(PSTR("Unload back to PTFE --> Pulling"));
         if (mm::motion.QueueEmpty()) { // all moves have been finished
             if (!mf::finda.Pressed()) { // FINDA switched off correctly while the move was performed
                 state = OK;
                 mg::globals.SetFilamentLoaded(mg::FilamentLoadState::AtPulley);
-                dbg_logic_sprintf_P(PSTR("Pulley end steps %u"), mm::motion.CurPosition(mm::Pulley));
-                dbg_logic_P(PSTR("Retract from FINDA --> DisengagingIdler"));
                 mi::idler.Disengage();
             } else { // FINDA didn't switch off
                 state = Failed;
@@ -40,6 +38,8 @@ bool RetractFromFinda::Step() {
             }
         }
         if (!mi::idler.Engaged()) {
+            dbg_logic_P(PSTR("Retract from FINDA --> Ider disengaged"));
+            dbg_logic_sprintf_P(PSTR("Pulley end steps %u"), mm::motion.CurPosition(mm::Pulley));
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
         }
         return false;
@@ -47,7 +47,7 @@ bool RetractFromFinda::Step() {
         dbg_logic_P(PSTR("Retract from FINDA OK"));
         return true;
     case Failed:
-        dbg_logic_P(PSTR("Retract from FINDA OK"));
+        dbg_logic_P(PSTR("Retract from FINDA FAILED"));
         return true;
     default:
         return true;
