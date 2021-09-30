@@ -66,7 +66,7 @@ static constexpr U_mm pulleyToCuttingEdge = 33.0_mm; /// 33.0_mm /// Pulley to c
 /// Case 2: FINDA not working: calculate retraction from printer to this point.
 static constexpr U_mm filamentMinLoadedToMMU = 20.0_mm; /// 20.0_mm ??? /// Limit of retraction. @TODO find correct distance.
 static constexpr U_mm ejectFromCuttingEdge = 40.0_mm; /// Eject should ignore FilamentMinLoadedToMMU and retract
-static constexpr U_mm cuttingEdgeRetract = 3.0_mm; /// 3.0_mm /// Cutting retraction distance (filament should be flush with outlet) @TODO find correct distance.
+static constexpr U_mm cuttingEdgeRetract = 5.0_mm; /// 3.0_mm /// Cutting retraction distance (filament should be flush with outlet) @TODO find correct distance.
 static constexpr U_mm cuttingEdgeToFinda = 18.5_mm; /// 18.5_mm -1.0_mm /// Cutting edge to FINDA MMU2 side -1mm tolerance should be ~18.5. FINDA shouldn't trigger here.
 static constexpr U_mm findaTriggerDistance = 4.5_mm; /// 9.0_mm /// FINDA trigger distance +1.0_mm tolerance.
 static constexpr U_mm cuttingEdgeToFindaMidpoint = 22.85_mm; /// Cutting edge to Midpoint of FINDA should be 22.85_mm.
