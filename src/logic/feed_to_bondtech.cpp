@@ -22,6 +22,7 @@ bool FeedToBondtech::Step() {
     switch (state) {
     case EngagingIdler:
         if (mi::idler.Engaged()) {
+            dbg_logic_P(PSTR("Feed to Bondtech --> Idler engaged"));
             dbg_logic_sprintf_P(PSTR("Pulley start steps %u"), mm::motion.CurPosition(mm::Pulley));
             state = PushingFilament;
             mm::motion.InitAxis(mm::Pulley);
@@ -30,7 +31,7 @@ bool FeedToBondtech::Step() {
         }
         return false;
     case PushingFilament:
-        dbg_logic_P(PSTR("Feed to Bondtech --> Pushing"));
+        //dbg_logic_P(PSTR("Feed to Bondtech --> Pushing"));
         if (mfs::fsensor.Pressed()) {
             mm::motion.AbortPlannedMoves(); // stop pushing filament
             mi::idler.Disengage();
@@ -44,8 +45,9 @@ bool FeedToBondtech::Step() {
         }
         return false;
     case DisengagingIdler:
-        dbg_logic_P(PSTR("Feed to Bondtech --> DisengagingIdler"));
         if (!mi::idler.Engaged()) {
+            dbg_logic_P(PSTR("Feed to Bondtech --> Idler disengaged"));
+            dbg_logic_sprintf_P(PSTR("Pulley end steps %u"), mm::motion.CurPosition(mm::Pulley));
             state = OK;
             mm::motion.Disable(mm::Pulley);
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
