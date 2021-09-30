@@ -16,7 +16,7 @@ void SHR16::Init() {
     gpio::Init(SHR16_DATA, GPIO_InitTypeDef(Mode::output, Level::low));
     gpio::Init(SHR16_LATCH, GPIO_InitTypeDef(Mode::output, Level::high));
     gpio::Init(SHR16_CLOCK, GPIO_InitTypeDef(Mode::output, Level::low));
-    Write(0);
+    Write(SHR16_ENA_MSK);
 }
 
 void SHR16::Write(uint16_t v) {
