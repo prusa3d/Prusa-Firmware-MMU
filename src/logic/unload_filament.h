@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "command_base.h"
 #include "unload_to_finda.h"
+#include "retract_from_finda.h"
 
 namespace logic {
 
@@ -21,6 +22,7 @@ public:
 private:
     constexpr static const uint8_t maxRetries = 3;
     UnloadToFinda unl;
+    RetractFromFinda retract;
 };
 
 /// The one and only instance of UnloadFilament state machine in the FW
