@@ -95,7 +95,7 @@ static constexpr PulleyLimits pulleyLimits = {
     .jerk = 4.0_mm_s,
     .accel = 800.0_mm_s2,
 };
-static constexpr U_mm_s pulleyFeedrate = 20._mm_s;
+static constexpr U_mm_s pulleyFeedrate = 40._mm_s;
 /// End: Pulley axis configuration
 
 /// Begin: Selector configuration
@@ -143,7 +143,7 @@ static constexpr U_mm selectorSlotPositions[toolCount + 1] = {
 */
 };
 
-static constexpr U_mm_s selectorFeedrate = 20._mm_s;
+static constexpr U_mm_s selectorFeedrate = 30._mm_s;
 /// End: Selector configuration
 
 /// Begin: Idler configuration
@@ -161,7 +161,7 @@ static constexpr AxisConfig idler = {
 static constexpr IdlerLimits idlerLimits = {
     .lenght = 270.0_deg,
     .jerk = 0.1_deg_s,
-    .accel = 10.0_deg_s2,
+    .accel = 500.0_deg_s2,
 };
 
 static constexpr U_deg IdlerSlotDistance = 40.0_deg; /// Idler distance between two slots
@@ -180,7 +180,7 @@ static constexpr U_deg idlerSlotPositions[toolCount + 1] = {
 
 static constexpr U_deg idlerParkPositionDelta = -IdlerSlotDistance + 5.0_deg / 2; ///@TODO verify
 
-static constexpr U_deg_s idlerFeedrate = 1000._deg_s;
+static constexpr U_deg_s idlerFeedrate = 200._deg_s;
 /// End: Idler configuration
 
 // TMC2130 setup
