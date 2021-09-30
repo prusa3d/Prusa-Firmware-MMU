@@ -44,12 +44,12 @@ USB_ClassInfo_CDC_Device_t VirtualSerial_CDC_Interface = {
 
 /** Event handler for the library USB Connection event. */
 void EVENT_USB_Device_Connect(void) {
-    dbg_modules_P(PSTR("EVENT_USB_Device_Connect"));
+    // dbg_modules_P(PSTR("EVENT_USB_Device_Connect"));
 }
 
 /** Event handler for the library USB Disconnection event. */
 void EVENT_USB_Device_Disconnect(void) {
-    dbg_modules_P(PSTR("EVENT_USB_Device_Disconnect"));
+    // dbg_modules_P(PSTR("EVENT_USB_Device_Disconnect"));
 }
 
 /** Event handler for the library USB Configuration Changed event. */
