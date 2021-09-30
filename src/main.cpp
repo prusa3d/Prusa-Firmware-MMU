@@ -10,6 +10,7 @@
 #include "pins.h"
 #include <avr/interrupt.h>
 #include <util/delay.h>
+#include <stdio.h>
 
 #include "modules/buttons.h"
 #include "modules/finda.h"
