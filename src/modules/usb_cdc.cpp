@@ -1,7 +1,7 @@
 #include "usb_cdc.h"
 #include "../hal/cpu.h"
-#include "../hal/usart.h"
 #include "../hal/watchdog.h"
+#include "debug.h"
 
 extern "C" {
 #include "lufa_config.h"
@@ -44,30 +44,25 @@ USB_ClassInfo_CDC_Device_t VirtualSerial_CDC_Interface = {
 
 /** Event handler for the library USB Connection event. */
 void EVENT_USB_Device_Connect(void) {
-    hal::usart::usart1.puts("EVENT_USB_Device_Connect\n");
+    dbg_modules_P(PSTR("EVENT_USB_Device_Connect"));
 }
 
 /** Event handler for the library USB Disconnection event. */
 void EVENT_USB_Device_Disconnect(void) {
-    hal::usart::usart1.puts("EVENT_USB_Device_Disconnect\n");
+    dbg_modules_P(PSTR("EVENT_USB_Device_Disconnect"));
 }
 
 /** Event handler for the library USB Configuration Changed event. */
 void EVENT_USB_Device_ConfigurationChanged(void) {
     bool ConfigSuccess = true;
-
     ConfigSuccess &= CDC_Device_ConfigureEndpoints(&VirtualSerial_CDC_Interface);
 
-    // LEDs_SetAllLEDs(ConfigSuccess ? LEDMASK_USB_READY : LEDMASK_USB_ERROR);
-    // char str1[] = "ready\n";
-    // char str0[] = "error\n";
-    // hal::usart::usart1.puts("EVENT_USB_Device_ConfigurationChanged:");
-    // hal::usart::usart1.puts(ConfigSuccess ? str1 : str0);
+    // dbg_modules_fP(PSTR("EVENT_USB_Device_ConfigurationChanged:%S"), ConfigSuccess ? PSTR("ready") : PSTR("error"));
 }
 
 /** Event handler for the library USB Control Request reception event. */
 void EVENT_USB_Device_ControlRequest(void) {
-    // hal::usart::usart1.puts("EVENT_USB_Device_ControlRequest\n");
+    // dbg_modules_P(PSTR("EVENT_USB_Device_ControlRequest"));
     CDC_Device_ProcessControlRequest(&VirtualSerial_CDC_Interface);
 }
 
@@ -77,23 +72,9 @@ void EVENT_USB_Device_ControlRequest(void) {
  *  \param[in] CDCInterfaceInfo  Pointer to the CDC class interface configuration structure being referenced
  */
 void EVENT_CDC_Device_ControLineStateChanged(USB_ClassInfo_CDC_Device_t *const CDCInterfaceInfo) {
-    // Printing to serial from here will make Windows commit suicide when opening the port
-
-    // hal::usart::usart1.puts("EVENT_CDC_Device_ControLineStateChanged ");
-    // bool HostReady = (CDCInterfaceInfo->State.ControlLineStates.HostToDevice & CDC_CONTROL_LINE_OUT_DTR) != 0;
-    // char str[50];
-    // sprintf_P(str, PSTR("DTR:%hu\n"), HostReady);
-    // hal::usart::usart1.puts(str);
 }
 
 void EVENT_CDC_Device_LineEncodingChanged(USB_ClassInfo_CDC_Device_t *const CDCInterfaceInfo) {
-    // Printing to serial from here will make Windows commit suicide when opening the port
-
-    // hal::usart::usart1.puts("EVENT_CDC_Device_LineEncodingChanged ");
-    // char str[50];
-    // sprintf_P(str, PSTR("baud:%lu\n"), CDCInterfaceInfo->State.LineEncoding.BaudRateBPS);
-    // hal::usart::usart1.puts(str);
-
     if (CDCInterfaceInfo->State.LineEncoding.BaudRateBPS == 1200) {
         // *(uint16_t *)0x0800U = 0x7777; //old bootloader?
         *(uint16_t *)(RAMEND - 1) = 0x7777;
