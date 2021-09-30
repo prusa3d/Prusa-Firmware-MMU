@@ -33,25 +33,22 @@ bool UnloadFilament::StepInner() {
                 error = ErrorCode::FINDA_DIDNT_SWITCH_OFF;
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0);
+                mi::idler.Disengage();
             } else {
-                state = ProgressCode::DisengagingIdler;
+                state = ProgressCode::UnloadingToPulley;
+                mm::motion.PlanMove<mm::Pulley>(-config::cuttingEdgeToFindaMidpoint, config::pulleyFeedrate);
             }
-            // in all cases disengage the idler
+        }
+        return false;
+    case ProgressCode::UnloadingToPulley:
+        if (mm::motion.QueueEmpty()) {
+            state = ProgressCode::DisengagingIdler;
             mi::idler.Disengage();
         }
         return false;
     case ProgressCode::DisengagingIdler:
-        if (!mi::idler.Engaged()) {
-            state = ProgressCode::AvoidingGrind; // @@TODO what was this originally? Why are we supposed to move the pulley when the idler is not engaged?
-            // may be the pulley was to move along with the idler?
-            //                mm::motion.PlanMove(mm::Pulley, -100, 10); // @@TODO constants
-        }
-        return false;
-    case ProgressCode::AvoidingGrind: // state 3 move a little bit so it is not a grinded hole in filament
         if (mm::motion.QueueEmpty()) {
             state = ProgressCode::FinishingMoves;
-            mi::idler.Disengage();
-            return true;
         }
         return false;
     case ProgressCode::FinishingMoves:
