@@ -19,7 +19,7 @@ void ToolChange::Reset(uint8_t param) {
         return;
     }
 
-    if (param == mg::globals.ActiveSlot() && mg::globals.FilamentLoaded() == mg::FilamentLoadState::InNozzle) {
+    if (param == mg::globals.ActiveSlot() && (mg::globals.FilamentLoaded() >= mg::FilamentLoadState::InSelector)) {
         // we are already at the correct slot and the filament is loaded - nothing to do
         dbg_logic_P(PSTR("we are already at the correct slot and the filament is loaded - nothing to do\n"));
         return;
@@ -51,6 +51,7 @@ bool ToolChange::StepInner() {
             // There is no way the UnloadFilament to finish in an error state
             state = ProgressCode::FeedingToFinda;
             error = ErrorCode::RUNNING;
+            mg::globals.SetActiveSlot(plannedSlot);
             feed.Reset(true);
         }
         break;
@@ -77,7 +78,7 @@ bool ToolChange::StepInner() {
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0); // signal loading error
             } else {
-                mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InNozzle);
+                mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InFSensor);
                 state = ProgressCode::OK;
                 error = ErrorCode::OK;
             }
