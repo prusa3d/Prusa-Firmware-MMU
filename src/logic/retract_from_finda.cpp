@@ -44,7 +44,11 @@ bool RetractFromFinda::Step() {
         }
         return false;
     case OK:
+        dbg_logic_P(PSTR("Retract from FINDA OK"));
+        return true;
     case Failed:
+        dbg_logic_P(PSTR("Retract from FINDA OK"));
+        return true;
     default:
         return true;
     }
