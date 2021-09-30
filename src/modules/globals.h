@@ -22,7 +22,8 @@ static_assert(
     /*(FilamentLoadState::NotLoaded < FilamentLoadState::AtPulley)
 &&*/
     (FilamentLoadState::AtPulley < FilamentLoadState::InSelector)
-        && (FilamentLoadState::InSelector < FilamentLoadState::InNozzle),
+        && (FilamentLoadState::InSelector < FilamentLoadState::InFSensor)
+        && (FilamentLoadState::InFSensor < FilamentLoadState::InNozzle),
     "incorrect order of Slot Filament Load States");
 
 /// Globals keep track of global state variables in the firmware.
