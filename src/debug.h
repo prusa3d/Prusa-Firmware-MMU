@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include "config/config.h"
+#include <avr/pgmspace.h>
 
 /// Enable DEBUG_LOGIC to compile debugging and error messages (beware of code base size ;) ) for the logic layer
 //#define DEBUG_LOGIC
@@ -21,48 +22,53 @@ namespace debug {
 
 #if defined(DEBUG_LOGIC) && defined(__AVR__)
 extern const char logic[];
-#define dbg_logic(x) debug::dbg_usart(debug::logic, x)
-#define dbg_logic_P(x) debug::dbg_usart_P(debug::logic, x)
-#define dbg_logic_sprintf_P(fmt, ...) debug::dbg_usart_sprintf_P(fmt, __VA_ARGS__)
+#define dbg_logic(x) debug::dbg_usb(debug::logic, x)
+#define dbg_logic_P(x) debug::dbg_usb_P(debug::logic, x)
+#define dbg_logic_fP(fmt, ...) debug::dbg_usb_fP(debug::logic, fmt, __VA_ARGS__)
 #else
 #define dbg_logic(x) /* */
 #define dbg_logic_P(x) /* */
-#define dbg_logic_sprintf_P(fmt, ...) /* */
+#define dbg_logic_fP(fmt, ...) /* */
 #endif
 
 #if defined(DEBUG_MODULES) && defined(__AVR__)
 extern const char modules[];
-#define dbg_modules(x) debug::dbg_usart(debug::modules, x)
-#define dbg_modules_P(x) debug::dbg_usart_P(debug::modules, x)
+#define dbg_modules(x) debug::dbg_usb(debug::modules, x)
+#define dbg_modules_P(x) debug::dbg_usb_P(debug::modules, x)
+#define dbg_modules_fP(fmt, ...) debug::dbg_usb_fP(debug::modules, fmt, __VA_ARGS__)
 #else
 #define dbg_modules(x) /* */
 #define dbg_modules_P(x) /* */
-
+#define dbg_modules_fP(fmt, ...) /* */
 #endif
 
 #if defined(DEBUG_HAL) && defined(__AVR__)
 extern const char hal[];
-#define dbg_hal(x) debug::dbg_usart(debug::hal, x)
-#define dbg_hal_P(x) debug::dbg_usart_P(debug::hal, x)
+#define dbg_hal(x) debug::dbg_usb(debug::hal, x)
+#define dbg_hal_P(x) debug::dbg_usb_P(debug::hal, x)
+#define dbg_hal_fP(fmt, ...) debug::dbg_usb_fP(debug::hal, fmt, __VA_ARGS__)
 #else
 #define dbg_hal(x) /* */
 #define dbg_hal_P(x) /* */
+#define dbg_hal_fP(fmt, ...) /* */
 #endif
 
 #if defined(DEBUG_LOGIC) || defined(DEBUG_MODULES) || defined(DEBUG_HAL)
-/// Dump an error message onto the USART
+/// Dump an error message onto the usb
 /// @param layer PROGMEM string
 /// @param s RAM string to be printed
-void dbg_usart(const char *layer_P, const char *s);
+void dbg_usb(const char *layer_P, const char *s);
 
-/// Dump an error message onto the USART
+/// Dump an error message onto the usb
 /// @param layer PROGMEM string
 /// @param s PROGMEM string to be printed
-void dbg_usart_P(const char *layer_P, const char *s_P);
+void dbg_usb_P(const char *layer_P, const char *s_P);
 
-/// Dump an error message onto the USART with sprintf-like formatting
-/// @param fmt_P PROGMEM format string
-void dbg_usart_sprintf_P(const char *fmt_P, ...);
+/// Dump an error message onto the usb
+/// @param layer PROGMEM string
+/// @param fmt PROGMEM format string
+/// @param ... arguments passed to the formatting string
+void dbg_usb_fP(const char *layer_P, const char *fmt_P, ...);
 #endif
 
 } // namespace debug

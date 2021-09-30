@@ -2,7 +2,6 @@
 
 #if defined(DEBUG_LOGIC) || defined(DEBUG_MODULES) || defined(DEBUG_HAL)
 
-#include "hal/usart.h"
 #include <avr/pgmspace.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -22,23 +21,23 @@ const char modules[] PROGMEM = "mod:";
 const char hal[] PROGMEM = "hal:";
 #endif
 
-void __attribute__((noinline)) dbg_usart(const char *layer_P, const char *s) {
-    hu::usart1.WriteS_P(layer_P);
-    hu::usart1.puts(s);
+void dbg_usb(const char *layer_P, const char *s) {
+    fputs_P(layer_P, stdout);
+    puts(s);
 }
 
-void __attribute__((noinline)) dbg_usart_P(const char *layer_P, const char *s_P) {
-    hu::usart1.WriteS_P(layer_P);
-    hu::usart1.puts_P(s_P);
+void dbg_usb_P(const char *layer_P, const char *s_P) {
+    fputs_P(layer_P, stdout);
+    puts_P(s_P);
 }
 
-void __attribute__((noinline)) dbg_usart_sprintf_P(const char *fmt_P, ...) {
-    char tmp[30];
+void dbg_usb_fP(const char *layer_P, const char *fmt_P, ...) {
     va_list argptr;
     va_start(argptr, fmt_P);
-    vsnprintf_P(tmp, 30, fmt_P, argptr);
+    fputs_P(layer_P, stdout);
+    vfprintf_P(stdout, fmt_P, argptr);
+    putchar('\n');
     va_end(argptr);
-    dbg_logic(tmp);
 }
 
 } // namespace debug
