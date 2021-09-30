@@ -52,9 +52,11 @@ bool FeedToBondtech::Step() {
         }
         return false;
     case OK:
-        dbg_logic_P(PSTR("Feed to Bondtech"));
+        dbg_logic_P(PSTR("Feed to Bondtech OK"));
+        return true;
     case Failed:
         dbg_logic_P(PSTR("Feed to Bondtech FAILED"));
+        return true;
     default:
         return true;
     }
