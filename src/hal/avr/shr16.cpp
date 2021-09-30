@@ -1,6 +1,8 @@
 #include "../shr16.h"
 #include "../gpio.h"
 #include "../../pins.h"
+#include <util/delay.h>
+#include <util/atomic.h>
 
 #define SHR16_LED_MSK 0xffc0
 #define SHR16_DIR_MSK 0x0015
@@ -20,15 +22,21 @@ void SHR16::Init() {
 }
 
 void SHR16::Write(uint16_t v) {
-    using namespace hal::gpio;
-    WritePin(SHR16_LATCH, Level::low);
-    for (uint16_t m = 0x8000; m; m >>= 1) {
-        WritePin(SHR16_DATA, (Level)((m & v) != 0));
-        WritePin(SHR16_CLOCK, Level::high);
-        WritePin(SHR16_CLOCK, Level::low);
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+        using namespace hal::gpio;
+        WritePin(SHR16_LATCH, Level::low);
+        _delay_us(1);
+        for (uint16_t m = 0x8000; m; m >>= 1) {
+            WritePin(SHR16_DATA, (Level)((m & v) != 0));
+            asm("nop");
+            WritePin(SHR16_CLOCK, Level::high);
+            asm("nop");
+            WritePin(SHR16_CLOCK, Level::low);
+            asm("nop");
+        }
+        WritePin(SHR16_LATCH, Level::high);
+        shr16_v = v;
     }
-    WritePin(SHR16_LATCH, Level::high);
-    shr16_v = v;
 }
 
 void SHR16::SetLED(uint16_t led) {
