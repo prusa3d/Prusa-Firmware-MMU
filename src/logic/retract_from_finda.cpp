@@ -30,17 +30,13 @@ bool RetractFromFinda::Step() {
             if (!mf::finda.Pressed()) { // FINDA switched off correctly while the move was performed
                 state = OK;
                 mg::globals.SetFilamentLoaded(mg::FilamentLoadState::AtPulley);
-                mi::idler.Disengage();
+                dbg_logic_sprintf_P(PSTR("Pulley end steps %u"), mm::motion.CurPosition(mm::Pulley));
+                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
             } else { // FINDA didn't switch off
                 state = Failed;
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0);
             }
-        }
-        if (!mi::idler.Engaged()) {
-            dbg_logic_P(PSTR("Retract from FINDA --> Ider disengaged"));
-            dbg_logic_sprintf_P(PSTR("Pulley end steps %u"), mm::motion.CurPosition(mm::Pulley));
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
         }
         return false;
     case OK:

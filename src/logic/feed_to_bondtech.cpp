@@ -24,24 +24,33 @@ bool FeedToBondtech::Step() {
         if (mi::idler.Engaged()) {
             dbg_logic_P(PSTR("Feed to Bondtech --> Idler engaged"));
             dbg_logic_sprintf_P(PSTR("Pulley start steps %u"), mm::motion.CurPosition(mm::Pulley));
-            state = PushingFilament;
+            state = PushingFilamentToFSensor;
             mm::motion.InitAxis(mm::Pulley);
             mm::motion.PlanMove<mm::Pulley>(config::defaultBowdenLength, config::pulleyFeedrate); //@@TODO constants - there was some strange acceleration sequence in the original FW,
             // we can probably hand over some array of constants for hand-tuned acceleration + leverage some smoothing in the stepper as well
         }
         return false;
-    case PushingFilament:
+    case PushingFilamentToFSensor:
         //dbg_logic_P(PSTR("Feed to Bondtech --> Pushing"));
         if (mfs::fsensor.Pressed()) {
             mm::motion.AbortPlannedMoves(); // stop pushing filament
-            mi::idler.Disengage();
-            mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InNozzle);
-            state = DisengagingIdler;
+            mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InFSensor);
+            // plan a slow move to help push filament into the nozzle
+            //@@TODO the speed in mm/s must correspond to printer's feeding speed!
+            mm::motion.PlanMove<mm::Pulley>(config::fsensorToNozzle, config::pulleySlowFeedrate);
+            state = PushingFilamentIntoNozzle;
         } else if (mm::motion.StallGuard(mm::Pulley)) {
             // stall guard occurred during movement - the filament got stuck
             state = Failed; // @@TODO may be even report why it failed
         } else if (mm::motion.QueueEmpty()) { // all moves have been finished and the fsensor didn't switch on
             state = Failed;
+        }
+        return false;
+    case PushingFilamentIntoNozzle:
+        if (mm::motion.QueueEmpty()) {
+            mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InNozzle);
+            mi::idler.Disengage();
+            state = DisengagingIdler;
         }
         return false;
     case DisengagingIdler:

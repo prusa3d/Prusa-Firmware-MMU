@@ -5,7 +5,11 @@ namespace logic {
 
 /// @brief Retract filament from FINDA to PTFE
 ///
-/// Continuously pull filament by a fixed length (originally 600 steps) + verify FINDA is switched OFF
+/// Continuously pulls filament by a fixed length (originally 600 steps) + verifies FINDA is switched OFF while performing the move
+/// Steps:
+/// - engages idler (or makes sure the idler is engaged)
+/// - pulls filament
+/// - leaves idler engaged for chaining operations
 struct RetractFromFinda {
     /// internal states of the state machine
     enum {

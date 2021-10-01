@@ -39,11 +39,7 @@ void LoadFilamentCommonSetup(uint8_t slot, logic::LoadFilament &lf) {
     // no change in selector's position
     // FINDA off
     // green LED should blink, red off
-    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::EngagingIdler));
-
-    // Stage 1 - engaging idler
-    REQUIRE(WhileTopState(lf, ProgressCode::EngagingIdler, idlerEngageDisengageMaxSteps));
-    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, slot, slot, false, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
 }
 
 void LoadFilamentSuccessful(uint8_t slot, logic::LoadFilament &lf) {
@@ -69,7 +65,7 @@ void LoadFilamentSuccessful(uint8_t slot, logic::LoadFilament &lf) {
         }
         return lf.TopLevelState() == ProgressCode::RetractingFromFinda; },
         5000));
-    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, slot, slot, false, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, slot, slot, false, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
 
     // Stage 4 - disengaging idler
     REQUIRE(WhileTopState(lf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));

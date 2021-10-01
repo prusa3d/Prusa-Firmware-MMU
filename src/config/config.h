@@ -77,6 +77,7 @@ static constexpr U_mm minimumBowdenLength = 341.0_mm; /// ~341.0_mm /// Minimum 
 static constexpr U_mm maximumBowdenLength = 792.0_mm; /// ~792.0_mm /// Maximum bowden length. @TODO Should be stored in EEPROM.
 static constexpr U_mm feedToFinda = cuttingEdgeToFindaMidpoint + filamentMinLoadedToMMU;
 static constexpr U_mm cutLength = 8.0_mm;
+static constexpr U_mm fsensorToNozzle = 20.0_mm; /// ~20mm from MK4's filament sensor through extruder gears into nozzle
 
 /// Begin: Pulley axis configuration
 static constexpr AxisConfig pulley = {
@@ -96,6 +97,7 @@ static constexpr PulleyLimits pulleyLimits = {
     .accel = 800.0_mm_s2,
 };
 static constexpr U_mm_s pulleyFeedrate = 40._mm_s;
+static constexpr U_mm_s pulleySlowFeedrate = 1._mm_s;
 /// End: Pulley axis configuration
 
 /// Begin: Selector configuration
