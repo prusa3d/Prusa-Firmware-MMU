@@ -14,24 +14,25 @@ enum class ProgressCode : uint_fast8_t {
     UnloadingToPulley, //P4
     FeedingToFinda, // P5
     FeedingToBondtech, // P6
-    AvoidingGrind, // P7
-    FinishingMoves, // P8
+    FeedingToNozzle, // P7
+    AvoidingGrind, // P8
+    FinishingMoves, // P9
 
-    ERRDisengagingIdler, // P9
-    ERREngagingIdler, // P10
-    ERRWaitingForUser, // P11
-    ERRInternal, // P12
-    ERRHelpingFilament, // P13
-    ERRTMCFailed, // P14
+    ERRDisengagingIdler, // P10
+    ERREngagingIdler, // P11
+    ERRWaitingForUser, // P12
+    ERRInternal, // P13
+    ERRHelpingFilament, // P14
+    ERRTMCFailed, // P15
 
-    UnloadingFilament, // P15
-    LoadingFilament, // P16
-    SelectingFilamentSlot, // P17
-    PreparingBlade, // P18
-    PushingFilament, // P19
-    PerformingCut, // P20
-    ReturningSelector, // P21
-    ParkingSelector, // P22
-    EjectingFilament, // P23
-    RetractingFromFinda, // P24
+    UnloadingFilament, // P16
+    LoadingFilament, // P17
+    SelectingFilamentSlot, // P18
+    PreparingBlade, // P19
+    PushingFilament, // P20
+    PerformingCut, // P21
+    ReturningSelector, // P22
+    ParkingSelector, // P23
+    EjectingFilament, // P24
+    RetractingFromFinda, // P25
 };

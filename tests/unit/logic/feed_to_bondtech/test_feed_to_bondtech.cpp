@@ -51,7 +51,7 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
     CHECK(mm::axes[mm::Pulley].enabled);
 
     // idler engaged, selector in position, we'll start pushing filament
-    REQUIRE(fb.State() == FeedToBondtech::PushingFilament);
+    REQUIRE(fb.State() == FeedToBondtech::PushingFilamentToFSensor);
     // at least at the beginning the LED should shine green (it should be blinking, but this mode has been already verified in the LED's unit test)
     REQUIRE(ml::leds.LedOn(mg::globals.ActiveSlot(), ml::green));
 
@@ -61,10 +61,17 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
         if( step == 1000 ){
             mfs::fsensor.ProcessMessage(true);
         }
-        return fb.State() == FeedToBondtech::PushingFilament; },
+        return fb.State() == FeedToBondtech::PushingFilamentToFSensor; },
         1500));
 
     REQUIRE(mfs::fsensor.Pressed());
+
+    // pushing filament from fsensor into the nozzle
+    REQUIRE(fb.State() == FeedToBondtech::PushingFilamentIntoNozzle);
+    REQUIRE(WhileCondition(
+        fb,
+        [&](int) { return fb.State() == FeedToBondtech::PushingFilamentIntoNozzle; },
+        5000));
 
     // disengaging idler
     REQUIRE(fb.State() == FeedToBondtech::DisengagingIdler);

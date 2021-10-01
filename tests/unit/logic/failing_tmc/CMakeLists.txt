@@ -3,6 +3,7 @@ add_executable(
   failing_tmc_tests
   ${CMAKE_SOURCE_DIR}/src/logic/command_base.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/feed_to_finda.cpp
+  ${CMAKE_SOURCE_DIR}/src/logic/retract_from_finda.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/unload_filament.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/unload_to_finda.cpp
   ${CMAKE_SOURCE_DIR}/src/modules/buttons.cpp

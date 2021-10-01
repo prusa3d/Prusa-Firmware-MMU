@@ -48,12 +48,12 @@ bool LoadFilament::StepInner() {
             if (retract.State() == RetractFromFinda::Failed) {
                 state = ProgressCode::ERRDisengagingIdler;
                 error = ErrorCode::FINDA_DIDNT_SWITCH_OFF;
-                mi::idler.Disengage();
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0); // signal loading error
             } else {
                 state = ProgressCode::DisengagingIdler;
             }
+            mi::idler.Disengage(); // disengage in both cases
         }
         break;
     case ProgressCode::DisengagingIdler:

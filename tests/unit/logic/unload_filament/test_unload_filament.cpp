@@ -66,36 +66,19 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA triggered off
     // green LED should be off
-    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, slot, slot, false, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, slot, slot, false, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
 
-    // Stage 2 - idler was engaged, disengage it
+    // Stage 2 - retracting from FINDA
+    REQUIRE(WhileTopState(uf, ProgressCode::RetractingFromFinda, idlerEngageDisengageMaxSteps));
+
+    // Stage 3 - idler was engaged, disengage it
     REQUIRE(WhileTopState(uf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
-
-    // we still think we have filament loaded at this stage
-    // idler should have been disengaged
-    // no change in selector's position
-    // FINDA still triggered off
-    // green LED should be off
-    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::AvoidingGrind));
-
-    // Stage 3 - avoiding grind (whatever is that @@TODO)
-    REQUIRE(WhileTopState(uf, ProgressCode::AvoidingGrind, 5000));
-
-    // we still think we have filament loaded at this stage
-    // idler should have been disengaged
-    // no change in selector's position
-    // FINDA still triggered off
-    // green LED should be off
-    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::FinishingMoves));
-
-    // Stage 4 - finishing moves and setting global state correctly
-    REQUIRE(WhileTopState(uf, ProgressCode::FinishingMoves, 5000));
 
     // filament unloaded
     // idler should have been disengaged
     // no change in selector's position
     // FINDA still triggered off
-    // green LED should be OFF
+    // green LED should be off
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
 
     // Stage 5 - repeated calls to TopLevelState should return "OK"
