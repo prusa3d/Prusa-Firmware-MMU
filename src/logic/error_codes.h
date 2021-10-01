@@ -64,14 +64,14 @@ enum class ErrorCode : uint_fast16_t {
     /// - E34944 Selector TMC driver
     /// - E35072 Idler TMC driver
     /// - E35264 All 3 TMC driver
-    TMC_UNDERVOLTAGE_ON_CHARGE_PUMP = 0x8800, 
+    TMC_UNDERVOLTAGE_ON_CHARGE_PUMP = 0x8800,
 
     /// TMC driver serious error - short to ground on coil A or coil B - dangerous to recover
     /// - E36928 Pulley TMC driver
     /// - E36992 Selector TMC driver
     /// - E37120 Idler TMC driver
     /// - E37312 All 3 TMC driver
-    TMC_SHORT_TO_GROUND = 0x9000, 
+    TMC_SHORT_TO_GROUND = 0x9000,
 
     /// TMC driver over temperature warning - can be recovered by restarting the driver.
     /// If this error happens, we should probably go into the error state as soon as the current command is finished.
