@@ -7,6 +7,7 @@
 #include "../modules/motion.h"
 #include "../modules/permanent_storage.h"
 #include "../modules/selector.h"
+#include "../debug.h"
 
 namespace logic {
 
@@ -20,7 +21,10 @@ void EjectFilament::Reset(uint8_t param) {
     error = ErrorCode::RUNNING;
     slot = param;
 
-    if (mg::globals.FilamentLoaded() >= mg::FilamentLoadState::InSelector) {
+    if (mg::globals.FilamentLoaded() == mg::FilamentLoadState::NotLoaded) {
+        state = ProgressCode::OK;
+        dbg_logic_P(PSTR("Already ejected"));
+    } else if (mg::globals.FilamentLoaded() >= mg::FilamentLoadState::AtPulley) {
         state = ProgressCode::UnloadingFilament;
         unl.Reset(param); //@@TODO probably act on active extruder only
     } else {
@@ -39,7 +43,7 @@ bool EjectFilament::StepInner() {
     switch (state) {
     case ProgressCode::UnloadingFilament:
         if (unl.StepInner()) {
-            // unloading sequence finished - basically, no errors can occurr here
+            // unloading sequence finished - basically, no errors can occur here
             // as UnloadFilament should handle all the possible error states on its own
             // There is no way the UnloadFilament to finish in an error state
             MoveSelectorAside();
@@ -49,7 +53,7 @@ bool EjectFilament::StepInner() {
         if (mm::motion.QueueEmpty()) { // selector parked aside
             state = ProgressCode::EjectingFilament;
             mm::motion.InitAxis(mm::Pulley);
-            mm::motion.PlanMove<mm::Pulley>(-config::filamentMinLoadedToMMU, config::pulleyFeedrate);
+            mm::motion.PlanMove<mm::Pulley>(-config::filamentMinLoadedToMMU, config::pulleySlowFeedrate);
         }
         break;
     case ProgressCode::EjectingFilament:
@@ -61,11 +65,13 @@ bool EjectFilament::StepInner() {
     case ProgressCode::DisengagingIdler:
         if (!mi::idler.Engaged()) { // idler disengaged
             mm::motion.Disable(mm::Pulley);
+            mg::globals.SetFilamentLoaded(mg::FilamentLoadState::NotLoaded);
             state = ProgressCode::OK;
             error = ErrorCode::OK;
         }
         break;
     case ProgressCode::OK:
+        dbg_logic_sprintf_P(PSTR("FilamentLoadState after Eject %d"), mg::globals.FilamentLoaded());
         return true;
     default: // we got into an unhandled state, better report it
         state = ProgressCode::ERRInternal;
