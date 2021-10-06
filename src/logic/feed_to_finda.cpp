@@ -28,6 +28,9 @@ bool FeedToFinda::Step() {
             dbg_logic_sprintf_P(PSTR("Pulley start steps %u"), mm::motion.CurPosition(mm::Pulley));
             state = PushingFilament;
             mm::motion.InitAxis(mm::Pulley);
+            if (mg::globals.FilamentLoaded() == mg::FilamentLoadState::NotLoaded) { // feed slowly filament to PTFE
+                mm::motion.PlanMove<mm::Pulley>(config::filamentMinLoadedToMMU, config::pulleySlowFeedrate);
+            }
             mm::motion.PlanMove<mm::Pulley>(config::feedToFinda, config::pulleyFeedrate);
             mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InSelector);
             mui::userInput.Clear(); // remove all buffered events if any just before we wait for some input
