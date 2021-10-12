@@ -8,7 +8,6 @@ extern "C" {
 #include "Descriptors.h"
 #include "lufa/LUFA/Drivers/USB/USB.h"
 
-
 /** Standard file stream for the CDC interface when set up, so that the virtual CDC COM port can be
  *  used like any regular character stream in the C APIs.
  */
@@ -93,7 +92,7 @@ void CDC::Init() {
     USB_Init();
 
     /* Create a regular character stream for the interface so that it can be used with the stdio.h functions */
-	CDC_Device_CreateStream(&VirtualSerial_CDC_Interface, &USBSerialStream);
+    CDC_Device_CreateStream(&VirtualSerial_CDC_Interface, &USBSerialStream);
     stdout = &USBSerialStream;
 }
 
