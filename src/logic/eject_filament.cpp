@@ -71,7 +71,7 @@ bool EjectFilament::StepInner() {
         }
         break;
     case ProgressCode::OK:
-        dbg_logic_sprintf_P(PSTR("FilamentLoadState after Eject %d"), mg::globals.FilamentLoaded());
+        dbg_logic_fP(PSTR("FilamentLoadState after Eject %d"), mg::globals.FilamentLoaded());
         return true;
     default: // we got into an unhandled state, better report it
         state = ProgressCode::ERRInternal;

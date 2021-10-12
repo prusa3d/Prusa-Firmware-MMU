@@ -23,7 +23,7 @@ bool FeedToBondtech::Step() {
     case EngagingIdler:
         if (mi::idler.Engaged()) {
             dbg_logic_P(PSTR("Feed to Bondtech --> Idler engaged"));
-            dbg_logic_sprintf_P(PSTR("Pulley start steps %u"), mm::motion.CurPosition(mm::Pulley));
+            dbg_logic_fP(PSTR("Pulley start steps %u"), mm::motion.CurPosition(mm::Pulley));
             state = PushingFilamentToFSensor;
             mm::motion.InitAxis(mm::Pulley);
             mm::motion.PlanMove<mm::Pulley>(config::defaultBowdenLength, config::pulleyFeedrate); //@@TODO constants - there was some strange acceleration sequence in the original FW,
@@ -56,7 +56,7 @@ bool FeedToBondtech::Step() {
     case DisengagingIdler:
         if (!mi::idler.Engaged()) {
             dbg_logic_P(PSTR("Feed to Bondtech --> Idler disengaged"));
-            dbg_logic_sprintf_P(PSTR("Pulley end steps %u"), mm::motion.CurPosition(mm::Pulley));
+            dbg_logic_fP(PSTR("Pulley end steps %u"), mm::motion.CurPosition(mm::Pulley));
             state = OK;
             mm::motion.Disable(mm::Pulley);
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
