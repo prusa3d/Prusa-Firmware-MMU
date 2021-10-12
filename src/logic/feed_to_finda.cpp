@@ -25,7 +25,7 @@ bool FeedToFinda::Step() {
     case EngagingIdler:
         if (mi::idler.Engaged() && ms::selector.Slot() == mg::globals.ActiveSlot()) {
             dbg_logic_P(PSTR("Feed to Finda --> Idler engaged"));
-            dbg_logic_sprintf_P(PSTR("Pulley start steps %u"), mm::motion.CurPosition(mm::Pulley));
+            dbg_logic_fP(PSTR("Pulley start steps %u"), mm::motion.CurPosition(mm::Pulley));
             state = PushingFilament;
             mm::motion.InitAxis(mm::Pulley);
             if (mg::globals.FilamentLoaded() == mg::FilamentLoadState::NotLoaded) { // feed slowly filament to PTFE
@@ -42,7 +42,7 @@ bool FeedToFinda::Step() {
             // FINDA triggered - that means it works and detected the filament tip
             mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InSelector);
             dbg_logic_P(PSTR("Feed to Finda --> Idler disengaged"));
-            dbg_logic_sprintf_P(PSTR("Pulley end steps %u"), mm::motion.CurPosition(mm::Pulley));
+            dbg_logic_fP(PSTR("Pulley end steps %u"), mm::motion.CurPosition(mm::Pulley));
             state = OK;
         } else if (mm::motion.QueueEmpty()) { // all moves have been finished and FINDA didn't switch on
             state = Failed;

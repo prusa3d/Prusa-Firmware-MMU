@@ -12,7 +12,7 @@ Selector selector;
 
 void Selector::PrepareMoveToPlannedSlot() {
     mm::motion.PlanMoveTo<mm::Selector>(SlotPosition(plannedSlot), mm::unitToAxisUnit<mm::S_speed_t>(config::selectorFeedrate));
-    dbg_logic_sprintf_P(PSTR("Prepare Move Selector slot %d"), plannedSlot);
+    dbg_logic_fP(PSTR("Prepare Move Selector slot %d"), plannedSlot);
 }
 
 void Selector::PlanHomingMove() {

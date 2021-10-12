@@ -12,7 +12,7 @@ Idler idler;
 
 void Idler::PrepareMoveToPlannedSlot() {
     mm::motion.PlanMoveTo<mm::Idler>(SlotPosition(plannedSlot), mm::unitToAxisUnit<mm::I_speed_t>(config::idlerFeedrate));
-    dbg_logic_sprintf_P(PSTR("Prepare Move Idler slot %d"), plannedSlot);
+    dbg_logic_fP(PSTR("Prepare Move Idler slot %d"), plannedSlot);
 }
 
 void Idler::PlanHomingMove() {
