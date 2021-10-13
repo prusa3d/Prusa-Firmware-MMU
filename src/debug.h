@@ -3,7 +3,7 @@
 #include "config/config.h"
 
 /// Enable DEBUG_LOGIC to compile debugging and error messages (beware of code base size ;) ) for the logic layer
-#define DEBUG_LOGIC
+//#define DEBUG_LOGIC
 
 /// Enable DEBUG_LOGIC to compile debugging and error messages (beware of code base size ;) ) for the logic layer
 //#define DEBUG_MODULES
