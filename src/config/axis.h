@@ -29,6 +29,7 @@ struct AxisConfig {
     uint8_t iHold; ///< holding current
     bool stealth; ///< Default to Stealth mode
     long double stepsPerUnit; ///< steps per unit
+    int8_t sg_thrs; /// @todo 7bit two's complement for the sg_thrs
 };
 
 /// List of available axes

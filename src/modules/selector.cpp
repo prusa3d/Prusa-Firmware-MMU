@@ -21,6 +21,10 @@ void Selector::PlanHomingMove() {
     dbg_logic_P(PSTR("Plan Homing Selector"));
 }
 
+void Selector::FinishHoming() {
+    mm::motion.SetPosition(mm::Selector, mm::unitToSteps<mm::S_pos_t>(config::selectorLimits.lenght));
+}
+
 Selector::OperationResult Selector::MoveToSlot(uint8_t slot) {
     if (state == Moving) {
         dbg_logic_P(PSTR("Moving --> Selector refused"));

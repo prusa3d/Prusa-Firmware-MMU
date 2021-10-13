@@ -2,10 +2,14 @@
 #include "tmc2130.h"
 #include "../config/config.h"
 
+#include "debug.h"
+
 namespace hal {
 namespace tmc2130 {
 
 bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, MotorMode mode) {
+    sg_filter_threshold = (1 << (8 - params.mRes)) - 1;
+
     gpio::Init(params.csPin, gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::high));
     gpio::Init(params.sgPin, gpio::GPIO_InitTypeDef(gpio::Mode::input, gpio::Pull::up));
     gpio::Init(params.stepPin, gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::low));
@@ -39,7 +43,7 @@ bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, Mot
     WriteRegister(params, Registers::TPOWERDOWN, 0);
 
     ///Stallguard parameters
-    static constexpr uint32_t tmc2130_coolConf = (((uint32_t)config::tmc2130_sg_thrs) << 16U);
+    uint32_t tmc2130_coolConf = (((uint32_t)params.sg_thrs) << 16U);
     WriteRegister(params, Registers::COOLCONF, tmc2130_coolConf);
     WriteRegister(params, Registers::TCOOLTHRS, config::tmc2130_coolStepThreshold);
 
@@ -78,13 +82,8 @@ void TMC2130::SetCurrents(const MotorParams &params, const MotorCurrents &curren
 void TMC2130::SetEnabled(const MotorParams &params, bool enabled) {
     hal::shr16::shr16.SetTMCEnabled(params.idx, enabled);
     if (this->enabled != enabled)
-        ClearStallguard(params);
+        ClearStallguard();
     this->enabled = enabled;
-}
-
-void TMC2130::ClearStallguard(const MotorParams &params) {
-    // @@TODO maximum resolution right now is x256/4 (uint8_t / 4)
-    sg_counter = 4 * (1 << (8 - params.mRes)) - 1; /// one electrical full step (4 steps when fullstepping)
 }
 
 bool TMC2130::CheckForErrors(const MotorParams &params) {
@@ -115,11 +114,11 @@ void TMC2130::WriteRegister(const MotorParams &params, Registers reg, uint32_t d
 }
 
 void TMC2130::Isr(const MotorParams &params) {
-    if (sg_counter) {
+    if (sg_filter_counter) {
         if (SampleDiag(params))
-            sg_counter--;
-        else if (sg_counter < (4 * (1 << (8 - params.mRes)) - 1))
-            sg_counter++;
+            sg_filter_counter--;
+        else if (sg_filter_counter < sg_filter_threshold)
+            sg_filter_counter++;
     }
 }
 

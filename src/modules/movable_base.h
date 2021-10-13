@@ -27,8 +27,8 @@ public:
 
     inline constexpr MovableBase()
         : state(Ready)
-        , plannedSlot(0)
-        , currentSlot(0) {}
+        , plannedSlot(-1)
+        , currentSlot(-1) {}
 
     /// virtual ~MovableBase(); intentionally disabled, see description in logic::CommandBase
 
@@ -60,6 +60,7 @@ protected:
 
     virtual void PrepareMoveToPlannedSlot() = 0;
     virtual void PlanHomingMove() = 0;
+    virtual void FinishHoming() = 0;
 
     OperationResult InitMovement(config::Axis axis);
 

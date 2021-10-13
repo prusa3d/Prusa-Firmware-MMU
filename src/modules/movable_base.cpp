@@ -8,13 +8,13 @@ namespace motion {
 
 void MovableBase::PlanHome(config::Axis axis) {
     // switch to normal mode on this axis
-    state = Homing;
     mm::motion.InitAxis(axis);
     mm::motion.SetMode(axis, mm::Normal);
     mm::motion.StallGuardReset(axis);
 
     // plan move at least as long as the axis can go from one side to the other
     PlanHomingMove(); // mm::motion.PlanMove(axis, delta, 1000);
+    state = Homing;
 }
 
 MovableBase::OperationResult MovableBase::InitMovement(config::Axis axis) {
@@ -44,6 +44,7 @@ void MovableBase::PerformHome(config::Axis axis) {
         // we have reached the end of the axis - homed ok
         mm::motion.AbortPlannedMoves(axis, true);
         mm::motion.SetMode(axis, mg::globals.MotorsStealth() ? mm::Stealth : mm::Normal);
+        FinishHoming();
         state = Ready;
     } else if (mm::motion.QueueEmpty(axis)) {
         // we ran out of planned moves but no StallGuard event has occurred - homing failed

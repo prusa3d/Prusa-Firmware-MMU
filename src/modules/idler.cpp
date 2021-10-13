@@ -21,6 +21,10 @@ void Idler::PlanHomingMove() {
     dbg_logic_P(PSTR("Plan Homing Idler"));
 }
 
+void Idler::FinishHoming() {
+    mm::motion.SetPosition(mm::Idler, 0);
+}
+
 Idler::OperationResult Idler::Disengage() {
     if (state == Moving) {
         dbg_logic_P(PSTR("Moving --> Disengage refused"));
