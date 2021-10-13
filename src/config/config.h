@@ -93,13 +93,13 @@ static constexpr U_mm fsensorToNozzleAvoidGrind = 5.0_mm;
 /// Begin: Pulley axis configuration
 static constexpr AxisConfig pulley = {
     .dirOn = false,
-    .mRes = MRes_2,
+    .mRes = MRes_8,
     .vSense = true,
     .iRun = 20, /// 348mA
     .iHold = 0, /// 17mA in SpreadCycle, freewheel in StealthChop
     .stealth = false,
-    .stepsPerUnit = (200 * 2 / 19.147274),
-    .sg_thrs = 3,
+    .stepsPerUnit = (200 * 8 / 19.147274),
+    .sg_thrs = 8,
 };
 
 /// Pulley motion limits
