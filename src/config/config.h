@@ -99,6 +99,7 @@ static constexpr AxisConfig pulley = {
     .iHold = 0, /// 17mA in SpreadCycle, freewheel in StealthChop
     .stealth = false,
     .stepsPerUnit = (200 * 2 / 19.147274),
+    .sg_thrs = 3,
 };
 
 /// Pulley motion limits
@@ -120,6 +121,7 @@ static constexpr AxisConfig selector = {
     .iHold = 5, /// 99mA
     .stealth = false,
     .stepsPerUnit = (200 * 8 / 8.),
+    .sg_thrs = 3,
 };
 
 /// Selector motion limits
@@ -168,6 +170,7 @@ static constexpr AxisConfig idler = {
     .iHold = 23, /// 398mA
     .stealth = false,
     .stepsPerUnit = (200 * 16 / 360.),
+    .sg_thrs = 8,
 };
 
 /// Idler motion limits
@@ -198,10 +201,10 @@ static constexpr U_deg_s idlerFeedrate = 200._deg_s;
 
 // TMC2130 setup
 
-static constexpr int8_t tmc2130_sg_thrs = 3; // @todo 7bit two's complement for the sg_thrs
-static_assert(tmc2130_sg_thrs >= -64 && tmc2130_sg_thrs <= 63, "tmc2130_sg_thrs out of range");
+// static constexpr int8_t tmc2130_sg_thrs = 3;
+// static_assert(tmc2130_sg_thrs >= -64 && tmc2130_sg_thrs <= 63, "tmc2130_sg_thrs out of range");
 
-static constexpr uint32_t tmc2130_coolStepThreshold = 400; ///< step-based 20bit uint
+static constexpr uint32_t tmc2130_coolStepThreshold = 5000; ///< step-based 20bit uint
 static_assert(tmc2130_coolStepThreshold <= 0xfffff, "tmc2130_coolStepThreshold out of range");
 
 static constexpr uint32_t tmc2130_PWM_AMPL = 240;

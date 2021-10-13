@@ -25,6 +25,7 @@ struct MotorParams {
     gpio::GPIO_pin stepPin; ///< step pin
     gpio::GPIO_pin sgPin; ///< stallguard pin
     config::MRes mRes; ///< microstep resolution
+    int8_t sg_thrs;
 };
 
 struct MotorCurrents {
@@ -114,10 +115,12 @@ public:
     }
 
     inline bool Stalled() const {
-        return sg_counter == 0;
+        return sg_filter_counter == 0;
     }
 
-    void ClearStallguard(const MotorParams &params);
+    inline void ClearStallguard() {
+        sg_filter_counter = sg_filter_threshold;
+    }
 
     /// Should be called periodically from main loop. Maybe not all the time. Once every 10 ms is probably enough
     bool CheckForErrors(const MotorParams &params);
@@ -149,7 +152,8 @@ private:
 
     ErrorFlags errorFlags;
     bool enabled = false;
-    uint8_t sg_counter = 0;
+    uint8_t sg_filter_threshold;
+    uint8_t sg_filter_counter = 0;
 };
 
 } // namespace tmc2130

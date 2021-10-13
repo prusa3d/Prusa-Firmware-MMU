@@ -145,6 +145,9 @@ void setup() {
 
     mu::cdc.Init();
 
+    ms::selector.Home();
+    mi::idler.Home();
+
     _delay_ms(100);
 
     /// Turn off all leds

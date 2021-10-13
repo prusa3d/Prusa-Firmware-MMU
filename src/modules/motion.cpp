@@ -43,7 +43,7 @@ bool Motion::StallGuard(Axis axis) {
 }
 
 void Motion::StallGuardReset(Axis axis) {
-    axisData[axis].drv.ClearStallguard(axisParams[axis].params);
+    axisData[axis].drv.ClearStallguard();
 }
 
 void Motion::PlanMoveTo(Axis axis, pos_t pos, steps_t feed_rate, steps_t end_rate) {

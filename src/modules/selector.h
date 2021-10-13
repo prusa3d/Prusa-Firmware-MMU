@@ -41,6 +41,7 @@ public:
 protected:
     virtual void PrepareMoveToPlannedSlot() override;
     virtual void PlanHomingMove() override;
+    virtual void FinishHoming() override;
 
 private:
 };
