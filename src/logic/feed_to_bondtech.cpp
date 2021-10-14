@@ -50,6 +50,8 @@ bool FeedToBondtech::Step() {
         if (mm::motion.QueueEmpty()) {
             mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InNozzle);
             mi::idler.Disengage();
+            // while disengaging the idler, keep on moving with the pulley to avoid grinding while the printer is trying to grab the filament itself
+            mm::motion.PlanMove<mm::Pulley>(config::fsensorToNozzleAvoidGrind, config::pulleySlowFeedrate);
             state = DisengagingIdler;
         }
         return false;
