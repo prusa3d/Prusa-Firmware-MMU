@@ -72,12 +72,18 @@ static constexpr U_mm findaTriggerDistance = 4.5_mm; /// 9.0_mm /// FINDA trigge
 static constexpr U_mm cuttingEdgeToFindaMidpoint = 22.85_mm; /// Cutting edge to Midpoint of FINDA should be 22.85_mm.
 static constexpr U_mm findaToCoupler = 12.0_mm; /// 12.0_mm /// FINDA Coupler side to coupler screw.
 static constexpr U_mm couplerToBowden = 3.5_mm; /// 3.5_mm /// FINDA Coupler screw to bowden mmu2s side (in coupling).
-static constexpr U_mm defaultBowdenLength = 427.0_mm; /// ~427.0_mm /// Default Bowden length. @TODO Should be stored in EEPROM.
+
+// @@TODO this is very tricky - the same MMU, same PTFE,
+// just another piece of PLA (probably having more resistance in the tubes)
+// and we are at least 40mm off! It looks like this really depends on the exact position
+// We'll probably need to check for stallguard while pushing the filament to avoid ginding the filament
+static constexpr U_mm defaultBowdenLength = 467.0_mm; /// ~427.0_mm /// Default Bowden length. @TODO Should be stored in EEPROM.
 static constexpr U_mm minimumBowdenLength = 341.0_mm; /// ~341.0_mm /// Minimum bowden length. @TODO Should be stored in EEPROM.
 static constexpr U_mm maximumBowdenLength = 792.0_mm; /// ~792.0_mm /// Maximum bowden length. @TODO Should be stored in EEPROM.
 static constexpr U_mm feedToFinda = cuttingEdgeToFindaMidpoint + filamentMinLoadedToMMU;
 static constexpr U_mm cutLength = 8.0_mm;
 static constexpr U_mm fsensorToNozzle = 20.0_mm; /// ~20mm from MK4's filament sensor through extruder gears into nozzle
+static constexpr U_mm fsensorToNozzleAvoidGrind = 5.0_mm;
 
 /// Begin: Pulley axis configuration
 static constexpr AxisConfig pulley = {
@@ -97,7 +103,7 @@ static constexpr PulleyLimits pulleyLimits = {
     .accel = 800.0_mm_s2,
 };
 static constexpr U_mm_s pulleyFeedrate = 40._mm_s;
-static constexpr U_mm_s pulleySlowFeedrate = 1._mm_s;
+static constexpr U_mm_s pulleySlowFeedrate = 20._mm_s;
 /// End: Pulley axis configuration
 
 /// Begin: Selector configuration
