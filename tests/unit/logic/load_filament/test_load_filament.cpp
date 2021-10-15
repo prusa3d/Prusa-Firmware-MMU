@@ -25,7 +25,7 @@ void LoadFilamentCommonSetup(uint8_t slot, logic::LoadFilament &lf) {
     ForceReinitAllAutomata();
 
     // change the startup to what we need here
-    EnsureActiveSlotIndex(slot);
+    EnsureActiveSlotIndex(slot, mg::FilamentLoadState::AtPulley);
 
     // verify startup conditions
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));

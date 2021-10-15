@@ -24,7 +24,7 @@ using Catch::Matchers::Equals;
 void CutSlot(logic::CutFilament &cf, uint8_t cutSlot) {
 
     ForceReinitAllAutomata();
-    EnsureActiveSlotIndex(0);
+    EnsureActiveSlotIndex(0, mg::FilamentLoadState::AtPulley);
 
     REQUIRE(VerifyEnvironmentState(mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), 0, false, false, ml::off, ml::off));
 

@@ -38,7 +38,7 @@ void ToolChange::Reset(uint8_t param) {
         state = ProgressCode::FeedingToFinda;
         error = ErrorCode::RUNNING;
         dbg_logic_P(PSTR("Filament is not loaded --> load"));
-        mg::globals.SetActiveSlot(plannedSlot);
+        mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::InSelector);
         feed.Reset(true);
     }
 }
@@ -52,7 +52,7 @@ bool ToolChange::StepInner() {
             // There is no way the UnloadFilament to finish in an error state
             state = ProgressCode::FeedingToFinda;
             error = ErrorCode::RUNNING;
-            mg::globals.SetActiveSlot(plannedSlot);
+            mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::AtPulley);
             feed.Reset(true);
         }
         break;

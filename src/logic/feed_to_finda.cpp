@@ -29,11 +29,12 @@ bool FeedToFinda::Step() {
             dbg_logic_fP(PSTR("Pulley start steps %u"), mm::motion.CurPosition(mm::Pulley));
             state = PushingFilament;
             mm::motion.InitAxis(mm::Pulley);
-            if (mg::globals.FilamentLoaded() == mg::FilamentLoadState::NotLoaded) { // feed slowly filament to PTFE
-                mm::motion.PlanMove<mm::Pulley>(config::filamentMinLoadedToMMU, config::pulleySlowFeedrate);
-            }
+            // @@TODO this may never happen as load filament always assumes the filament is at least at the pulley
+            //            if (mg::globals.FilamentLoaded() == mg::FilamentLoadState::NotLoaded) { // feed slowly filament to PTFE
+            //                mm::motion.PlanMove<mm::Pulley>(config::filamentMinLoadedToMMU, config::pulleySlowFeedrate);
+            //            }
             mm::motion.PlanMove<mm::Pulley>(config::feedToFinda, config::pulleyFeedrate);
-            mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InSelector);
+            mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InSelector);
             mui::userInput.Clear(); // remove all buffered events if any just before we wait for some input
         }
         return false;
@@ -41,7 +42,7 @@ bool FeedToFinda::Step() {
         if (mf::finda.Pressed() || (feedPhaseLimited && mui::userInput.AnyEvent())) { // @@TODO probably also a command from the printer
             mm::motion.AbortPlannedMoves(); // stop pushing filament
             // FINDA triggered - that means it works and detected the filament tip
-            mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InSelector);
+            mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InSelector);
             dbg_logic_P(PSTR("Feed to Finda --> Idler disengaged"));
             dbg_logic_fP(PSTR("Pulley end steps %u"), mm::motion.CurPosition(mm::Pulley));
             state = OK;

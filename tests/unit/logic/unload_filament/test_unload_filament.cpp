@@ -26,9 +26,7 @@ void RegularUnloadFromSlot04Init(uint8_t slot, logic::UnloadFilament &uf) {
     ForceReinitAllAutomata();
 
     // change the startup to what we need here
-    EnsureActiveSlotIndex(slot);
-
-    mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InNozzle);
+    EnsureActiveSlotIndex(slot, mg::FilamentLoadState::InNozzle);
 
     // set FINDA ON + debounce
     SetFINDAStateAndDebounce(true);
@@ -102,12 +100,12 @@ void FindaDidntTriggerCommonSetup(uint8_t slot, logic::UnloadFilament &uf) {
 
     // change the startup to what we need here
     // move selector to the right spot
-    EnsureActiveSlotIndex(slot);
+    EnsureActiveSlotIndex(slot, mg::FilamentLoadState::InNozzle);
 
     // set FINDA ON + debounce
     SetFINDAStateAndDebounce(true);
 
-    mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InNozzle);
+    //    mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InNozzle);
 
     // verify startup conditions
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::InNozzle, mi::Idler::IdleSlotIndex(), slot, true, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
@@ -264,4 +262,24 @@ TEST_CASE("unload_filament::finda_didnt_trigger_resolve_try_again", "[unload_fil
         FindaDidntTriggerResolveTryAgain(slot, uf);
         RegularUnloadFromSlot04(slot, uf);
     }
+}
+
+TEST_CASE("unload_filament::not_loaded", "[unload_filament]") {
+    logic::UnloadFilament uf;
+
+    // prepare startup conditions
+    ForceReinitAllAutomata();
+
+    // change the startup to what we need here
+    // move selector to the right spot
+    EnsureActiveSlotIndex(0, mg::FilamentLoadState::AtPulley);
+
+    // verify startup conditions
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), 0, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+
+    // restart the automaton
+    uf.Reset(0);
+
+    // Stage 0 - unload filament should finish immediately as there is no filament loaded
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), 0, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
 }

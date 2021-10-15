@@ -39,9 +39,7 @@ void FailingIdler(hal::tmc2130::ErrorFlags ef, ErrorCode ec) {
     ForceReinitAllAutomata();
 
     // change the startup to what we need here
-    EnsureActiveSlotIndex(0);
-
-    mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InNozzle);
+    EnsureActiveSlotIndex(0, mg::FilamentLoadState::InNozzle);
 
     // set FINDA ON + debounce
     SetFINDAStateAndDebounce(true);

@@ -21,7 +21,7 @@ void LoadFilament::Reset(uint8_t param) {
     dbg_logic_P(PSTR("Load Filament"));
     state = ProgressCode::FeedingToFinda;
     error = ErrorCode::RUNNING;
-    mg::globals.SetActiveSlot(param);
+    mg::globals.SetFilamentLoaded(param, mg::FilamentLoadState::AtPulley); // still at pulley, haven't moved yet
     feed.Reset(true);
     ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
     ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);

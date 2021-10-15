@@ -50,7 +50,7 @@ void FeedingToBondtech(logic::ToolChange &tc, uint8_t toSlot) {
 void ToolChange(logic::ToolChange tc, uint8_t fromSlot, uint8_t toSlot) {
     ForceReinitAllAutomata();
 
-    EnsureActiveSlotIndex(fromSlot);
+    EnsureActiveSlotIndex(fromSlot, mg::FilamentLoadState::InNozzle);
 
     // restart the automaton
     tc.Reset(toSlot);
@@ -63,7 +63,9 @@ void ToolChange(logic::ToolChange tc, uint8_t fromSlot, uint8_t toSlot) {
         }
         return tc.TopLevelState() == ProgressCode::UnloadingFilament; },
         200000UL));
-    REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::AtPulley);
+    CHECKED_ELSE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::AtPulley) {
+        ++toSlot;
+    }
 
     FeedingToFinda(tc, toSlot);
 
@@ -78,9 +80,7 @@ void NoToolChange(logic::ToolChange tc, uint8_t fromSlot, uint8_t toSlot) {
     ForceReinitAllAutomata();
 
     // the filament is LOADED
-    mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InNozzle);
-
-    EnsureActiveSlotIndex(fromSlot);
+    EnsureActiveSlotIndex(fromSlot, mg::FilamentLoadState::InNozzle);
 
     REQUIRE(VerifyEnvironmentState(mg::FilamentLoadState::InNozzle, mi::Idler::IdleSlotIndex(), toSlot, false, false, ml::off, ml::off));
 
@@ -95,7 +95,7 @@ void NoToolChange(logic::ToolChange tc, uint8_t fromSlot, uint8_t toSlot) {
 void JustLoadFilament(logic::ToolChange tc, uint8_t slot) {
     ForceReinitAllAutomata();
 
-    EnsureActiveSlotIndex(slot);
+    EnsureActiveSlotIndex(slot, mg::FilamentLoadState::AtPulley);
 
     // verify filament NOT loaded
     REQUIRE(VerifyEnvironmentState(mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off));
