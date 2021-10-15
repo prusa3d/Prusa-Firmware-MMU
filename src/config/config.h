@@ -24,7 +24,11 @@ static constexpr const uint16_t fsensorDebounceMs = 10;
 
 // LEDS
 /// The complete period of LED's blinking (i.e. ON and OFF together)
-static constexpr uint16_t ledBlinkPeriodMs = 1000U;
+/// Beware - in order to keep the blink periods "handle" millis overflow seamlessly
+/// keep the period a power of 2 (i.e. 256, 512, 1024).
+/// If you don't, one of the LED unit tests will fail.
+static constexpr uint16_t ledBlinkPeriodMs = 1024U;
+static_assert(ledBlinkPeriodMs == 256 || ledBlinkPeriodMs == 512 || ledBlinkPeriodMs == 1024 || ledBlinkPeriodMs == 2048, "LED blink period should be a power of 2");
 
 // FINDA setup
 static constexpr const uint16_t findaDebounceMs = 100;
