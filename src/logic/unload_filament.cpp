@@ -14,6 +14,13 @@ namespace logic {
 UnloadFilament unloadFilament;
 
 void UnloadFilament::Reset(uint8_t /*param*/) {
+
+    if (!mf::finda.Pressed() && mg::globals.FilamentLoaded() < mg::FilamentLoadState::InSelector) {
+        // it looks like we have nothing in the PTFE tube, at least FINDA doesn't sense anything
+        // so the filament has been probably already unloaded - terminate with OK or report an error?
+        return;
+    }
+
     // unloads filament from extruder - filament is above Bondtech gears
     mm::motion.InitAxis(mm::Pulley);
     state = ProgressCode::UnloadingToFinda;
@@ -59,7 +66,7 @@ bool UnloadFilament::StepInner() {
             state = ProgressCode::OK;
             error = ErrorCode::OK;
             mm::motion.Disable(mm::Pulley);
-            mg::globals.SetFilamentLoaded(mg::FilamentLoadState::AtPulley); // filament unloaded
+            mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::AtPulley); // filament unloaded
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
         }

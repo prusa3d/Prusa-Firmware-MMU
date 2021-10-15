@@ -122,7 +122,7 @@ void InvalidSlot(SM &logicSM,  uint8_t activeSlot, uint8_t invSlot){
 
     REQUIRE(VerifyEnvironmentState(mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), ms::Selector::IdleSlotIndex(), false, false, ml::off, ml::off));
 
-    EnsureActiveSlotIndex(activeSlot);
+    EnsureActiveSlotIndex(activeSlot, mg::FilamentLoadState::AtPulley);
 
     logicSM.Reset(invSlot);
     REQUIRE(VerifyState(logicSM, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), activeSlot, false, false, ml::off, ml::off, ErrorCode::INVALID_TOOL, ProgressCode::OK));

@@ -30,7 +30,7 @@ bool RetractFromFinda::Step() {
         if (mm::motion.QueueEmpty()) { // all moves have been finished
             if (!mf::finda.Pressed()) { // FINDA switched off correctly while the move was performed
                 state = OK;
-                mg::globals.SetFilamentLoaded(mg::FilamentLoadState::AtPulley);
+                mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::AtPulley);
                 dbg_logic_fP(PSTR("Pulley end steps %u"), mm::motion.CurPosition(mm::Pulley));
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
             } else { // FINDA didn't switch off

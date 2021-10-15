@@ -19,6 +19,7 @@
 namespace config {
 
 static constexpr const uint8_t toolCount = 5U; ///< Max number of extruders/tools/slots
+static_assert(toolCount < 15, "Up to 14 valid slots (+1 parking) is supported in EEPROM storage");
 
 // Printer's filament sensor setup
 static constexpr const uint16_t fsensorDebounceMs = 10;

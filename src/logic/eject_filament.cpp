@@ -66,7 +66,7 @@ bool EjectFilament::StepInner() {
     case ProgressCode::DisengagingIdler:
         if (!mi::idler.Engaged()) { // idler disengaged
             mm::motion.Disable(mm::Pulley);
-            mg::globals.SetFilamentLoaded(mg::FilamentLoadState::NotLoaded);
+            mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::NotLoaded);
             state = ProgressCode::OK;
             error = ErrorCode::OK;
         }

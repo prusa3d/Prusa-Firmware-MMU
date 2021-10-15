@@ -69,7 +69,7 @@ bool CutFilament::StepInner() {
         if (mm::motion.QueueEmpty()) { // idler and selector finished their moves
             // move selector aside - prepare the blade into active position
             state = ProgressCode::PreparingBlade;
-            mg::globals.SetFilamentLoaded(mg::FilamentLoadState::AtPulley);
+            mg::globals.SetFilamentLoaded(cutSlot, mg::FilamentLoadState::AtPulley);
             ms::selector.MoveToSlot(cutSlot + 1);
         }
     case ProgressCode::PreparingBlade:

@@ -65,8 +65,7 @@ void ForceReinitAllAutomata() {
     mm::ReinitMotion();
 
     // let's assume we have the filament NOT loaded and active slot 0
-    mg::globals.SetFilamentLoaded(mg::FilamentLoadState::AtPulley);
-    mg::globals.SetActiveSlot(0);
+    mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::AtPulley);
 }
 
 void HomeIdlerAndSelector() {
@@ -86,7 +85,7 @@ void HomeIdlerAndSelector() {
         main_loop();
 }
 
-void EnsureActiveSlotIndex(uint8_t slot) {
+void EnsureActiveSlotIndex(uint8_t slot, mg::FilamentLoadState loadState) {
     HomeIdlerAndSelector();
 
     // move selector to the right spot
@@ -94,7 +93,8 @@ void EnsureActiveSlotIndex(uint8_t slot) {
     while (ms::selector.Slot() != slot)
         main_loop();
 
-    mg::globals.SetActiveSlot(slot);
+    // mg::globals.SetActiveSlot(slot);
+    mg::globals.SetFilamentLoaded(slot, loadState);
 }
 
 void SetFINDAStateAndDebounce(bool press) {

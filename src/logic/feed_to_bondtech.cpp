@@ -35,7 +35,7 @@ bool FeedToBondtech::Step() {
         //dbg_logic_P(PSTR("Feed to Bondtech --> Pushing"));
         if (mfs::fsensor.Pressed()) {
             mm::motion.AbortPlannedMoves(); // stop pushing filament
-            mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InFSensor);
+            mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InFSensor);
             // plan a slow move to help push filament into the nozzle
             //@@TODO the speed in mm/s must correspond to printer's feeding speed!
             mm::motion.PlanMove<mm::Pulley>(config::fsensorToNozzle, config::pulleySlowFeedrate);
@@ -49,7 +49,7 @@ bool FeedToBondtech::Step() {
         return false;
     case PushingFilamentIntoNozzle:
         if (mm::motion.QueueEmpty()) {
-            mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InNozzle);
+            mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InNozzle);
             mi::idler.Disengage();
             // while disengaging the idler, keep on moving with the pulley to avoid grinding while the printer is trying to grab the filament itself
             mm::motion.PlanMove<mm::Pulley>(config::fsensorToNozzleAvoidGrind, config::pulleySlowFeedrate);

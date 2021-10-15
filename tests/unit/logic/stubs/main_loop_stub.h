@@ -1,5 +1,6 @@
 #pragma once
 #include "../../../../src/logic/command_base.h"
+#include "../../../../src/modules/globals.h"
 
 extern void main_loop();
 extern void ForceReinitAllAutomata();
@@ -21,7 +22,7 @@ bool WhileTopState(SM &sm, ProgressCode state, uint32_t maxLoops = 5000) {
         sm, [&](int) { return sm.TopLevelState() == state; }, maxLoops);
 }
 
-extern void EnsureActiveSlotIndex(uint8_t slot);
+extern void EnsureActiveSlotIndex(uint8_t slot, modules::globals::FilamentLoadState loadState);
 
 extern void SetFINDAStateAndDebounce(bool press);
 

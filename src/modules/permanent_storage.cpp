@@ -228,7 +228,7 @@ bool FilamentLoaded::get(uint8_t &filament) {
         return false;
     const uint8_t rawFilament = ee::EEPROM::ReadByte(EEOFFSET(eepromBase->eepromFilament[index]));
     filament = 0x0f & rawFilament;
-    if (filament > 4)
+    if (filament >= config::toolCount)
         return false;
     const uint8_t status = getStatus();
     if (!(status == KeyFront1

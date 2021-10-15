@@ -28,20 +28,14 @@ static_assert(
     "incorrect order of Slot Filament Load States");
 
 /// Globals keep track of global state variables in the firmware.
-/// So far only Active slot and Filament loaded variables are used.
 class Globals {
 public:
     /// Initializes the global storage hive - basically looks into EEPROM to gather information.
     void Init();
 
-    /// @returns active filament slot on the MMU unit
+    /// @returns active filament slot on the MMU unit. This value basically means there is some piece of filament blocking the selector from moving freely.
     /// Slots are numbered 0-4
     uint8_t ActiveSlot() const;
-
-    /// Sets the active slot, usually after some command/operation.
-    /// Also updates the EEPROM records accordingly
-    /// @param newActiveSlot the new slot index to set
-    void SetActiveSlot(uint8_t newActiveSlot);
 
     /// @returns true if filament is considered as loaded
     FilamentLoadState FilamentLoaded() const;
@@ -49,7 +43,7 @@ public:
     /// Sets the filament loaded flag value, usually after some command/operation.
     /// Also updates the EEPROM records accordingly
     /// @param newFilamentLoaded new state
-    void SetFilamentLoaded(FilamentLoadState newFilamentLoaded);
+    void SetFilamentLoaded(uint8_t slot, FilamentLoadState newFilamentLoaded);
 
     /// @returns the total number of MMU errors so far
     /// Errors are stored in the EEPROM
@@ -68,6 +62,11 @@ public:
     bool MotorsStealth() const { return stealthMode; }
 
 private:
+    /// Sets the active slot, usually after some command/operation.
+    /// Also updates the EEPROM records accordingly
+    /// @param newActiveSlot the new slot index to set
+    void SetActiveSlot(uint8_t newActiveSlot);
+
     uint8_t activeSlot;
     FilamentLoadState filamentLoaded;
     bool stealthMode;

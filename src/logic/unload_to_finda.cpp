@@ -35,7 +35,7 @@ bool UnloadToFinda::Step() {
     case UnloadingToFinda:
         if (mi::idler.Engaged()) {
             state = WaitingForFINDA;
-            mg::globals.SetFilamentLoaded(mg::FilamentLoadState::InSelector);
+            mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InSelector);
             mm::motion.PlanMove<mm::Pulley>(-config::defaultBowdenLength - config::feedToFinda - config::filamentMinLoadedToMMU, config::pulleyFeedrate); // @@TODO constants
         }
         return false;
