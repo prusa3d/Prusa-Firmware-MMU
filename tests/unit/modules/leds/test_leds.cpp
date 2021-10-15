@@ -2,6 +2,7 @@
 #include "leds.h"
 #include "shr16.h"
 #include "../stubs/stub_timebase.h"
+#include "../../../../src/modules/timebase.h"
 
 using Catch::Matchers::Equals;
 
@@ -116,4 +117,38 @@ TEST_CASE("leds::blink0-single", "[leds]") {
     TestBlink(index, color, shr16_register, false, ml::blink0);
 
     TestBlink(index, color, shr16_register, true, ml::blink1);
+}
+
+void TestBlinkOverflow(uint16_t period) {
+    using namespace hal::shr16;
+
+    // reset timing to a stage close to millis overflow
+    mt::ReinitTimebase(0x10000U - period / 2 + 1);
+
+    ml::LEDs leds;
+    uint8_t index = 0;
+    ml::Color color = ml::green;
+    uint16_t ms = mt::timebase.Millis();
+    bool shouldBeOn = ((ms / (period / 2)) & 0x01U) != 0;
+    uint16_t shr16_register = SHR16_LEDG0;
+
+    leds.SetMode(index, color, ml::blink0);
+    leds.Step();
+
+    REQUIRE(leds.LedOn(index, color) == shouldBeOn);
+    CHECK(shr16_v_copy == (shouldBeOn ? shr16_register : 0));
+
+    // advance timebase with overflow
+    mt::IncMillis(period / 2);
+
+    // the LED must have changed its state
+    leds.Step();
+
+    REQUIRE(leds.LedOn(index, color) != shouldBeOn);
+    CHECK(shr16_v_copy == (shouldBeOn ? 0 : shr16_register));
+}
+
+TEST_CASE("leds::blink0-overflow", "[leds]") {
+    // this is a check for a correct FW configuration
+    TestBlinkOverflow(config::ledBlinkPeriodMs);
 }
