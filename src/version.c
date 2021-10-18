@@ -1,3 +1,4 @@
+/// @file version.c
 #include "version.h"
 
 #define _STR(x) #x

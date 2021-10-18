@@ -1,3 +1,4 @@
+/// @file set_mode.cpp
 #include "set_mode.h"
 #include "../modules/globals.h"
 #include "../modules/motion.h"

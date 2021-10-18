@@ -1,3 +1,4 @@
+/// @file circular_buffer.h
 #pragma once
 #include <stddef.h>
 #include "../intlimits.h"

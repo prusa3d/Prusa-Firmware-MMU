@@ -1,3 +1,4 @@
+/// @file fsensor.h
 #pragma once
 #include <stdint.h>
 #include "debouncer.h"

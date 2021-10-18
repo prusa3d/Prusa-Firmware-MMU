@@ -1,3 +1,4 @@
+/// @file watchdog.h
 #pragma once
 #include <stdint.h>
 

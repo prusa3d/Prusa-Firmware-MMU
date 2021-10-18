@@ -1,3 +1,4 @@
+/// @file watchdog.cpp
 #include "../watchdog.h"
 #include <avr/wdt.h>
 

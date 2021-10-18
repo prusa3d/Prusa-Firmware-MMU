@@ -1,3 +1,4 @@
+/// @file fsensor.cpp
 #include "fsensor.h"
 #include "timebase.h"
 

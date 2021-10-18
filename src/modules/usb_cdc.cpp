@@ -1,3 +1,4 @@
+/// @file usb_cdc.cpp
 #include "usb_cdc.h"
 #include "../hal/cpu.h"
 #include "../hal/watchdog.h"

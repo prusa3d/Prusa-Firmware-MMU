@@ -1,3 +1,4 @@
+/// @file pulse_gen.h
 #pragma once
 #include "speed_table.h"
 #include "../hal/tmc2130.h"

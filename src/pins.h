@@ -1,3 +1,4 @@
+/// @file pins.h
 #pragma once
 #include "hal/gpio.h"
 

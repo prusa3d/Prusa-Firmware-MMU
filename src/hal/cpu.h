@@ -1,3 +1,4 @@
+/// @file cpu.h
 #pragma once
 
 namespace hal {

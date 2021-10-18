@@ -1,3 +1,4 @@
+/// @file speed_table.cpp
 #include "speed_table.h"
 
 namespace modules {

@@ -1,3 +1,4 @@
+/// @file spi.h
 #pragma once
 #include <inttypes.h>
 #include "gpio.h"

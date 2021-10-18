@@ -1,3 +1,4 @@
+/// @file debug.h
 #pragma once
 #include <stdint.h>
 #include "config/config.h"

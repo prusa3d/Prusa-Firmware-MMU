@@ -1,3 +1,4 @@
+/// @file config.h
 #pragma once
 #include <stdint.h>
 #include "axis.h"

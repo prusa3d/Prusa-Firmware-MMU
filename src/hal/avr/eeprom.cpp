@@ -1,3 +1,4 @@
+/// @file eeprom.cpp
 #include "../eeprom.h"
 #include <avr/eeprom.h>
 

@@ -1,3 +1,4 @@
+/// @file selector.cpp
 #include "selector.h"
 #include "buttons.h"
 #include "leds.h"

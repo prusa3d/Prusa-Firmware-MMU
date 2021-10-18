@@ -1,3 +1,4 @@
+/// @file version.h
 #pragma once
 
 #ifdef __cplusplus

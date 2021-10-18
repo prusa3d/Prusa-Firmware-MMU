@@ -1,3 +1,4 @@
+/// @file pulse_gen.cpp
 #include "pulse_gen.h"
 
 namespace modules {

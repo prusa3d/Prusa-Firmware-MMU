@@ -1,3 +1,4 @@
+/// @file usb_cdc.h
 #pragma once
 #include <stdint.h>
 

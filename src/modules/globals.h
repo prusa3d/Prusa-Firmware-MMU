@@ -1,3 +1,4 @@
+/// @file globals.h
 #pragma once
 #include <stdint.h>
 

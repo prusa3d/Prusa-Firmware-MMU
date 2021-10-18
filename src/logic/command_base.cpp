@@ -1,3 +1,4 @@
+/// @file command_base.cpp
 #include "command_base.h"
 #include "../modules/idler.h"
 #include "../modules/selector.h"

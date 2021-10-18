@@ -1,3 +1,4 @@
+/// @file buttons.cpp
 #include "buttons.h"
 #include "../hal/adc.h"
 #include "timebase.h"

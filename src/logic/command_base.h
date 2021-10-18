@@ -1,3 +1,4 @@
+/// @file command_base.h
 #pragma once
 #include <stdint.h>
 #include "error_codes.h"

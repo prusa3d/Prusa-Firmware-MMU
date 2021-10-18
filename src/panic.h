@@ -1,3 +1,4 @@
+/// @file panic.h
 #pragma once
 #include <stdint.h>
 #include "logic/error_codes.h"

@@ -1,3 +1,4 @@
+/// @file timers.cpp
 #include "../timers.h"
 
 namespace hal {
