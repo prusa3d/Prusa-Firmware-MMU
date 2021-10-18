@@ -1,3 +1,4 @@
+/// @file timers.h
 #pragma once
 #include <avr/io.h>
 

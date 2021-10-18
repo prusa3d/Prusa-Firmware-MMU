@@ -1,3 +1,4 @@
+/// @file permanent_storage.h
 #pragma once
 #include "../hal/eeprom.h"
 

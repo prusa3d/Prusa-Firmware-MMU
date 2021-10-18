@@ -1,3 +1,4 @@
+/// @file motion.h
 #pragma once
 #include "../pins.h"
 #include "pulse_gen.h"

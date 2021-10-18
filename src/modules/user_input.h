@@ -1,3 +1,4 @@
+/// @file user_input.h
 #pragma once
 #include <stdint.h>
 #include "../hal/circular_buffer.h"

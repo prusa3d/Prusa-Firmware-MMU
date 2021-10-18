@@ -1,3 +1,4 @@
+/// @file globals.cpp
 #include "globals.h"
 #include "permanent_storage.h"
 

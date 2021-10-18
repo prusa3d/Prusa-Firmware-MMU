@@ -1,3 +1,4 @@
+/// @file protocol.h
 #pragma once
 #include <stdint.h>
 

@@ -1,3 +1,4 @@
+/// @file permanent_storage.cpp
 #include "permanent_storage.h"
 #include "../hal/eeprom.h"
 #include "globals.h"

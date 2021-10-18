@@ -1,3 +1,4 @@
+/// @file usart.h
 #pragma once
 #include <inttypes.h>
 #include <avr/io.h>

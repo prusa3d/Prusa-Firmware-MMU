@@ -1,3 +1,4 @@
+/// @file speed_table.h
 #pragma once
 #include "../config/config.h"
 #include "../hal/progmem.h"

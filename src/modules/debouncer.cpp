@@ -1,3 +1,4 @@
+/// @file debouncer.cpp
 #include "debouncer.h"
 
 namespace modules {

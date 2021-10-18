@@ -1,3 +1,4 @@
+/// @file idler.cpp
 #include "idler.h"
 #include "buttons.h"
 #include "leds.h"

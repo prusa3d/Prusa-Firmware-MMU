@@ -1,3 +1,4 @@
+/// @file spi.cpp
 #include "../spi.h"
 
 namespace hal {

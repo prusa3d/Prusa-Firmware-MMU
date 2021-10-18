@@ -1,3 +1,4 @@
+/// @file debug.cpp
 #include "debug.h"
 
 #if defined(DEBUG_LOGIC) || defined(DEBUG_MODULES) || defined(DEBUG_HAL)

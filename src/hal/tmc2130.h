@@ -1,3 +1,4 @@
+/// @file tmc2130.h
 #pragma once
 #include "../config/config.h"
 #include "../hal/gpio.h"
