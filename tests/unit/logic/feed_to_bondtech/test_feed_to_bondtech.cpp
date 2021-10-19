@@ -54,7 +54,7 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
     // idler engaged, selector in position, we'll start pushing filament
     REQUIRE(fb.State() == FeedToBondtech::PushingFilamentToFSensor);
     // at least at the beginning the LED should shine green (it should be blinking, but this mode has been already verified in the LED's unit test)
-    REQUIRE(ml::leds.LedOn(mg::globals.ActiveSlot(), ml::green));
+    REQUIRE(ml::leds.Mode(mg::globals.ActiveSlot(), ml::green) == ml::blink0);
 
     REQUIRE(WhileCondition(
         fb,
