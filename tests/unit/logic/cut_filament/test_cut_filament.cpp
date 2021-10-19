@@ -39,7 +39,7 @@ void CutSlot(logic::CutFilament &cf, uint8_t cutSlot) {
     REQUIRE(WhileTopState(cf, ProgressCode::SelectingFilamentSlot, selectorMoveMaxSteps));
 
     // idler and selector reached their target positions and the CF automaton will start feeding to FINDA as the next step
-    REQUIRE(VerifyState(cf, mg::FilamentLoadState::AtPulley, cutSlot, cutSlot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
+    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, cutSlot, cutSlot, false, false, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
 
     // prepare for simulated finda trigger
     REQUIRE(WhileCondition(
@@ -51,7 +51,7 @@ void CutSlot(logic::CutFilament &cf, uint8_t cutSlot) {
         return cf.TopLevelState() == ProgressCode::FeedingToFinda; }, 5000));
 
     // filament fed to FINDA
-    REQUIRE(VerifyState(cf, mg::FilamentLoadState::InSelector, cutSlot, cutSlot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToPulley));
+    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::InSelector, cutSlot, cutSlot, true, true, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToPulley));
 
     // pull it back to the pulley + simulate FINDA depress
     REQUIRE(WhileCondition(
@@ -62,7 +62,7 @@ void CutSlot(logic::CutFilament &cf, uint8_t cutSlot) {
         }
         return cf.TopLevelState() == ProgressCode::UnloadingToPulley; }, 5000));
 
-    REQUIRE(VerifyState(cf, mg::FilamentLoadState::AtPulley, cutSlot, cutSlot, false, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::PreparingBlade));
+    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, cutSlot, cutSlot, false, true, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::PreparingBlade));
 
     // now move the selector aside, prepare for cutting
     REQUIRE(WhileTopState(cf, ProgressCode::PreparingBlade, 5000));
