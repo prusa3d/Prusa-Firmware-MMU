@@ -69,7 +69,9 @@ bool VerifyState2(SM &uf, mg::FilamentLoadState fls, uint8_t idlerSlotIndex, uin
     CHECKED_ELSE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(idlerSlotIndex).v) {
     return false;
     }
-    CHECKED_ELSE(mi::idler.Engaged() == (idlerSlotIndex < config::toolCount)) { return false; }
+    CHECKED_ELSE(mi::idler.Engaged() == (idlerSlotIndex < config::toolCount)) {
+    return false;
+    }
     CHECKED_ELSE(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(selectorSlotIndex).v) {
     return false;
     }
@@ -116,8 +118,9 @@ bool VerifyState2(SM &uf, mg::FilamentLoadState fls, uint8_t idlerSlotIndex, uin
 template<typename SM>
 void InvalidSlot(SM &logicSM,  uint8_t activeSlot, uint8_t invSlot){
     ForceReinitAllAutomata();
+    EnsureActiveSlotIndex(5);
 
-    REQUIRE(VerifyEnvironmentState(mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), 0, false, false, ml::off, ml::off));
+    REQUIRE(VerifyEnvironmentState(mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), ms::Selector::IdleSlotIndex(), false, false, ml::off, ml::off));
 
     EnsureActiveSlotIndex(activeSlot);
 

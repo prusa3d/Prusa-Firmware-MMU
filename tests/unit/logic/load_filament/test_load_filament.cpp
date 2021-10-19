@@ -83,7 +83,7 @@ TEST_CASE("load_filament::regular_load_to_slot_0-4", "[load_filament]") {
 void FailedLoadToFinda(uint8_t slot, logic::LoadFilament &lf) {
     // Stage 2 - feeding to finda
     // we'll assume the finda is defective here and does not trigger
-    REQUIRE(WhileTopState(lf, ProgressCode::FeedingToFinda, 5000));
+    REQUIRE(WhileTopState(lf, ProgressCode::FeedingToFinda, 50000));
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, false, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRDisengagingIdler));
 
     // Stage 3 - disengaging idler in error mode

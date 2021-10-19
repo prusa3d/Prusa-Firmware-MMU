@@ -2,7 +2,7 @@
 #include "tmc2130.h"
 #include "../config/config.h"
 
-#include "debug.h"
+#include "../debug.h"
 
 namespace hal {
 namespace tmc2130 {

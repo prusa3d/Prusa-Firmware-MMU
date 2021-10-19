@@ -24,16 +24,15 @@ using Catch::Matchers::Equals;
 void CutSlot(logic::CutFilament &cf, uint8_t cutSlot) {
 
     ForceReinitAllAutomata();
+    EnsureActiveSlotIndex(0);
 
     REQUIRE(VerifyEnvironmentState(mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), 0, false, false, ml::off, ml::off));
-
-    EnsureActiveSlotIndex(cutSlot);
 
     // restart the automaton
     cf.Reset(cutSlot);
 
     // check initial conditions
-    REQUIRE(VerifyState(cf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), cutSlot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::SelectingFilamentSlot));
+    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), 0, false, false, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::SelectingFilamentSlot));
 
     // now cycle at most some number of cycles (to be determined yet) and then verify, that the idler and selector reached their target positions
     // Beware - with the real positions of the selector, the number of steps needed to finish some states grows, so the ~40K steps here has a reason

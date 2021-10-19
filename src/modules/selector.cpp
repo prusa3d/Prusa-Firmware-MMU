@@ -21,8 +21,14 @@ void Selector::PlanHomingMove() {
     dbg_logic_P(PSTR("Plan Homing Selector"));
 }
 
-void Selector::FinishHoming() {
+void Selector::FinishHomingAndPlanMoveToParkPos() {
     mm::motion.SetPosition(mm::Selector, mm::unitToSteps<mm::S_pos_t>(config::selectorLimits.lenght));
+    plannedSlot = IdleSlotIndex();
+    InitMovement(mm::Selector);
+}
+
+void Selector::FinishMove() {
+    mm::motion.Disable(mm::Selector); // turn off selector motor's power every time
 }
 
 Selector::OperationResult Selector::MoveToSlot(uint8_t slot) {
@@ -58,8 +64,6 @@ bool Selector::Step() {
         return false;
     case Ready:
         //dbg_logic_P(PSTR("Selector Ready"));
-        currentSlot = plannedSlot;
-        mm::motion.Disable(mm::Selector); // turn off selector motor's power every time
         return true;
     case Failed:
         dbg_logic_P(PSTR("Selector Failed"));

@@ -25,6 +25,7 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
     using namespace logic;
 
     ForceReinitAllAutomata();
+    EnsureActiveSlotIndex(0);
 
     FeedToBondtech fb;
     main_loop();
