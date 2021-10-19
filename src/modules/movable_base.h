@@ -60,7 +60,8 @@ protected:
 
     virtual void PrepareMoveToPlannedSlot() = 0;
     virtual void PlanHomingMove() = 0;
-    virtual void FinishHoming() = 0;
+    virtual void FinishHomingAndPlanMoveToParkPos() = 0;
+    virtual void FinishMove() = 0;
 
     OperationResult InitMovement(config::Axis axis);
 

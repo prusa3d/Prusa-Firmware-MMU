@@ -21,8 +21,17 @@ void Idler::PlanHomingMove() {
     dbg_logic_P(PSTR("Plan Homing Idler"));
 }
 
-void Idler::FinishHoming() {
+void Idler::FinishHomingAndPlanMoveToParkPos() {
     mm::motion.SetPosition(mm::Idler, 0);
+    plannedSlot = IdleSlotIndex();
+    plannedEngage = false;
+    InitMovement(mm::Idler);
+}
+
+void Idler::FinishMove() {
+    currentlyEngaged = plannedEngage;
+    if (!Engaged()) // turn off power into the Idler motor when disengaged (no force necessary)
+        mm::motion.Disable(mm::Idler);
 }
 
 Idler::OperationResult Idler::Disengage() {
@@ -76,13 +85,6 @@ bool Idler::Step() {
         PerformHome(mm::Idler);
         return false;
     case Ready:
-        // dbg_logic_P(PSTR("Idler Ready"));
-        currentlyEngaged = plannedEngage;
-        currentSlot = plannedSlot;
-
-        if (!Engaged()) // turn off power into the Idler motor when disengaged (no force necessary)
-            mm::motion.Disable(mm::Idler);
-
         return true;
     case Failed:
         dbg_logic_P(PSTR("Idler Failed"));

@@ -127,7 +127,7 @@ void FindaDidntTriggerCommonSetup(uint8_t slot, logic::UnloadFilament &uf) {
     // run the automaton
     // Stage 1 - unloading to FINDA - do NOT let it trigger - keep it pressed, the automaton should finish all moves with the pulley
     // without reaching the FINDA and report an error
-    REQUIRE(WhileTopState(uf, ProgressCode::UnloadingToFinda, 50000));
+    REQUIRE(WhileTopState(uf, ProgressCode::UnloadingToFinda, 500000));
 
     // we still think we have filament loaded at this stage
     // idler should have been activated by the underlying automaton

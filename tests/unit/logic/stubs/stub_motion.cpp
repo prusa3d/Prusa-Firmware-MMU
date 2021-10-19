@@ -32,6 +32,10 @@ void Motion::StallGuardReset(Axis axis) {
     axes[axis].stallGuard = false;
 }
 
+void TriggerStallGuard(Axis axis) {
+    axes[axis].stallGuard = true;
+}
+
 void Motion::PlanMoveTo(Axis axis, pos_t pos, steps_t feed_rate, steps_t end_rate) {
     axes[axis].targetPos = pos;
 }
@@ -40,9 +44,9 @@ pos_t Motion::Position(Axis axis) const {
     return axes[axis].pos;
 }
 
-//void Motion::Home(Axis axis, bool direction) {
-//    axes[Pulley].homed = true;
-//}
+void Motion::SetPosition(Axis axis, pos_t x) {
+    axes[axis].pos = x;
+}
 
 void Motion::SetMode(Axis axis, hal::tmc2130::MotorMode mode) {
 }

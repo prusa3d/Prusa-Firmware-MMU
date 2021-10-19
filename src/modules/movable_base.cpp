@@ -35,6 +35,8 @@ void MovableBase::PerformMove(config::Axis axis) {
         state = Failed;
     } else if (mm::motion.QueueEmpty(axis)) {
         // move finished
+        currentSlot = plannedSlot;
+        FinishMove();
         state = Ready;
     }
 }
@@ -44,8 +46,8 @@ void MovableBase::PerformHome(config::Axis axis) {
         // we have reached the end of the axis - homed ok
         mm::motion.AbortPlannedMoves(axis, true);
         mm::motion.SetMode(axis, mg::globals.MotorsStealth() ? mm::Stealth : mm::Normal);
-        FinishHoming();
-        state = Ready;
+        FinishHomingAndPlanMoveToParkPos();
+        // state = Ready; // not yet - we have to move to our parking position after homing the axis
     } else if (mm::motion.QueueEmpty(axis)) {
         // we ran out of planned moves but no StallGuard event has occurred - homing failed
         mm::motion.SetMode(axis, mg::globals.MotorsStealth() ? mm::Stealth : mm::Normal);

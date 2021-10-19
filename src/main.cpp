@@ -145,8 +145,11 @@ void setup() {
 
     mu::cdc.Init();
 
-    ms::selector.Home();
-    mi::idler.Home();
+    if (mg::globals.FilamentLoaded() < mg::FilamentLoadState::InFSensor) {
+        // home the Selector only in case we don't have filament loaded (or at least we think we don't)
+        ms::selector.Home();
+    }
+    mi::idler.Home(); // home Idler every time
 
     _delay_ms(100);
 

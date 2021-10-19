@@ -69,7 +69,26 @@ void ForceReinitAllAutomata() {
     mg::globals.SetActiveSlot(0);
 }
 
+void HomeIdlerAndSelector() {
+    ms::selector.Home();
+    mi::idler.Home();
+
+    // do 5 steps until we trigger the simulated stallguard
+    for (uint8_t i = 0; i < 5; ++i) {
+        main_loop();
+    }
+
+    mm::TriggerStallGuard(mm::Selector);
+    mm::TriggerStallGuard(mm::Idler);
+
+    // now the Selector and Idler shall perform a move into their parking positions
+    while (ms::selector.State() != mm::MovableBase::Ready || mi::idler.State() != mm::MovableBase::Ready)
+        main_loop();
+}
+
 void EnsureActiveSlotIndex(uint8_t slot) {
+    HomeIdlerAndSelector();
+
     // move selector to the right spot
     ms::selector.MoveToSlot(slot);
     while (ms::selector.Slot() != slot)
