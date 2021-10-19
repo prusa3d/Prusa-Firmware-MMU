@@ -33,8 +33,8 @@ void CutFilament::SelectFilamentSlot() {
     state = ProgressCode::SelectingFilamentSlot;
     mi::idler.Engage(cutSlot);
     ms::selector.MoveToSlot(cutSlot);
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
+    ml::leds.SetMode(cutSlot, ml::green, ml::blink0);
+    ml::leds.SetMode(cutSlot, ml::red, ml::off);
 }
 
 bool CutFilament::StepInner() {
@@ -49,6 +49,7 @@ bool CutFilament::StepInner() {
         break;
     case ProgressCode::SelectingFilamentSlot:
         if (mi::idler.Engaged() && ms::selector.Slot() == cutSlot) { // idler and selector finished their moves
+            mg::globals.SetActiveSlot(cutSlot);
             feed.Reset(true);
             state = ProgressCode::FeedingToFinda;
         }
