@@ -23,42 +23,46 @@ void SHR16::Init() {
 }
 
 void SHR16::Write(uint16_t v) {
-    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-        using namespace hal::gpio;
-        WritePin(SHR16_LATCH, Level::low);
-        _delay_us(1);
-        for (uint16_t m = 0x8000; m; m >>= 1) {
-            WritePin(SHR16_DATA, (Level)((m & v) != 0));
-            asm("nop");
-            WritePin(SHR16_CLOCK, Level::high);
-            asm("nop");
-            WritePin(SHR16_CLOCK, Level::low);
-            asm("nop");
-        }
-        WritePin(SHR16_LATCH, Level::high);
-        shr16_v = v;
+    using namespace hal::gpio;
+    WritePin(SHR16_LATCH, Level::low);
+    _delay_us(1);
+    for (uint16_t m = 0x8000; m; m >>= 1) {
+        WritePin(SHR16_DATA, (Level)((m & v) != 0));
+        asm("nop");
+        WritePin(SHR16_CLOCK, Level::high);
+        asm("nop");
+        WritePin(SHR16_CLOCK, Level::low);
+        asm("nop");
     }
+    WritePin(SHR16_LATCH, Level::high);
+    shr16_v = v;
 }
 
 void SHR16::SetLED(uint16_t led) {
-    led = ((led & 0x00ff) << 8) | ((led & 0x0300) >> 2);
-    Write((shr16_v & ~SHR16_LED_MSK) | led);
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+        led = ((led & 0x00ff) << 8) | ((led & 0x0300) >> 2);
+        Write((shr16_v & ~SHR16_LED_MSK) | led);
+    }
 }
 
 void SHR16::SetTMCEnabled(uint8_t index, bool ena) {
-    const uint16_t mask = 1 << (2 * index + 1);
-    if (ena)
-        Write(shr16_v & ~mask);
-    else
-        Write(shr16_v | mask);
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+        const uint16_t mask = 1 << (2 * index + 1);
+        if (ena)
+            Write(shr16_v & ~mask);
+        else
+            Write(shr16_v | mask);
+    }
 }
 
 void SHR16::SetTMCDir(uint8_t index, bool dir) {
-    const uint16_t mask = 1 << (2 * index);
-    if (dir)
-        Write(shr16_v & ~mask);
-    else
-        Write(shr16_v | mask);
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+        const uint16_t mask = 1 << (2 * index);
+        if (dir)
+            Write(shr16_v & ~mask);
+        else
+            Write(shr16_v | mask);
+    }
 }
 
 } // namespace shr16
