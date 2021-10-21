@@ -118,7 +118,7 @@ bool VerifyState2(SM &uf, mg::FilamentLoadState fls, uint8_t idlerSlotIndex, uin
 template<typename SM>
 void InvalidSlot(SM &logicSM,  uint8_t activeSlot, uint8_t invSlot){
     ForceReinitAllAutomata();
-    EnsureActiveSlotIndex(5);
+    EnsureActiveSlotIndex(5, mg::FilamentLoadState::AtPulley);
 
     REQUIRE(VerifyEnvironmentState(mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), ms::Selector::IdleSlotIndex(), false, false, ml::off, ml::off));
 

@@ -23,7 +23,7 @@ namespace ha = hal::adc;
 
 TEST_CASE("unload_to_finda::regular_unload", "[unload_to_finda]") {
     ForceReinitAllAutomata();
-    EnsureActiveSlotIndex(0);
+    EnsureActiveSlotIndex(0, mg::FilamentLoadState::AtPulley);
 
     // we need finda ON
     SetFINDAStateAndDebounce(true);
@@ -63,7 +63,7 @@ TEST_CASE("unload_to_finda::regular_unload", "[unload_to_finda]") {
 
 TEST_CASE("unload_to_finda::no_sense_FINDA_upon_start", "[unload_to_finda]") {
     ForceReinitAllAutomata(); // that implies FINDA OFF which should really not happen for an unload call
-    EnsureActiveSlotIndex(0);
+    EnsureActiveSlotIndex(0, mg::FilamentLoadState::AtPulley);
 
     logic::UnloadToFinda ff;
 
@@ -77,7 +77,7 @@ TEST_CASE("unload_to_finda::no_sense_FINDA_upon_start", "[unload_to_finda]") {
 
 TEST_CASE("unload_to_finda::unload_without_FINDA_trigger", "[unload_to_finda]") {
     ForceReinitAllAutomata();
-    EnsureActiveSlotIndex(0);
+    EnsureActiveSlotIndex(0, mg::FilamentLoadState::AtPulley);
 
     // we need finda ON
     SetFINDAStateAndDebounce(true);

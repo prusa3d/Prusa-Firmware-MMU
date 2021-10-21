@@ -49,7 +49,7 @@ bool CutFilament::StepInner() {
         break;
     case ProgressCode::SelectingFilamentSlot:
         if (mi::idler.Engaged() && ms::selector.Slot() == cutSlot) { // idler and selector finished their moves
-            mg::globals.SetActiveSlot(cutSlot);
+            mg::globals.SetFilamentLoaded(cutSlot, mg::FilamentLoadState::AtPulley);
             feed.Reset(true);
             state = ProgressCode::FeedingToFinda;
         }
