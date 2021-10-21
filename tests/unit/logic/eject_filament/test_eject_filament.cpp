@@ -26,7 +26,7 @@ TEST_CASE("eject_filament::eject0", "[eject_filament][.]") {
     using namespace logic;
 
     ForceReinitAllAutomata();
-    EnsureActiveSlotIndex(0);
+    EnsureActiveSlotIndex(0, mg::FilamentLoadState::AtPulley);
 
     EjectFilament ef;
     // restart the automaton
