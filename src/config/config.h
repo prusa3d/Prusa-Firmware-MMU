@@ -132,7 +132,7 @@ static constexpr SelectorLimits selectorLimits = {
 };
 
 static constexpr U_mm SelectorSlotDistance = 14.0_mm; /// Selector distance between two slots
-//static constexpr U_mm SelectorOffsetFromMax = 1.0_mm; /// Selector offset from home max to slot 0
+static constexpr U_mm SelectorOffsetFromMax = 1.0_mm; /// Selector offset from home max to slot 0
 static constexpr U_mm SelectorOffsetFromMin = 75.5_mm; /// Selector offset from home min to slot 0
 
 /// slots 0-4 are the real ones, the 5th is the farthest parking positions
@@ -140,21 +140,21 @@ static constexpr U_mm SelectorOffsetFromMin = 75.5_mm; /// Selector offset from 
 /// selector.dirOn = false = Home at min: selector POM nut hit the selector motor
 static constexpr U_mm selectorSlotPositions[toolCount + 1] = {
 
-    ///selctor max positions
-    //    SelectorOffsetFromMax + 0 * SelectorSlotDistance, ///1.0_mm + 0 * 14.0_mm = 1.0_mm
-    //    SelectorOffsetFromMax + 1 * SelectorSlotDistance, ///1.0_mm + 1 * 14.0_mm = 15.0_mm
-    //    SelectorOffsetFromMax + 2 * SelectorSlotDistance, ///1.0_mm + 2 * 14.0_mm = 29.0_mm
-    //    SelectorOffsetFromMax + 3 * SelectorSlotDistance, ///1.0_mm + 3 * 14.0_mm = 43.0_mm
-    //    SelectorOffsetFromMax + 4 * SelectorSlotDistance, ///1.0_mm + 4 * 14.0_mm = 57.0_mm
-    //    SelectorOffsetFromMax + 5 * SelectorSlotDistance ///1.0_mm + 5 * 14.0_mm = 71.0_mm
+    ///selector max positions
+    SelectorOffsetFromMax + 0 * SelectorSlotDistance, ///1.0_mm + 0 * 14.0_mm = 1.0_mm
+    SelectorOffsetFromMax + 1 * SelectorSlotDistance, ///1.0_mm + 1 * 14.0_mm = 15.0_mm
+    SelectorOffsetFromMax + 2 * SelectorSlotDistance, ///1.0_mm + 2 * 14.0_mm = 29.0_mm
+    SelectorOffsetFromMax + 3 * SelectorSlotDistance, ///1.0_mm + 3 * 14.0_mm = 43.0_mm
+    SelectorOffsetFromMax + 4 * SelectorSlotDistance, ///1.0_mm + 4 * 14.0_mm = 57.0_mm
+    SelectorOffsetFromMax + 5 * SelectorSlotDistance ///1.0_mm + 5 * 14.0_mm = 71.0_mm
 
     ///selector min positions
-    SelectorOffsetFromMin - 1.0_mm - 0 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 0 * 14.0_mm = 74.5_mm
-    SelectorOffsetFromMin - 1.0_mm - 1 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 1 * 14.0_mm = 60.5_mm
-    SelectorOffsetFromMin - 1.0_mm - 2 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 2 * 14.0_mm = 46.5_mm
-    SelectorOffsetFromMin - 1.0_mm - 3 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 3 * 14.0_mm = 32.5_mm
-    SelectorOffsetFromMin - 1.0_mm - 4 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 4 * 14.0_mm = 18.5_mm
-    SelectorOffsetFromMin - 1.0_mm - 5 * SelectorSlotDistance ///75.5_mm - 1.0_mm - 5 * 14.0_mm = 4.5_mm
+    //    SelectorOffsetFromMin - 1.0_mm - 0 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 0 * 14.0_mm = 74.5_mm
+    //    SelectorOffsetFromMin - 1.0_mm - 1 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 1 * 14.0_mm = 60.5_mm
+    //    SelectorOffsetFromMin - 1.0_mm - 2 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 2 * 14.0_mm = 46.5_mm
+    //    SelectorOffsetFromMin - 1.0_mm - 3 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 3 * 14.0_mm = 32.5_mm
+    //    SelectorOffsetFromMin - 1.0_mm - 4 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 4 * 14.0_mm = 18.5_mm
+    //    SelectorOffsetFromMin - 1.0_mm - 5 * SelectorSlotDistance ///75.5_mm - 1.0_mm - 5 * 14.0_mm = 4.5_mm
 };
 
 static constexpr U_mm_s selectorFeedrate = 30._mm_s;
