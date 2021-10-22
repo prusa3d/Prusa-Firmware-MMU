@@ -130,6 +130,9 @@ private:
     /// [8] - green LED slot 4
     /// [9] - red LED slot 4
     LED leds[ledPairs * 2];
+
+    /// Cache for avoiding duplicit writes into the shift registers (may reduce LED flickering on some boards)
+    uint16_t cachedState = 0;
 };
 
 /// The one and only instance of FINDA in the FW
