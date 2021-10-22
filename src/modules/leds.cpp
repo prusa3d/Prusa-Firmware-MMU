@@ -49,8 +49,10 @@ void LEDs::Step() {
         result <<= 1;
         result |= leds[i].Step(oddPeriod);
     }
-
-    hal::shr16::shr16.SetLED(result);
+    if (result != cachedState) {
+        hal::shr16::shr16.SetLED(result);
+        cachedState = result;
+    }
 }
 
 } // namespace leds
