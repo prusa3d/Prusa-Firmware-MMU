@@ -28,11 +28,11 @@ void SHR16::Write(uint16_t v) {
     _delay_us(1);
     for (uint16_t m = 0x8000; m; m >>= 1) {
         WritePin(SHR16_DATA, (Level)((m & v) != 0));
-        asm("nop");
+        _delay_us(1);
         WritePin(SHR16_CLOCK, Level::high);
-        asm("nop");
+        _delay_us(1);
         WritePin(SHR16_CLOCK, Level::low);
-        asm("nop");
+        _delay_us(1);
     }
     WritePin(SHR16_LATCH, Level::high);
     shr16_v = v;
