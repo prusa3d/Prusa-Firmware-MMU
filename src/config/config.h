@@ -9,10 +9,10 @@
 /// Enable DEBUG_LOGIC to compile debugging and error messages (beware of code base size ;) ) for the logic layer
 //#define DEBUG_LOGIC
 
-/// Enable DEBUG_LOGIC to compile debugging and error messages (beware of code base size ;) ) for the logic layer
+/// Enable DEBUG_MODULES to compile debugging and error messages (beware of code base size ;) ) for the modules layer
 //#define DEBUG_MODULES
 
-/// Enable DEBUG_HAL to compile debugging and error messages (beware of code base size ;) ) for the logic layer
+/// Enable DEBUG_HAL to compile debugging and error messages (beware of code base size ;) ) for the HAL layer
 //#define DEBUG_HAL
 
 /// Wrangler for assorted compile-time configuration and constants.
@@ -53,7 +53,8 @@ static constexpr uint16_t maxStepFrequency = 40000;
 static constexpr uint16_t minStepRate = 120;
 
 /// Size for the motion planner block buffer size
-static constexpr uint8_t blockBufferSize = 2;
+/// Beware of too low setting (esp. because of Motion::PlanLongMove)
+static constexpr uint8_t blockBufferSize = 4;
 
 /// Step timer frequency divider (F = F_CPU / divider)
 static constexpr uint8_t stepTimerFrequencyDivider = 8;
@@ -83,7 +84,7 @@ static constexpr U_mm couplerToBowden = 3.5_mm; /// 3.5_mm /// FINDA Coupler scr
 // just another piece of PLA (probably having more resistance in the tubes)
 // and we are at least 40mm off! It looks like this really depends on the exact position
 // We'll probably need to check for stallguard while pushing the filament to avoid ginding the filament
-static constexpr U_mm defaultBowdenLength = 467.0_mm; /// ~427.0_mm /// Default Bowden length. @TODO Should be stored in EEPROM.
+static constexpr U_mm defaultBowdenLength = 427.0_mm; /// ~427.0_mm /// Default Bowden length. @TODO Should be stored in EEPROM. 392 a 784
 static constexpr U_mm minimumBowdenLength = 341.0_mm; /// ~341.0_mm /// Minimum bowden length. @TODO Should be stored in EEPROM.
 static constexpr U_mm maximumBowdenLength = 792.0_mm; /// ~792.0_mm /// Maximum bowden length. @TODO Should be stored in EEPROM.
 static constexpr U_mm feedToFinda = cuttingEdgeToFindaMidpoint + filamentMinLoadedToMMU;
