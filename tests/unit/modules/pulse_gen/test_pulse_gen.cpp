@@ -175,12 +175,13 @@ TEST_CASE("pulse_gen::queue_size", "[pulse_gen]") {
     // queue should start empty
     REQUIRE(pg.QueueEmpty());
 
-    // queue the first move
-    CHECK(pg.PlanMoveTo(10, 1));
-    REQUIRE(!pg.QueueEmpty());
+    for (uint8_t i = 0; i < config::blockBufferSize - 1; ++i) {
+        CHECK(pg.PlanMoveTo(10 + i, 1));
+        REQUIRE(!pg.QueueEmpty());
+    }
 
     // queue a second move to fill the queue
-    CHECK(pg.PlanMoveTo(15, 1));
+    CHECK(pg.PlanMoveTo(100, 1));
     REQUIRE(pg.Full());
 
     // further enqueuing should fail
