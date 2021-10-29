@@ -39,11 +39,11 @@ void FeedingToBondtech(logic::ToolChange &tc, uint8_t toSlot) {
     REQUIRE(WhileCondition(
         tc,
         [&](int step) -> bool {
-        if(step == 5000){ // on 5000th step make filament sensor trigger
+        if(step == 2000){ // on 5000th step make filament sensor trigger
             mfs::fsensor.ProcessMessage(true);
         }
         return tc.TopLevelState() == ProgressCode::FeedingToBondtech; },
-        200000UL));
+        20000UL));
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::InNozzle, mi::Idler::IdleSlotIndex(), toSlot, true, false, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
 }
 

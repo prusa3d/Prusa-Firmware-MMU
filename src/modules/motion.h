@@ -162,6 +162,27 @@ public:
             unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(end_rate));
     }
 
+    /// This function exists solely because of some mysterious overflow bug in planning/stepping
+    /// which occurrs when number of steps exceeds 32K. The bug doesn't even exhibit in unit tests :( .
+    /// Therefore it plans multiple segments in case the desired distance is longer than 32K steps.
+    /// So far this is only used for moving the Pulley...
+    template <Axis A, config::UnitBase B>
+    constexpr void PlanLongMove(config::Unit<long double, B, Lenght> delta,
+        config::Unit<long double, B, Speed> feed_rate, config::Unit<long double, B, Speed> end_rate = { 0 }) {
+        auto steps = unitToAxisUnit<AxisUnit<pos_t, A, Lenght>>(delta);
+        while (steps.v > 32767) {
+            PlanMove<A>(
+                { 32767 },
+                unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(feed_rate),
+                unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(feed_rate)); // keep the end feedrate the same to continue with the next segment
+            steps.v -= 32767;
+        }
+        PlanMove<A>( // last segment
+            steps,
+            unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(feed_rate),
+            unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(end_rate));
+    }
+
     /// @returns head position of an axis (last enqueued position)
     /// @param axis axis affected
     pos_t Position(Axis axis) const;
