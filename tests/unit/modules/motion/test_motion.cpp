@@ -25,10 +25,18 @@ ssize_t stepUntilDone(size_t maxSteps = 100000) {
     return -1;
 }
 
+void ResetMotionSim() {
+    stepUntilDone();
+    REQUIRE(motion.QueueEmpty());
+    motion.ResetAxesData();
+    REQUIRE(motion.Position(Idler) == 0);
+    REQUIRE(motion.Position(Selector) == 0);
+    REQUIRE(motion.Position(Pulley) == 0);
+}
+
 TEST_CASE("motion::basic", "[motion]") {
     // initial state
-    REQUIRE(motion.QueueEmpty());
-    REQUIRE(motion.Position(Idler) == 0);
+    ResetMotionSim();
 
     // enqueue a single move
     motion.PlanMoveTo(Idler, 10, 1);
@@ -74,13 +82,12 @@ TEST_CASE("motion::auto_axis_enable", "[motion]") {
 TEST_CASE("motion::unit", "[motion]") {
     // test AxisUnit conversion in the PlanMove and PlanMoveTo.
     // Use Selector explicitly, as it has an exact unit/step conversion.
-    REQUIRE(motion.QueueEmpty());
-    REQUIRE(motion.Position(Selector) == 0);
+    ResetMotionSim();
 
     // move with AxisUnit
     pos_t target = config::selector.stepsPerUnit * 10;
     motion.PlanMoveTo<Selector>(10.0_S_mm, 100.0_S_mm_s);
-    CHECK(stepUntilDone());
+    CHECK(stepUntilDone() != -1);
     REQUIRE(motion.Position(Selector) == target);
 
     // move directly with physical units
@@ -90,31 +97,31 @@ TEST_CASE("motion::unit", "[motion]") {
 
     // relative move with AxisUnit
     motion.PlanMove<Selector>(-5.0_S_mm, 100.0_S_mm_s);
-    CHECK(stepUntilDone());
+    CHECK(stepUntilDone() != -1);
     REQUIRE(motion.Position(Selector) == target / 2);
 
     // relative move with physical unit
     motion.PlanMove<Selector>(-5.0_mm, 100.0_mm_s);
-    CHECK(stepUntilDone());
+    CHECK(stepUntilDone() != -1);
     REQUIRE(motion.Position(Selector) == 0);
 
     // now test remaining axes
     target = config::pulley.stepsPerUnit * 10;
     motion.PlanMoveTo<Pulley>(10.0_P_mm, 100.0_P_mm_s);
     motion.PlanMove<Pulley>(10.0_mm, 100.0_mm_s);
-    CHECK(stepUntilDone());
+    CHECK(stepUntilDone() != -1);
     REQUIRE(abs(motion.Position(Pulley) - target * 2) <= 1);
 
     target = config::idler.stepsPerUnit * 10;
     motion.PlanMoveTo<Idler>(10.0_I_deg, 100.0_I_deg_s);
     motion.PlanMove<Idler>(10.0_deg, 100.0_deg_s);
-    CHECK(stepUntilDone());
+    CHECK(stepUntilDone() != -1);
     REQUIRE(abs(motion.Position(Idler) - target * 2) <= 1);
 }
 
 TEST_CASE("motion::dual_move_fwd", "[motion]") {
     // enqueue moves on two axes
-    REQUIRE(motion.QueueEmpty());
+    ResetMotionSim();
 
     // ensure the same jerk is set on both
     motion.SetJerk(Idler, motion.Jerk(Selector));
@@ -139,7 +146,7 @@ TEST_CASE("motion::dual_move_fwd", "[motion]") {
 
 TEST_CASE("motion::dual_move_inv", "[motion]") {
     // enqueue moves on two axes
-    REQUIRE(motion.QueueEmpty());
+    ResetMotionSim();
 
     // ensure the same jerk is set on both
     motion.SetJerk(Idler, motion.Jerk(Selector));
@@ -169,7 +176,7 @@ TEST_CASE("motion::dual_move_inv", "[motion]") {
 
 TEST_CASE("motion::dual_move_complex", "[motion]") {
     // enqueue two completely different moves on two axes
-    REQUIRE(motion.QueueEmpty());
+    ResetMotionSim();
 
     // set custom acceleration values
     motion.SetAcceleration(Idler, 10);
@@ -189,26 +196,32 @@ TEST_CASE("motion::dual_move_complex", "[motion]") {
 }
 
 TEST_CASE("motion::triple_move", "[motion]") {
+    ResetMotionSim();
+
+    constexpr pos_t i = 10;
+    constexpr pos_t s = 20;
+    constexpr pos_t p = 30;
+
     // check that we can move three axes at the same time
-    motion.PlanMoveTo(Idler, 10, 1);
-    motion.PlanMoveTo(Selector, 20, 1);
-    motion.PlanMoveTo(Pulley, 30, 1);
+    motion.PlanMoveTo(Idler, i, 1);
+    motion.PlanMoveTo(Selector, s, 1);
+    motion.PlanMoveTo(Pulley, p, 1);
 
     // perform the move with a maximum step limit
-    REQUIRE(stepUntilDone(10 + 20 + 30));
+    REQUIRE(stepUntilDone(std::max({ i, s, p }) + 1) != -1);
 
     // check queue status
     REQUIRE(motion.QueueEmpty());
 
     // check for final axis positions
-    REQUIRE(motion.Position(Idler) == 10);
-    REQUIRE(motion.Position(Selector) == 20);
-    REQUIRE(motion.Position(Pulley) == 30);
+    REQUIRE(motion.Position(Idler) == i);
+    REQUIRE(motion.Position(Selector) == s);
+    REQUIRE(motion.Position(Pulley) == p);
 }
 
 TEST_CASE("motion::queue_abort", "[motion]") {
     // queue should start empty
-    REQUIRE(motion.QueueEmpty());
+    ResetMotionSim();
 
     // enqueue two moves
     motion.PlanMoveTo(Pulley, 10, 1);
@@ -230,7 +243,7 @@ TEST_CASE("motion::queue_abort", "[motion]") {
 
 TEST_CASE("motion::queue_abort_1", "[motion]") {
     // queue should start empty
-    REQUIRE(motion.QueueEmpty());
+    ResetMotionSim();
 
     // enqueue two moves
     motion.PlanMoveTo(Pulley, 10, 1);
@@ -248,4 +261,12 @@ TEST_CASE("motion::queue_abort_1", "[motion]") {
     REQUIRE(motion.QueueEmpty(Pulley));
     REQUIRE(!motion.QueueEmpty(Idler));
     REQUIRE(!motion.QueueEmpty());
+}
+
+TEST_CASE("motion::long_pulley_move", "[motion]") {
+    ResetMotionSim();
+    constexpr auto mm400 = 400._mm;
+    constexpr pos_t p = unitToSteps<P_pos_t>(mm400);
+    motion.PlanMoveTo<Pulley>(mm400, 1._mm_s);
+    REQUIRE(stepUntilDone() == p);
 }
