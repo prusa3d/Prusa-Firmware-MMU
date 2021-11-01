@@ -9,7 +9,9 @@ namespace globals {
 Globals globals;
 
 void Globals::Init() {
-    mps::FilamentLoaded::get(activeSlot); //@@TODO check for errors
+    if (!mps::FilamentLoaded::get(activeSlot)) {
+        activeSlot = config::toolCount;
+    }
 
     if (activeSlot < config::toolCount) {
         // some valid slot has been recorded in EEPROM - we have some filament loaded in the selector or even in the nozzle

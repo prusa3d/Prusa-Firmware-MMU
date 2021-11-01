@@ -1,6 +1,7 @@
 #include "catch2/catch.hpp"
 
 #include "../../../../src/hal/eeprom.h"
+#include "stub_eeprom.h"
 
 #include <array>
 #include <stddef.h>
@@ -13,6 +14,10 @@ EEPROM eeprom;
 
 constexpr uint16_t eepromSize = 2048U;
 static std::array<uint8_t, eepromSize> EE;
+
+void ClearEEPROM() {
+    std::fill(EE.begin(), EE.end(), 0xff);
+}
 
 /// EEPROM interface
 void EEPROM::WriteByte(EEPROM::addr_t offset, uint8_t value) {
