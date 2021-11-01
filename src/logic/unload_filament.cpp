@@ -43,6 +43,11 @@ bool UnloadFilament::StepInner() {
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0);
                 mi::idler.Disengage();
+            } else if (mfs::fsensor.Pressed()) {
+                // fsensor still pressed - that smells bad - a piece of filament may still be present in the heatsink
+                // and that would cause serious problems while loading another filament
+                state = ProgressCode::ERRDisengagingIdler;
+                error = ErrorCode::FSENSOR_DIDNT_SWITCH_OFF;
             } else {
                 state = ProgressCode::RetractingFromFinda;
                 retract.Reset();
