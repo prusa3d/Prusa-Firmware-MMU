@@ -74,7 +74,7 @@ bool Selector::Step() {
 }
 
 void Selector::Init() {
-    if (mg::globals.FilamentLoaded() < mg::FilamentLoadState::InFSensor) {
+    if (mg::globals.FilamentLoaded() < mg::FilamentLoadState::InSelector) {
         // home the Selector only in case we don't have filament loaded (or at least we think we don't)
         Home();
     } else {
