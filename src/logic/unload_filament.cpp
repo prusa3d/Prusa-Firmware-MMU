@@ -1,6 +1,7 @@
 /// @file unload_filament.cpp
 #include "unload_filament.h"
 #include "../modules/finda.h"
+#include "../modules/fsensor.h"
 #include "../modules/globals.h"
 #include "../modules/idler.h"
 #include "../modules/leds.h"
@@ -83,13 +84,25 @@ bool UnloadFilament::StepInner() {
             mi::idler.Engage(mg::globals.ActiveSlot());
             break;
         case mui::Event::Middle: // try again the whole sequence
-            Reset(0); //@@TODO validate the reset parameter
+            Reset(0);
             break;
         case mui::Event::Right: // problem resolved - the user pulled the fillament by hand
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
-            //                mm::motion.PlanMove(mm::Pulley, 450, 5000); // @@TODO constants
-            state = ProgressCode::AvoidingGrind;
+            // we should check the state of all the sensors and either report another error or confirm the correct state
+            if (mfs::fsensor.Pressed()) {
+                // printer's filament sensor is still pressed - that smells bad
+                error = ErrorCode::FSENSOR_DIDNT_SWITCH_OFF;
+                state = ProgressCode::ERRWaitingForUser; // stand still
+            } else if (mf::finda.Pressed()) {
+                // FINDA is still pressed - that smells bad
+                error = ErrorCode::FINDA_DIDNT_SWITCH_OFF;
+                state = ProgressCode::ERRWaitingForUser; // stand still
+            } else {
+                // all sensors are ok
+                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
+                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
+                state = ProgressCode::OK;
+                error = ErrorCode::OK;
+            }
             break;
         default:
             break;
@@ -99,7 +112,7 @@ bool UnloadFilament::StepInner() {
     case ProgressCode::ERREngagingIdler:
         if (mi::idler.Engaged()) {
             state = ProgressCode::ERRHelpingFilament;
-            mm::motion.PlanMove(mm::Pulley, 450, 5000);
+            mm::motion.PlanMove<mm::Pulley>(-config::pulleyHelperMove, config::pulleySlowFeedrate);
         }
         return false;
     case ProgressCode::ERRHelpingFilament:

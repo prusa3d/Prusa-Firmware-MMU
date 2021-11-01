@@ -1,6 +1,7 @@
 /// @file load_filament.cpp
 #include "load_filament.h"
 #include "../modules/finda.h"
+#include "../modules/fsensor.h"
 #include "../modules/globals.h"
 #include "../modules/idler.h"
 #include "../modules/leds.h"
@@ -83,10 +84,22 @@ bool LoadFilament::StepInner() {
             Reset(mg::globals.ActiveSlot());
             break;
         case mui::Event::Right: // problem resolved - the user pushed the fillament by hand?
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
-            //                mm::motion.PlanMove(mm::Pulley, 450, 5000); // @@TODO constants
-            state = ProgressCode::AvoidingGrind;
+            // we should check the state of all the sensors and either report another error or confirm the correct state
+            if (!mf::finda.Pressed()) {
+                // FINDA is still NOT pressed - that smells bad
+                error = ErrorCode::FINDA_DIDNT_SWITCH_ON;
+                state = ProgressCode::ERRWaitingForUser; // stand still
+            } else if (!mfs::fsensor.Pressed()) {
+                // printer's filament sensor is still NOT pressed - that smells bad
+                error = ErrorCode::FSENSOR_DIDNT_SWITCH_ON;
+                state = ProgressCode::ERRWaitingForUser; // stand still
+            } else {
+                // all sensors are ok
+                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
+                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
+                state = ProgressCode::OK;
+                error = ErrorCode::OK;
+            }
             break;
         default: // no event, continue waiting for user input
             break;
@@ -96,7 +109,7 @@ bool LoadFilament::StepInner() {
     case ProgressCode::ERREngagingIdler:
         if (mi::idler.Engaged()) {
             state = ProgressCode::ERRHelpingFilament;
-            mm::motion.PlanMove(mm::Pulley, 450, 5000); //@@TODO constants
+            mm::motion.PlanMove<mm::Pulley>(config::pulleyHelperMove, config::pulleySlowFeedrate);
         }
         return false;
     case ProgressCode::ERRHelpingFilament:
@@ -116,122 +129,5 @@ bool LoadFilament::StepInner() {
     }
     return false;
 }
-
-//! @brief Load filament through bowden
-//! @param disengageIdler
-//!  * true Disengage idler after movement
-//!  * false Do not disengage idler after movement
-//void load_filament_withSensor(bool disengageIdler)
-//{
-//    FilamentLoaded::set(active_extruder);
-//    motion_engage_idler();
-
-//    tmc2130_init_axis(AX_PUL, tmc2130_mode);
-
-//    set_pulley_dir_push();
-
-//    int _loadSteps = 0;
-//    int _endstop_hit = 0;
-
-//    // load filament until FINDA senses end of the filament, means correctly loaded into the selector
-//    // we can expect something like 570 steps to get in sensor
-//    do{
-//        do_pulley_step();
-//        _loadSteps++;
-//        delayMicroseconds(5500);
-//    } while (digitalRead(A1) == 0 && _loadSteps < 1500);
-
-//    // filament did not arrive at FINDA, let's try to correct that
-//    if (digitalRead(A1) == 0){
-//        for (int i = 6; i > 0; i--){
-//            if (digitalRead(A1) == 0){
-//                // attempt to correct
-//                set_pulley_dir_pull();
-//                for (int i = 200; i >= 0; i--){
-//                    do_pulley_step();
-//                    delayMicroseconds(1500);
-//                }
-
-//                set_pulley_dir_push();
-//                _loadSteps = 0;
-//                do{
-//                    do_pulley_step();
-//                    _loadSteps++;
-//                    delayMicroseconds(4000);
-//                    if (digitalRead(A1) == 1) _endstop_hit++;
-//                } while (_endstop_hit<100 && _loadSteps < 500);
-//            }
-//        }
-//    }
-
-//    // still not at FINDA, error on loading, let's wait for user input
-//    if (digitalRead(A1) == 0){
-//        bool _continue = false;
-//        bool _isOk = false;
-//        motion_disengage_idler();
-//        do{
-//            if (!_isOk){
-//                signal_load_failure();
-//            }else{
-//                signal_ok_after_load_failure();
-//            }
-
-//            switch (buttonPressed()){
-//                case Btn::left:
-//                    // just move filament little bit
-//                    motion_engage_idler();
-//                    set_pulley_dir_push();
-
-//                    for (int i = 0; i < 200; i++)
-//                    {
-//                        do_pulley_step();
-//                        delayMicroseconds(5500);
-//                    }
-//                    motion_disengage_idler();
-//                    break;
-//                case Btn::middle:
-//                    // check if everything is ok
-//                    motion_engage_idler();
-//                    _isOk = checkOk();
-//                    motion_disengage_idler();
-//                    break;
-//                case Btn::right:
-//                    // continue with loading
-//                    motion_engage_idler();
-//                    _isOk = checkOk();
-//                    motion_disengage_idler();
-
-//                    if (_isOk) //pridat do podminky flag ze od tiskarny prislo continue
-//                    {
-//                        _continue = true;
-//                    }
-//                    break;
-//                default:
-//                    break;
-//            }
-
-//        } while ( !_continue );
-
-//        motion_engage_idler();
-//        set_pulley_dir_push();
-//        _loadSteps = 0;
-//        do
-//        {
-//            do_pulley_step();
-//            _loadSteps++;
-//            delayMicroseconds(5500);
-//        } while (digitalRead(A1) == 0 && _loadSteps < 1500);
-//        // ?
-//    }
-//    else
-//    {
-//        // nothing
-//    }
-
-//    motion_feed_to_bondtech();
-
-//    tmc2130_disable_axis(AX_PUL, tmc2130_mode);
-//    if (disengageIdler) motion_disengage_idler();
-//    isFilamentLoaded = true;  // filament loaded
 
 } // namespace logic
