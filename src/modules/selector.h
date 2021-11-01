@@ -38,6 +38,12 @@ public:
     /// @returns the index of idle position of the selector, usually 5 in case of 0-4 valid indices of filament slots
     inline static constexpr uint8_t IdleSlotIndex() { return config::toolCount; }
 
+    /// Initializes the selector after restart/cold boot
+    /// Reads the active slot from the EEPROM and decides if the selector is free or blocked by a piece of filament
+    /// - free -> home the selector
+    /// - blocked -> set selector's position according to the active filament slot
+    void Init();
+
 protected:
     virtual void PrepareMoveToPlannedSlot() override;
     virtual void PlanHomingMove() override;

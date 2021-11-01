@@ -5,6 +5,7 @@
 #include "motion.h"
 #include "permanent_storage.h"
 #include "../debug.h"
+#include "globals.h"
 
 namespace modules {
 namespace selector {
@@ -69,6 +70,16 @@ bool Selector::Step() {
         dbg_logic_P(PSTR("Selector Failed"));
     default:
         return true;
+    }
+}
+
+void Selector::Init() {
+    if (mg::globals.FilamentLoaded() < mg::FilamentLoadState::InFSensor) {
+        // home the Selector only in case we don't have filament loaded (or at least we think we don't)
+        Home();
+    } else {
+        // otherwise set selector's position according to know slot positions (and pretend it is correct)
+        mm::motion.SetPosition(mm::Selector, SlotPosition(mg::globals.ActiveSlot()).v);
     }
 }
 

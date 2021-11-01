@@ -3,6 +3,22 @@ bool VerifyEnvironmentState(mg::FilamentLoadState fls, uint8_t idlerSlotIndex, u
     CHECKED_ELSE(mg::globals.FilamentLoaded() & fls) { // beware - abusing the values as bit masks to detect multiple situations at once
     return false;
     }
+    if( mg::globals.FilamentLoaded() >= mg::FilamentLoadState::InSelector ){
+        // check eeprom content - filament blocking the selector
+        uint8_t eeSlot = 0xff;
+        CHECKED_ELSE(mps::FilamentLoaded::get(eeSlot)){
+        return false;
+        }
+        CHECKED_ELSE(eeSlot == selectorSlotIndex){
+        return false;
+        }
+    } else {
+        // check eeprom content - filament blocking the selector
+        uint8_t eeSlot = 0xff;
+        CHECKED_ELSE(mps::FilamentLoaded::get(eeSlot) == false){
+        return false;
+        }
+    }
     CHECKED_ELSE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(idlerSlotIndex).v) {
     return false;
     }

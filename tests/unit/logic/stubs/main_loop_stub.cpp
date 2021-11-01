@@ -1,6 +1,7 @@
 #include "main_loop_stub.h"
 
 #include "../../modules/stubs/stub_adc.h"
+#include "../../modules/stubs/stub_eeprom.h"
 #include "../../modules/stubs/stub_timebase.h"
 
 #include "../../../../src/modules/buttons.h"
@@ -51,6 +52,8 @@ void ForceReinitAllAutomata() {
     new (&mi::idler) mi::Idler();
     new (&ms::selector) ms::Selector();
     new (&mm::motion) mm::Motion();
+
+    hal::eeprom::ClearEEPROM();
 
     // no buttons involved ;)
     hal::adc::ReinitADC(config::buttonsADCIndex, hal::adc::TADCData({ 1023 }), 1);

@@ -50,49 +50,6 @@ logic::CommandBase *currentCommand = &logic::noCommand;
 /// will look like "X0 F" until a command (T, L, U ...) has been issued.
 mp::RequestMsg currentCommandRq(mp::RequestMsgCodes::Reset, 0);
 
-// examples and test code shall be located here
-void TmpPlayground() {
-    using namespace hal;
-
-    // SPI example
-    //    gpio::Init(gpio::GPIO_pin(GPIOC, 6), gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::high));
-    //    uint8_t dat[5];
-    //    gpio::WritePin(gpio::GPIO_pin(GPIOC, 6), gpio::Level::low);
-    //    spi::TxRx(SPI0, 0x01);
-    //    spi::TxRx(SPI0, 0x00);
-    //    spi::TxRx(SPI0, 0x00);
-    //    spi::TxRx(SPI0, 0x00);
-    //    spi::TxRx(SPI0, 0x00);
-    //    gpio::WritePin(gpio::GPIO_pin(GPIOC, 6), gpio::Level::high);
-    //    gpio::WritePin(gpio::GPIO_pin(GPIOC, 6), gpio::Level::low);
-    //    dat[0] = spi::TxRx(SPI0, 0x00);
-    //    dat[1] = spi::TxRx(SPI0, 0x00);
-    //    dat[2] = spi::TxRx(SPI0, 0x00);
-    //    dat[3] = spi::TxRx(SPI0, 0x00);
-    //    dat[4] = spi::TxRx(SPI0, 0x00);
-    //    gpio::WritePin(gpio::GPIO_pin(GPIOC, 6), gpio::Level::high);
-    //    (void)dat;
-
-    //    using namespace hal::gpio;
-    //    WritePin(GPIO_pin(GPIOB, 5), Level::low);
-    //    TogglePin(GPIO_pin(GPIOB, 6));
-    //    if (hal::gpio::ReadPin(GPIO_pin(GPIOB, 7)) == hal::gpio::Level::low)
-    //        break;
-
-    sei();
-    hu::usart1.puts("1234567890\n");
-    hu::usart1.puts("1234567890\n");
-    hu::usart1.puts("1234567890\n");
-    hu::usart1.puts("1234567890\n");
-    hu::usart1.puts("1234567890\n");
-    hu::usart1.puts("1234567890\n");
-    hu::usart1.puts("1234567890\n");
-    hu::usart1.puts("1234567890\n");
-    hu::usart1.puts("1234567890\n");
-    hu::usart1.puts("1234567890\n");
-    hu::usart1.puts("1234567890\n");
-}
-
 /// One-time setup of HW and SW components
 /// Called before entering the loop() function
 /// Green LEDs signalize the progress of initialization. If anything goes wrong we shall turn on a red LED
@@ -145,10 +102,7 @@ void setup() {
 
     mu::cdc.Init();
 
-    if (mg::globals.FilamentLoaded() < mg::FilamentLoadState::InFSensor) {
-        // home the Selector only in case we don't have filament loaded (or at least we think we don't)
-        ms::selector.Home();
-    }
+    ms::selector.Init(); // selector decides if homing is possible
     mi::idler.Home(); // home Idler every time
 
     _delay_ms(100);
