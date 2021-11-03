@@ -170,12 +170,22 @@ public:
     constexpr void PlanLongMove(config::Unit<long double, B, Lenght> delta,
         config::Unit<long double, B, Speed> feed_rate, config::Unit<long double, B, Speed> end_rate = { 0 }) {
         auto steps = unitToAxisUnit<AxisUnit<pos_t, A, Lenght>>(delta);
-        while (steps.v > 32767) {
-            PlanMove<A>(
-                { 32767 },
-                unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(feed_rate),
-                unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(feed_rate)); // keep the end feedrate the same to continue with the next segment
-            steps.v -= 32767;
+        if (steps.v < 0) {
+            while (steps.v > 32767) {
+                PlanMove<A>(
+                    { 32767 },
+                    unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(feed_rate),
+                    unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(feed_rate)); // keep the end feedrate the same to continue with the next segment
+                steps.v -= 32767;
+            }
+        } else {
+            while (steps.v < -32767) {
+                PlanMove<A>(
+                    { -32767 },
+                    unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(feed_rate),
+                    unitToAxisUnit<AxisUnit<steps_t, A, Speed>>(feed_rate)); // keep the end feedrate the same to continue with the next segment
+                steps.v += 32767;
+            }
         }
         PlanMove<A>( // last segment
             steps,
