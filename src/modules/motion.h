@@ -170,7 +170,7 @@ public:
     constexpr void PlanLongMove(config::Unit<long double, B, Lenght> delta,
         config::Unit<long double, B, Speed> feed_rate, config::Unit<long double, B, Speed> end_rate = { 0 }) {
         auto steps = unitToAxisUnit<AxisUnit<pos_t, A, Lenght>>(delta);
-        if (steps.v < 0) {
+        if (steps.v >= 0) {
             while (steps.v > 32767) {
                 PlanMove<A>(
                     { 32767 },
