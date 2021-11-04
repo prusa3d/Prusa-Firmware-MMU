@@ -154,7 +154,8 @@ void PulseGen::AbortPlannedMoves(bool halt) {
     if (current_block) {
         last_rate = acc_step_rate;
         current_block = nullptr;
-        block_index.pop();
+        while (!block_index.empty()) // drop all remaining blocks
+            block_index.pop();
     }
 
     // truncate the last rate if halting
