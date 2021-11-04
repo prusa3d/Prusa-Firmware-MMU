@@ -126,7 +126,7 @@ void FailedLoadToFindaResolveHelpFindaTriggered(uint8_t slot, logic::LoadFilamen
         return lf.TopLevelState() == ProgressCode::ERRHelpingFilament; },
         5000));
 
-    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::FeedingToBondtech));
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
 }
 
 void FailedLoadToFindaResolveHelpFindaDidntTrigger(uint8_t slot, logic::LoadFilament &lf) {
