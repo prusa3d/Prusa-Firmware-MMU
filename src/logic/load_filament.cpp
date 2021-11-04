@@ -1,7 +1,6 @@
 /// @file load_filament.cpp
 #include "load_filament.h"
 #include "../modules/finda.h"
-#include "../modules/fsensor.h"
 #include "../modules/globals.h"
 #include "../modules/idler.h"
 #include "../modules/leds.h"
@@ -89,10 +88,6 @@ bool LoadFilament::StepInner() {
                 // FINDA is still NOT pressed - that smells bad
                 error = ErrorCode::FINDA_DIDNT_SWITCH_ON;
                 state = ProgressCode::ERRWaitingForUser; // stand still
-            } else if (!mfs::fsensor.Pressed()) {
-                // printer's filament sensor is still NOT pressed - that smells bad
-                error = ErrorCode::FSENSOR_DIDNT_SWITCH_ON;
-                state = ProgressCode::ERRWaitingForUser; // stand still
             } else {
                 // all sensors are ok
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
@@ -115,7 +110,10 @@ bool LoadFilament::StepInner() {
     case ProgressCode::ERRHelpingFilament:
         if (mf::finda.Pressed()) {
             // the help was enough to press the FINDA, we are ok, continue normally
-            state = ProgressCode::FeedingToBondtech;
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
+            state = ProgressCode::RetractingFromFinda;
+            retract.Reset();
             error = ErrorCode::RUNNING;
         } else if (mm::motion.QueueEmpty()) {
             // helped a bit, but FINDA didn't trigger, return to the main error state
