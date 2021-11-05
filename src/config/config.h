@@ -53,7 +53,6 @@ static constexpr uint16_t maxStepFrequency = 40000;
 static constexpr uint16_t minStepRate = 120;
 
 /// Size for the motion planner block buffer size
-/// Beware of too low setting (esp. because of Motion::PlanLongMove)
 static constexpr uint8_t blockBufferSize = 4;
 
 /// Step timer frequency divider (F = F_CPU / divider)

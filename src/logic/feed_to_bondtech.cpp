@@ -27,7 +27,7 @@ bool FeedToBondtech::Step() {
             dbg_logic_fP(PSTR("Pulley start steps %u"), mm::motion.CurPosition(mm::Pulley));
             state = PushingFilamentToFSensor;
             mm::motion.InitAxis(mm::Pulley);
-            mm::motion.PlanLongMove<mm::Pulley>(config::defaultBowdenLength, config::pulleyFeedrate, config::pulleySlowFeedrate);
+            mm::motion.PlanMove<mm::Pulley>(config::defaultBowdenLength, config::pulleyFeedrate, config::pulleySlowFeedrate);
         }
         return false;
     case PushingFilamentToFSensor:
