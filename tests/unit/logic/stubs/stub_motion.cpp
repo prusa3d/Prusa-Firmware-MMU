@@ -38,6 +38,8 @@ void TriggerStallGuard(Axis axis) {
 
 void Motion::PlanMoveTo(Axis axis, pos_t pos, steps_t feed_rate, steps_t end_rate) {
     axes[axis].targetPos = pos;
+    if (!axisData[axis].enabled)
+        SetEnabled(axis, true);
 }
 
 pos_t Motion::Position(Axis axis) const {

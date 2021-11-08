@@ -31,6 +31,15 @@ void UnloadFilament::Reset(uint8_t /*param*/) {
     ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
 }
 
+void logic::UnloadFilament::FinishedCorrectly() {
+    state = ProgressCode::OK;
+    error = ErrorCode::OK;
+    mm::motion.Disable(mm::Pulley);
+    mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::AtPulley); // filament unloaded
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
+}
+
 bool UnloadFilament::StepInner() {
     switch (state) {
     // state 1 engage idler - will be done by the Unload to FINDA state machine
@@ -61,12 +70,7 @@ bool UnloadFilament::StepInner() {
         return false;
     case ProgressCode::DisengagingIdler:
         if (!mi::idler.Engaged()) {
-            state = ProgressCode::OK;
-            error = ErrorCode::OK;
-            mm::motion.Disable(mm::Pulley);
-            mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::AtPulley); // filament unloaded
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
+            FinishedCorrectly();
         }
         return false;
     case ProgressCode::ERRDisengagingIdler: // couldn't unload to FINDA
@@ -80,7 +84,12 @@ bool UnloadFilament::StepInner() {
             GoToErrEngagingIdler();
             break;
         case mui::Event::Middle: // try again the whole sequence
-            Reset(0);
+            if (mf::finda.Pressed()) {
+                Reset(0);
+            } else {
+                state = ProgressCode::DisengagingIdler;
+                mi::idler.Disengage();
+            }
             break;
         case mui::Event::Right: // problem resolved - the user pulled the fillament by hand
             // we should check the state of all the sensors and either report another error or confirm the correct state
@@ -94,10 +103,7 @@ bool UnloadFilament::StepInner() {
                 state = ProgressCode::ERRWaitingForUser; // stand still
             } else {
                 // all sensors are ok
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
-                state = ProgressCode::OK;
-                error = ErrorCode::OK;
+                FinishedCorrectly();
             }
             break;
         default:

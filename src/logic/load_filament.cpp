@@ -39,6 +39,14 @@ void logic::LoadFilament::GoToRetractingFromFinda() {
     retract.Reset();
 }
 
+void logic::LoadFilament::FinishedCorrectly() {
+    state = ProgressCode::OK;
+    error = ErrorCode::OK;
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
+    mm::motion.Disable(mm::Pulley);
+}
+
 bool LoadFilament::StepInner() {
     switch (state) {
     case ProgressCode::FeedingToFinda:
@@ -64,11 +72,7 @@ bool LoadFilament::StepInner() {
         break;
     case ProgressCode::DisengagingIdler:
         if (!mi::idler.Engaged()) {
-            state = ProgressCode::OK;
-            error = ErrorCode::OK;
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
-            mm::motion.Disable(mm::Pulley);
+            FinishedCorrectly();
         }
         break;
     case ProgressCode::OK:
