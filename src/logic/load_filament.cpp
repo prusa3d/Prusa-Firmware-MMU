@@ -19,12 +19,24 @@ void LoadFilament::Reset(uint8_t param) {
         return;
     }
     dbg_logic_P(PSTR("Load Filament"));
+    mg::globals.SetFilamentLoaded(param, mg::FilamentLoadState::AtPulley); // still at pulley, haven't moved yet
+    Reset2();
+}
+
+void logic::LoadFilament::Reset2() {
     state = ProgressCode::FeedingToFinda;
     error = ErrorCode::RUNNING;
-    mg::globals.SetFilamentLoaded(param, mg::FilamentLoadState::AtPulley); // still at pulley, haven't moved yet
     feed.Reset(true);
     ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
     ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
+}
+
+void logic::LoadFilament::GoToRetractingFromFinda() {
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
+    state = ProgressCode::RetractingFromFinda;
+    error = ErrorCode::RUNNING;
+    retract.Reset();
 }
 
 bool LoadFilament::StepInner() {
@@ -80,7 +92,12 @@ bool LoadFilament::StepInner() {
             mi::idler.Engage(mg::globals.ActiveSlot());
             break;
         case mui::Event::Middle: // try again the whole sequence
-            Reset(mg::globals.ActiveSlot());
+            // however it depends on the state of FINDA - if it is on, we must perform unload first
+            if (!mf::finda.Pressed()) {
+                Reset2();
+            } else {
+                GoToRetractingFromFinda();
+            }
             break;
         case mui::Event::Right: // problem resolved - the user pushed the fillament by hand?
             // we should check the state of all the sensors and either report another error or confirm the correct state
@@ -89,11 +106,8 @@ bool LoadFilament::StepInner() {
                 error = ErrorCode::FINDA_DIDNT_SWITCH_ON;
                 state = ProgressCode::ERRWaitingForUser; // stand still
             } else {
-                // all sensors are ok
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
-                state = ProgressCode::OK;
-                error = ErrorCode::OK;
+                // all sensors are ok - pull the filament back
+                GoToRetractingFromFinda();
             }
             break;
         default: // no event, continue waiting for user input
@@ -110,11 +124,7 @@ bool LoadFilament::StepInner() {
     case ProgressCode::ERRHelpingFilament:
         if (mf::finda.Pressed()) {
             // the help was enough to press the FINDA, we are ok, continue normally
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
-            state = ProgressCode::RetractingFromFinda;
-            retract.Reset();
-            error = ErrorCode::RUNNING;
+            GoToRetractingFromFinda();
         } else if (mm::motion.QueueEmpty()) {
             // helped a bit, but FINDA didn't trigger, return to the main error state
             state = ProgressCode::ERRDisengagingIdler;

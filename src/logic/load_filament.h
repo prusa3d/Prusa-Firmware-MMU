@@ -21,6 +21,9 @@ public:
     bool StepInner() override;
 
 private:
+    void GoToRetractingFromFinda();
+    void Reset2();
+
     FeedToFinda feed;
     RetractFromFinda retract;
 };
