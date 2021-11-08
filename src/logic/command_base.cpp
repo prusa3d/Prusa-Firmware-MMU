@@ -1,5 +1,6 @@
 /// @file command_base.cpp
 #include "command_base.h"
+#include "../modules/globals.h"
 #include "../modules/idler.h"
 #include "../modules/selector.h"
 #include "../modules/motion.h"
@@ -103,6 +104,19 @@ void CommandBase::ErrDisengagingIdler() {
         state = ProgressCode::ERRWaitingForUser;
         mui::userInput.Clear(); // remove all buffered events if any just before we wait for some input
     }
+}
+
+void CommandBase::GoToErrDisengagingIdler(ErrorCode ec) {
+    state = ProgressCode::ERRDisengagingIdler;
+    error = ec;
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0);
+    mi::idler.Disengage();
+}
+
+void CommandBase::GoToErrEngagingIdler() {
+    state = ProgressCode::ERREngagingIdler;
+    mi::idler.Engage(mg::globals.ActiveSlot());
 }
 
 } // namespace logic

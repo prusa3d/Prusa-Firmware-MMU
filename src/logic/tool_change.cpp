@@ -60,11 +60,7 @@ bool ToolChange::StepInner() {
     case ProgressCode::FeedingToFinda:
         if (feed.Step()) {
             if (feed.State() == FeedToFinda::Failed) {
-                state = ProgressCode::ERRDisengagingIdler;
-                error = ErrorCode::FINDA_DIDNT_SWITCH_ON;
-                mi::idler.Disengage();
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0); // signal loading error
+                GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_ON); // signal loading error
             } else {
                 state = ProgressCode::FeedingToBondtech;
                 james.Reset(3);
@@ -74,11 +70,7 @@ bool ToolChange::StepInner() {
     case ProgressCode::FeedingToBondtech:
         if (james.Step()) {
             if (james.State() == FeedToBondtech::Failed) {
-                state = ProgressCode::ERRDisengagingIdler;
-                error = ErrorCode::FSENSOR_DIDNT_SWITCH_ON;
-                mi::idler.Disengage();
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0); // signal loading error
+                GoToErrDisengagingIdler(ErrorCode::FSENSOR_DIDNT_SWITCH_ON); // signal loading error
             } else {
                 state = ProgressCode::OK;
                 error = ErrorCode::OK;
@@ -97,8 +89,7 @@ bool ToolChange::StepInner() {
         mui::Event ev = mui::userInput.ConsumeEvent();
         switch (ev) {
         case mui::Event::Left: // try to manually load just a tiny bit - help the filament with the pulley
-            state = ProgressCode::ERREngagingIdler;
-            mi::idler.Engage(mg::globals.ActiveSlot());
+            GoToErrEngagingIdler();
             break;
         case mui::Event::Middle: // try again the whole sequence
             Reset(mg::globals.ActiveSlot());
@@ -146,7 +137,7 @@ bool ToolChange::StepInner() {
             error = ErrorCode::RUNNING;
         } else if (mm::motion.QueueEmpty()) {
             // helped a bit, but FINDA/Fsensor didn't trigger, return to the main error state
-            state = ProgressCode::ERRDisengagingIdler;
+            GoToErrDisengagingIdler(ErrorCode::FSENSOR_DIDNT_SWITCH_ON);
         }
         return false;
     default: // we got into an unhandled state, better report it

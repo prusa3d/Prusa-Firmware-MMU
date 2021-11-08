@@ -38,16 +38,11 @@ bool UnloadFilament::StepInner() {
         if (unl.Step()) {
             if (unl.State() == UnloadToFinda::Failed) {
                 // couldn't unload to FINDA, report error and wait for user to resolve it
-                state = ProgressCode::ERRDisengagingIdler;
-                error = ErrorCode::FINDA_DIDNT_SWITCH_OFF;
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0);
-                mi::idler.Disengage();
+                GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_OFF);
             } else if (mfs::fsensor.Pressed()) {
                 // fsensor still pressed - that smells bad - a piece of filament may still be present in the heatsink
                 // and that would cause serious problems while loading another filament
-                state = ProgressCode::ERRDisengagingIdler;
-                error = ErrorCode::FSENSOR_DIDNT_SWITCH_OFF;
+                GoToErrDisengagingIdler(ErrorCode::FSENSOR_DIDNT_SWITCH_OFF);
             } else {
                 state = ProgressCode::RetractingFromFinda;
                 retract.Reset();
@@ -57,14 +52,11 @@ bool UnloadFilament::StepInner() {
     case ProgressCode::RetractingFromFinda:
         if (retract.Step()) {
             if (retract.State() == RetractFromFinda::Failed) {
-                state = ProgressCode::ERRDisengagingIdler;
-                error = ErrorCode::FINDA_DIDNT_SWITCH_OFF;
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0); // signal loading error
+                GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_OFF); // signal unloading error
             } else {
                 state = ProgressCode::DisengagingIdler;
+                mi::idler.Disengage();
             }
-            mi::idler.Disengage();
         }
         return false;
     case ProgressCode::DisengagingIdler:
@@ -85,8 +77,7 @@ bool UnloadFilament::StepInner() {
         mui::Event ev = mui::userInput.ConsumeEvent();
         switch (ev) {
         case mui::Event::Left: // try to manually unload just a tiny bit - help the filament with the pulley
-            state = ProgressCode::ERREngagingIdler;
-            mi::idler.Engage(mg::globals.ActiveSlot());
+            GoToErrEngagingIdler();
             break;
         case mui::Event::Middle: // try again the whole sequence
             Reset(0);
@@ -127,7 +118,7 @@ bool UnloadFilament::StepInner() {
             error = ErrorCode::RUNNING;
         } else if (mm::motion.QueueEmpty()) {
             // helped a bit, but FINDA didn't trigger, return to the main error state
-            state = ProgressCode::ERRDisengagingIdler;
+            GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_OFF);
         }
         return false;
     case ProgressCode::OK:

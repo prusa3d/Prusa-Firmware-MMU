@@ -45,11 +45,7 @@ bool LoadFilament::StepInner() {
         if (feed.Step()) {
             if (feed.State() == FeedToFinda::Failed) {
                 // @@TODO - try to repeat 6x - push/pull sequence - probably something to put into feed_to_finda as an option
-                state = ProgressCode::ERRDisengagingIdler;
-                error = ErrorCode::FINDA_DIDNT_SWITCH_ON;
-                mi::idler.Disengage();
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0); // signal loading error
+                GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_ON); // signal loading error
             } else {
                 state = ProgressCode::RetractingFromFinda;
                 retract.Reset();
@@ -59,14 +55,11 @@ bool LoadFilament::StepInner() {
     case ProgressCode::RetractingFromFinda:
         if (retract.Step()) {
             if (retract.State() == RetractFromFinda::Failed) {
-                state = ProgressCode::ERRDisengagingIdler;
-                error = ErrorCode::FINDA_DIDNT_SWITCH_OFF;
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0); // signal loading error
+                GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_OFF); // signal loading error
             } else {
                 state = ProgressCode::DisengagingIdler;
+                mi::idler.Disengage();
             }
-            mi::idler.Disengage(); // disengage in both cases
         }
         break;
     case ProgressCode::DisengagingIdler:
@@ -88,8 +81,7 @@ bool LoadFilament::StepInner() {
         mui::Event ev = mui::userInput.ConsumeEvent();
         switch (ev) {
         case mui::Event::Left: // try to manually load just a tiny bit - help the filament with the pulley
-            state = ProgressCode::ERREngagingIdler;
-            mi::idler.Engage(mg::globals.ActiveSlot());
+            GoToErrEngagingIdler();
             break;
         case mui::Event::Middle: // try again the whole sequence
             // however it depends on the state of FINDA - if it is on, we must perform unload first
@@ -127,7 +119,7 @@ bool LoadFilament::StepInner() {
             GoToRetractingFromFinda();
         } else if (mm::motion.QueueEmpty()) {
             // helped a bit, but FINDA didn't trigger, return to the main error state
-            state = ProgressCode::ERRDisengagingIdler;
+            GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_ON);
         }
         return false;
     default: // we got into an unhandled state, better report it
