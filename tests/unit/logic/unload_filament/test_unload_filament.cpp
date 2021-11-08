@@ -156,12 +156,8 @@ void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
 
     // In this case we check the first option
 
-    // Perform press on button 1 + debounce
-    hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCLimits[0][0] + 1);
-    while (!mb::buttons.ButtonPressed(0)) {
-        main_loop();
-        uf.StepInner();
-    }
+    // Perform press on button 0 + debounce
+    PressButtonAndDebounce(uf, mb::Left);
 
     // we still think we have filament loaded at this stage
     // idler should have been disengaged
@@ -239,13 +235,7 @@ void FindaDidntTriggerResolveTryAgain(uint8_t slot, logic::UnloadFilament &uf) {
     // - resolve the problem by hand - after pressing the button we shall check, that FINDA is off and we should do what?
 
     // In this case we check the second option
-
-    // Perform press on button 2 + debounce
-    hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCLimits[1][0] + 1);
-    while (!mb::buttons.ButtonPressed(1)) {
-        main_loop();
-        uf.StepInner();
-    }
+    PressButtonAndDebounce(uf, mb::Middle);
 
     // we still think we have filament loaded at this stage
     // idler should have been disengaged

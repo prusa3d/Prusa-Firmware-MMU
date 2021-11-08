@@ -99,13 +99,7 @@ void FailedLoadToFindaResolveHelp(uint8_t slot, logic::LoadFilament &lf) {
     // - resolve the problem by hand - after pressing the button we shall check, that FINDA is off and we should do what?
 
     // In this case we check the first option
-
-    // Perform press on button 0 + debounce
-    hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCLimits[0][0] + 1);
-    while (!mb::buttons.ButtonPressed(0)) {
-        main_loop();
-        lf.Step();
-    }
+    PressButtonAndDebounce(lf, mb::Left);
 
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERREngagingIdler));
 
@@ -140,12 +134,9 @@ void FailedLoadToFindaResolveManual(uint8_t slot, logic::LoadFilament &lf) {
     // simulate the user fixed the issue himself
 
     // Perform press on button 2 + debounce + switch on FINDA
-    hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCLimits[2][0] + 1);
     hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
-    while (!mb::buttons.ButtonPressed(2)) {
-        main_loop();
-        lf.Step();
-    }
+    PressButtonAndDebounce(lf, mb::Right);
+
     // pulling filament back
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
 
@@ -168,22 +159,14 @@ void FailedLoadToFindaResolveManual(uint8_t slot, logic::LoadFilament &lf) {
 
 void FailedLoadToFindaResolveManualNoFINDA(uint8_t slot, logic::LoadFilament &lf) {
     // Perform press on button 2 + debounce + keep FINDA OFF (i.e. the user didn't solve anything)
-    hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCLimits[2][0] + 1);
-    while (!mb::buttons.ButtonPressed(2)) {
-        main_loop();
-        lf.Step();
-    }
+    PressButtonAndDebounce(lf, mb::Right);
+
     // pulling filament back
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));
 }
 
 void FailedLoadToFindaResolveTryAgain(uint8_t slot, logic::LoadFilament &lf) {
-    // Perform press on button 1 + debounce
-    hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCLimits[1][0] + 1);
-    while (!mb::buttons.ButtonPressed(1)) {
-        main_loop();
-        lf.Step();
-    }
+    PressButtonAndDebounce(lf, mb::Middle);
 
     // the state machine should have restarted
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));

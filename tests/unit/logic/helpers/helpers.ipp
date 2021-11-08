@@ -143,3 +143,12 @@ void InvalidSlot(SM &logicSM,  uint8_t activeSlot, uint8_t invSlot){
     logicSM.Reset(invSlot);
     REQUIRE(VerifyState(logicSM, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), activeSlot, false, false, ml::off, ml::off, ErrorCode::INVALID_TOOL, ProgressCode::OK));
 }
+
+template <typename SM>
+void PressButtonAndDebounce(SM &sm, uint8_t btnIndex){
+    hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCLimits[btnIndex][0] + 1);
+    while (!mb::buttons.ButtonPressed(btnIndex)) {
+        main_loop();
+        sm.StepInner();
+    }
+}
