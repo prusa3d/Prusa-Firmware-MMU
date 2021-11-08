@@ -24,6 +24,9 @@ private:
     void GoToRetractingFromFinda();
     void Reset2();
 
+    /// Common code for a correct completion of UnloadFilament
+    void FinishedCorrectly();
+
     FeedToFinda feed;
     RetractFromFinda retract;
 };

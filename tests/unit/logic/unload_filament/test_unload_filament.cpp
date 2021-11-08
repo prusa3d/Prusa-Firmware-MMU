@@ -143,7 +143,7 @@ void FindaDidntTriggerCommonSetup(uint8_t slot, logic::UnloadFilament &uf) {
     // FINDA still on
     // red LED should blink
     // green LED should be off
-    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRWaitingForUser));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRWaitingForUser));
 }
 
 void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
@@ -164,7 +164,7 @@ void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA still on
     // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERREngagingIdler));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERREngagingIdler));
 
     // Stage 4 - engage the idler
     REQUIRE(WhileTopState(uf, ProgressCode::ERREngagingIdler, idlerEngageDisengageMaxSteps));
@@ -272,4 +272,58 @@ TEST_CASE("unload_filament::not_loaded", "[unload_filament]") {
 
     // Stage 0 - unload filament should finish immediately as there is no filament loaded
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), 0, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+}
+
+void FailedUnloadResolveManual(uint8_t slot, logic::UnloadFilament &uf) {
+    // simulate the user fixed the issue himself
+
+    // Perform press on button 2 + debounce + switch off FINDA
+    hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
+    PressButtonAndDebounce(uf, mb::Right);
+
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+}
+
+void FailedUnloadResolveManualFINDAon(uint8_t slot, logic::UnloadFilament &uf) {
+    // simulate the user fixed the issue himself
+
+    // Perform press on button 2 + debounce + keep FINDA on
+    PressButtonAndDebounce(uf, mb::Right);
+
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRWaitingForUser));
+}
+
+void FailedUnloadResolveManualFSensorOn(uint8_t slot, logic::UnloadFilament &uf) {
+    // simulate the user fixed the issue himself
+
+    // Perform press on button 2 + debounce + keep FSensor on
+    mfs::fsensor.ProcessMessage(true);
+    hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
+    PressButtonAndDebounce(uf, mb::Right);
+
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::blink0, ErrorCode::FSENSOR_DIDNT_SWITCH_OFF, ProgressCode::ERRWaitingForUser));
+}
+
+TEST_CASE("unload_filament::failed_unload_to_finda_0-4_resolve_manual", "[unload_filament]") {
+    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
+        logic::UnloadFilament uf;
+        FindaDidntTriggerCommonSetup(slot, uf);
+        FailedUnloadResolveManual(slot, uf);
+    }
+}
+
+TEST_CASE("unload_filament::failed_unload_to_finda_0-4_resolve_manual_FINDA_on", "[unload_filament]") {
+    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
+        logic::UnloadFilament uf;
+        FindaDidntTriggerCommonSetup(slot, uf);
+        FailedUnloadResolveManualFINDAon(slot, uf);
+    }
+}
+
+TEST_CASE("unload_filament::failed_unload_to_finda_0-4_resolve_manual_FSensor_on", "[unload_filament]") {
+    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
+        logic::UnloadFilament uf;
+        FindaDidntTriggerCommonSetup(slot, uf);
+        FailedUnloadResolveManualFSensorOn(slot, uf);
+    }
 }
