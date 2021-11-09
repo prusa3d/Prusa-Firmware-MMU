@@ -117,6 +117,7 @@ void CommandBase::GoToErrDisengagingIdler(ErrorCode ec) {
 
 void CommandBase::GoToErrEngagingIdler() {
     state = ProgressCode::ERREngagingIdler;
+    error = ErrorCode::RUNNING;
     mi::idler.Engage(mg::globals.ActiveSlot());
 }
 

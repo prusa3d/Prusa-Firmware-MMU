@@ -26,6 +26,11 @@ public:
     ErrorCode Error() const override;
 
 private:
+    void GoToFeedingToBondtech();
+
+    /// Common code for a correct completion of UnloadFilament
+    void FinishedCorrectly();
+
     UnloadFilament unl; ///< a high-level command/operation may be used as a building block of other operations as well
     FeedToFinda feed;
     FeedToBondtech james; // bond ;)

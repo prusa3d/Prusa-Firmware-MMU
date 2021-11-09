@@ -36,6 +36,11 @@ struct FeedToBondtech {
     /// @returns Failed if the maximum feed length has been reached without the the printer's fsensor trigger being reported
     inline uint8_t State() const { return state; }
 
+    /// Transition to PushingFilamentIntoNozzle.
+    /// Allows jumping into the state machine from outside just to push filament slowly into the nozzle
+    /// (this principle uses tool change)
+    void GoToPushToNozzle();
+
 private:
     uint8_t state;
     uint8_t maxRetries;
