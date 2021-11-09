@@ -21,13 +21,15 @@ using Catch::Matchers::Equals;
 
 #include "../helpers/helpers.ipp"
 
-void FeedingToFinda(logic::ToolChange &tc, uint8_t toSlot) {
+void FeedingToFinda(logic::ToolChange &tc, uint8_t toSlot, uint32_t triggerAt = 1000) {
     // feeding to finda
     REQUIRE(WhileCondition(
         tc,
         [&](int step) -> bool {
-        if(step == 1000){ // on 1000th step make FINDA trigger
+        if(step == triggerAt){ // on specified stepNr make FINDA trigger
             hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
+        } else if(step >= triggerAt + config::findaDebounceMs + 1){
+            REQUIRE(mf::finda.Pressed() == true);
         }
         return tc.TopLevelState() == ProgressCode::FeedingToFinda; },
         200000UL));
@@ -47,7 +49,13 @@ void FeedingToBondtech(logic::ToolChange &tc, uint8_t toSlot) {
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::InNozzle, mi::Idler::IdleSlotIndex(), toSlot, true, false, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
 }
 
-void ToolChange(logic::ToolChange tc, uint8_t fromSlot, uint8_t toSlot) {
+void CheckFinishedCorrectly(logic::ToolChange &tc, uint8_t toSlot) {
+    REQUIRE(tc.TopLevelState() == ProgressCode::OK);
+    REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::InNozzle);
+    REQUIRE(mg::globals.ActiveSlot() == toSlot);
+}
+
+void ToolChange(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
     ForceReinitAllAutomata();
 
     EnsureActiveSlotIndex(fromSlot, mg::FilamentLoadState::InNozzle);
@@ -63,20 +71,23 @@ void ToolChange(logic::ToolChange tc, uint8_t fromSlot, uint8_t toSlot) {
         }
         return tc.TopLevelState() == ProgressCode::UnloadingFilament; },
         200000UL));
-    CHECKED_ELSE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::AtPulley) {
-        ++toSlot;
-    }
+
+    auto gf = ml::leds.Mode(fromSlot, ml::green);
+    auto gt = ml::leds.Mode(toSlot, ml::green);
+    auto rf = ml::leds.Mode(fromSlot, ml::red);
+    auto rt = ml::leds.Mode(toSlot, ml::red);
+
+    //    REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::AtPulley);
+    REQUIRE(VerifyState2(tc, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), fromSlot, false, false, toSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
 
     FeedingToFinda(tc, toSlot);
 
     FeedingToBondtech(tc, toSlot);
 
-    REQUIRE(tc.TopLevelState() == ProgressCode::OK);
-    REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::InNozzle);
-    REQUIRE(mg::globals.ActiveSlot() == toSlot);
+    CheckFinishedCorrectly(tc, toSlot);
 }
 
-void NoToolChange(logic::ToolChange tc, uint8_t fromSlot, uint8_t toSlot) {
+void NoToolChange(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
     ForceReinitAllAutomata();
 
     // the filament is LOADED
@@ -92,7 +103,7 @@ void NoToolChange(logic::ToolChange tc, uint8_t fromSlot, uint8_t toSlot) {
     REQUIRE(tc.Error() == ErrorCode::OK);
 }
 
-void JustLoadFilament(logic::ToolChange tc, uint8_t slot) {
+void JustLoadFilament(logic::ToolChange &tc, uint8_t slot) {
     ForceReinitAllAutomata();
 
     EnsureActiveSlotIndex(slot, mg::FilamentLoadState::AtPulley);
@@ -107,9 +118,7 @@ void JustLoadFilament(logic::ToolChange tc, uint8_t slot) {
 
     FeedingToBondtech(tc, slot);
 
-    REQUIRE(tc.TopLevelState() == ProgressCode::OK);
-    REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::InNozzle);
-    REQUIRE(mg::globals.ActiveSlot() == slot);
+    CheckFinishedCorrectly(tc, slot);
 }
 
 TEST_CASE("tool_change::test0", "[tool_change]") {
@@ -152,5 +161,118 @@ TEST_CASE("tool_change::same_slot_just_unloaded_filament", "[tool_change]") {
     for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
         logic::ToolChange tc;
         JustLoadFilament(tc, toSlot);
+    }
+}
+
+void ToolChangeFailLoadToFinda(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
+    ForceReinitAllAutomata();
+
+    EnsureActiveSlotIndex(fromSlot, mg::FilamentLoadState::InNozzle);
+
+    // restart the automaton
+    tc.Reset(toSlot);
+
+    REQUIRE(WhileCondition(
+        tc,
+        [&](int step) -> bool {
+        if(step == 2000){ // on 2000th step make FINDA trigger
+            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
+        }
+        return tc.TopLevelState() == ProgressCode::UnloadingFilament; },
+        200000UL));
+
+    REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::AtPulley);
+
+    // feeding to finda, but fails - do not trigger FINDA
+    REQUIRE(WhileTopState(tc, ProgressCode::FeedingToFinda, 50000UL));
+
+    // should end up in error disengage idler
+    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRDisengagingIdler));
+    REQUIRE(WhileTopState(tc, ProgressCode::ERRDisengagingIdler, 5000));
+}
+
+void ToolChangeFailLoadToFindaButton0(logic::ToolChange &tc, uint8_t toSlot) {
+    // now waiting for user input
+    PressButtonAndDebounce(tc, 0);
+
+    REQUIRE(WhileTopState(tc, ProgressCode::ERREngagingIdler, 5000UL));
+
+    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRHelpingFilament));
+
+    // try push more, if FINDA triggers, continue loading
+    REQUIRE(WhileCondition(
+        tc,
+        [&](int step) -> bool {
+        if(step == 20){ // on 20th step make FINDA trigger
+            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
+        }
+        return tc.TopLevelState() == ProgressCode::ERRHelpingFilament; },
+        2000UL));
+
+    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToBondtech));
+
+    FeedingToBondtech(tc, toSlot);
+
+    CheckFinishedCorrectly(tc, toSlot);
+}
+
+void ToolChangeFailLoadToFindaButton1(logic::ToolChange &tc, uint8_t toSlot) {
+    // now waiting for user input
+    PressButtonAndDebounce(tc, 1);
+
+    REQUIRE(WhileCondition(
+        tc,
+        [&](int step) -> bool {
+        if(step == 2000){ // on 2000th step make FINDA trigger
+            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
+        }
+        return tc.TopLevelState() == ProgressCode::UnloadingFilament; },
+        200000UL));
+    REQUIRE(VerifyState(tc, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), toSlot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
+
+    // retry the whole operation
+    // beware - the FeedToFinda state machine will leverage the already engaged Idler,
+    // so the necessary number of steps to reach the FINDA is quite low (~200 was lowest once tested)
+    // without running short of max distance of Pulley to travel
+    FeedingToFinda(tc, toSlot, 200);
+
+    FeedingToBondtech(tc, toSlot);
+
+    CheckFinishedCorrectly(tc, toSlot);
+}
+
+void ToolChangeFailLoadToFindaButton2(logic::ToolChange &tc, uint8_t toSlot) {
+    // now waiting for user input
+    PressButtonAndDebounce(tc, 2);
+
+    // the user resolved the situation by hand
+    FeedingToFinda(tc, toSlot);
+
+    FeedingToBondtech(tc, toSlot);
+
+    CheckFinishedCorrectly(tc, toSlot);
+}
+
+TEST_CASE("tool_change::load_fail_FINDA_resolve_btn0", "[tool_change]") {
+    logic::ToolChange tc;
+    for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
+        for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
+            if (fromSlot != toSlot) {
+                ToolChangeFailLoadToFinda(tc, fromSlot, toSlot);
+                ToolChangeFailLoadToFindaButton0(tc, toSlot);
+            }
+        }
+    }
+}
+
+TEST_CASE("tool_change::load_fail_FINDA_resolve_btn1", "[tool_change]") {
+    logic::ToolChange tc;
+    for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
+        for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
+            if (fromSlot != toSlot) {
+                ToolChangeFailLoadToFinda(tc, fromSlot, toSlot);
+                ToolChangeFailLoadToFindaButton1(tc, toSlot);
+            }
+        }
     }
 }

@@ -19,6 +19,14 @@ void FeedToBondtech::Reset(uint8_t maxRetries) {
     mi::idler.Engage(mg::globals.ActiveSlot());
 }
 
+void logic::FeedToBondtech::GoToPushToNozzle() {
+    mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InFSensor);
+    // plan a slow move to help push filament into the nozzle
+    //@@TODO the speed in mm/s must correspond to printer's feeding speed!
+    mm::motion.PlanMove<mm::Pulley>(config::fsensorToNozzle, config::pulleySlowFeedrate);
+    state = PushingFilamentIntoNozzle;
+}
+
 bool FeedToBondtech::Step() {
     switch (state) {
     case EngagingIdler:
@@ -34,11 +42,7 @@ bool FeedToBondtech::Step() {
         //dbg_logic_P(PSTR("Feed to Bondtech --> Pushing"));
         if (mfs::fsensor.Pressed()) {
             mm::motion.AbortPlannedMoves(); // stop pushing filament
-            mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InFSensor);
-            // plan a slow move to help push filament into the nozzle
-            //@@TODO the speed in mm/s must correspond to printer's feeding speed!
-            mm::motion.PlanMove<mm::Pulley>(config::fsensorToNozzle, config::pulleySlowFeedrate);
-            state = PushingFilamentIntoNozzle;
+            GoToPushToNozzle();
         } else if (mm::motion.StallGuard(mm::Pulley)) {
             // stall guard occurred during movement - the filament got stuck
             state = Failed; // @@TODO may be even report why it failed

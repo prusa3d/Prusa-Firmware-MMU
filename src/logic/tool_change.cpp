@@ -44,6 +44,21 @@ void ToolChange::Reset(uint8_t param) {
     }
 }
 
+void logic::ToolChange::GoToFeedingToBondtech() {
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
+    james.Reset(3);
+    state = ProgressCode::FeedingToBondtech;
+    error = ErrorCode::RUNNING;
+}
+
+void logic::ToolChange::FinishedCorrectly() {
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
+    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
+    state = ProgressCode::OK;
+    error = ErrorCode::OK;
+}
+
 bool ToolChange::StepInner() {
     switch (state) {
     case ProgressCode::UnloadingFilament:
@@ -62,8 +77,7 @@ bool ToolChange::StepInner() {
             if (feed.State() == FeedToFinda::Failed) {
                 GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_ON); // signal loading error
             } else {
-                state = ProgressCode::FeedingToBondtech;
-                james.Reset(3);
+                GoToFeedingToBondtech();
             }
         }
         break;
@@ -72,15 +86,13 @@ bool ToolChange::StepInner() {
             if (james.State() == FeedToBondtech::Failed) {
                 GoToErrDisengagingIdler(ErrorCode::FSENSOR_DIDNT_SWITCH_ON); // signal loading error
             } else {
-                state = ProgressCode::OK;
-                error = ErrorCode::OK;
+                FinishedCorrectly();
             }
         }
         break;
     case ProgressCode::OK:
         return true;
 
-    // @@TODO error handling definitely needs unifying with the LoadFilament state machine
     case ProgressCode::ERRDisengagingIdler:
         ErrDisengagingIdler();
         return false;
@@ -106,10 +118,7 @@ bool ToolChange::StepInner() {
                 state = ProgressCode::ERRWaitingForUser; // stand still
             } else {
                 // all sensors are ok
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
-                state = ProgressCode::OK;
-                error = ErrorCode::OK;
+                FinishedCorrectly();
             }
             break;
         default: // no event, continue waiting for user input
@@ -127,14 +136,13 @@ bool ToolChange::StepInner() {
         // @@TODO helping filament needs improvement - the filament should try to move forward as long as the button is pressed
         if (mf::finda.Pressed()) {
             // the help was enough to press the FINDA, we are ok, continue normally
-            state = ProgressCode::FeedingToBondtech;
-            error = ErrorCode::RUNNING;
+            GoToFeedingToBondtech();
         } else if (mfs::fsensor.Pressed()) {
             // the help was enough to press the filament sensor, we are ok, continue normally
-            // This is not correct @@TODO - when the fsensor triggers, we still need to push the filament into the nozzle/gears
+            GoToFeedingToBondtech();
+            // Beware, when the fsensor triggers, we still need to push the filament into the nozzle/gears
             // which requires restarting James from its last stage
-            state = ProgressCode::FeedingToBondtech;
-            error = ErrorCode::RUNNING;
+            james.GoToPushToNozzle();
         } else if (mm::motion.QueueEmpty()) {
             // helped a bit, but FINDA/Fsensor didn't trigger, return to the main error state
             GoToErrDisengagingIdler(ErrorCode::FSENSOR_DIDNT_SWITCH_ON);

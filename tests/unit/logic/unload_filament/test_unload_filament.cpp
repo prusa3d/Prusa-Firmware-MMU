@@ -164,7 +164,7 @@ void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA still on
     // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERREngagingIdler));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, false, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERREngagingIdler));
 
     // Stage 4 - engage the idler
     REQUIRE(WhileTopState(uf, ProgressCode::ERREngagingIdler, idlerEngageDisengageMaxSteps));
@@ -174,7 +174,7 @@ void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA still on
     // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRHelpingFilament));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRHelpingFilament));
 }
 
 void FindaDidntTriggerResolveHelpFindaTriggered(uint8_t slot, logic::UnloadFilament &uf) {
