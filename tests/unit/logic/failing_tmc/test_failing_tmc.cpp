@@ -54,10 +54,10 @@ void FailingIdler(hal::tmc2130::ErrorFlags ef, ErrorCode ec) {
 
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::InNozzle, mi::Idler::IdleSlotIndex(), 0, true, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
 
-    int failingStep = 5;
+    uint32_t failingStep = 5;
     REQUIRE(WhileCondition(
         uf,
-        [&](int step) -> bool {
+        [&](uint32_t step) -> bool {
         if(step == failingStep){ // on 5th step make the TMC report some error
             CauseTMCError(mm::Idler, ef);
         }

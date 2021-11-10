@@ -45,7 +45,7 @@ TEST_CASE("unload_to_finda::regular_unload", "[unload_to_finda]") {
     // engaging idler
     REQUIRE(WhileCondition(
         ff,
-        [&](int) { return !mi::idler.Engaged(); },
+        [&](uint32_t) { return !mi::idler.Engaged(); },
         5000));
     CHECK(mm::axes[mm::Pulley].enabled == true);
 
@@ -54,7 +54,7 @@ TEST_CASE("unload_to_finda::regular_unload", "[unload_to_finda]") {
     hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
     REQUIRE(WhileCondition(
         ff,
-        [&](int) { return mf::finda.Pressed(); },
+        [&](uint32_t) { return mf::finda.Pressed(); },
         50000));
 
     REQUIRE(ff.State() == logic::UnloadToFinda::OK);
@@ -100,7 +100,7 @@ TEST_CASE("unload_to_finda::unload_without_FINDA_trigger", "[unload_to_finda]") 
     // engaging idler
     REQUIRE(WhileCondition(
         ff,
-        [&](int) { return !mi::idler.Engaged(); },
+        [&](uint32_t) { return !mi::idler.Engaged(); },
         5000));
 
     // now pulling the filament until finda triggers
@@ -109,7 +109,7 @@ TEST_CASE("unload_to_finda::unload_without_FINDA_trigger", "[unload_to_finda]") 
     // no changes to FINDA during unload - we'll pretend it never triggers
     REQUIRE_FALSE(WhileCondition(
         ff,
-        [&](int) { return mf::finda.Pressed(); },
+        [&](uint32_t) { return mf::finda.Pressed(); },
         50000));
 
     REQUIRE(ff.State() == logic::UnloadToFinda::Failed);

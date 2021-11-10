@@ -43,7 +43,7 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
     // engaging idler
     REQUIRE(WhileCondition(
         ff,
-        [&](int) { return !mi::idler.Engaged(); },
+        [&](uint32_t) { return !mi::idler.Engaged(); },
         5000));
 
     CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(0).v);
@@ -60,7 +60,7 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
 
     REQUIRE(WhileCondition(
         ff,
-        [&](int) { return ff.State() == FeedToFinda::PushingFilament; },
+        [&](uint32_t) { return ff.State() == FeedToFinda::PushingFilament; },
         1500));
     // From now on the FINDA is reported as ON
 
@@ -111,7 +111,7 @@ TEST_CASE("feed_to_finda::FINDA_failed", "[feed_to_finda]") {
     // engaging idler
     REQUIRE(WhileCondition(
         ff,
-        [&](int) { return !mi::idler.Engaged(); },
+        [&](uint32_t) { return !mi::idler.Engaged(); },
         5000));
 
     CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(0).v);
@@ -127,7 +127,7 @@ TEST_CASE("feed_to_finda::FINDA_failed", "[feed_to_finda]") {
 
     REQUIRE(WhileCondition(
         ff,
-        [&](int) { return ff.State() == FeedToFinda::PushingFilament; },
+        [&](uint32_t) { return ff.State() == FeedToFinda::PushingFilament; },
         5000));
 
     // the FINDA didn't trigger, we should be in the Failed state

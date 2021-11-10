@@ -44,7 +44,7 @@ void CutSlot(logic::CutFilament &cf, uint8_t cutSlot) {
     // prepare for simulated finda trigger
     REQUIRE(WhileCondition(
         cf,
-        [&](int step) -> bool {
+        [&](uint32_t step) -> bool {
         if( step == 100 ){ // simulate FINDA trigger - will get pressed in 100 steps (due to debouncing)
             hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
         }
@@ -56,7 +56,7 @@ void CutSlot(logic::CutFilament &cf, uint8_t cutSlot) {
     // pull it back to the pulley + simulate FINDA depress
     REQUIRE(WhileCondition(
         cf,
-        [&](int step) -> bool {
+        [&](uint32_t step) -> bool {
         if( step == 100 ){ // simulate FINDA trigger - will get depressed in 100 steps
             hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
         }

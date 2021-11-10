@@ -19,7 +19,7 @@ bool WhileCondition(SM &sm, COND cond, uint32_t maxLoops = 5000) {
 template <typename SM>
 bool WhileTopState(SM &sm, ProgressCode state, uint32_t maxLoops = 5000) {
     return WhileCondition(
-        sm, [&](int) { return sm.TopLevelState() == state; }, maxLoops);
+        sm, [&](uint32_t) { return sm.TopLevelState() == state; }, maxLoops);
 }
 
 extern void EnsureActiveSlotIndex(uint8_t slot, modules::globals::FilamentLoadState loadState);
