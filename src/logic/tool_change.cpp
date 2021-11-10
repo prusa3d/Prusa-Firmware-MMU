@@ -114,10 +114,12 @@ bool ToolChange::StepInner() {
                 state = ProgressCode::ERRWaitingForUser; // stand still
             } else if (!mfs::fsensor.Pressed()) {
                 // printer's filament sensor is still NOT pressed - that smells bad
+                mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::InSelector); // only assume the filament is in selector
                 error = ErrorCode::FSENSOR_DIDNT_SWITCH_ON;
-                state = ProgressCode::ERRWaitingForUser; // stand still
+                state = ProgressCode::ERRWaitingForUser; // stand still - we may even try loading the filament into the nozzle
             } else {
-                // all sensors are ok
+                // all sensors are ok, we assume the user pushed the filament into the nozzle
+                mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::InNozzle);
                 FinishedCorrectly();
             }
             break;
