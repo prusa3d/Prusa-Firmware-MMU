@@ -44,7 +44,7 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
     // engaging idler
     REQUIRE(WhileCondition(
         fb,
-        [&](int) { return !mi::idler.Engaged(); },
+        [&](uint32_t) { return !mi::idler.Engaged(); },
         5000));
 
     CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(0).v);
@@ -58,7 +58,7 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
 
     REQUIRE(WhileCondition(
         fb,
-        [&](int step) {
+        [&](uint32_t step) {
         if( step == 1000 ){
             mfs::fsensor.ProcessMessage(true);
         }
@@ -71,14 +71,14 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
     REQUIRE(fb.State() == FeedToBondtech::PushingFilamentIntoNozzle);
     REQUIRE(WhileCondition(
         fb,
-        [&](int) { return fb.State() == FeedToBondtech::PushingFilamentIntoNozzle; },
+        [&](uint32_t) { return fb.State() == FeedToBondtech::PushingFilamentIntoNozzle; },
         5000));
 
     // disengaging idler
     REQUIRE(fb.State() == FeedToBondtech::DisengagingIdler);
     REQUIRE(WhileCondition(
         fb,
-        [&](int) { return fb.State() == FeedToBondtech::DisengagingIdler; },
+        [&](uint32_t) { return fb.State() == FeedToBondtech::DisengagingIdler; },
         5000));
 
     CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5).v);

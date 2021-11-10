@@ -25,7 +25,7 @@ void FeedingToFinda(logic::ToolChange &tc, uint8_t toSlot, uint32_t triggerAt = 
     // feeding to finda
     REQUIRE(WhileCondition(
         tc,
-        [&](int step) -> bool {
+        [&](uint32_t step) -> bool {
         if(step == triggerAt){ // on specified stepNr make FINDA trigger
             hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
         } else if(step >= triggerAt + config::findaDebounceMs + 1){
@@ -40,7 +40,7 @@ void FeedingToBondtech(logic::ToolChange &tc, uint8_t toSlot) {
     // james is feeding
     REQUIRE(WhileCondition(
         tc,
-        [&](int step) -> bool {
+        [&](uint32_t step) -> bool {
         if(step == 2000){ // on 2000th step make filament sensor trigger
             mfs::fsensor.ProcessMessage(true);
         }
@@ -65,17 +65,12 @@ void ToolChange(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
 
     REQUIRE(WhileCondition(
         tc,
-        [&](int step) -> bool {
+        [&](uint32_t step) -> bool {
         if(step == 2000){ // on 2000th step make FINDA trigger
             hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
         }
         return tc.TopLevelState() == ProgressCode::UnloadingFilament; },
         200000UL));
-
-    auto gf = ml::leds.Mode(fromSlot, ml::green);
-    auto gt = ml::leds.Mode(toSlot, ml::green);
-    auto rf = ml::leds.Mode(fromSlot, ml::red);
-    auto rt = ml::leds.Mode(toSlot, ml::red);
 
     //    REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::AtPulley);
     REQUIRE(VerifyState2(tc, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), fromSlot, false, false, toSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
@@ -174,7 +169,7 @@ void ToolChangeFailLoadToFinda(logic::ToolChange &tc, uint8_t fromSlot, uint8_t 
 
     REQUIRE(WhileCondition(
         tc,
-        [&](int step) -> bool {
+        [&](uint32_t step) -> bool {
         if(step == 2000){ // on 2000th step make FINDA trigger
             hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
         }
@@ -202,7 +197,7 @@ void ToolChangeFailLoadToFindaButton0(logic::ToolChange &tc, uint8_t toSlot) {
     // try push more, if FINDA triggers, continue loading
     REQUIRE(WhileCondition(
         tc,
-        [&](int step) -> bool {
+        [&](uint32_t step) -> bool {
         if(step == 20){ // on 20th step make FINDA trigger
             hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
         }
@@ -222,7 +217,7 @@ void ToolChangeFailLoadToFindaButton1(logic::ToolChange &tc, uint8_t toSlot) {
 
     REQUIRE(WhileCondition(
         tc,
-        [&](int step) -> bool {
+        [&](uint32_t step) -> bool {
         if(step == 2000){ // on 2000th step make FINDA trigger
             hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
         }

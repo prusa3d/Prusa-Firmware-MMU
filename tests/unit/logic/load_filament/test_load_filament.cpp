@@ -47,7 +47,7 @@ void LoadFilamentSuccessful(uint8_t slot, logic::LoadFilament &lf) {
     // we'll assume the finda is working correctly here
     REQUIRE(WhileCondition(
         lf,
-        [&](int step) -> bool {
+        [&](uint32_t step) -> bool {
         if(step == 100){ // on 100th step make FINDA trigger
             hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
         }
@@ -59,7 +59,7 @@ void LoadFilamentSuccessful(uint8_t slot, logic::LoadFilament &lf) {
     // we'll assume the finda is working correctly here
     REQUIRE(WhileCondition(
         lf,
-        [&](int step) -> bool {
+        [&](uint32_t step) -> bool {
         if(step == 50){ // on 50th step make FINDA trigger
             hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
         }
@@ -113,7 +113,7 @@ void FailedLoadToFindaResolveHelpFindaTriggered(uint8_t slot, logic::LoadFilamen
     // Stage 5 - move the pulley a bit - simulate FINDA depress
     REQUIRE(WhileCondition(
         lf,
-        [&](int step) -> bool {
+        [&](uint32_t step) -> bool {
         if(step == 100){ // on 100th step make FINDA trigger
             hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
         }
@@ -144,7 +144,7 @@ void FailedLoadToFindaResolveManual(uint8_t slot, logic::LoadFilament &lf) {
     // we'll assume the finda is working correctly here
     REQUIRE(WhileCondition(
         lf,
-        [&](int step) -> bool {
+        [&](uint32_t step) -> bool {
         if(step == 50){ // on 50th step make FINDA trigger
             hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
         }

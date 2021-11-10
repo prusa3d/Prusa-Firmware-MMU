@@ -52,7 +52,7 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
     // Stage 1 - unloading to FINDA
     REQUIRE(WhileCondition(
         uf,
-        [&](int step) -> bool {
+        [&](uint32_t step) -> bool {
         if(step == 100){ // on 100th step make FINDA trigger
             hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
         }
@@ -181,7 +181,7 @@ void FindaDidntTriggerResolveHelpFindaTriggered(uint8_t slot, logic::UnloadFilam
     // Stage 5 - move the pulley a bit - simulate FINDA depress
     REQUIRE(WhileCondition(
         uf,
-        [&](int step) -> bool {
+        [&](uint32_t step) -> bool {
         if(step == 100){ // on 100th step make FINDA trigger
             hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
         }
