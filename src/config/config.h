@@ -110,8 +110,8 @@ static constexpr PulleyLimits pulleyLimits = {
     .jerk = 4.0_mm_s,
     .accel = 800.0_mm_s2,
 };
-static constexpr U_mm_s pulleyFeedrate = 40._mm_s;
-static constexpr U_mm_s pulleySlowFeedrate = 20._mm_s;
+static constexpr U_mm_s pulleyFeedrate = 80._mm_s; // used to push filament fast from FINDA to FSensor
+static constexpr U_mm_s pulleySlowFeedrate = 20._mm_s; // used to slowly push filament into the gears after FSensor triggered
 /// End: Pulley axis configuration
 
 /// Begin: Selector configuration
@@ -159,7 +159,7 @@ static constexpr U_mm selectorSlotPositions[toolCount + 1] = {
     //    SelectorOffsetFromMin - 1.0_mm - 5 * SelectorSlotDistance ///75.5_mm - 1.0_mm - 5 * 14.0_mm = 4.5_mm
 };
 
-static constexpr U_mm_s selectorFeedrate = 30._mm_s;
+static constexpr U_mm_s selectorFeedrate = 50._mm_s; // above 60 we may start getting homing issues and 80 is way too much even for a reliable move
 /// End: Selector configuration
 
 /// Begin: Idler configuration
@@ -197,7 +197,7 @@ static constexpr U_deg idlerSlotPositions[toolCount + 1] = {
 
 static constexpr U_deg idlerParkPositionDelta = -IdlerSlotDistance + 5.0_deg / 2; ///@TODO verify
 
-static constexpr U_deg_s idlerFeedrate = 200._deg_s;
+static constexpr U_deg_s idlerFeedrate = 400._deg_s;
 /// End: Idler configuration
 
 // TMC2130 setup
