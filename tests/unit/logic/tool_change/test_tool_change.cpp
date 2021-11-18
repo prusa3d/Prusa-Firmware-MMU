@@ -186,9 +186,9 @@ void ToolChangeFailLoadToFinda(logic::ToolChange &tc, uint8_t fromSlot, uint8_t 
     REQUIRE(WhileTopState(tc, ProgressCode::ERRDisengagingIdler, 5000));
 }
 
-void ToolChangeFailLoadToFindaButton0(logic::ToolChange &tc, uint8_t toSlot) {
+void ToolChangeFailLoadToFindaLeftBtn(logic::ToolChange &tc, uint8_t toSlot) {
     // now waiting for user input
-    PressButtonAndDebounce(tc, 0);
+    PressButtonAndDebounce(tc, mb::Left);
 
     REQUIRE(WhileTopState(tc, ProgressCode::ERREngagingIdler, 5000UL));
 
@@ -211,9 +211,9 @@ void ToolChangeFailLoadToFindaButton0(logic::ToolChange &tc, uint8_t toSlot) {
     CheckFinishedCorrectly(tc, toSlot);
 }
 
-void ToolChangeFailLoadToFindaButton1(logic::ToolChange &tc, uint8_t toSlot) {
+void ToolChangeFailLoadToFindaMiddleBtn(logic::ToolChange &tc, uint8_t toSlot) {
     // now waiting for user input
-    PressButtonAndDebounce(tc, 1);
+    PressButtonAndDebounce(tc, mb::Middle);
 
     REQUIRE(WhileCondition(
         tc,
@@ -236,73 +236,73 @@ void ToolChangeFailLoadToFindaButton1(logic::ToolChange &tc, uint8_t toSlot) {
     CheckFinishedCorrectly(tc, toSlot);
 }
 
-void ToolChangeFailLoadToFindaButton2FINDA_FSensor(logic::ToolChange &tc, uint8_t toSlot) {
+void ToolChangeFailLoadToFindaRightBtnFINDA_FSensor(logic::ToolChange &tc, uint8_t toSlot) {
     // now waiting for user input - press FINDA and FSensor
     hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
     mfs::fsensor.ProcessMessage(true);
-    PressButtonAndDebounce(tc, 2);
+    PressButtonAndDebounce(tc, mb::Right);
 
     CheckFinishedCorrectly(tc, toSlot);
 }
 
-void ToolChangeFailLoadToFindaButton2FINDA(logic::ToolChange &tc, uint8_t toSlot) {
+void ToolChangeFailLoadToFindaRightBtnFINDA(logic::ToolChange &tc, uint8_t toSlot) {
     // now waiting for user input - press FINDA
     hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
-    PressButtonAndDebounce(tc, 2);
+    PressButtonAndDebounce(tc, mb::Right);
 
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), toSlot, true, false, ml::off, ml::blink0, ErrorCode::FSENSOR_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));
 }
 
-void ToolChangeFailLoadToFindaButton2(logic::ToolChange &tc, uint8_t toSlot) {
+void ToolChangeFailLoadToFindaRightBtn(logic::ToolChange &tc, uint8_t toSlot) {
     // now waiting for user input - do not press anything
-    PressButtonAndDebounce(tc, 2);
+    PressButtonAndDebounce(tc, mb::Right);
 
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), toSlot, false, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));
 }
 
-TEST_CASE("tool_change::load_fail_FINDA_resolve_btn0", "[tool_change]") {
+TEST_CASE("tool_change::load_fail_FINDA_resolve_btnL", "[tool_change]") {
     logic::ToolChange tc;
     for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
         for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
             if (fromSlot != toSlot) {
                 ToolChangeFailLoadToFinda(tc, fromSlot, toSlot);
-                ToolChangeFailLoadToFindaButton0(tc, toSlot);
+                ToolChangeFailLoadToFindaLeftBtn(tc, toSlot);
             }
         }
     }
 }
 
-TEST_CASE("tool_change::load_fail_FINDA_resolve_btn1", "[tool_change]") {
+TEST_CASE("tool_change::load_fail_FINDA_resolve_btnM", "[tool_change]") {
     logic::ToolChange tc;
     for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
         for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
             if (fromSlot != toSlot) {
                 ToolChangeFailLoadToFinda(tc, fromSlot, toSlot);
-                ToolChangeFailLoadToFindaButton1(tc, toSlot);
+                ToolChangeFailLoadToFindaMiddleBtn(tc, toSlot);
             }
         }
     }
 }
 
-TEST_CASE("tool_change::load_fail_FINDA_resolve_btn2_FINDA_FSensor", "[tool_change]") {
+TEST_CASE("tool_change::load_fail_FINDA_resolve_btnR_FINDA_FSensor", "[tool_change]") {
     logic::ToolChange tc;
     for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
         for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
             if (fromSlot != toSlot) {
                 ToolChangeFailLoadToFinda(tc, fromSlot, toSlot);
-                ToolChangeFailLoadToFindaButton2FINDA_FSensor(tc, toSlot);
+                ToolChangeFailLoadToFindaRightBtnFINDA_FSensor(tc, toSlot);
             }
         }
     }
 }
 
-TEST_CASE("tool_change::load_fail_FINDA_resolve_btn2_FINDA", "[tool_change]") {
+TEST_CASE("tool_change::load_fail_FINDA_resolve_btnR_FINDA", "[tool_change]") {
     logic::ToolChange tc;
     for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
         for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
             if (fromSlot != toSlot) {
                 ToolChangeFailLoadToFinda(tc, fromSlot, toSlot);
-                ToolChangeFailLoadToFindaButton2FINDA(tc, toSlot);
+                ToolChangeFailLoadToFindaRightBtnFINDA(tc, toSlot);
             }
         }
     }
