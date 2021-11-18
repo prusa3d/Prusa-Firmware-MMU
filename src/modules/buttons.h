@@ -21,9 +21,9 @@ private:
 
 /// Enum of buttons - used also as indices in an array of buttons to keep the code size tight.
 enum {
-    Left = 0,
+    Right = 0,
     Middle,
-    Right
+    Left
 };
 
 /// A model of the 3 buttons on the MMU unit

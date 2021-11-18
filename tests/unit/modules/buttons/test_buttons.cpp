@@ -115,27 +115,27 @@ TEST_CASE("buttons::Step-debounce-one-button", "[buttons]") {
         b.Step(); // should detect the press but remain in detected state - wait for debounce
         mt::IncMillis();
     }
-    CHECK(!b.ButtonPressed(mb::Left));
-    CHECK(!b.ButtonPressed(mb::Middle));
     CHECK(!b.ButtonPressed(mb::Right));
+    CHECK(!b.ButtonPressed(mb::Middle));
+    CHECK(!b.ButtonPressed(mb::Left));
 
     // 1023
     for (uint8_t i = 0; i < oversampleFactor; ++i) {
         b.Step(); // reset to waiting
         mt::IncMillis();
     }
-    CHECK(!b.ButtonPressed(mb::Left));
-    CHECK(!b.ButtonPressed(mb::Middle));
     CHECK(!b.ButtonPressed(mb::Right));
+    CHECK(!b.ButtonPressed(mb::Middle));
+    CHECK(!b.ButtonPressed(mb::Left));
 
     // 5
     for (uint8_t i = 0; i < oversampleFactor; ++i) {
         b.Step(); // pressed again, still in debouncing state
         mt::IncMillis();
     }
-    CHECK(!b.ButtonPressed(mb::Left));
-    CHECK(!b.ButtonPressed(mb::Middle));
     CHECK(!b.ButtonPressed(mb::Right));
+    CHECK(!b.ButtonPressed(mb::Middle));
+    CHECK(!b.ButtonPressed(mb::Left));
 
     // 9
     for (uint8_t i = 0; i < oversampleFactor; ++i) {
@@ -151,43 +151,43 @@ TEST_CASE("buttons::Step-debounce-one-button", "[buttons]") {
         b.Step(); // no change
         mt::IncMillis();
     }
-    CHECK(!b.ButtonPressed(mb::Left));
-    CHECK(!b.ButtonPressed(mb::Middle));
     CHECK(!b.ButtonPressed(mb::Right));
+    CHECK(!b.ButtonPressed(mb::Middle));
+    CHECK(!b.ButtonPressed(mb::Left));
 
     // 7
     for (uint8_t i = 0; i < oversampleFactor; ++i) {
         b.Step(); // one step from "pressed"
         mt::IncMillis();
     }
-    CHECK(!b.ButtonPressed(mb::Left));
-    CHECK(!b.ButtonPressed(mb::Middle));
     CHECK(!b.ButtonPressed(mb::Right));
+    CHECK(!b.ButtonPressed(mb::Middle));
+    CHECK(!b.ButtonPressed(mb::Left));
 
     // 8
     for (uint8_t i = 0; i < oversampleFactor; ++i) {
         b.Step(); // fifth set of samples - should report "pressed" finally
         mt::IncMillis();
     }
-    CHECK(b.ButtonPressed(mb::Left));
+    CHECK(b.ButtonPressed(mb::Right));
     CHECK(!b.ButtonPressed(mb::Middle));
-    CHECK(!b.ButtonPressed(mb::Right));
+    CHECK(!b.ButtonPressed(mb::Left));
 
     // 1023
     for (uint8_t i = 0; i < oversampleFactor; ++i) {
         b.Step(); // sixth set of samples - button released (no debouncing on release)
         mt::IncMillis();
     }
-    CHECK(!b.ButtonPressed(mb::Left));
-    CHECK(!b.ButtonPressed(mb::Middle));
     CHECK(!b.ButtonPressed(mb::Right));
+    CHECK(!b.ButtonPressed(mb::Middle));
+    CHECK(!b.ButtonPressed(mb::Left));
 
     // 1023
     for (uint8_t i = 0; i < oversampleFactor; ++i) {
         b.Step(); // seventh set of samples - still released
         mt::IncMillis();
     }
-    CHECK(!b.ButtonPressed(mb::Left));
-    CHECK(!b.ButtonPressed(mb::Middle));
     CHECK(!b.ButtonPressed(mb::Right));
+    CHECK(!b.ButtonPressed(mb::Middle));
+    CHECK(!b.ButtonPressed(mb::Left));
 }
