@@ -108,6 +108,9 @@ bool ToolChange::StepInner() {
             break;
         case mui::Event::Right: // problem resolved - the user pushed the fillament by hand?
             // we should check the state of all the sensors and either report another error or confirm the correct state
+
+            // First invalidate homing flags as the user may have moved the Idler or Selector accidentally
+            InvalidateHoming();
             if (!mf::finda.Pressed()) {
                 // FINDA is still NOT pressed - that smells bad
                 error = ErrorCode::FINDA_DIDNT_SWITCH_ON;

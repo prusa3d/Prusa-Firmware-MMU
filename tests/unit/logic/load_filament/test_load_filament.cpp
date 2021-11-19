@@ -137,8 +137,11 @@ void FailedLoadToFindaResolveManual(uint8_t slot, logic::LoadFilament &lf) {
     hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
     PressButtonAndDebounce(lf, mb::Right);
 
+    // the Idler also engages in this call as this is planned as the next step
+    SimulateIdlerHoming();
+
     // pulling filament back
-    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, true, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
 
     // Stage 3 - retracting from finda
     // we'll assume the finda is working correctly here
@@ -150,9 +153,24 @@ void FailedLoadToFindaResolveManual(uint8_t slot, logic::LoadFilament &lf) {
         }
         return lf.TopLevelState() == ProgressCode::RetractingFromFinda; },
         5000));
-    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, slot, slot, false, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
 
-    // disengaging idler
+    // This is a tricky part as the Selector will start homing asynchronnously right after
+    // the filament state switches to AtPulley.
+    // The trouble is, that the filament state is updated after the Pulley finishes
+    // its moves (which is correct), but we don't have enough cycles to home the selector afterwards
+    // - basically it will just start homing
+    // Moreover, the Idler is to disengage meanwhile, which makes the simulation even harder.
+    // Therefore we just tick the stallguard of the Selector and hope for the best
+    mm::TriggerStallGuard(mm::Selector);
+    ms::selector.Step();
+    mm::motion.StallGuardReset(mm::Selector); // drop stallguard on Selector to avoid future confusion
+
+    // just one step is necessary to "finish" homing
+    // but the selector then (correctly) plans its move to the original position
+    // therefore we expect the selector to have its idle position at this stage
+    // REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, slot, ms::selector.IdleSlotIndex(), false, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
+
+    // disengaging idler (and the selector will move to the desired position meanwhile
     REQUIRE(WhileTopState(lf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
 }
@@ -160,6 +178,8 @@ void FailedLoadToFindaResolveManual(uint8_t slot, logic::LoadFilament &lf) {
 void FailedLoadToFindaResolveManualNoFINDA(uint8_t slot, logic::LoadFilament &lf) {
     // Perform press on button 2 + debounce + keep FINDA OFF (i.e. the user didn't solve anything)
     PressButtonAndDebounce(lf, mb::Right);
+
+    SimulateIdlerHoming();
 
     // pulling filament back
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));

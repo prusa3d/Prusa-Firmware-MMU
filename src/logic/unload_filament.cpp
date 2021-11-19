@@ -7,6 +7,7 @@
 #include "../modules/leds.h"
 #include "../modules/motion.h"
 #include "../modules/permanent_storage.h"
+#include "../modules/selector.h"
 #include "../modules/user_input.h"
 #include "../debug.h"
 
@@ -93,6 +94,9 @@ bool UnloadFilament::StepInner() {
             break;
         case mui::Event::Right: // problem resolved - the user pulled the fillament by hand
             // we should check the state of all the sensors and either report another error or confirm the correct state
+
+            // First invalidate homing flags as the user may have moved the Idler or Selector accidentally
+            InvalidateHoming();
             if (mfs::fsensor.Pressed()) {
                 // printer's filament sensor is still pressed - that smells bad
                 error = ErrorCode::FSENSOR_DIDNT_SWITCH_OFF;

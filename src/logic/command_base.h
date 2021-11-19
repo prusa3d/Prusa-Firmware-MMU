@@ -70,6 +70,13 @@ public:
     /// The only way out is to reset the board.
     void Panic(ErrorCode ec);
 
+    /// Invalidates homing state on Idler and Selector - doesn't change anything about filament load status
+    static void InvalidateHoming();
+
+    /// Invalidates homing state on Idler and Selector + resets the knowledge about
+    /// filament presence according to known sensors (FINDA+FSensor)
+    static void InvalidateHomingAndFilamentState();
+
 protected:
     /// @returns true if the slot/tool index is within specified range (0 - config::toolCount)
     /// If not, it returns false and sets the error to ErrorCode::INVALID_TOOL

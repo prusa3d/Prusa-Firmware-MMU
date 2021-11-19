@@ -23,8 +23,11 @@ void Idler::PlanHomingMove() {
 
 void Idler::FinishHomingAndPlanMoveToParkPos() {
     mm::motion.SetPosition(mm::Idler, 0);
-    plannedSlot = IdleSlotIndex();
-    plannedEngage = false;
+
+    // finish whatever has been planned before homing
+    if (!plannedEngage) {
+        plannedSlot = IdleSlotIndex();
+    }
     InitMovement(mm::Idler);
 }
 
@@ -42,10 +45,19 @@ Idler::OperationResult Idler::Disengage() {
     plannedSlot = IdleSlotIndex();
     plannedEngage = false;
 
+    // coordinates invalid, first home, then disengage
+    if (!homingValid) {
+        PerformHome(mm::Idler);
+        return OperationResult::Accepted;
+    }
+
+    // already disengaged
     if (!Engaged()) {
         dbg_logic_P(PSTR("Idler Disengaged"));
         return OperationResult::Accepted;
     }
+
+    // disengaging
     return InitMovement(mm::Idler);
 }
 
@@ -58,20 +70,25 @@ Idler::OperationResult Idler::Engage(uint8_t slot) {
     plannedSlot = slot;
     plannedEngage = true;
 
+    // if we are homing right now, just record the desired planned slot and return Accepted
+    if (state == Homing) {
+        return OperationResult::Accepted;
+    }
+
+    // coordinates invalid, first home, then engage
+    if (!homingValid) {
+        PlanHome(mm::Idler);
+        return OperationResult::Accepted;
+    }
+
+    // already engaged
     if (Engaged()) {
         dbg_logic_P(PSTR("Idler Engaged"));
         return OperationResult::Accepted;
     }
 
+    // engaging
     return InitMovement(mm::Idler);
-}
-
-bool Idler::Home() {
-    if (state == Moving)
-        return false;
-    plannedEngage = false;
-    PlanHome(mm::Idler);
-    return true;
 }
 
 bool Idler::Step() {
@@ -85,6 +102,10 @@ bool Idler::Step() {
         PerformHome(mm::Idler);
         return false;
     case Ready:
+        if (!homingValid) {
+            PlanHome(mm::Idler);
+            return false;
+        }
         return true;
     case Failed:
         dbg_logic_P(PSTR("Idler Failed"));

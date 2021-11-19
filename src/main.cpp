@@ -102,10 +102,9 @@ void setup() {
 
     mu::cdc.Init();
 
-    ms::selector.Init(); // selector decides if homing is possible
-    mi::idler.Home(); // home Idler every time
-
-    _delay_ms(100);
+    // waits at least finda debounce period
+    // which is abused to let the LEDs shine for ~100ms
+    mf::finda.BlockingInit();
 
     /// Turn off all leds
     for (uint8_t i = 0; i < config::toolCount; i++) {
@@ -113,6 +112,10 @@ void setup() {
         ml::leds.SetMode(i, ml::red, ml::off);
     }
     ml::leds.Step();
+
+    // Idler will home on its own by default
+    // Selector decides whether homing is possible
+    ms::selector.Init();
 }
 
 static constexpr const uint8_t maxMsgLen = 10;

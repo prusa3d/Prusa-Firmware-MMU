@@ -28,10 +28,6 @@ public:
     /// @returns #OperationResult
     OperationResult Disengage();
 
-    /// Plan homing of the idler axis
-    /// @returns false in case an operation is already underway
-    bool Home();
-
     /// Performs one step of the state machine according to currently planned operation
     /// @returns true if the idler is ready to accept new commands (i.e. it has finished the last operation)
     bool Step();

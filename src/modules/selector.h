@@ -22,10 +22,6 @@ public:
     /// @returns false in case an operation is already underway
     OperationResult MoveToSlot(uint8_t slot);
 
-    /// Plan homing of the selector's axis
-    /// @returns false in case an operation is already underway
-    bool Home();
-
     /// Performs one step of the state machine according to currently planned operation.
     /// @returns true if the selector is ready to accept new commands (i.e. it has finished the last operation)
     bool Step();

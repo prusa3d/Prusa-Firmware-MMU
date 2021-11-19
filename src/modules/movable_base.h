@@ -28,7 +28,8 @@ public:
     inline constexpr MovableBase()
         : state(Ready)
         , plannedSlot(-1)
-        , currentSlot(-1) {}
+        , currentSlot(-1)
+        , homingValid(false) {}
 
     /// virtual ~MovableBase(); intentionally disabled, see description in logic::CommandBase
 
@@ -42,8 +43,17 @@ public:
 
     inline hal::tmc2130::ErrorFlags TMCErrorFlags() const { return tmcErrorFlags; }
 
-    /// Prepare a homing move of the axis
-    void PlanHome(config::Axis axis);
+    /// Invalidates the homing flag - that is now used to inform the movable component (Idler or Selector)
+    /// that their current coordinates may have been compromised and a new homing move is to be performed.
+    /// Each movable component performs the homing move immediately after it is possible to do so:
+    /// - Idler immediately (and then moves to desired slot again)
+    /// - Selector once there is no filament stuck in it (and then moves to desired slot again)
+    /// Homing procedure therefore becomes completely transparent to upper layers
+    /// and it will not be necessary to call it explicitly.
+    /// Please note this method does not clear any planned move on the component
+    /// - on the contrary - the planned move will be peformed immediately after homing
+    /// (which makes homing completely transparent)
+    inline void InvalidateHoming() { homingValid = false; }
 
 protected:
     /// internal state of the automaton
@@ -55,6 +65,9 @@ protected:
     /// current slot
     uint8_t currentSlot;
 
+    /// true if the axis is considered as homed
+    bool homingValid;
+
     /// cached TMC2130 error flags - being read only if the axis is enabled and doing something (moving)
     hal::tmc2130::ErrorFlags tmcErrorFlags;
 
@@ -64,6 +77,9 @@ protected:
     virtual void FinishMove() = 0;
 
     OperationResult InitMovement(config::Axis axis);
+
+    /// Prepare a homing move of the axis
+    void PlanHome(config::Axis axis);
 
     void PerformMove(config::Axis axis);
 
