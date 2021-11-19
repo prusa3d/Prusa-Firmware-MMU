@@ -35,4 +35,6 @@ enum class ProgressCode : uint_fast8_t {
     ParkingSelector, // P23
     EjectingFilament, // P24
     RetractingFromFinda, // P25
+
+    Homing,
 };

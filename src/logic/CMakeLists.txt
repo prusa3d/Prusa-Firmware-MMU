@@ -5,6 +5,7 @@ target_sources(
           eject_filament.cpp
           feed_to_bondtech.cpp
           feed_to_finda.cpp
+          home.cpp
           load_filament.cpp
           no_command.cpp
           retract_from_finda.cpp

@@ -27,6 +27,7 @@
 #include "logic/command_base.h"
 #include "logic/cut_filament.h"
 #include "logic/eject_filament.h"
+#include "logic/home.h"
 #include "logic/load_filament.h"
 #include "logic/no_command.h"
 #include "logic/set_mode.h"
@@ -222,6 +223,9 @@ void PlanCommand(const mp::RequestMsg &rq) {
             break;
         case mp::RequestMsgCodes::Eject:
             currentCommand = &logic::ejectFilament;
+            break;
+        case mp::RequestMsgCodes::Home:
+            currentCommand = &logic::home;
             break;
         case mp::RequestMsgCodes::Load:
             currentCommand = &logic::loadFilament;

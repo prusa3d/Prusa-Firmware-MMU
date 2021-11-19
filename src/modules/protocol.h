@@ -26,7 +26,8 @@ enum class RequestMsgCodes : uint8_t {
     Wait = 'W',
     Cut = 'K',
     FilamentType = 'F',
-    FilamentSensor = 'f'
+    FilamentSensor = 'f',
+    Home = 'H'
 };
 
 /// Definition of response message parameter codes
