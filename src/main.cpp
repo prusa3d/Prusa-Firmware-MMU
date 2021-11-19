@@ -113,8 +113,8 @@ void setup() {
     }
     ml::leds.Step();
 
-    // Idler will home on its own by default
-    // Selector decides whether homing is possible
+    // Idler and Selector decide whether homing is possible/safe
+    mi::idler.Init();
     ms::selector.Init();
 }
 

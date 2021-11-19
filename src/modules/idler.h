@@ -45,6 +45,12 @@ public:
     /// @returns the index of idle position of the idler, usually 5 in case of 0-4 valid indices of filament slots
     inline static constexpr uint8_t IdleSlotIndex() { return config::toolCount; }
 
+    /// Initializes the idler after restart/cold boot
+    /// Reads the active slot from the EEPROM and decides if the idler is safe to move (not hold the filament while printing)
+    /// - free -> home the idler
+    /// - blocked -> set idler's position according to the active filament slot
+    void Init();
+
 protected:
     virtual void PrepareMoveToPlannedSlot() override;
     virtual void PlanHomingMove() override;

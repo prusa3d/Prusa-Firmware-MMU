@@ -1,6 +1,7 @@
 /// @file idler.cpp
 #include "idler.h"
 #include "buttons.h"
+#include "globals.h"
 #include "leds.h"
 #include "motion.h"
 #include "permanent_storage.h"
@@ -76,7 +77,10 @@ Idler::OperationResult Idler::Engage(uint8_t slot) {
     }
 
     // coordinates invalid, first home, then engage
-    if (!homingValid) {
+    // avoid homing if filament in fsensor or in nozzle
+    // - the printer may be printing right now and holding the filament
+    // against the pulley even for a short period of time may not be healthy
+    if (!homingValid && mg::globals.FilamentLoaded() < mg::InFSensor) {
         PlanHome(mm::Idler);
         return OperationResult::Accepted;
     }
@@ -102,7 +106,7 @@ bool Idler::Step() {
         PerformHome(mm::Idler);
         return false;
     case Ready:
-        if (!homingValid) {
+        if (!homingValid && mg::globals.FilamentLoaded() < mg::InFSensor) {
             PlanHome(mm::Idler);
             return false;
         }
@@ -111,6 +115,17 @@ bool Idler::Step() {
         dbg_logic_P(PSTR("Idler Failed"));
     default:
         return true;
+    }
+}
+
+void Idler::Init() {
+    if (mg::globals.FilamentLoaded() < mg::InFSensor) {
+        // home the Idler only in case we don't have filament loaded in the printer (or at least we think we don't)
+        PlanHome(mm::Idler);
+    } else {
+        // otherwise set selector's position according to know slot positions (and pretend it is correct)
+        mm::motion.SetPosition(mm::Idler, SlotPosition(mg::globals.ActiveSlot()).v);
+        InvalidateHoming(); // and plan homing sequence ASAP
     }
 }
 
