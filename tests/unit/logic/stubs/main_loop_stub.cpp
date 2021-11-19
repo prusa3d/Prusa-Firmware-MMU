@@ -72,9 +72,12 @@ void ForceReinitAllAutomata() {
 }
 
 void HomeIdlerAndSelector() {
-    ms::selector.Home();
-    mi::idler.Home();
+    ms::selector.InvalidateHoming();
+    mi::idler.InvalidateHoming();
+    SimulateIdlerAndSelectorHoming();
+}
 
+void SimulateIdlerAndSelectorHoming() {
     // do 5 steps until we trigger the simulated stallguard
     for (uint8_t i = 0; i < 5; ++i) {
         main_loop();
@@ -86,6 +89,39 @@ void HomeIdlerAndSelector() {
     // now the Selector and Idler shall perform a move into their parking positions
     while (ms::selector.State() != mm::MovableBase::Ready || mi::idler.State() != mm::MovableBase::Ready)
         main_loop();
+
+    mm::motion.StallGuardReset(mm::Selector);
+    mm::motion.StallGuardReset(mm::Idler);
+}
+
+void SimulateIdlerHoming() {
+    // do 5 steps until we trigger the simulated stallguard
+    for (uint8_t i = 0; i < 5; ++i) {
+        main_loop();
+    }
+
+    mm::TriggerStallGuard(mm::Idler);
+
+    // now the Idler shall perform a move into their parking positions
+    while (mi::idler.State() != mm::MovableBase::Ready)
+        main_loop();
+
+    mm::motion.StallGuardReset(mm::Idler);
+}
+
+void SimulateSelectorHoming() {
+    // do 5 steps until we trigger the simulated stallguard
+    for (uint8_t i = 0; i < 5; ++i) {
+        main_loop();
+    }
+
+    mm::TriggerStallGuard(mm::Selector);
+
+    // now the Selector shall perform a move into their parking positions
+    while (ms::selector.State() != mm::MovableBase::Ready)
+        main_loop();
+
+    mm::motion.StallGuardReset(mm::Selector);
 }
 
 void EnsureActiveSlotIndex(uint8_t slot, mg::FilamentLoadState loadState) {

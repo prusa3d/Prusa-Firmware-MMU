@@ -1,6 +1,7 @@
 /// @file selector.cpp
 #include "selector.h"
 #include "buttons.h"
+#include "finda.h"
 #include "leds.h"
 #include "motion.h"
 #include "permanent_storage.h"
@@ -24,7 +25,12 @@ void Selector::PlanHomingMove() {
 
 void Selector::FinishHomingAndPlanMoveToParkPos() {
     mm::motion.SetPosition(mm::Selector, mm::unitToSteps<mm::S_pos_t>(config::selectorLimits.lenght));
-    plannedSlot = IdleSlotIndex();
+    currentSlot = -1;
+
+    // finish whatever has been planned before homing
+    if (plannedSlot > config::toolCount) {
+        plannedSlot = IdleSlotIndex();
+    }
     InitMovement(mm::Selector);
 }
 
@@ -39,18 +45,25 @@ Selector::OperationResult Selector::MoveToSlot(uint8_t slot) {
     }
     plannedSlot = slot;
 
+    // if we are homing right now, just record the desired planned slot and return Accepted
+    if (state == Homing) {
+        return OperationResult::Accepted;
+    }
+
+    // coordinates invalid, first home, then engage
+    if (!homingValid && mg::globals.FilamentLoaded() < mg::FilamentLoadState::InSelector) {
+        PlanHome(mm::Selector);
+        return OperationResult::Accepted;
+    }
+
+    // already at the right slot
     if (currentSlot == slot) {
         dbg_logic_P(PSTR("Moving Selector"));
         return OperationResult::Accepted;
     }
-    return InitMovement(mm::Selector);
-}
 
-bool Selector::Home() {
-    if (state == Moving)
-        return false;
-    PlanHome(mm::Selector);
-    return true;
+    // do the move
+    return InitMovement(mm::Selector);
 }
 
 bool Selector::Step() {
@@ -64,7 +77,10 @@ bool Selector::Step() {
         PerformHome(mm::Selector);
         return false;
     case Ready:
-        //dbg_logic_P(PSTR("Selector Ready"));
+        if (!homingValid && mg::globals.FilamentLoaded() < mg::InSelector) {
+            PlanHome(mm::Selector);
+            return false;
+        }
         return true;
     case Failed:
         dbg_logic_P(PSTR("Selector Failed"));
@@ -74,12 +90,13 @@ bool Selector::Step() {
 }
 
 void Selector::Init() {
-    if (mg::globals.FilamentLoaded() < mg::FilamentLoadState::InSelector) {
+    if (mg::globals.FilamentLoaded() < mg::FilamentLoadState::InSelector && (!mf::finda.Pressed())) {
         // home the Selector only in case we don't have filament loaded (or at least we think we don't)
-        Home();
+        PlanHome(mm::Selector);
     } else {
         // otherwise set selector's position according to know slot positions (and pretend it is correct)
         mm::motion.SetPosition(mm::Selector, SlotPosition(mg::globals.ActiveSlot()).v);
+        InvalidateHoming(); // and plan homing sequence ASAP
     }
 }
 

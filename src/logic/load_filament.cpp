@@ -71,7 +71,10 @@ bool LoadFilament::StepInner() {
         }
         break;
     case ProgressCode::DisengagingIdler:
-        if (!mi::idler.Engaged()) {
+        // beware - this state is being reused for error recovery
+        // and if the selector decided to re-home, we have to wait for it as well
+        // therefore: 'if (!mi::idler.Engaged())' : alone is not enough
+        if (!mi::idler.Engaged() && ms::selector.Slot() == mg::globals.ActiveSlot()) {
             FinishedCorrectly();
         }
         break;
@@ -97,6 +100,9 @@ bool LoadFilament::StepInner() {
             break;
         case mui::Event::Right: // problem resolved - the user pushed the fillament by hand?
             // we should check the state of all the sensors and either report another error or confirm the correct state
+
+            // First invalidate homing flags as the user may have moved the Idler or Selector accidentally
+            InvalidateHoming();
             if (!mf::finda.Pressed()) {
                 // FINDA is still NOT pressed - that smells bad
                 error = ErrorCode::FINDA_DIDNT_SWITCH_ON;

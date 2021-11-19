@@ -22,9 +22,11 @@ bool WhileTopState(SM &sm, ProgressCode state, uint32_t maxLoops = 5000) {
         sm, [&](uint32_t) { return sm.TopLevelState() == state; }, maxLoops);
 }
 
-extern void EnsureActiveSlotIndex(uint8_t slot, modules::globals::FilamentLoadState loadState);
-
-extern void SetFINDAStateAndDebounce(bool press);
+void EnsureActiveSlotIndex(uint8_t slot, modules::globals::FilamentLoadState loadState);
+void SetFINDAStateAndDebounce(bool press);
+void SimulateIdlerHoming();
+void SimulateSelectorHoming();
+void SimulateIdlerAndSelectorHoming();
 
 // these are recommended max steps for simulated movement of the idler and selector
 // - roughly the amount of motion steps from one end to the other + some margin

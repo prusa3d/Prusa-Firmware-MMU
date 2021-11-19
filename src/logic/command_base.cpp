@@ -1,6 +1,8 @@
 /// @file command_base.cpp
 #include "command_base.h"
 #include "../modules/globals.h"
+#include "../modules/finda.h"
+#include "../modules/fsensor.h"
 #include "../modules/idler.h"
 #include "../modules/selector.h"
 #include "../modules/motion.h"
@@ -86,6 +88,31 @@ void CommandBase::Panic(ErrorCode ec) {
     for (uint8_t i = 0; i < config::toolCount; ++i) {
         ml::leds.SetMode(i, ml::green, ml::blink0);
         ml::leds.SetMode(i, ml::red, ml::blink0);
+    }
+}
+
+void CommandBase::InvalidateHoming() {
+    mi::idler.InvalidateHoming();
+    ms::selector.InvalidateHoming();
+}
+
+void CommandBase::InvalidateHomingAndFilamentState() {
+    InvalidateHoming();
+
+    // reset the filament presence according to available sensor states
+    bool fs = mfs::fsensor.Pressed();
+    bool fi = mf::finda.Pressed();
+
+    if (fs && fi) {
+        mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::InNozzle);
+    } else if (!fs && fi) {
+        mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::InSelector);
+    } else if (!fs && !fi) {
+        mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::AtPulley);
+    } else {
+        // we can't say for sure - definitely an error in sensors or something is blocking them
+        // let's assume there is a piece of filament present in the selector
+        mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::InSelector);
     }
 }
 
