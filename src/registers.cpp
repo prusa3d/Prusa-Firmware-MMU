@@ -165,6 +165,7 @@
 | 0x1fh 31 | uint16  |Set/Get Selector iRun current| 0-31         | 1fh 31      | 31->530mA: see TMC2130 current conversion| Read / Write | M707 A0x1f | M708 A0x1f Xn
 | 0x20h 32 | uint16   | Set/Get Idler iRun current | 0-31         | 1fh 31      | 31->530mA: see TMC2130 current conversion| Read / Write | M707 A0x20 | M708 A0x20 Xn
 | 0x21h 33 | uint16   | Reserved for internal use  | 225          |             | N/A                                      | N/A          | N/A        | N/A
+| 0x22h 34 | uint16   | Bowden length              | 155h 341     | 318h 792    | unit mm                                  | Read / Write | M707 A0x22 | M708 A0x22 Xn
 */
 
 struct __attribute__((packed)) RegisterFlags {
@@ -287,7 +288,7 @@ static const RegisterRec registers[] PROGMEM = {
     RegisterRec(false, &project_build_number),
     // 0x04
     RegisterRec( // MMU errors
-        []() -> uint16_t { return mg::globals.DriveErrors(); },
+        []() -> uint16_t { return mg::globals.DriveErrors(); }, // compiles to: <{lambda()#1}::_FUN()>: jmp <modules::permanent_storage::DriveError::get()>
         // [](uint16_t) {}, // @@TODO think about setting/clearing the error counter from the outside
         2),
     // 0x05
@@ -429,6 +430,12 @@ static const RegisterRec registers[] PROGMEM = {
     // 0x21 Current VCC voltage level R
     RegisterRec(
         []() -> uint16_t { return 225; /*mv::vcc.CurrentBandgapVoltage();*/ },
+        2),
+
+    // 0x22 Detected bowden length R
+    RegisterRec(
+        []() -> uint16_t { return mps::BowdenLength::Get(); },
+        [](uint16_t d) { mps::BowdenLength::Set(d); },
         2),
 };
 

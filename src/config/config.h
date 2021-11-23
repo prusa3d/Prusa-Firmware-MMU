@@ -18,7 +18,10 @@
 /// Wrangler for assorted compile-time configuration and constants.
 namespace config {
 
-static constexpr const uint8_t toolCount = 5U; ///< Max number of extruders/tools/slots
+/// Max number of extruders/tools/slots
+/// Beware - if you change this, the EEPROM structure will become invalid and no migration procedures have been implemented.
+/// So if you really have to change this, erase your EEPROM content then.
+static constexpr const uint8_t toolCount = 5U;
 static_assert(toolCount < 15, "Up to 14 valid slots (+1 parking) is supported in EEPROM storage");
 
 // Printer's filament sensor setup
@@ -92,9 +95,9 @@ static constexpr U_mm couplerToBowden = 3.5_mm; /// FINDA Coupler screw to bowde
 // just another piece of PLA (probably having more resistance in the tubes)
 // and we are at least 40mm off! It looks like this really depends on the exact position
 // We'll probably need to check for StallGuard while pushing the filament to avoid ginding the filament
-static constexpr U_mm defaultBowdenLength = 427.0_mm; ///< ~427.0_mm - Default Bowden length. TODO Should be stored in EEPROM. 392 a 784
-static constexpr U_mm minimumBowdenLength = 341.0_mm; ///< ~341.0_mm - Minimum bowden length. TODO Should be stored in EEPROM.
-static constexpr U_mm maximumBowdenLength = 792.0_mm; ///< ~792.0_mm - Maximum bowden length. TODO Should be stored in EEPROM.
+static constexpr U_mm defaultBowdenLength = 427.0_mm; /// ~427.0_mm - Default Bowden length.
+static constexpr U_mm minimumBowdenLength = 341.0_mm; /// ~341.0_mm - Minimum bowden length.
+static constexpr U_mm maximumBowdenLength = 792.0_mm; /// ~792.0_mm - Maximum bowden length.
 static constexpr U_mm feedToFinda = cuttingEdgeToFindaMidpoint + filamentMinLoadedToMMU;
 static constexpr U_mm maximumFeedToFinda = feedToFinda + 20.0_mm; ///< allow for some safety margin to load to FINDA
 static constexpr U_mm pulleyHelperMove = 10.0_mm; ///< Helper move for Load/Unload error states - when the MMU should slowly move the filament a bit
