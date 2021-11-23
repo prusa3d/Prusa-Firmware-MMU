@@ -123,8 +123,8 @@ void Idler::Init() {
         // home the Idler only in case we don't have filament loaded in the printer (or at least we think we don't)
         PlanHome(mm::Idler);
     } else {
-        // otherwise set selector's position according to know slot positions (and pretend it is correct)
-        mm::motion.SetPosition(mm::Idler, SlotPosition(mg::globals.ActiveSlot()).v);
+        // otherwise assume the Idler is at its idle position (that's where it usually is)
+        mm::motion.SetPosition(mm::Idler, SlotPosition(IdleSlotIndex()).v);
         InvalidateHoming(); // and plan homing sequence ASAP
     }
 }

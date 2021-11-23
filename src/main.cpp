@@ -117,6 +117,11 @@ void setup() {
     // Idler and Selector decide whether homing is possible/safe
     mi::idler.Init();
     ms::selector.Init();
+
+    // activate the correct LED if filament is present
+    if (mg::globals.FilamentLoaded() > mg::FilamentLoadState::AtPulley) {
+        ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
+    }
 }
 
 static constexpr const uint8_t maxMsgLen = 10;
