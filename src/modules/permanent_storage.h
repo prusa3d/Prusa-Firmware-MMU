@@ -16,22 +16,17 @@ void Init();
 /// Erase the whole EEPROM
 void EraseAll();
 
-/// @brief Read manipulate and store bowden length
+/// @brief Read and store bowden length
 ///
 /// Value is stored independently for each filament.
 /// Active filament is deduced from active_extruder global variable.
 class BowdenLength {
 public:
-    static uint16_t get();
-    static const uint8_t stepSize = 10u; ///< increase()/decrease() bowden length step size
-    BowdenLength();
-    bool increase();
-    bool decrease();
-    ~BowdenLength();
+    /// @returns bowden length for selected slot
+    static uint16_t Get(uint8_t slot);
 
-private:
-    uint8_t filament; ///< Selected filament
-    uint16_t length; ///< Selected filament bowden length
+    /// Sets
+    static void Set(uint8_t slot, uint16_t steps);
 };
 
 /// @brief Read and store last filament loaded to nozzle

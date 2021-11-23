@@ -71,7 +71,7 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
         if( step == 100 ){
             mfs::fsensor.ProcessMessage(true);
         }
-        return fb.State() == FeedToBondtech::PushingFilamentToFSensor; },
+        return fb.State() == FeedToBondtech::PushingFilamentToFSensorFast; },
         1500));
 
     REQUIRE(mfs::fsensor.Pressed());

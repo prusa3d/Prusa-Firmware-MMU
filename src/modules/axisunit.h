@@ -145,6 +145,13 @@ static constexpr typename AU::type_t unitToSteps(U v) {
     return unitToAxisUnit<AU>(v).v;
 }
 
+/// Convert a steps type (pos_t or steps_t) to a unit::Unit.
+/// Extract the raw step count from an AxisUnit with type checking.
+template <typename U, typename AU>
+static constexpr typename U::type_t stepsToUnit(AU pos) {
+    return axisUnitToUnit<U, AU>(pos);
+}
+
 // Pulley
 typedef AxisUnit<pos_t, Pulley, Lenght> P_pos_t; ///< Pulley position type (steps)
 typedef AxisUnit<steps_t, Pulley, Speed> P_speed_t; ///< Pulley speed type (steps/s)

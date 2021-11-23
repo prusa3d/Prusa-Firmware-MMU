@@ -3,6 +3,7 @@
 #include "../hal/eeprom.h"
 #include "globals.h"
 #include "../config/config.h"
+#include "axisunit.h"
 
 #include <stddef.h>
 
@@ -43,10 +44,14 @@ static const uint8_t layoutVersion = 0xff;
 // ideally, this would have been a nice constexpr (since it is a compile time constant), but the C++ standard prohibits reinterpret_casts in constexpr
 static eeprom_t *const eepromBase = reinterpret_cast<eeprom_t *>(0); ///< First EEPROM address
 constexpr const uint16_t eepromEmpty = 0xffffU; ///< EEPROM content when erased
-constexpr const uint16_t eepromLengthCorrectionBase = 7900U; ///< legacy bowden length correction base (~391mm)
-constexpr const uint16_t eepromBowdenLenDefault = 8900U; ///< Default bowden length (~427 mm)
-constexpr const uint16_t eepromBowdenLenMinimum = 6900U; ///< Minimum bowden length (~341 mm)
-constexpr const uint16_t eepromBowdenLenMaximum = 16000U; ///< Maximum bowden length (~792 mm)
+
+namespace mm = modules::motion;
+constexpr const uint16_t eepromLengthCorrectionBase = config::defaultBowdenLength.v;
+constexpr const uint16_t eepromBowdenLenDefault = config::defaultBowdenLength.v; ///< Default bowden length (~427 mm)
+constexpr const uint16_t eepromBowdenLenMinimum = config::minimumBowdenLength.v; ///< Minimum bowden length (~341 mm)
+constexpr const uint16_t eepromBowdenLenMaximum = config::maximumBowdenLength.v; ///< Maximum bowden length (~792 mm)
+
+// static_assert (mm::unitToSteps<mm::P_pos_t>(config::maximumBowdenLength) < 65535U, "");
 
 namespace ee = hal::eeprom;
 
@@ -88,11 +93,10 @@ static bool validBowdenLen(const uint16_t BowdenLength) {
 ///
 /// Returns stored value, doesn't return actual value when it is edited by increase() / decrease() unless it is stored.
 /// @return stored bowden length
-uint16_t BowdenLength::get() {
-    uint8_t filament = mg::globals.ActiveSlot();
-    if (validFilament(filament)) {
+uint16_t BowdenLength::Get(uint8_t slot) {
+    if (validFilament(slot)) {
         // @@TODO these reinterpret_cast expressions look horrible but I'm keeping them almost intact to respect the original code from MM_control_01
-        uint16_t bowdenLength = ee::EEPROM::ReadByte(reinterpret_cast<size_t>(&(eepromBase->eepromBowdenLen[filament])));
+        uint16_t bowdenLength = ee::EEPROM::ReadByte(reinterpret_cast<size_t>(&(eepromBase->eepromBowdenLen[slot])));
 
         if (eepromEmpty == bowdenLength) {
             const uint8_t LengthCorrectionLegacy = ee::EEPROM::ReadByte(reinterpret_cast<size_t>(&(eepromBase->eepromLengthCorrection)));
@@ -107,46 +111,10 @@ uint16_t BowdenLength::get() {
     return eepromBowdenLenDefault;
 }
 
-/// @brief Construct BowdenLength object which allows bowden length manipulation
-///
-/// To be created on stack, new value is permanently stored when object goes out of scope.
-/// Active filament and associated bowden length is stored in member variables.
-BowdenLength::BowdenLength()
-    : filament(mg::globals.ActiveSlot()) // @@TODO - verify correct initialization order
-    , length(BowdenLength::get()) // @@TODO
-{
-}
-
-/// @brief Increase bowden length
-///
-/// New value is not stored immediately. See ~BowdenLength() for storing permanently.
-/// @retval true passed
-/// @retval false failed, it is not possible to increase, new bowden length would be out of range
-bool BowdenLength::increase() {
-    if (validBowdenLen(length + stepSize)) {
-        length += stepSize;
-        return true;
+void BowdenLength::Set(uint8_t slot, uint16_t steps) {
+    if (validFilament(slot)) {
+        ee::EEPROM::UpdateWord(EEOFFSET(eepromBase->eepromBowdenLen[slot]), steps);
     }
-    return false;
-}
-
-/// @brief Decrease bowden length
-///
-/// New value is not stored immediately. See ~BowdenLength() for storing permanently.
-/// @retval true passed
-/// @retval false failed, it is not possible to decrease, new bowden length would be out of range
-bool BowdenLength::decrease() {
-    if (validBowdenLen(length - stepSize)) {
-        length -= stepSize;
-        return true;
-    }
-    return false;
-}
-
-/// @brief Store bowden length permanently.
-BowdenLength::~BowdenLength() {
-    if (validFilament(filament))
-        ee::EEPROM::UpdateWord(EEOFFSET(eepromBase->eepromBowdenLen[filament]), length);
 }
 
 /// @brief Get filament storage status
