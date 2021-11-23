@@ -9,6 +9,7 @@
 #include "../modules/permanent_storage.h"
 #include "../modules/pulley.h"
 #include "../debug.h"
+#include "../config/axis.h"
 
 namespace logic {
 
@@ -23,9 +24,22 @@ void FeedToBondtech::Reset(uint8_t maxRetries) {
 void logic::FeedToBondtech::GoToPushToNozzle() {
     mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InFSensor);
     // plan a slow move to help push filament into the nozzle
-    //@@TODO the speed in mm/s must correspond to printer's feeding speed!
+    // the speed in mm/s must correspond to printer's feeding speed!
     mpu::pulley.PlanMove(mg::globals.FSensorToNozzle_mm(), mg::globals.PulleySlowFeedrate_mm_s());
     state = PushingFilamentIntoNozzle;
+}
+
+void FeedToBondtech::UpdateBowdenLength(int32_t measuredBowdenLength) {
+    if (measuredBowdenLength < (int32_t)config::maximumBowdenLength.v) { // is the measured length any valid/acceptable?
+        static_assert(config::maximumBowdenLength.v <= 65535, "Max bowden length too long");
+        int16_t mbl = (int16_t)measuredBowdenLength;
+        int16_t difference = abs(mbl - mps::BowdenLength::Get());
+        if (difference > 10) {
+            // @@TODO Is 10_mm tolerance good enough?
+            // @@TODO We can either raise an error (filament slipping) or save the new value.
+            mps::BowdenLength::Set(mbl);
+        }
+    }
 }
 
 bool FeedToBondtech::Step() {
@@ -37,11 +51,14 @@ bool FeedToBondtech::Step() {
             state = PushingFilamentFast;
             mpu::pulley.InitAxis();
             // plan a fast move while in the safe minimal length
-            mpu::pulley.PlanMove(config::minimumBowdenLength,
+            feedStart_mm = mpu::pulley.CurrentPosition_mm();
+            // fast feed in millimeters - if the EEPROM value is incorrect, we'll get the default length
+            unit::U_mm fastFeedDistance = { (long double)mps::BowdenLength::Get() };
+            mpu::pulley.PlanMove(fastFeedDistance,
                 mg::globals.PulleyLoadFeedrate_mm_s(),
                 mg::globals.PulleySlowFeedrate_mm_s());
             // plan additional slow move while waiting for fsensor to trigger
-            mpu::pulley.PlanMove(config::maximumBowdenLength - config::minimumBowdenLength,
+            mpu::pulley.PlanMove(config::maximumBowdenLength - fastFeedDistance,
                 mg::globals.PulleySlowFeedrate_mm_s(),
                 mg::globals.PulleySlowFeedrate_mm_s());
         }
@@ -92,6 +109,7 @@ bool FeedToBondtech::Step() {
             dbg_logic_P(PSTR("Feed to Bondtech --> Idler disengaged"));
             dbg_logic_fP(PSTR("Pulley end steps %u"), mpu::pulley.CurrentPosition_mm());
             state = OK;
+            UpdateBowdenLength(abs(mpu::pulley.CurrentPosition_mm() - feedStart_mm));
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
         }
         return false;

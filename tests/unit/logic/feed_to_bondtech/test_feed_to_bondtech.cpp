@@ -27,6 +27,13 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
     ForceReinitAllAutomata();
     REQUIRE(EnsureActiveSlotIndex(slot, mg::FilamentLoadState::AtPulley));
 
+    // reset bowden lenghts in EEPROM
+    InitBowdenLengths();
+    // check bowden lengths
+    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
+        REQUIRE(mps::BowdenLength::Get(mg::globals.ActiveSlot()) == config::minimumBowdenLength.v);
+    }
+
     FeedToBondtech fb;
     main_loop();
 

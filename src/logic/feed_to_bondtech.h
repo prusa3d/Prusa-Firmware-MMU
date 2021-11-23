@@ -1,6 +1,7 @@
 /// @file feed_to_bondtech.h
 #pragma once
 #include <stdint.h>
+#include "../modules/axisunit.h"
 
 namespace logic {
 
@@ -10,6 +11,10 @@ namespace logic {
 /// Then it feeds a bit more very gently to push the filament into the nozzle
 /// Disengages the Idler after finishing the feed.
 /// Disables the Pulley axis after disengaging the idler.
+///
+/// If filament has been successfully fed into the fsensor,
+/// records/updates PTFE length.
+/// To prevent constant EEPROM updates only significant changes are recorded.
 struct FeedToBondtech {
     /// internal states of the state machine
     enum {
@@ -46,8 +51,12 @@ struct FeedToBondtech {
     void GoToPushToNozzle();
 
 private:
+    /// Update bowden length if changed significantly
+    void UpdateBowdenLength(int32_t measuredBowdenLength);
+
     uint8_t state;
     uint8_t maxRetries;
+    int32_t feedStart_mm; // intentionally trying to avoid using U_mm because it is a float (resp. long double)
 };
 
 } // namespace logic
