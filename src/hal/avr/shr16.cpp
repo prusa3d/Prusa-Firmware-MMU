@@ -17,24 +17,25 @@ SHR16 shr16;
 void SHR16::Init() {
     using namespace hal::gpio;
     gpio::Init(SHR16_DATA, GPIO_InitTypeDef(Mode::output, Level::low));
-    gpio::Init(SHR16_LATCH, GPIO_InitTypeDef(Mode::output, Level::high));
+    gpio::Init(SHR16_LATCH, GPIO_InitTypeDef(Mode::output, Level::low));
     gpio::Init(SHR16_CLOCK, GPIO_InitTypeDef(Mode::output, Level::low));
     Write(SHR16_ENA_MSK);
 }
 
 void SHR16::Write(uint16_t v) {
     using namespace hal::gpio;
-    WritePin(SHR16_LATCH, Level::low);
-    _delay_us(1);
     for (uint16_t m = 0x8000; m; m >>= 1) {
-        WritePin(SHR16_DATA, (Level)((m & v) != 0));
-        asm("nop");
-        WritePin(SHR16_CLOCK, Level::high);
-        asm("nop");
         WritePin(SHR16_CLOCK, Level::low);
-        asm("nop");
+        WritePin(SHR16_DATA, (Level)((m & v) != 0));
+        // _delay_us(1);
+        WritePin(SHR16_CLOCK, Level::high);
+        // _delay_us(1);
     }
+    WritePin(SHR16_CLOCK, Level::low);
     WritePin(SHR16_LATCH, Level::high);
+    _delay_us(10);
+    WritePin(SHR16_LATCH, Level::low);
+
     shr16_v = v;
 }
 
