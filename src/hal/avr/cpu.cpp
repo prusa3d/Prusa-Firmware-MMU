@@ -26,7 +26,6 @@ void Reset() {
 
 void Step() {
     if (resetPending) {
-        hal::usart::usart1.puts("resetPending\n");
         USB_Detach();
         for (;;)
             ; //endless loop while waiting for the watchdog to reset
