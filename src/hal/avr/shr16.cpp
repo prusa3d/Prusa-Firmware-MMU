@@ -33,7 +33,7 @@ void SHR16::Write(uint16_t v) {
     }
     WritePin(SHR16_CLOCK, Level::low);
     WritePin(SHR16_LATCH, Level::high);
-    _delay_us(10);
+    _delay_us(25);
     WritePin(SHR16_LATCH, Level::low);
 
     shr16_v = v;
