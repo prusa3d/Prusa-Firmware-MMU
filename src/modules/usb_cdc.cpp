@@ -72,15 +72,18 @@ void EVENT_USB_Device_ControlRequest(void) {
  *  \param[in] CDCInterfaceInfo  Pointer to the CDC class interface configuration structure being referenced
  */
 void EVENT_CDC_Device_ControLineStateChanged(USB_ClassInfo_CDC_Device_t *const CDCInterfaceInfo) {
-}
-
-void EVENT_CDC_Device_LineEncodingChanged(USB_ClassInfo_CDC_Device_t *const CDCInterfaceInfo) {
-    if (CDCInterfaceInfo->State.LineEncoding.BaudRateBPS == 1200) {
-        // *(uint16_t *)0x0800U = 0x7777; //old bootloader?
-        *(uint16_t *)(RAMEND - 1) = 0x7777;
+    if (CDCInterfaceInfo->State.LineEncoding.BaudRateBPS == 1200 && !(CDCInterfaceInfo->State.ControlLineStates.HostToDevice & CDC_CONTROL_LINE_OUT_DTR)) {
+        if (pgm_read_word(FLASHEND - 1) == 0xDCFB)
+            *(uint16_t *)(RAMEND - 1) = 0x7777; //MMU2-MK3 bootloader
+        else
+            *(uint16_t *)0x0800U = 0x7777; //MMU2-MK4 bootloader with UART support
         hal::cpu::resetPending = true;
         hal::watchdog::Enable(hal::watchdog::configuration::compute(250));
     }
+}
+
+void EVENT_CDC_Device_LineEncodingChanged(USB_ClassInfo_CDC_Device_t *const CDCInterfaceInfo) {
+
 }
 }
 
