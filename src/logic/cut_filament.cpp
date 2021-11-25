@@ -33,8 +33,7 @@ void CutFilament::SelectFilamentSlot() {
     state = ProgressCode::SelectingFilamentSlot;
     mi::idler.Engage(cutSlot);
     ms::selector.MoveToSlot(cutSlot);
-    ml::leds.SetMode(cutSlot, ml::green, ml::blink0);
-    ml::leds.SetMode(cutSlot, ml::red, ml::off);
+    ml::leds.SetPairButOffOthers(cutSlot, ml::blink0, ml::off);
 }
 
 bool CutFilament::StepInner() {
@@ -94,8 +93,7 @@ bool CutFilament::StepInner() {
         if (ms::selector.Slot() == 5) { // selector returned to position, feed the filament back to FINDA
             state = ProgressCode::OK;
             error = ErrorCode::OK;
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
+            ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::on, ml::off);
             feed.Reset(true);
         }
         break;

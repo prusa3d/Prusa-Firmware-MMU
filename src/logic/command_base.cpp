@@ -137,8 +137,7 @@ void CommandBase::ErrDisengagingIdler() {
 void CommandBase::GoToErrDisengagingIdler(ErrorCode ec) {
     state = ProgressCode::ERRDisengagingIdler;
     error = ec;
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0);
+    ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::blink0);
     mi::idler.Disengage();
 }
 

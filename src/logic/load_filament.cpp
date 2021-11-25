@@ -27,13 +27,11 @@ void logic::LoadFilament::Reset2() {
     state = ProgressCode::FeedingToFinda;
     error = ErrorCode::RUNNING;
     feed.Reset(true);
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
+    ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
 }
 
 void logic::LoadFilament::GoToRetractingFromFinda() {
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
+    ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
     state = ProgressCode::RetractingFromFinda;
     error = ErrorCode::RUNNING;
     retract.Reset();
@@ -42,8 +40,7 @@ void logic::LoadFilament::GoToRetractingFromFinda() {
 void logic::LoadFilament::FinishedCorrectly() {
     state = ProgressCode::OK;
     error = ErrorCode::OK;
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
+    ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::off);
     mm::motion.Disable(mm::Pulley);
 }
 

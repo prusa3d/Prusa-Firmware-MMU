@@ -45,16 +45,14 @@ void ToolChange::Reset(uint8_t param) {
 }
 
 void logic::ToolChange::GoToFeedingToBondtech() {
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
+    ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
     james.Reset(3);
     state = ProgressCode::FeedingToBondtech;
     error = ErrorCode::RUNNING;
 }
 
 void logic::ToolChange::FinishedCorrectly() {
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
+    ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::on, ml::off);
     state = ProgressCode::OK;
     error = ErrorCode::OK;
 }

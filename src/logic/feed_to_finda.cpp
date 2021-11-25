@@ -15,7 +15,7 @@ void FeedToFinda::Reset(bool feedPhaseLimited) {
     dbg_logic_P(PSTR("\nFeed to FINDA\n\n"));
     state = EngagingIdler;
     this->feedPhaseLimited = feedPhaseLimited;
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
+    ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
     mi::idler.Engage(mg::globals.ActiveSlot());
     // We can't get any FINDA readings if the selector is at the wrong spot - move it accordingly if necessary
     ms::selector.MoveToSlot(mg::globals.ActiveSlot());
@@ -48,8 +48,7 @@ bool FeedToFinda::Step() {
             state = OK;
         } else if (mm::motion.QueueEmpty()) { // all moves have been finished and FINDA didn't switch on
             state = Failed;
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0);
+            ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::blink0);
         }
     }
         return false;

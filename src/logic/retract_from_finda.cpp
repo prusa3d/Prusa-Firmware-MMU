@@ -35,8 +35,7 @@ bool RetractFromFinda::Step() {
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
             } else { // FINDA didn't switch off
                 state = Failed;
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::blink0);
+                ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::blink0);
             }
         }
         return false;
