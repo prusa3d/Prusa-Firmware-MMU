@@ -28,8 +28,7 @@ void UnloadFilament::Reset(uint8_t /*param*/) {
     state = ProgressCode::UnloadingToFinda;
     error = ErrorCode::RUNNING;
     unl.Reset(maxRetries);
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
+    ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::off);
 }
 
 void logic::UnloadFilament::FinishedCorrectly() {
@@ -37,8 +36,7 @@ void logic::UnloadFilament::FinishedCorrectly() {
     error = ErrorCode::OK;
     mm::motion.Disable(mm::Pulley);
     mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::AtPulley); // filament unloaded
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::red, ml::off);
+    ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::off);
 }
 
 bool UnloadFilament::StepInner() {
