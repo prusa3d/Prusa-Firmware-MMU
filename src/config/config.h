@@ -87,6 +87,7 @@ static constexpr U_mm defaultBowdenLength = 427.0_mm; /// ~427.0_mm /// Default 
 static constexpr U_mm minimumBowdenLength = 341.0_mm; /// ~341.0_mm /// Minimum bowden length. @TODO Should be stored in EEPROM.
 static constexpr U_mm maximumBowdenLength = 792.0_mm; /// ~792.0_mm /// Maximum bowden length. @TODO Should be stored in EEPROM.
 static constexpr U_mm feedToFinda = cuttingEdgeToFindaMidpoint + filamentMinLoadedToMMU;
+static constexpr U_mm maximumFeedToFinda = feedToFinda + 20.0_mm; ///< allow for some safety margin to load to FINDA
 static constexpr U_mm pulleyHelperMove = 10.0_mm; /// Helper move for Load/Unload error states - when the MMU should slowly move the filament a bit
 static constexpr U_mm cutLength = 8.0_mm;
 static constexpr U_mm fsensorToNozzle = 20.0_mm; /// ~20mm from MK4's filament sensor through extruder gears into nozzle

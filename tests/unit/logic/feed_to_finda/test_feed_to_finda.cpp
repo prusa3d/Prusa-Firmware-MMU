@@ -31,7 +31,7 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
     main_loop();
 
     // restart the automaton
-    ff.Reset(false);
+    ff.Reset(false, true);
 
     REQUIRE(ff.State() == FeedToFinda::EngagingIdler);
 
@@ -99,7 +99,7 @@ TEST_CASE("feed_to_finda::FINDA_failed", "[feed_to_finda]") {
     main_loop();
 
     // restart the automaton - we want the limited version of the feed
-    ff.Reset(true);
+    ff.Reset(true, true);
 
     REQUIRE(ff.State() == FeedToFinda::EngagingIdler);
 
@@ -128,7 +128,7 @@ TEST_CASE("feed_to_finda::FINDA_failed", "[feed_to_finda]") {
     REQUIRE(WhileCondition(
         ff,
         [&](uint32_t) { return ff.State() == FeedToFinda::PushingFilament; },
-        5000));
+        10000));
 
     // the FINDA didn't trigger, we should be in the Failed state
     REQUIRE(ff.State() == FeedToFinda::Failed);
