@@ -40,7 +40,7 @@ void ToolChange::Reset(uint8_t param) {
         error = ErrorCode::RUNNING;
         dbg_logic_P(PSTR("Filament is not loaded --> load"));
         mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::InSelector);
-        feed.Reset(true);
+        feed.Reset(true, false);
     }
 }
 
@@ -67,7 +67,7 @@ bool ToolChange::StepInner() {
             state = ProgressCode::FeedingToFinda;
             error = ErrorCode::RUNNING;
             mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::AtPulley);
-            feed.Reset(true);
+            feed.Reset(true, false);
         }
         break;
     case ProgressCode::FeedingToFinda:

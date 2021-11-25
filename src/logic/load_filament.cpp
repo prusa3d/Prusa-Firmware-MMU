@@ -26,7 +26,7 @@ void LoadFilament::Reset(uint8_t param) {
 void logic::LoadFilament::Reset2() {
     state = ProgressCode::FeedingToFinda;
     error = ErrorCode::RUNNING;
-    feed.Reset(true);
+    feed.Reset(true, true);
     ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
 }
 

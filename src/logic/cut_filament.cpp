@@ -49,7 +49,7 @@ bool CutFilament::StepInner() {
     case ProgressCode::SelectingFilamentSlot:
         if (mi::idler.Engaged() && ms::selector.Slot() == cutSlot) { // idler and selector finished their moves
             mg::globals.SetFilamentLoaded(cutSlot, mg::FilamentLoadState::AtPulley);
-            feed.Reset(true);
+            feed.Reset(true, true);
             state = ProgressCode::FeedingToFinda;
         }
         break;
@@ -94,7 +94,7 @@ bool CutFilament::StepInner() {
             state = ProgressCode::OK;
             error = ErrorCode::OK;
             ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::on, ml::off);
-            feed.Reset(true);
+            feed.Reset(true, true);
         }
         break;
     case ProgressCode::OK:
