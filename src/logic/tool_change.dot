@@ -1,0 +1,47 @@
+digraph architecture {
+    graph [fontname=Helvetica, fontsize=10]
+    node [shape=record, fontname=Helvetica, fontsize=10]
+    edge [fontname=Helvetica, fontsize=10]
+    compound=true;
+    subgraph cluster_tool_change { label="tool_change"
+        reset
+        ActiveSlot_FilamentLoadState [label="Slot && FilLoadState", shape=diamond]
+        return
+        FilamentLoadState [shape=diamond]
+        UnloadingFilament
+        FeedingToFinda
+        FINDA [shape=diamond]
+        ErrorFINDAnotON
+        FeedingToBondtech
+        FSensor [shape=diamond]
+        ErrorFSnotON
+        ERRWaitingForUser
+        FinishedCorrectly
+        {rank = same
+                FeedingToBondtech ErrorFINDAnotON
+        }
+        {rank = same
+                FinishedCorrectly ERRWaitingForUser
+        }
+        {rank = same
+            FinishedCorrectly return
+
+        }
+    }
+    reset -> ActiveSlot_FilamentLoadState
+    ActiveSlot_FilamentLoadState:w -> return [label = "Slot && InNozzle"]
+    ActiveSlot_FilamentLoadState:s -> FilamentLoadState:n
+    FilamentLoadState -> UnloadingFilament [label=">=InSelector"]
+    FilamentLoadState:e -> FeedingToFinda [label="<InSelector"]
+    UnloadingFilament -> FeedingToFinda
+    FeedingToFinda -> FINDA
+    FINDA:w -> ErrorFINDAnotON [label="OFF"]
+    ErrorFINDAnotON -> ERRWaitingForUser
+    FINDA:s -> FeedingToBondtech:n [label="ON"]
+    FeedingToBondtech -> FSensor
+    FSensor:w -> ErrorFSnotON [label="OFF"]
+    ErrorFSnotON -> ERRWaitingForUser
+    FSensor -> FinishedCorrectly [label="ON"]
+
+
+}
