@@ -8,6 +8,9 @@
 namespace logic {
 
 /// @brief A high-level command state machine - handles the complex logic of unloading filament
+///
+/// State machine overview:
+/// @dotfile unload_filament.dot
 class UnloadFilament : public CommandBase {
 public:
     inline UnloadFilament()

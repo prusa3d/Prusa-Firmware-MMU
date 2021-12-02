@@ -1,0 +1,33 @@
+digraph architecture {
+   graph [fontname=Helvetica, fontsize=10];
+   node [shape=record, fontname=Helvetica, fontsize=10];
+   edge [fontname=Helvetica, fontsize=10];
+   compound=true;
+   subgraph cluster_unload_filament { label="unload_filament"
+        reset;
+        UnloadFilament [ URL="\ref logic::UnloadFilament"];
+        finda_FilLoadState [ shape=diamond, label="FINDA && FilLoadState"];
+        return [shape="oval"];
+        UnloadingToFinda [ URL="\ref logic::UnloadingToFinda", shape=diamond];
+        ErrorFSnotOFF [shape=oval];
+        ErrorFINDAnotOFF [shape=oval];
+        RetractingFromFinda [shape=diamond];
+        DisengagingIdler [shape=diamond];
+        ERRDisengagingIdler [shape=hexagon];
+        Finished [shape=oval];
+        {rank = same; finda_FilLoadState; return;}
+        {rank = same; ErrorFSnotOFF; UnloadingToFinda; ErrorFINDAnotOFF;}
+        {rank = same; DisengagingIdler; ERRDisengagingIdler;}
+   }
+   reset -> finda_FilLoadState
+   finda_FilLoadState -> return [label="NO && < 2"];
+   finda_FilLoadState -> UnloadFilament [label="YES && >=2"];
+   UnloadFilament -> UnloadingToFinda;
+   UnloadingToFinda -> ErrorFSnotOFF [label="err"];
+   UnloadingToFinda -> ErrorFINDAnotOFF [label="err"];
+   UnloadingToFinda -> RetractingFromFinda;
+   RetractingFromFinda -> ErrorFINDAnotOFF [label="err"];
+   RetractingFromFinda -> DisengagingIdler;
+   DisengagingIdler -> ERRDisengagingIdler [label="err"];
+   DisengagingIdler -> Finished;
+}
