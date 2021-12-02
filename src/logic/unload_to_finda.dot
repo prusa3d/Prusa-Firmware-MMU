@@ -1,0 +1,36 @@
+digraph architecture {
+    graph [fontname=Helvetica, fontsize=10];
+    node [shape=record, fontname=Helvetica, fontsize=10];
+    edge [fontname=Helvetica, fontsize=10];
+    compound=true;
+    subgraph cluster_unload_to_finda { label="unload_to_finda"
+         Reset;
+         retry [shape=circle];
+         finda_state [ shape=diamond, label="FINDA"];
+         engage_idler [shape=circle];
+         EngagingIdler [ shape=diamond];
+         UnloadingToFinda [shape=diamond];
+         pull_pulley [shape=circle];
+         WaitingForFINDA [ shape=diamond, label="Waiting for FINDA"];
+         AboardPlannedMoves [shape=circle];
+         OK;
+         Failed;
+         {rank = same; finda_state; retry;}
+         {rank = same; engage_idler; EngagingIdler;}
+         {rank = same; pull_pulley; UnloadingToFinda;}
+         {rank = same; WaitingForFINDA; AboardPlannedMoves;}
+         {rank = same; OK; Failed;}
+    }
+    Reset -> finda_state;
+    finda_state -> OK [label="NO"];
+    finda_state -> EngagingIdler [label="YES"];
+    EngagingIdler -> engage_idler;
+    EngagingIdler -> UnloadingToFinda [label=">=InSelector"];
+    EngagingIdler -> Failed [label="<InSelector"];
+    UnloadingToFinda -> pull_pulley [label="Idler engaged"];
+    UnloadingToFinda -> WaitingForFINDA;
+    WaitingForFINDA -> AboardPlannedMoves [label="FINDA off"];
+    AboardPlannedMoves -> OK;
+    WaitingForFINDA -> retry [label="FINDA still on"];
+    retry -> Reset [label="maxTries"];
+}

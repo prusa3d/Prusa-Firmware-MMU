@@ -9,6 +9,8 @@
 namespace logic {
 
 /// @brief  A high-level command state machine - handles the complex logic of tool change - which is basically a chain of an Unload and a Load operation.
+/// State machine overview:
+/// @dotfile tool_change.dot
 class ToolChange : public CommandBase {
 public:
     inline ToolChange()

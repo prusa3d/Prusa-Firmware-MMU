@@ -11,6 +11,9 @@ namespace logic {
 /// - rotate pulley to some direction as long as the FINDA is on/off
 /// - rotate some axis to some fixed direction
 /// - load/unload to finda
+///
+/// State machine overview:
+/// @dotfile unload_to_finda.dot
 struct UnloadToFinda {
     /// internal states of the state machine
     enum {
