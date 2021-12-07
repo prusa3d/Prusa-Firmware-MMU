@@ -77,10 +77,10 @@ Idler::OperationResult Idler::Engage(uint8_t slot) {
     }
 
     // coordinates invalid, first home, then engage
-    // avoid homing if filament in fsensor or in nozzle
-    // - the printer may be printing right now and holding the filament
-    // against the pulley even for a short period of time may not be healthy
-    if (!homingValid && mg::globals.FilamentLoaded() < mg::InFSensor) {
+    // The MMU FW only decides to engage the Idler when it is supposed to do something and not while it is idle
+    // so rebooting the MMU while the printer is printing (and thus holding the filament by the moving Idler)
+    // should not be an issue
+    if (!homingValid) {
         PlanHome(mm::Idler);
         return OperationResult::Accepted;
     }
