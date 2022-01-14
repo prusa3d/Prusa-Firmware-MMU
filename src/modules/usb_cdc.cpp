@@ -82,7 +82,7 @@ void EVENT_CDC_Device_LineEncodingChanged(USB_ClassInfo_CDC_Device_t *const CDCI
         hal::watchdog::Enable(hal::watchdog::configuration::compute(250));
     }
 }
-}
+} // extern "C"
 
 namespace modules {
 namespace usb {

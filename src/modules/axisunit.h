@@ -112,11 +112,28 @@ static constexpr AU unitToAxisUnit(U v) {
     return { (typename AU::type_t)(v.v * axisScale[AU::axis].stepsPerUnit) };
 }
 
-/// Convert an unit::Unit to a steps type (pos_t or steps_t).
+/// Convert an AxisUnit to unit::Unit.
+/// The scaling factor is stored with the pair config::AxisConfig::uSteps and
+/// config::AxisConfig::stepsPerUnit (one per-axis).
+template <typename U, typename AU>
+static constexpr typename U::type_t axisUnitToUnit(AU v) {
+    static_assert(AU::unit == U::unit, "incorrect unit type conversion");
+    //static_assert(U::base == axisScale[AU::axis].base, "incorrect unit base conversion");
+    return { (typename U::type_t)(v.v / axisScale[AU::axis].stepsPerUnit) };
+}
+
+/// Convert a unit::Unit to a steps type (pos_t or steps_t).
 /// Extract the raw step count from an AxisUnit with type checking.
 template <typename AU, typename U>
 static constexpr typename AU::type_t unitToSteps(U v) {
     return unitToAxisUnit<AU>(v).v;
+}
+
+/// Convert a steps type (pos_t or steps_t) to a unit::Unit.
+/// Extract the raw step count from an AxisUnit with type checking.
+template <typename U, typename AU>
+static constexpr typename U::type_t stepsToUnit(AU pos) {
+    return axisUnitToUnit<U, AU>(pos);
 }
 
 // Pulley

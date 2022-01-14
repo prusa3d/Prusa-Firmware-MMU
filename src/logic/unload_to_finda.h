@@ -18,7 +18,8 @@ struct UnloadToFinda {
         UnloadingToFinda,
         WaitingForFINDA,
         OK,
-        Failed
+        FailedFINDA,
+        FailedFSensor
     };
     inline UnloadToFinda()
         : maxTries(3) {}
@@ -36,6 +37,7 @@ struct UnloadToFinda {
 private:
     uint8_t state;
     uint8_t maxTries;
+    int32_t unloadStart_mm; // intentionally trying to avoid using U_mm because it is a float (reps. long double)
 };
 
 } // namespace logic

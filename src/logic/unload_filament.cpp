@@ -31,7 +31,7 @@ void UnloadFilament::Reset(uint8_t /*param*/) {
     ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::off);
 }
 
-void logic::UnloadFilament::FinishedCorrectly() {
+void UnloadFilament::FinishedCorrectly() {
     state = ProgressCode::OK;
     error = ErrorCode::OK;
     mm::motion.Disable(mm::Pulley);
@@ -39,21 +39,31 @@ void logic::UnloadFilament::FinishedCorrectly() {
     ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::off);
 }
 
+void UnloadFilament::GoToRetractingFromFinda() {
+    state = ProgressCode::RetractingFromFinda;
+    retract.Reset();
+}
+
+void UnloadFilament::GoToRecheckFilamentAgainstFINDA() {
+    state = ProgressCode::FeedingToFinda;
+    error = ErrorCode::RUNNING;
+    feed.Reset(true, true);
+}
+
 bool UnloadFilament::StepInner() {
     switch (state) {
     // state 1 engage idler - will be done by the Unload to FINDA state machine
     case ProgressCode::UnloadingToFinda: // state 2 rotate pulley as long as the FINDA is on
         if (unl.Step()) {
-            if (unl.State() == UnloadToFinda::Failed) {
+            if (unl.State() == UnloadToFinda::FailedFINDA) {
                 // couldn't unload to FINDA, report error and wait for user to resolve it
                 GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_OFF);
-            } else if (mfs::fsensor.Pressed()) {
+            } else if (unl.State() == UnloadToFinda::FailedFSensor) {
                 // fsensor still pressed - that smells bad - a piece of filament may still be present in the heatsink
                 // and that would cause serious problems while loading another filament
                 GoToErrDisengagingIdler(ErrorCode::FSENSOR_DIDNT_SWITCH_OFF);
             } else {
-                state = ProgressCode::RetractingFromFinda;
-                retract.Reset();
+                GoToRetractingFromFinda();
             }
         }
         return false;
@@ -83,11 +93,17 @@ bool UnloadFilament::StepInner() {
             GoToErrEngagingIdler();
             break;
         case mui::Event::Middle: // try again the whole sequence
+            // First invalidate homing flags as the user may have moved the Idler or Selector accidentally
+            InvalidateHoming();
             if (mf::finda.Pressed()) {
-                Reset(0);
+                Reset(0); // filament is present in FINDA (regardless of FSensor) - assume we need to pull the filament to FINDA first
+            } else if (!mf::finda.Pressed() && mfs::fsensor.Pressed()) {
+                // a piece of filament is stuck in the extruder - keep waiting for the user to fix it
             } else {
-                state = ProgressCode::DisengagingIdler;
-                mi::idler.Disengage();
+                // filament is not present in FINDA and not in FSensor
+                // - that means the filament can still be behind FINDA and blocking the selector
+                // Ideally push it to FINDA and then back to verify the whole situation
+                GoToRecheckFilamentAgainstFINDA();
             }
             break;
         case mui::Event::Right: // problem resolved - the user pulled the fillament by hand
@@ -104,8 +120,8 @@ bool UnloadFilament::StepInner() {
                 error = ErrorCode::FINDA_DIDNT_SWITCH_OFF;
                 state = ProgressCode::ERRWaitingForUser; // stand still
             } else {
-                // all sensors are ok
-                FinishedCorrectly();
+                // all sensors are ok, but re-check the position of the filament against FINDA
+                GoToRecheckFilamentAgainstFINDA();
             }
             break;
         default:
@@ -129,6 +145,17 @@ bool UnloadFilament::StepInner() {
             GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_OFF);
         }
         return false;
+    case ProgressCode::FeedingToFinda:
+        // recovery mode - we assume the filament is somewhere between the idle position and FINDA - thus blocking the selector
+        if (feed.Step()) {
+            if (feed.State() == FeedToFinda::Failed) {
+                GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_ON);
+            } else {
+                state = ProgressCode::RetractingFromFinda;
+                retract.Reset();
+            }
+        }
+        break;
     case ProgressCode::OK:
         return true; // successfully finished
     default: // we got into an unhandled state, better report it

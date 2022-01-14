@@ -2,6 +2,7 @@
 #pragma once
 #include <stdint.h>
 #include "command_base.h"
+#include "feed_to_finda.h"
 #include "unload_to_finda.h"
 #include "retract_from_finda.h"
 
@@ -25,8 +26,11 @@ private:
 
     /// Common code for a correct completion of UnloadFilament
     void FinishedCorrectly();
+    void GoToRetractingFromFinda();
+    void GoToRecheckFilamentAgainstFINDA();
 
     UnloadToFinda unl;
+    FeedToFinda feed;
     RetractFromFinda retract;
 };
 

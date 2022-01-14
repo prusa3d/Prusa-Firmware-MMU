@@ -27,6 +27,7 @@ void SetFINDAStateAndDebounce(bool press);
 void SimulateIdlerHoming();
 void SimulateSelectorHoming();
 void SimulateIdlerAndSelectorHoming();
+bool SimulateUnloadToFINDA(uint32_t step, uint32_t fsOff, uint32_t findaOff);
 
 // these are recommended max steps for simulated movement of the idler and selector
 // - roughly the amount of motion steps from one end to the other + some margin
