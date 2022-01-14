@@ -141,3 +141,18 @@ void SetFINDAStateAndDebounce(bool press) {
     for (size_t i = 0; i < config::findaDebounceMs + 1; ++i)
         main_loop();
 }
+
+// The idea is to set fsOff and findaOff to some reasonable values (like 10 and 1000)
+// for normal situations.
+// For errorneous situations set fsOff or findaOff to some number higher than the number of steps
+// the testing routine is allowed to do -> thus effectively blocking the corresponding moment for fsensor
+// and finda switching off
+bool SimulateUnloadToFINDA(uint32_t step, uint32_t fsOff, uint32_t findaOff) {
+    if (step == fsOff) { // make FSensor switch off
+        mfs::fsensor.ProcessMessage(false);
+        return true;
+    } else if (step == findaOff) { // make FINDA switch off
+        hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
+    }
+    return mf::finda.Pressed();
+}

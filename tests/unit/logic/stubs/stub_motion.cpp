@@ -48,6 +48,7 @@ pos_t Motion::Position(Axis axis) const {
 
 void Motion::SetPosition(Axis axis, pos_t x) {
     axes[axis].pos = x;
+    axisData[axis].ctrl.SetPosition(axes[axis].pos);
 }
 
 void Motion::SetMode(Axis axis, hal::tmc2130::MotorMode mode) {
@@ -58,6 +59,7 @@ st_timer_t Motion::Step() {
         if (axes[i].pos != axes[i].targetPos) {
             int8_t dirInc = (axes[i].pos < axes[i].targetPos) ? 1 : -1;
             axes[i].pos += dirInc;
+            axisData[i].ctrl.SetPosition(axes[i].pos);
         }
     }
     return 0;
@@ -83,6 +85,7 @@ void Motion::AbortPlannedMoves(bool halt) {
 
 void Motion::AbortPlannedMoves(config::Axis i, bool) {
     axes[i].targetPos = axes[i].pos; // leave the axis where it was at the time of abort
+    axisData[i].ctrl.SetPosition(axes[i].pos);
 }
 
 void ReinitMotion() {

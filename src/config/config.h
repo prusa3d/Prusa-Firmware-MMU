@@ -83,15 +83,17 @@ static constexpr U_mm couplerToBowden = 3.5_mm; /// 3.5_mm /// FINDA Coupler scr
 // just another piece of PLA (probably having more resistance in the tubes)
 // and we are at least 40mm off! It looks like this really depends on the exact position
 // We'll probably need to check for stallguard while pushing the filament to avoid ginding the filament
-static constexpr U_mm defaultBowdenLength = 427.0_mm; /// ~427.0_mm /// Default Bowden length. @TODO Should be stored in EEPROM. 392 a 784
-static constexpr U_mm minimumBowdenLength = 341.0_mm; /// ~341.0_mm /// Minimum bowden length. @TODO Should be stored in EEPROM.
-static constexpr U_mm maximumBowdenLength = 792.0_mm; /// ~792.0_mm /// Maximum bowden length. @TODO Should be stored in EEPROM.
+static constexpr U_mm defaultBowdenLength = 427.0_mm; ///< ~427.0_mm - Default Bowden length. @TODO Should be stored in EEPROM. 392 a 784
+static constexpr U_mm minimumBowdenLength = 341.0_mm; ///< ~341.0_mm - Minimum bowden length. @TODO Should be stored in EEPROM.
+static constexpr U_mm maximumBowdenLength = 792.0_mm; ///< ~792.0_mm - Maximum bowden length. @TODO Should be stored in EEPROM.
 static constexpr U_mm feedToFinda = cuttingEdgeToFindaMidpoint + filamentMinLoadedToMMU;
 static constexpr U_mm maximumFeedToFinda = feedToFinda + 20.0_mm; ///< allow for some safety margin to load to FINDA
-static constexpr U_mm pulleyHelperMove = 10.0_mm; /// Helper move for Load/Unload error states - when the MMU should slowly move the filament a bit
+static constexpr U_mm pulleyHelperMove = 10.0_mm; ///< Helper move for Load/Unload error states - when the MMU should slowly move the filament a bit
 static constexpr U_mm cutLength = 8.0_mm;
-static constexpr U_mm fsensorToNozzle = 20.0_mm; /// ~20mm from MK4's filament sensor through extruder gears into nozzle
+static constexpr U_mm fsensorToNozzle = 20.0_mm; ///< ~20mm from MK4's filament sensor through extruder gears into nozzle
 static constexpr U_mm fsensorToNozzleAvoidGrind = 5.0_mm;
+/// Check the state of FSensor after this amount of filament got (hopefully) pulled out while unloading.
+static constexpr U_mm fsensorUnloadCheckDistance = 20.0_mm;
 
 /// Begin: Pulley axis configuration
 static constexpr AxisConfig pulley = {

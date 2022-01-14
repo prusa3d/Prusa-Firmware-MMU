@@ -18,6 +18,7 @@
 #include "../stubs/stub_motion.h"
 
 using Catch::Matchers::Equals;
+using namespace std::placeholders;
 
 #include "../helpers/helpers.ipp"
 
@@ -38,7 +39,7 @@ void RegularUnloadFromSlot04Init(uint8_t slot, logic::UnloadFilament &uf) {
     uf.Reset(slot);
 }
 
-void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
+void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf, uint8_t entryIdlerSlotIndex, bool selectorShallHomeAtEnd) {
     // Stage 0 - verify state just after Reset()
     // we still think we have filament loaded at this stage
     // idler should have been activated by the underlying automaton
@@ -46,7 +47,7 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
     // FINDA on
     // green LED should blink, red off
     REQUIRE(VerifyState(uf, (mg::FilamentLoadState)(mg::FilamentLoadState::InNozzle | mg::FilamentLoadState::InSelector),
-        mi::Idler::IdleSlotIndex(), slot, true, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
+        entryIdlerSlotIndex, slot, true, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
 
     // run the automaton
     // Stage 1 - unloading to FINDA
@@ -72,6 +73,10 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf) {
     // Stage 3 - idler was engaged, disengage it
     REQUIRE(WhileTopState(uf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
 
+    if (selectorShallHomeAtEnd) {
+        SimulateSelectorHoming();
+    }
+
     // filament unloaded
     // idler should have been disengaged
     // no change in selector's position
@@ -90,7 +95,7 @@ TEST_CASE("unload_filament::regular_unload_from_slot_0-4", "[unload_filament]") 
     for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
         logic::UnloadFilament uf;
         RegularUnloadFromSlot04Init(slot, uf);
-        RegularUnloadFromSlot04(slot, uf);
+        RegularUnloadFromSlot04(slot, uf, mi::Idler::IdleSlotIndex(), false);
     }
 }
 
@@ -125,7 +130,13 @@ void FindaDidntTriggerCommonSetup(uint8_t slot, logic::UnloadFilament &uf) {
     // run the automaton
     // Stage 1 - unloading to FINDA - do NOT let it trigger - keep it pressed, the automaton should finish all moves with the pulley
     // without reaching the FINDA and report an error
-    REQUIRE(WhileTopState(uf, ProgressCode::UnloadingToFinda, 500000));
+    REQUIRE(WhileCondition(
+        uf,
+        [&](uint32_t step) {
+            SimulateUnloadToFINDA(step, 10, 1'000'000);
+            return uf.TopLevelState() == ProgressCode::UnloadingToFinda;
+        },
+        200'000));
 
     // we still think we have filament loaded at this stage
     // idler should have been activated by the underlying automaton
@@ -243,6 +254,9 @@ void FindaDidntTriggerResolveTryAgain(uint8_t slot, logic::UnloadFilament &uf) {
     // FINDA still on
     // red LED should blink, green LED should be off
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
+
+    // Assume, the Idler homed (homing is invalidated after pressing the recovery button)
+    SimulateIdlerHoming();
 }
 
 TEST_CASE("unload_filament::finda_didnt_trigger_resolve_try_again", "[unload_filament]") {
@@ -250,7 +264,7 @@ TEST_CASE("unload_filament::finda_didnt_trigger_resolve_try_again", "[unload_fil
         logic::UnloadFilament uf;
         FindaDidntTriggerCommonSetup(slot, uf);
         FindaDidntTriggerResolveTryAgain(slot, uf);
-        RegularUnloadFromSlot04(slot, uf);
+        RegularUnloadFromSlot04(slot, uf, slot, true);
     }
 }
 
@@ -280,6 +294,19 @@ void FailedUnloadResolveManual(uint8_t slot, logic::UnloadFilament &uf) {
     // Perform press on button 2 + debounce + switch off FINDA
     hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
     PressButtonAndDebounce(uf, mb::Right);
+
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
+
+    // we still need to feed to FINDA and back to verify the position of the filament
+    SimulateIdlerHoming();
+
+    REQUIRE(WhileTopState(uf, ProgressCode::FeedingToFinda, 5000));
+
+    REQUIRE(WhileTopState(uf, ProgressCode::RetractingFromFinda, idlerEngageDisengageMaxSteps));
+
+    REQUIRE(WhileTopState(uf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
+
+    SimulateSelectorHoming();
 
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
 }
