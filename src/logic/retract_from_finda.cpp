@@ -23,7 +23,7 @@ bool RetractFromFinda::Step() {
         if (mi::idler.Engaged()) {
             dbg_logic_fP(PSTR("Pulley start steps %u"), mm::motion.CurPosition(mm::Pulley));
             state = UnloadBackToPTFE;
-            mp::pulley.PlanMove(-(config::cuttingEdgeToFindaMidpoint + config::cuttingEdgeRetract), config::pulleyUnloadFeedrate);
+            mpu::pulley.PlanMove(-(config::cuttingEdgeToFindaMidpoint + config::cuttingEdgeRetract), config::pulleyUnloadFeedrate);
         }
         return false;
     case UnloadBackToPTFE:

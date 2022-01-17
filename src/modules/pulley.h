@@ -47,4 +47,4 @@ extern Pulley pulley;
 } // namespace pulley
 } // namespace modules
 
-namespace mp = modules::pulley;
+namespace mpu = modules::pulley;

@@ -24,7 +24,7 @@ void logic::FeedToBondtech::GoToPushToNozzle() {
     mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InFSensor);
     // plan a slow move to help push filament into the nozzle
     //@@TODO the speed in mm/s must correspond to printer's feeding speed!
-    mp::pulley.PlanMove(config::fsensorToNozzle, config::pulleySlowFeedrate);
+    mpu::pulley.PlanMove(config::fsensorToNozzle, config::pulleySlowFeedrate);
     state = PushingFilamentIntoNozzle;
 }
 
@@ -35,8 +35,8 @@ bool FeedToBondtech::Step() {
             dbg_logic_P(PSTR("Feed to Bondtech --> Idler engaged"));
             dbg_logic_fP(PSTR("Pulley start steps %u"), mm::motion.CurPosition(mm::Pulley));
             state = PushingFilamentToFSensor;
-            mp::pulley.InitAxis();
-            mp::pulley.PlanMove(config::defaultBowdenLength, config::pulleyLoadFeedrate, config::pulleySlowFeedrate);
+            mpu::pulley.InitAxis();
+            mpu::pulley.PlanMove(config::defaultBowdenLength, config::pulleyLoadFeedrate, config::pulleySlowFeedrate);
         }
         return false;
     case PushingFilamentToFSensor:
@@ -56,7 +56,7 @@ bool FeedToBondtech::Step() {
             mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InNozzle);
             mi::idler.Disengage();
             // while disengaging the idler, keep on moving with the pulley to avoid grinding while the printer is trying to grab the filament itself
-            mp::pulley.PlanMove(config::fsensorToNozzleAvoidGrind, config::pulleySlowFeedrate);
+            mpu::pulley.PlanMove(config::fsensorToNozzleAvoidGrind, config::pulleySlowFeedrate);
             state = DisengagingIdler;
         }
         return false;
@@ -65,7 +65,7 @@ bool FeedToBondtech::Step() {
             dbg_logic_P(PSTR("Feed to Bondtech --> Idler disengaged"));
             dbg_logic_fP(PSTR("Pulley end steps %u"), mm::motion.CurPosition(mm::Pulley));
             state = OK;
-            mp::pulley.Disable();
+            mpu::pulley.Disable();
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
         }
         return false;
