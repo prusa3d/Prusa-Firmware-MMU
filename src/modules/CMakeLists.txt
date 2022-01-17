@@ -11,6 +11,7 @@ target_sources(
           motion.cpp
           movable_base.cpp
           permanent_storage.cpp
+          pulley.cpp
           pulse_gen.cpp
           selector.cpp
           speed_table.cpp

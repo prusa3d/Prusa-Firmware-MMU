@@ -29,7 +29,7 @@ void Idler::FinishHomingAndPlanMoveToParkPos() {
     if (!plannedEngage) {
         plannedSlot = IdleSlotIndex();
     }
-    InitMovement(mm::Idler);
+    InitMovement();
 }
 
 void Idler::FinishMove() {
@@ -48,7 +48,7 @@ Idler::OperationResult Idler::Disengage() {
 
     // coordinates invalid, first home, then disengage
     if (!homingValid) {
-        PerformHome(mm::Idler);
+        PerformHome();
         return OperationResult::Accepted;
     }
 
@@ -59,7 +59,7 @@ Idler::OperationResult Idler::Disengage() {
     }
 
     // disengaging
-    return InitMovement(mm::Idler);
+    return InitMovement();
 }
 
 Idler::OperationResult Idler::Engage(uint8_t slot) {
@@ -81,7 +81,7 @@ Idler::OperationResult Idler::Engage(uint8_t slot) {
     // so rebooting the MMU while the printer is printing (and thus holding the filament by the moving Idler)
     // should not be an issue
     if (!homingValid) {
-        PlanHome(mm::Idler);
+        PlanHome();
         return OperationResult::Accepted;
     }
 
@@ -92,26 +92,26 @@ Idler::OperationResult Idler::Engage(uint8_t slot) {
     }
 
     // engaging
-    return InitMovement(mm::Idler);
+    return InitMovement();
 }
 
 bool Idler::Step() {
     switch (state) {
     case Moving:
         // dbg_logic_P(PSTR("Moving Idler"));
-        PerformMove(mm::Idler);
+        PerformMove();
         return false;
     case Homing:
         dbg_logic_P(PSTR("Homing Idler"));
-        PerformHome(mm::Idler);
+        PerformHome();
         return false;
     case Ready:
         if (!homingValid && mg::globals.FilamentLoaded() < mg::InFSensor) {
-            PlanHome(mm::Idler);
+            PlanHome();
             return false;
         }
         return true;
-    case Failed:
+    case TMCFailed:
         dbg_logic_P(PSTR("Idler Failed"));
     default:
         return true;
@@ -121,7 +121,7 @@ bool Idler::Step() {
 void Idler::Init() {
     if (mg::globals.FilamentLoaded() < mg::InFSensor) {
         // home the Idler only in case we don't have filament loaded in the printer (or at least we think we don't)
-        PlanHome(mm::Idler);
+        PlanHome();
     } else {
         // otherwise assume the Idler is at its idle position (that's where it usually is)
         mm::motion.SetPosition(mm::Idler, SlotPosition(IdleSlotIndex()).v);

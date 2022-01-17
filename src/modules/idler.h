@@ -15,7 +15,7 @@ namespace mm = modules::motion;
 class Idler : public motion::MovableBase {
 public:
     inline constexpr Idler()
-        : MovableBase()
+        : MovableBase(mm::Idler)
         , plannedEngage(false)
         , currentlyEngaged(false) {}
 
