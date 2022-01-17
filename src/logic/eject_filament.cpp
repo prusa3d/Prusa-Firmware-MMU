@@ -7,6 +7,7 @@
 #include "../modules/leds.h"
 #include "../modules/motion.h"
 #include "../modules/permanent_storage.h"
+#include "../modules/pulley.h"
 #include "../modules/selector.h"
 #include "../debug.h"
 
@@ -53,8 +54,8 @@ bool EjectFilament::StepInner() {
     case ProgressCode::ParkingSelector:
         if (mm::motion.QueueEmpty()) { // selector parked aside
             state = ProgressCode::EjectingFilament;
-            mm::motion.InitAxis(mm::Pulley);
-            mm::motion.PlanMove<mm::Pulley>(-config::filamentMinLoadedToMMU, config::pulleySlowFeedrate);
+            mp::pulley.InitAxis();
+            mp::pulley.PlanMove(-config::filamentMinLoadedToMMU, config::pulleySlowFeedrate);
         }
         break;
     case ProgressCode::EjectingFilament:
@@ -65,7 +66,7 @@ bool EjectFilament::StepInner() {
         break;
     case ProgressCode::DisengagingIdler:
         if (!mi::idler.Engaged()) { // idler disengaged
-            mm::motion.Disable(mm::Pulley);
+            mp::pulley.Disable();
             mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::NotLoaded);
             state = ProgressCode::OK;
             error = ErrorCode::OK;

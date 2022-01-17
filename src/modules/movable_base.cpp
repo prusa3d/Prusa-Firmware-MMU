@@ -6,7 +6,7 @@
 namespace modules {
 namespace motion {
 
-void MovableBase::PlanHome(config::Axis axis) {
+void MovableBase::PlanHome() {
     // switch to normal mode on this axis
     mm::motion.InitAxis(axis);
     mm::motion.SetMode(axis, mm::Normal);
@@ -17,22 +17,22 @@ void MovableBase::PlanHome(config::Axis axis) {
     state = Homing;
 }
 
-MovableBase::OperationResult MovableBase::InitMovement(config::Axis axis) {
+MovableBase::OperationResult MovableBase::InitMovement() {
     if (motion.InitAxis(axis)) {
         PrepareMoveToPlannedSlot();
         state = Moving;
         return OperationResult::Accepted;
     } else {
-        state = Failed;
+        state = TMCFailed;
         return OperationResult::Failed;
     }
 }
 
-void MovableBase::PerformMove(config::Axis axis) {
+void MovableBase::PerformMove() {
     if (!mm::motion.DriverForAxis(axis).GetErrorFlags().Good()) { // @@TODO check occasionally, i.e. not every time?
         // TMC2130 entered some error state, the planned move couldn't have been finished - result of operation is Failed
         tmcErrorFlags = mm::motion.DriverForAxis(axis).GetErrorFlags(); // save the failed state
-        state = Failed;
+        state = TMCFailed;
     } else if (mm::motion.QueueEmpty(axis)) {
         // move finished
         currentSlot = plannedSlot;
@@ -41,7 +41,7 @@ void MovableBase::PerformMove(config::Axis axis) {
     }
 }
 
-void MovableBase::PerformHome(config::Axis axis) {
+void MovableBase::PerformHome() {
     if (mm::motion.StallGuard(axis)) {
         // we have reached the end of the axis - homed ok
         mm::motion.AbortPlannedMoves(axis, true);
@@ -53,7 +53,7 @@ void MovableBase::PerformHome(config::Axis axis) {
         // we ran out of planned moves but no StallGuard event has occurred - homing failed
         homingValid = false;
         mm::motion.SetMode(axis, mg::globals.MotorsStealth() ? mm::Stealth : mm::Normal);
-        state = Failed;
+        state = HomingFailed;
     }
 }
 

@@ -8,6 +8,7 @@
 #include "../modules/leds.h"
 #include "../modules/motion.h"
 #include "../modules/permanent_storage.h"
+#include "../modules/pulley.h"
 #include "../modules/selector.h"
 #include "../modules/user_input.h"
 #include "../debug.h"
@@ -132,7 +133,7 @@ bool ToolChange::StepInner() {
     case ProgressCode::ERREngagingIdler:
         if (mi::idler.Engaged()) {
             state = ProgressCode::ERRHelpingFilament;
-            mm::motion.PlanMove<mm::Pulley>(config::pulleyHelperMove, config::pulleySlowFeedrate);
+            mp::pulley.PlanMove(config::pulleyHelperMove, config::pulleySlowFeedrate);
         }
         return false;
     case ProgressCode::ERRHelpingFilament:

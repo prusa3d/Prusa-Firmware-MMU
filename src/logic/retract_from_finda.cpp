@@ -5,6 +5,7 @@
 #include "../modules/idler.h"
 #include "../modules/leds.h"
 #include "../modules/motion.h"
+#include "../modules/pulley.h"
 #include "../debug.h"
 
 namespace logic {
@@ -22,7 +23,7 @@ bool RetractFromFinda::Step() {
         if (mi::idler.Engaged()) {
             dbg_logic_fP(PSTR("Pulley start steps %u"), mm::motion.CurPosition(mm::Pulley));
             state = UnloadBackToPTFE;
-            mm::motion.PlanMove<mm::Pulley>(-(config::cuttingEdgeToFindaMidpoint + config::cuttingEdgeRetract), config::pulleyUnloadFeedrate);
+            mp::pulley.PlanMove(-(config::cuttingEdgeToFindaMidpoint + config::cuttingEdgeRetract), config::pulleyUnloadFeedrate);
         }
         return false;
     case UnloadBackToPTFE:

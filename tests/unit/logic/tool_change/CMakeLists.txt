@@ -18,6 +18,7 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/src/modules/leds.cpp
   ${CMAKE_SOURCE_DIR}/src/modules/movable_base.cpp
   ${CMAKE_SOURCE_DIR}/src/modules/permanent_storage.cpp
+  ${CMAKE_SOURCE_DIR}/src/modules/pulley.cpp
   ${CMAKE_SOURCE_DIR}/src/modules/selector.cpp
   ${CMAKE_SOURCE_DIR}/src/modules/user_input.cpp
   ${CMAKE_SOURCE_DIR}/src/modules/pulse_gen.cpp

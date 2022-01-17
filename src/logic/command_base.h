@@ -4,6 +4,12 @@
 #include "error_codes.h"
 #include "progress_codes.h"
 
+namespace modules {
+namespace motion {
+class MovableBase;
+}
+}
+
 /// The logic namespace handles the application logic on top of the modules.
 namespace logic {
 
@@ -19,7 +25,8 @@ class CommandBase {
 public:
     inline CommandBase()
         : state(ProgressCode::OK)
-        , error(ErrorCode::OK) {}
+        , error(ErrorCode::OK)
+        , stateBeforeModuleFailed(ProgressCode::OK) {}
 
     // Normally, a base class should (must) have a virtual destructor to enable correct deallocation of superstructures.
     // However, in our case we don't want ANY destruction of these objects and moreover - adding a destructor like this
@@ -82,6 +89,15 @@ protected:
     /// If not, it returns false and sets the error to ErrorCode::INVALID_TOOL
     bool CheckToolIndex(uint8_t index);
 
+    /// Checks for errors of modules - that includes TMC errors, Idler and Selector errors and possibly more.
+    /// The idea is to check blocking errors at one spot consistently.
+    /// Some of the detected errors can be irrecoverable (i.e. need power cycling the MMU).
+    /// @returns true if waiting for a recovery, false if the state machine can continue.
+    bool WaitForModulesErrorRecovery();
+
+    /// @returns true when still waiting for a module to recover, false otherwise.
+    bool WaitForOneModuleErrorRecovery(ErrorCode iState, modules::motion::MovableBase &m);
+
     /// Perform disengaging idler in ErrDisengagingIdler state
     void ErrDisengagingIdler();
 
@@ -93,6 +109,7 @@ protected:
 
     ProgressCode state; ///< current progress state of the state machine
     ErrorCode error; ///< current error code
+    ProgressCode stateBeforeModuleFailed; ///< saved state of the state machine before a common error happened
 };
 
 } // namespace logic

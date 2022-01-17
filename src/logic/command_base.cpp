@@ -4,6 +4,7 @@
 #include "../modules/finda.h"
 #include "../modules/fsensor.h"
 #include "../modules/idler.h"
+#include "../modules/pulley.h"
 #include "../modules/selector.h"
 #include "../modules/motion.h"
 #include "../modules/leds.h"
@@ -15,7 +16,7 @@ inline ErrorCode &operator|=(ErrorCode &a, ErrorCode b) {
     return a = (ErrorCode)((uint16_t)a | (uint16_t)b);
 }
 
-static ErrorCode TMC2130ToErrorCode(const hal::tmc2130::ErrorFlags &ef, uint8_t tmcIndex) {
+static ErrorCode TMC2130ToErrorCode(const hal::tmc2130::ErrorFlags &ef) {
     ErrorCode e = ErrorCode::RUNNING;
 
     if (ef.reset_flag) {
@@ -34,51 +35,101 @@ static ErrorCode TMC2130ToErrorCode(const hal::tmc2130::ErrorFlags &ef, uint8_t 
         e |= ErrorCode::TMC_OVER_TEMPERATURE_ERROR;
     }
 
-    if (e != ErrorCode::RUNNING) {
-        switch (tmcIndex) {
-        case config::Axis::Pulley:
-            e |= ErrorCode::TMC_PULLEY_BIT;
-            break;
-        case config::Axis::Selector:
-            e |= ErrorCode::TMC_SELECTOR_BIT;
-            break;
-        case config::Axis::Idler:
-            e |= ErrorCode::TMC_IDLER_BIT;
-            break;
-        default:
-            break;
-        }
-    }
-
     return e;
 }
 
-bool CommandBase::Step() {
-    ErrorCode tmcErr = ErrorCode::RUNNING;
-    // check the global HW errors - may be we should avoid the modules layer and check for the HAL layer errors directly
-    if (mi::idler.State() == mi::Idler::Failed) {
-        state = ProgressCode::ERRTMCFailed;
-        tmcErr |= TMC2130ToErrorCode(mi::idler.TMCErrorFlags(), mm::Axis::Idler);
+static ErrorCode AddErrorAxisBit(ErrorCode ec, uint8_t tmcIndex) {
+    switch (tmcIndex) {
+    case config::Axis::Pulley:
+        ec |= ErrorCode::TMC_PULLEY_BIT;
+        break;
+    case config::Axis::Selector:
+        ec |= ErrorCode::TMC_SELECTOR_BIT;
+        break;
+    case config::Axis::Idler:
+        ec |= ErrorCode::TMC_IDLER_BIT;
+        break;
+    default:
+        break;
     }
-    if (ms::selector.State() == ms::Selector::Failed) {
-        state = ProgressCode::ERRTMCFailed;
-        tmcErr |= TMC2130ToErrorCode(ms::selector.TMCErrorFlags(), mm::Axis::Selector);
-    }
-    // may be we should model the Pulley as well...
-    //    if (ms::selector.State() == ms::Selector::Failed) {
-    //        state = ProgressCode::ERRTMCFailed;
-    //        error |= TMC2130ToErrorCode(mm::motion.DriverForAxis(mm::Axis::Selector), mm::Axis::Selector);
-    //        return true; // the HW error prevents us from continuing with the state machine - the MMU must be restarted/fixed before continuing
-    //    }
+    return ec;
+}
 
-    // @@TODO not sure how to prevent losing the previously accumulated error ... or do I really need to do it?
-    // May be the TMC error word just gets updated with new flags as the motion proceeds
-    // And how about the logical errors like FINDA_DIDNT_SWITCH_ON?
-    if (tmcErr != ErrorCode::RUNNING) {
-        error |= tmcErr;
+ErrorCode CheckMovable(mm::MovableBase &m) {
+    switch (m.State()) {
+    case mm::MovableBase::TMCFailed:
+        return AddErrorAxisBit(TMC2130ToErrorCode(m.TMCErrorFlags()), m.Axis());
+    case mm::MovableBase::HomingFailed:
+        return AddErrorAxisBit(ErrorCode::HOMING_FAILED, m.Axis());
+    }
+    return ErrorCode::RUNNING;
+}
+
+static inline ErrorCode WithoutAxisBits(ErrorCode ec) {
+    return static_cast<ErrorCode>(
+        static_cast<uint16_t>(ec)
+        & (~(static_cast<uint16_t>(ErrorCode::TMC_SELECTOR_BIT)
+            | static_cast<uint16_t>(ErrorCode::TMC_IDLER_BIT)
+            | static_cast<uint16_t>(ErrorCode::TMC_PULLEY_BIT))));
+}
+
+bool CommandBase::WaitForOneModuleErrorRecovery(ErrorCode ec, modules::motion::MovableBase &m) {
+    if (ec != ErrorCode::RUNNING) {
+        if (stateBeforeModuleFailed == ProgressCode::OK) {
+            // a new problem with the movable modules
+            // @@TODO not sure how to prevent losing the previously accumulated error ... or do I really need to do it?
+            // May be the TMC error word just gets updated with new flags as the motion proceeds
+            stateBeforeModuleFailed = state;
+            error = ec;
+            state = ProgressCode::ERRWaitingForUser; // such a situation always requires user's attention -> let the printer display an error screen
+            return true;
+        } else {
+            switch (state) {
+            case ProgressCode::ERRWaitingForUser: // waiting for a recovery - mask axis bits:
+                if (WithoutAxisBits(ec) == ErrorCode::HOMING_FAILED) {
+                    // homing can be recovered
+                    mui::Event ev = mui::userInput.ConsumeEvent();
+                    if (ev == mui::Event::Middle) {
+                        m.InvalidateHoming(); // @@TODO invalidate and force initiate a new homing attempt
+                        state = ProgressCode::Homing;
+                    }
+                }
+                // TMC errors cannot be recovered safely, waiting for power cycling the MMU
+                return true;
+            case ProgressCode::Homing:
+                if (m.HomingValid()) {
+                    // managed to recover from a homing problem
+                    state = stateBeforeModuleFailed;
+                    stateBeforeModuleFailed = ProgressCode::OK;
+                    return false;
+                }
+                return true;
+            default:
+                return true; // no idea what to do in other states ... set internal fw error state?
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+bool CommandBase::WaitForModulesErrorRecovery() {
+    if (WaitForOneModuleErrorRecovery(CheckMovable(mi::idler), mi::idler))
+        return true;
+
+    if (WaitForOneModuleErrorRecovery(CheckMovable(ms::selector), ms::selector))
+        return true;
+
+    if (WaitForOneModuleErrorRecovery(CheckMovable(mp::pulley), mp::pulley))
+        return true;
+
+    return false;
+}
+
+bool CommandBase::Step() {
+    if (WaitForModulesErrorRecovery()) {
         return true;
     }
-
     return StepInner();
 }
 
@@ -129,7 +180,7 @@ bool CommandBase::CheckToolIndex(uint8_t index) {
 void CommandBase::ErrDisengagingIdler() {
     if (!mi::idler.Engaged()) {
         state = ProgressCode::ERRWaitingForUser;
-        mm::motion.Disable(mm::Pulley);
+        mp::pulley.Disable();
         mui::userInput.Clear(); // remove all buffered events if any just before we wait for some input
     }
 }

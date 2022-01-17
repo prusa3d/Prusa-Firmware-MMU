@@ -3,6 +3,7 @@ add_executable(
   failing_tmc_tests
   ${CMAKE_SOURCE_DIR}/src/logic/command_base.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/feed_to_finda.cpp
+  ${CMAKE_SOURCE_DIR}/src/logic/load_filament.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/retract_from_finda.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/unload_filament.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/unload_to_finda.cpp
@@ -15,6 +16,7 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/src/modules/leds.cpp
   ${CMAKE_SOURCE_DIR}/src/modules/movable_base.cpp
   ${CMAKE_SOURCE_DIR}/src/modules/permanent_storage.cpp
+  ${CMAKE_SOURCE_DIR}/src/modules/pulley.cpp
   ${CMAKE_SOURCE_DIR}/src/modules/selector.cpp
   ${CMAKE_SOURCE_DIR}/src/modules/user_input.cpp
   ${CMAKE_SOURCE_DIR}/src/modules/pulse_gen.cpp

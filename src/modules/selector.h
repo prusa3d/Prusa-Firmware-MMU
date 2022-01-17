@@ -15,7 +15,7 @@ namespace mm = modules::motion;
 class Selector : public mm::MovableBase {
 public:
     inline constexpr Selector()
-        : MovableBase() {}
+        : MovableBase(mm::Selector) {}
 
     /// Plan move of the selector to a specific filament slot
     /// @param slot index to move to

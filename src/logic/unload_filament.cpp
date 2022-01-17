@@ -7,6 +7,7 @@
 #include "../modules/leds.h"
 #include "../modules/motion.h"
 #include "../modules/permanent_storage.h"
+#include "../modules/pulley.h"
 #include "../modules/selector.h"
 #include "../modules/user_input.h"
 #include "../debug.h"
@@ -24,7 +25,7 @@ void UnloadFilament::Reset(uint8_t /*param*/) {
     }
 
     // unloads filament from extruder - filament is above Bondtech gears
-    mm::motion.InitAxis(mm::Pulley);
+    mp::pulley.InitAxis();
     state = ProgressCode::UnloadingToFinda;
     error = ErrorCode::RUNNING;
     unl.Reset(maxRetries);
@@ -34,7 +35,7 @@ void UnloadFilament::Reset(uint8_t /*param*/) {
 void UnloadFilament::FinishedCorrectly() {
     state = ProgressCode::OK;
     error = ErrorCode::OK;
-    mm::motion.Disable(mm::Pulley);
+    mp::pulley.Disable();
     mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::AtPulley); // filament unloaded
     ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::off);
 }
@@ -132,7 +133,7 @@ bool UnloadFilament::StepInner() {
     case ProgressCode::ERREngagingIdler:
         if (mi::idler.Engaged()) {
             state = ProgressCode::ERRHelpingFilament;
-            mm::motion.PlanMove<mm::Pulley>(-config::pulleyHelperMove, config::pulleySlowFeedrate);
+            mp::pulley.PlanMove(-config::pulleyHelperMove, config::pulleySlowFeedrate);
         }
         return false;
     case ProgressCode::ERRHelpingFilament:
