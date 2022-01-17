@@ -29,7 +29,7 @@ public:
 
     /// @returns rounded current position (rotation) of the Pulley
     /// This exists purely to avoid expensive float (long double) computations of distance traveled by the filament
-    int32_t CurrentPositionPulley_mm();
+    int32_t CurrentPosition_mm();
 
     void InitAxis();
     void Disable();
