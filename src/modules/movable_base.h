@@ -15,7 +15,8 @@ public:
         Ready = 0, // intentionally set as zero in order to allow zeroing the Idler structure upon startup -> avoid explicit initialization code
         Moving,
         Homing,
-        Failed
+        TMCFailed,
+        HomingFailed
     };
 
     /// Operation (Engage/Disengage/MoveToSlot) return values
@@ -25,11 +26,12 @@ public:
         Failed ///< the operation could not been started due to HW issues
     };
 
-    inline constexpr MovableBase()
+    inline constexpr MovableBase(config::Axis axis)
         : state(Ready)
         , plannedSlot(-1)
         , currentSlot(-1)
-        , homingValid(false) {}
+        , homingValid(false)
+        , axis(axis) {}
 
     /// virtual ~MovableBase(); intentionally disabled, see description in logic::CommandBase
 
@@ -55,6 +57,10 @@ public:
     /// (which makes homing completely transparent)
     inline void InvalidateHoming() { homingValid = false; }
 
+    inline bool HomingValid() const { return homingValid; }
+
+    inline config::Axis Axis() const { return axis; }
+
 protected:
     /// internal state of the automaton
     uint8_t state;
@@ -71,19 +77,21 @@ protected:
     /// cached TMC2130 error flags - being read only if the axis is enabled and doing something (moving)
     hal::tmc2130::ErrorFlags tmcErrorFlags;
 
+    config::Axis axis;
+
     virtual void PrepareMoveToPlannedSlot() = 0;
     virtual void PlanHomingMove() = 0;
     virtual void FinishHomingAndPlanMoveToParkPos() = 0;
     virtual void FinishMove() = 0;
 
-    OperationResult InitMovement(config::Axis axis);
+    OperationResult InitMovement();
 
     /// Prepare a homing move of the axis
-    void PlanHome(config::Axis axis);
+    void PlanHome();
 
-    void PerformMove(config::Axis axis);
+    void PerformMove();
 
-    void PerformHome(config::Axis axis);
+    void PerformHome();
 };
 
 } // namespace motion

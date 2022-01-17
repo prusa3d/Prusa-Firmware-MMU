@@ -7,6 +7,7 @@
 #include "../modules/leds.h"
 #include "../modules/motion.h"
 #include "../modules/permanent_storage.h"
+#include "../modules/pulley.h"
 
 namespace logic {
 
@@ -32,7 +33,7 @@ bool UnloadToFinda::Step() {
     case EngagingIdler:
         if (mg::globals.FilamentLoaded() >= mg::FilamentLoadState::InSelector) {
             state = UnloadingToFinda;
-            mm::motion.InitAxis(mm::Pulley);
+            mp::pulley.InitAxis();
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
         } else {
             state = FailedFINDA;
@@ -42,8 +43,8 @@ bool UnloadToFinda::Step() {
         if (mi::idler.Engaged()) {
             state = WaitingForFINDA;
             mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InSelector);
-            unloadStart_mm = CurrentPositionPulley_mm();
-            mm::motion.PlanMove<mm::Pulley>(-config::defaultBowdenLength - config::feedToFinda - config::filamentMinLoadedToMMU, config::pulleyUnloadFeedrate);
+            unloadStart_mm = mp::pulley.CurrentPositionPulley_mm();
+            mp::pulley.PlanMove(-config::defaultBowdenLength - config::feedToFinda - config::filamentMinLoadedToMMU, config::pulleyUnloadFeedrate);
         }
         return false;
     case WaitingForFINDA: {

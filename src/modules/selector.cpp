@@ -31,7 +31,7 @@ void Selector::FinishHomingAndPlanMoveToParkPos() {
     if (plannedSlot > config::toolCount) {
         plannedSlot = IdleSlotIndex();
     }
-    InitMovement(mm::Selector);
+    InitMovement();
 }
 
 void Selector::FinishMove() {
@@ -52,7 +52,7 @@ Selector::OperationResult Selector::MoveToSlot(uint8_t slot) {
 
     // coordinates invalid, first home, then engage
     if (!homingValid && mg::globals.FilamentLoaded() < mg::FilamentLoadState::InSelector) {
-        PlanHome(mm::Selector);
+        PlanHome();
         return OperationResult::Accepted;
     }
 
@@ -63,26 +63,26 @@ Selector::OperationResult Selector::MoveToSlot(uint8_t slot) {
     }
 
     // do the move
-    return InitMovement(mm::Selector);
+    return InitMovement();
 }
 
 bool Selector::Step() {
     switch (state) {
     case Moving:
-        PerformMove(mm::Selector);
+        PerformMove();
         //dbg_logic_P(PSTR("Moving Selector"));
         return false;
     case Homing:
         dbg_logic_P(PSTR("Homing Selector"));
-        PerformHome(mm::Selector);
+        PerformHome();
         return false;
     case Ready:
         if (!homingValid && mg::globals.FilamentLoaded() < mg::InSelector) {
-            PlanHome(mm::Selector);
+            PlanHome();
             return false;
         }
         return true;
-    case Failed:
+    case TMCFailed:
         dbg_logic_P(PSTR("Selector Failed"));
     default:
         return true;
@@ -92,7 +92,7 @@ bool Selector::Step() {
 void Selector::Init() {
     if (mg::globals.FilamentLoaded() < mg::FilamentLoadState::InSelector && (!mf::finda.Pressed())) {
         // home the Selector only in case we don't have filament loaded (or at least we think we don't)
-        PlanHome(mm::Selector);
+        PlanHome();
     } else {
         // otherwise set selector's position according to know slot positions (and pretend it is correct)
         mm::motion.SetPosition(mm::Selector, SlotPosition(mg::globals.ActiveSlot()).v);

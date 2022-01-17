@@ -7,6 +7,7 @@
 #include "../modules/leds.h"
 #include "../modules/motion.h"
 #include "../modules/permanent_storage.h"
+#include "../modules/pulley.h"
 #include "../modules/user_input.h"
 #include "../debug.h"
 namespace logic {
@@ -29,12 +30,12 @@ bool FeedToFinda::Step() {
             dbg_logic_P(PSTR("Feed to Finda --> Idler engaged"));
             dbg_logic_fP(PSTR("Pulley start steps %u"), mm::motion.CurPosition(mm::Pulley));
             state = PushingFilament;
-            mm::motion.InitAxis(mm::Pulley);
+            mp::pulley.InitAxis();
             // @@TODO this may never happen as load filament always assumes the filament is at least at the pulley
             //            if (mg::globals.FilamentLoaded() == mg::FilamentLoadState::NotLoaded) { // feed slowly filament to PTFE
-            //                mm::motion.PlanMove<mm::Pulley>(config::filamentMinLoadedToMMU, config::pulleySlowFeedrate);
+            //                mp::pulley.PlanMove(config::filamentMinLoadedToMMU, config::pulleySlowFeedrate);
             //            }
-            mm::motion.PlanMove<mm::Pulley>(config::maximumFeedToFinda, config::pulleySlowFeedrate);
+            mp::pulley.PlanMove(config::maximumFeedToFinda, config::pulleySlowFeedrate);
             mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InSelector);
             mui::userInput.Clear(); // remove all buffered events if any just before we wait for some input
         }

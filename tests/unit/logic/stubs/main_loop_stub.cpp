@@ -12,6 +12,7 @@
 #include "../../../../src/modules/leds.h"
 #include "../../../../src/modules/motion.h"
 #include "../../../../src/modules/permanent_storage.h"
+#include "../../../../src/modules/pulley.h"
 #include "../../../../src/modules/selector.h"
 #include "../../../../src/modules/user_input.h"
 
@@ -26,6 +27,7 @@ void main_loop() {
     mf::finda.Step();
     mfs::fsensor.Step();
     mi::idler.Step();
+    mp::pulley.Step();
     ms::selector.Step();
     mm::motion.Step();
     mui::userInput.Step();
@@ -50,6 +52,7 @@ void ForceReinitAllAutomata() {
     new (&mf::finda) mf::FINDA();
     new (&mfs::fsensor) mfs::FSensor();
     new (&mi::idler) mi::Idler();
+    new (&mp::pulley) mp::Pulley();
     new (&ms::selector) ms::Selector();
     new (&mm::motion) mm::Motion();
 
@@ -137,7 +140,7 @@ void EnsureActiveSlotIndex(uint8_t slot, mg::FilamentLoadState loadState) {
 }
 
 void SetFINDAStateAndDebounce(bool press) {
-    hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
+    hal::gpio::WritePin(FINDA_PIN, press ? hal::gpio::Level::high : hal::gpio::Level::low);
     for (size_t i = 0; i < config::findaDebounceMs + 1; ++i)
         main_loop();
 }
