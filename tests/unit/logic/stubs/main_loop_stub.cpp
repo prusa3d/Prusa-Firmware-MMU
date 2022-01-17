@@ -27,7 +27,7 @@ void main_loop() {
     mf::finda.Step();
     mfs::fsensor.Step();
     mi::idler.Step();
-    mp::pulley.Step();
+    mpu::pulley.Step();
     ms::selector.Step();
     mm::motion.Step();
     mui::userInput.Step();
@@ -52,7 +52,7 @@ void ForceReinitAllAutomata() {
     new (&mf::finda) mf::FINDA();
     new (&mfs::fsensor) mfs::FSensor();
     new (&mi::idler) mi::Idler();
-    new (&mp::pulley) mp::Pulley();
+    new (&mpu::pulley) mpu::Pulley();
     new (&ms::selector) ms::Selector();
     new (&mm::motion) mm::Motion();
 
