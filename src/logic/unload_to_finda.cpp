@@ -28,7 +28,7 @@ bool UnloadToFinda::Step() {
     case EngagingIdler:
         if (mg::globals.FilamentLoaded() >= mg::FilamentLoadState::InSelector) {
             state = UnloadingToFinda;
-            mp::pulley.InitAxis();
+            mpu::pulley.InitAxis();
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
         } else {
             state = FailedFINDA;
@@ -38,12 +38,12 @@ bool UnloadToFinda::Step() {
         if (mi::idler.Engaged()) {
             state = WaitingForFINDA;
             mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InSelector);
-            unloadStart_mm = mp::pulley.CurrentPositionPulley_mm();
-            mp::pulley.PlanMove(-config::defaultBowdenLength - config::feedToFinda - config::filamentMinLoadedToMMU, config::pulleyUnloadFeedrate);
+            unloadStart_mm = mpu::pulley.CurrentPositionPulley_mm();
+            mpu::pulley.PlanMove(-config::defaultBowdenLength - config::feedToFinda - config::filamentMinLoadedToMMU, config::pulleyUnloadFeedrate);
         }
         return false;
     case WaitingForFINDA: {
-        int32_t currentPulley_mm = mp::pulley.CurrentPositionPulley_mm();
+        int32_t currentPulley_mm = mpu::pulley.CurrentPositionPulley_mm();
         if ((abs(unloadStart_mm - currentPulley_mm) > config::fsensorUnloadCheckDistance.v) && mfs::fsensor.Pressed()) {
             // fsensor didn't trigger within the first fsensorUnloadCheckDistance mm -> stop pulling, something failed, report an error
             // This scenario should not be tried again - repeating it may cause more damage to filament + potentially more collateral damage

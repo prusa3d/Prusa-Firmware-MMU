@@ -133,7 +133,7 @@ bool ToolChange::StepInner() {
     case ProgressCode::ERREngagingIdler:
         if (mi::idler.Engaged()) {
             state = ProgressCode::ERRHelpingFilament;
-            mp::pulley.PlanMove(config::pulleyHelperMove, config::pulleySlowFeedrate);
+            mpu::pulley.PlanMove(config::pulleyHelperMove, config::pulleySlowFeedrate);
         }
         return false;
     case ProgressCode::ERRHelpingFilament:

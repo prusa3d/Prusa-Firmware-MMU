@@ -54,8 +54,8 @@ bool EjectFilament::StepInner() {
     case ProgressCode::ParkingSelector:
         if (mm::motion.QueueEmpty()) { // selector parked aside
             state = ProgressCode::EjectingFilament;
-            mp::pulley.InitAxis();
-            mp::pulley.PlanMove(-config::filamentMinLoadedToMMU, config::pulleySlowFeedrate);
+            mpu::pulley.InitAxis();
+            mpu::pulley.PlanMove(-config::filamentMinLoadedToMMU, config::pulleySlowFeedrate);
         }
         break;
     case ProgressCode::EjectingFilament:
@@ -66,7 +66,7 @@ bool EjectFilament::StepInner() {
         break;
     case ProgressCode::DisengagingIdler:
         if (!mi::idler.Engaged()) { // idler disengaged
-            mp::pulley.Disable();
+            mpu::pulley.Disable();
             mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::NotLoaded);
             state = ProgressCode::OK;
             error = ErrorCode::OK;

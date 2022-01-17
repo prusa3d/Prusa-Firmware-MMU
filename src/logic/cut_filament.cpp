@@ -61,7 +61,7 @@ bool CutFilament::StepInner() {
             } else {
                 // unload back to the pulley
                 state = ProgressCode::UnloadingToPulley;
-                mp::pulley.PlanMove(-config::cutLength, config::pulleyUnloadFeedrate);
+                mpu::pulley.PlanMove(-config::cutLength, config::pulleyUnloadFeedrate);
             }
         }
         break;
@@ -75,7 +75,7 @@ bool CutFilament::StepInner() {
     case ProgressCode::PreparingBlade:
         if (ms::selector.Slot() == cutSlot + 1) {
             state = ProgressCode::PushingFilament;
-            mp::pulley.PlanMove(config::cutLength, config::pulleyUnloadFeedrate); //
+            mpu::pulley.PlanMove(config::cutLength, config::pulleyUnloadFeedrate); //
         }
         break;
     case ProgressCode::PushingFilament:

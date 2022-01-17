@@ -120,7 +120,7 @@ bool CommandBase::WaitForModulesErrorRecovery() {
     if (WaitForOneModuleErrorRecovery(CheckMovable(ms::selector), ms::selector))
         return true;
 
-    if (WaitForOneModuleErrorRecovery(CheckMovable(mp::pulley), mp::pulley))
+    if (WaitForOneModuleErrorRecovery(CheckMovable(mpu::pulley), mpu::pulley))
         return true;
 
     return false;
@@ -180,7 +180,7 @@ bool CommandBase::CheckToolIndex(uint8_t index) {
 void CommandBase::ErrDisengagingIdler() {
     if (!mi::idler.Engaged()) {
         state = ProgressCode::ERRWaitingForUser;
-        mp::pulley.Disable();
+        mpu::pulley.Disable();
         mui::userInput.Clear(); // remove all buffered events if any just before we wait for some input
     }
 }

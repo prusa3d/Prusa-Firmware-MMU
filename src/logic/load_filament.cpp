@@ -42,7 +42,7 @@ void logic::LoadFilament::FinishedCorrectly() {
     state = ProgressCode::OK;
     error = ErrorCode::OK;
     ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::off);
-    mp::pulley.Disable();
+    mpu::pulley.Disable();
 }
 
 bool LoadFilament::StepInner() {
@@ -118,7 +118,7 @@ bool LoadFilament::StepInner() {
     case ProgressCode::ERREngagingIdler:
         if (mi::idler.Engaged()) {
             state = ProgressCode::ERRHelpingFilament;
-            mp::pulley.PlanMove(config::pulleyHelperMove, config::pulleySlowFeedrate);
+            mpu::pulley.PlanMove(config::pulleyHelperMove, config::pulleySlowFeedrate);
         }
         return false;
     case ProgressCode::ERRHelpingFilament:
