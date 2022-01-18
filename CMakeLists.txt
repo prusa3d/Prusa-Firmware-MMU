@@ -142,6 +142,9 @@ if(CMAKE_CROSSCOMPILING)
   add_link_dependency(firmware ${LINKER_SCRIPT})
   #]]
 
+  # limit the text section to 28K (32K - 4k reserved for the bootloader)
+  target_link_options(firmware PUBLIC -Wl,--defsym=__TEXT_REGION_LENGTH__=28K)
+
   # generate firmware.bin file
   objcopy(firmware "ihex" ".hex")
 
