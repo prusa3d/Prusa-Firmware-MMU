@@ -18,6 +18,11 @@ enum class ErrorCode : uint_fast16_t {
     RUNNING = 0x0000, ///< the operation is still running - keep this value as ZERO as it is used for initialization of error codes as well
     OK = 0x0001, ///< the operation finished OK
 
+    // TMC bit masks
+    TMC_PULLEY_BIT = 0x0040, ///< +64 TMC Pulley bit
+    TMC_SELECTOR_BIT = 0x0080, ///< +128 TMC Pulley bit
+    TMC_IDLER_BIT = 0x0100, ///< +256 TMC Pulley bit
+
     /// Unload Filament related error codes
     FINDA_DIDNT_SWITCH_ON = 0x8001, ///< E32769 FINDA didn't switch on while loading filament - either there is something blocking the metal ball or a cable is broken/disconnected
     FINDA_DIDNT_SWITCH_OFF = 0x8002, ///< E32770 FINDA didn't switch off while unloading filament
@@ -29,18 +34,17 @@ enum class ErrorCode : uint_fast16_t {
 
     INVALID_TOOL = 0x8006, ///< E32774 tool/slot index out of range (typically issuing T5 into an MMU with just 5 slots - valid range 0-4)
 
+    HOMING_FAILED = 0x8007, ///< generic homing failed error - always reported with the corresponding axis bit set (Idler or Selector) as follows:
+    HOMING_SELECTOR_FAILED = HOMING_FAILED | TMC_SELECTOR_BIT, ///< E32903 the Selector was unable to home properly - that means something is blocking its movement
+    HOMING_IDLER_FAILED = HOMING_FAILED | TMC_IDLER_BIT, ///< E33031 the Idler was unable to home properly - that means something is blocking its movement
+    STALLED_PULLEY = HOMING_FAILED | TMC_PULLEY_BIT, ///< E32839 for the Pulley "homing" means just stallguard detected during Pulley's operation (Pulley doesn't home)
+
     QUEUE_FULL = 0x802b, ///< E32811 internal logic error - attempt to move with a full queue
 
     VERSION_MISMATCH = 0x802c, ///< E32812 internal error of the printer - incompatible version of the MMU FW
     PROTOCOL_ERROR = 0x802d, ///< E32813 internal error of the printer - communication with the MMU got garbled - protocol decoder couldn't decode the incoming messages
     MMU_NOT_RESPONDING = 0x802e, ///< E32814 internal error of the printer - communication with the MMU is not working
     INTERNAL = 0x802f, ///< E32815 internal runtime error (software)
-
-    // TMC bit masks
-
-    TMC_PULLEY_BIT = 0x0040, ///< +64 TMC Pulley bit
-    TMC_SELECTOR_BIT = 0x0080, ///< +128 TMC Pulley bit
-    TMC_IDLER_BIT = 0x0100, ///< +256 TMC Pulley bit
 
     /// TMC driver init error - TMC dead or bad communication
     /// - E33344 Pulley TMC driver
