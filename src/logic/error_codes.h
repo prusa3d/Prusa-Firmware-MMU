@@ -41,11 +41,6 @@ enum class ErrorCode : uint_fast16_t {
 
     QUEUE_FULL = 0x802b, ///< E32811 internal logic error - attempt to move with a full queue
 
-    HOMING_FAILED = 0x8007, ///< generic homing failed error - always reported with the corresponding axis bit set (Idler or Selector) as follows:
-    HOMING_SELECTOR_FAILED = HOMING_FAILED | TMC_SELECTOR_BIT, ///< E32903 the Selector was unable to home properly - that means something is blocking its movement
-    HOMING_IDLER_FAILED = HOMING_FAILED | TMC_IDLER_BIT, ///< E33031 the Idler was unable to home properly - that means something is blocking its movement
-    STALLED_PULLEY = HOMING_FAILED | TMC_PULLEY_BIT, ///< E32839 for the Pulley "homing" means just stallguard detected during Pulley's operation (Pulley doesn't home)
-
     VERSION_MISMATCH = 0x802c, ///< E32812 internal error of the printer - incompatible version of the MMU FW
     PROTOCOL_ERROR = 0x802d, ///< E32813 internal error of the printer - communication with the MMU got garbled - protocol decoder couldn't decode the incoming messages
     MMU_NOT_RESPONDING = 0x802e, ///< E32814 internal error of the printer - communication with the MMU is not working
