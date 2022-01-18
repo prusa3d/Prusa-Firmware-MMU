@@ -120,10 +120,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_compile_definitions(_DEBUG)
 endif()
 
-# if(CMAKE_CROSSCOMPILING) # configure linker script set(LINKER_SCRIPT
-# "${CMAKE_CURRENT_SOURCE_DIR}/src/STM32F407VG_FLASH.ld")
-# add_link_options("-Wl,-T,${LINKER_SCRIPT}") endif()
-
 #
 # Import definitions of all libraries
 #
@@ -139,6 +135,13 @@ add_executable(firmware)
 set_target_properties(firmware PROPERTIES CXX_STANDARD 14)
 
 if(CMAKE_CROSSCOMPILING)
+  #[[
+  # configure linker script
+  set(LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/src/avr5.xn)
+  target_link_options(firmware PUBLIC -Wl,-T,${LINKER_SCRIPT})
+  add_link_dependency(firmware ${LINKER_SCRIPT})
+  #]]
+
   # generate firmware.bin file
   objcopy(firmware "ihex" ".hex")
 
@@ -156,8 +159,6 @@ if(CMAKE_CROSSCOMPILING)
   # generate linker map file
   target_link_options(firmware PUBLIC -Wl,-Map=firmware.map)
 endif()
-
-# add_link_dependency(firmware "${LINKER_SCRIPT}")
 
 target_include_directories(firmware PRIVATE src lib)
 
