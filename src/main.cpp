@@ -18,6 +18,7 @@
 #include "modules/idler.h"
 #include "modules/leds.h"
 #include "modules/protocol.h"
+#include "modules/pulley.h"
 #include "modules/selector.h"
 #include "modules/user_input.h"
 #include "modules/timebase.h"
@@ -344,6 +345,7 @@ void loop() {
     mfs::fsensor.Step();
     mi::idler.Step();
     ms::selector.Step();
+    mpu::pulley.Step();
     mui::userInput.Step();
     currentCommand->Step();
     hal::cpu::Step();
