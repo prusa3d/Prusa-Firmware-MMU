@@ -44,6 +44,7 @@ DecodeStatus Protocol::DecodeRequest(uint8_t c) {
         case 'K':
         case 'F':
         case 'f':
+        case 'H':
             requestMsg.code = (RequestMsgCodes)c;
             requestMsg.value = 0;
             rqState = RequestStates::Value;
@@ -105,6 +106,7 @@ DecodeStatus Protocol::DecodeResponse(uint8_t c) {
         case 'K':
         case 'F':
         case 'f':
+        case 'H':
             responseMsg.request.code = (RequestMsgCodes)c;
             responseMsg.request.value = 0;
             rspState = ResponseStates::RequestValue;
