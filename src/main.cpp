@@ -282,6 +282,7 @@ void ProcessRequestMsg(const mp::RequestMsg &rq) {
         break; // @@TODO - not used anywhere yet
     case mp::RequestMsgCodes::Cut:
     case mp::RequestMsgCodes::Eject:
+    case mp::RequestMsgCodes::Home:
     case mp::RequestMsgCodes::Load:
     case mp::RequestMsgCodes::Tool:
     case mp::RequestMsgCodes::Unload:

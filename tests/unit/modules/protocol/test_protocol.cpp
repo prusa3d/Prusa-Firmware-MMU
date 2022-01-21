@@ -15,6 +15,7 @@ TEST_CASE("protocol::EncodeRequests", "[protocol]") {
         std::make_tuple(mp::RequestMsgCodes::Cut, 0),
         std::make_tuple(mp::RequestMsgCodes::Eject, 0),
         std::make_tuple(mp::RequestMsgCodes::Finda, 0),
+        std::make_tuple(mp::RequestMsgCodes::Home, 0),
         std::make_tuple(mp::RequestMsgCodes::Load, 0),
         std::make_tuple(mp::RequestMsgCodes::Load, 1),
         std::make_tuple(mp::RequestMsgCodes::Load, 2),
@@ -57,6 +58,10 @@ TEST_CASE("protocol::EncodeResponseCmdAR", "[protocol]") {
         mp::RequestMsg(mp::RequestMsgCodes::Eject, 2),
         mp::RequestMsg(mp::RequestMsgCodes::Eject, 3),
         mp::RequestMsg(mp::RequestMsgCodes::Eject, 4),
+
+        mp::RequestMsg(mp::RequestMsgCodes::Home, 0),
+        mp::RequestMsg(mp::RequestMsgCodes::Home, 1),
+        mp::RequestMsg(mp::RequestMsgCodes::Home, 2),
 
         mp::RequestMsg(mp::RequestMsgCodes::FilamentType, 0),
         mp::RequestMsg(mp::RequestMsgCodes::FilamentType, 1),
@@ -151,6 +156,10 @@ TEST_CASE("protocol::EncodeResponseQueryOperation", "[protocol]") {
         mp::RequestMsg(mp::RequestMsgCodes::Eject, 2),
         mp::RequestMsg(mp::RequestMsgCodes::Eject, 3),
         mp::RequestMsg(mp::RequestMsgCodes::Eject, 4),
+
+        mp::RequestMsg(mp::RequestMsgCodes::Home, 0),
+        mp::RequestMsg(mp::RequestMsgCodes::Home, 1),
+        mp::RequestMsg(mp::RequestMsgCodes::Home, 2),
 
         mp::RequestMsg(mp::RequestMsgCodes::Load, 0),
         mp::RequestMsg(mp::RequestMsgCodes::Load, 1),
@@ -263,6 +272,7 @@ TEST_CASE("protocol::DecodeRequest", "[protocol]") {
     const char *rxbuff = GENERATE(
         "B0\n", "B1\n", "B2\n",
         "E0\n", "E1\n", "E2\n", "E3\n", "E4\n",
+        "H0\n", "H1\n", "H2\n",
         "F0\n", "F1\n",
         "f0\n", "f1\n",
         "K0\n",
@@ -328,6 +338,7 @@ TEST_CASE("protocol::DecodeResponseQueryOperation", "[protocol]") {
     mp::Protocol p;
     const char *cmdReference = GENERATE(
         "E0", "E1", "E2", "E3", "E4",
+        "H0", "H1", "H2",
         "K0", "K1", "K2", "K3", "K4",
         "L0", "L1", "L2", "L3", "L4",
         "T0", "T1", "T2", "T3", "T4",
@@ -445,7 +456,7 @@ TEST_CASE("protocol::DecodeResponseErrorsCross", "[protocol][.]") {
     const char *invalidInitialSpaces = GENERATE(" ", "  ");
     bool viInitialSpace = GENERATE(true, false);
 
-    const char *validReqCode = GENERATE("B", "E", "F", "f", "K", "L", "M", "P", "Q", "S", "T", "U", "W", "X");
+    const char *validReqCode = GENERATE("B", "E", "H", "F", "f", "K", "L", "M", "P", "Q", "S", "T", "U", "W", "X");
     const char *invalidReqCode = GENERATE("A", "R");
     bool viReqCode = GENERATE(true, false);
 
