@@ -183,7 +183,7 @@ static constexpr AxisConfig idler = {
 
 /// Idler motion limits
 static constexpr IdlerLimits idlerLimits = {
-    .lenght = 270.0_deg,
+    .lenght = 225.0_deg,
     .jerk = 0.1_deg_s,
     .accel = 500.0_deg_s2,
 };
