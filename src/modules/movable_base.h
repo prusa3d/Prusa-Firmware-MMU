@@ -14,7 +14,9 @@ public:
     enum {
         Ready = 0, // intentionally set as zero in order to allow zeroing the Idler structure upon startup -> avoid explicit initialization code
         Moving,
-        Homing,
+        HomeForward,
+        HomeMoveAwayFromForward,
+        HomeBack,
         TMCFailed,
         HomingFailed
     };
@@ -31,7 +33,8 @@ public:
         , plannedSlot(-1)
         , currentSlot(-1)
         , homingValid(false)
-        , axis(axis) {}
+        , axis(axis)
+        , axisStart(0) {}
 
     /// virtual ~MovableBase(); intentionally disabled, see description in logic::CommandBase
 
@@ -79,9 +82,13 @@ protected:
 
     config::Axis axis;
 
+    int32_t axisStart;
+
     virtual void PrepareMoveToPlannedSlot() = 0;
-    virtual void PlanHomingMove() = 0;
-    virtual void FinishHomingAndPlanMoveToParkPos() = 0;
+    virtual void PlanHomingMoveForward() = 0;
+    virtual void PlanHomingMoveBack() = 0;
+    /// @returns true if the measured axis length is within the expected range, false otherwise
+    virtual bool FinishHomingAndPlanMoveToParkPos() = 0;
     virtual void FinishMove() = 0;
 
     OperationResult InitMovement();
@@ -91,7 +98,11 @@ protected:
 
     void PerformMove();
 
-    void PerformHome();
+    void PerformHomeForward();
+    void PerformMoveAwayFromForward();
+    void PerformHomeBack();
+
+    void HomeFailed();
 };
 
 } // namespace motion

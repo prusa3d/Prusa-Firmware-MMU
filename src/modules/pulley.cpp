@@ -12,8 +12,9 @@ namespace pulley {
 
 Pulley pulley;
 
-void Pulley::FinishHomingAndPlanMoveToParkPos() {
+bool Pulley::FinishHomingAndPlanMoveToParkPos() {
     mm::motion.SetPosition(mm::Pulley, 0);
+    return true;
 }
 
 bool Pulley::Step() {
@@ -21,7 +22,7 @@ bool Pulley::Step() {
     case Moving:
         PerformMove();
         return false;
-    case Homing:
+    case HomeBack:
         homingValid = true;
         FinishHomingAndPlanMoveToParkPos();
         return true;

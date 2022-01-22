@@ -13,8 +13,8 @@ void MovableBase::PlanHome() {
     mm::motion.StallGuardReset(axis);
 
     // plan move at least as long as the axis can go from one side to the other
-    PlanHomingMove(); // mm::motion.PlanMove(axis, delta, 1000);
-    state = Homing;
+    PlanHomingMoveForward(); // mm::motion.PlanMove(axis, delta, 1000);
+    state = HomeForward;
 }
 
 MovableBase::OperationResult MovableBase::InitMovement() {
@@ -41,20 +41,51 @@ void MovableBase::PerformMove() {
     }
 }
 
-void MovableBase::PerformHome() {
+void MovableBase::PerformHomeForward() {
     if (mm::motion.StallGuard(axis)) {
-        // we have reached the end of the axis - homed ok
+        // we have reached the front end of the axis - first part homed probably ok
+        mm::motion.StallGuardReset(axis);
+        mm::motion.AbortPlannedMoves(axis, true);
+        PlanHomingMoveBack();
+        state = HomeMoveAwayFromForward;
+    } else if (mm::motion.QueueEmpty(axis)) {
+        HomeFailed();
+    }
+}
+
+void MovableBase::PerformMoveAwayFromForward() {
+    // need to wait for the TMC to report "no-stall", otherwise we may get stuck in the forward stalled position forever
+    if (!mm::motion.StallGuard(axis)) {
+        mm::motion.StallGuardReset(axis);
+        state = HomeBack;
+    } else if (mm::motion.QueueEmpty(axis)) {
+        HomeFailed();
+    }
+}
+
+void MovableBase::PerformHomeBack() {
+    if (mm::motion.StallGuard(axis)) {
+        // we have reached the back end of the axis - second part homed probably ok
+        mm::motion.StallGuardReset(axis);
         mm::motion.AbortPlannedMoves(axis, true);
         mm::motion.SetMode(axis, mg::globals.MotorsStealth() ? mm::Stealth : mm::Normal);
-        homingValid = true;
-        FinishHomingAndPlanMoveToParkPos();
-        // state = Ready; // not yet - we have to move to our parking position after homing the axis
+        if (!FinishHomingAndPlanMoveToParkPos()) {
+            // the measured axis' length was incorrect, something is blocking it, report an error, homing procedure terminated
+            state = HomingFailed;
+        } else {
+            homingValid = true;
+            // state = Ready; // not yet - we have to move to our parking position after homing the axis
+        }
     } else if (mm::motion.QueueEmpty(axis)) {
-        // we ran out of planned moves but no StallGuard event has occurred - homing failed
-        homingValid = false;
-        mm::motion.SetMode(axis, mg::globals.MotorsStealth() ? mm::Stealth : mm::Normal);
-        state = HomingFailed;
+        HomeFailed();
     }
+}
+
+void MovableBase::HomeFailed() {
+    // we ran out of planned moves but no StallGuard event has occurred - homing failed
+    homingValid = false;
+    mm::motion.SetMode(axis, mg::globals.MotorsStealth() ? mm::Stealth : mm::Normal);
+    state = HomingFailed;
 }
 
 } // namespace motion
