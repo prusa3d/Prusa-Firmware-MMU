@@ -88,13 +88,33 @@ void SimulateIdlerAndSelectorHoming() {
 
     mm::TriggerStallGuard(mm::Selector);
     mm::TriggerStallGuard(mm::Idler);
+    main_loop();
+    mm::motion.StallGuardReset(mm::Selector);
+    mm::motion.StallGuardReset(mm::Idler);
+
+    // now do a correct amount of steps of each axis towards the other end
+    uint32_t idlerSteps = mm::unitToSteps<mm::I_pos_t>(config::idlerLimits.lenght);
+    uint32_t selectorSteps = mm::unitToSteps<mm::S_pos_t>(config::selectorLimits.lenght);
+    uint32_t maxSteps = std::max(idlerSteps, selectorSteps) + 1;
+
+    for (uint32_t i = 0; i < maxSteps; ++i) {
+        main_loop();
+
+        if (i == idlerSteps) {
+            mm::TriggerStallGuard(mm::Idler);
+        } else {
+            mm::motion.StallGuardReset(mm::Idler);
+        }
+        if (i == selectorSteps) {
+            mm::TriggerStallGuard(mm::Selector);
+        } else {
+            mm::motion.StallGuardReset(mm::Selector);
+        }
+    }
 
     // now the Selector and Idler shall perform a move into their parking positions
     while (ms::selector.State() != mm::MovableBase::Ready || mi::idler.State() != mm::MovableBase::Ready)
         main_loop();
-
-    mm::motion.StallGuardReset(mm::Selector);
-    mm::motion.StallGuardReset(mm::Idler);
 }
 
 void SimulateIdlerHoming() {
@@ -104,12 +124,25 @@ void SimulateIdlerHoming() {
     }
 
     mm::TriggerStallGuard(mm::Idler);
+    main_loop();
+    mm::motion.StallGuardReset(mm::Idler);
+
+    // now do a correct amount of steps of each axis towards the other end
+    uint32_t idlerSteps = mm::unitToSteps<mm::I_pos_t>(config::idlerLimits.lenght) + 1;
+
+    for (uint32_t i = 0; i < idlerSteps; ++i) {
+        main_loop();
+
+        if (i == idlerSteps) {
+            mm::TriggerStallGuard(mm::Idler);
+        } else {
+            mm::motion.StallGuardReset(mm::Idler);
+        }
+    }
 
     // now the Idler shall perform a move into their parking positions
     while (mi::idler.State() != mm::MovableBase::Ready)
         main_loop();
-
-    mm::motion.StallGuardReset(mm::Idler);
 }
 
 void SimulateSelectorHoming() {
@@ -119,12 +152,25 @@ void SimulateSelectorHoming() {
     }
 
     mm::TriggerStallGuard(mm::Selector);
+    main_loop();
+    mm::motion.StallGuardReset(mm::Selector);
+
+    // now do a correct amount of steps of each axis towards the other end
+    uint32_t selectorSteps = mm::unitToSteps<mm::S_pos_t>(config::selectorLimits.lenght) + 1;
+
+    for (uint32_t i = 0; i < selectorSteps; ++i) {
+        main_loop();
+
+        if (i == selectorSteps) {
+            mm::TriggerStallGuard(mm::Selector);
+        } else {
+            mm::motion.StallGuardReset(mm::Selector);
+        }
+    }
 
     // now the Selector shall perform a move into their parking positions
     while (ms::selector.State() != mm::MovableBase::Ready)
         main_loop();
-
-    mm::motion.StallGuardReset(mm::Selector);
 }
 
 void EnsureActiveSlotIndex(uint8_t slot, mg::FilamentLoadState loadState) {

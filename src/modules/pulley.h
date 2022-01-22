@@ -36,8 +36,9 @@ public:
 
 protected:
     virtual void PrepareMoveToPlannedSlot() override {}
-    virtual void PlanHomingMove() override {}
-    virtual void FinishHomingAndPlanMoveToParkPos() override;
+    virtual void PlanHomingMoveForward() override {}
+    virtual void PlanHomingMoveBack() override {}
+    virtual bool FinishHomingAndPlanMoveToParkPos() override;
     virtual void FinishMove() override {}
 };
 

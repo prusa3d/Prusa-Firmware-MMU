@@ -18,12 +18,26 @@ void Selector::PrepareMoveToPlannedSlot() {
     dbg_logic_fP(PSTR("Prepare Move Selector slot %d"), plannedSlot);
 }
 
-void Selector::PlanHomingMove() {
-    mm::motion.PlanMove<mm::Selector>(mm::unitToAxisUnit<mm::S_pos_t>(config::selectorLimits.lenght * 2), mm::unitToAxisUnit<mm::S_speed_t>(config::selectorFeedrate));
-    dbg_logic_P(PSTR("Plan Homing Selector"));
+void Selector::PlanHomingMoveForward() {
+    mm::motion.PlanMove<mm::Selector>(mm::unitToAxisUnit<mm::S_pos_t>(-config::selectorLimits.lenght * 2), mm::unitToAxisUnit<mm::S_speed_t>(config::selectorFeedrate));
+    dbg_logic_P(PSTR("Plan Homing Selector Forward"));
 }
 
-void Selector::FinishHomingAndPlanMoveToParkPos() {
+void Selector::PlanHomingMoveBack() {
+    // we expect that we are at the front end of the axis, set the expected axis' position
+    mm::motion.SetPosition(mm::Selector, 0);
+    axisStart = mm::stepsToUnit<mm::S_pos_t>(mm::S_pos_t({ mm::motion.CurPosition(mm::Selector) }));
+    mm::motion.PlanMove<mm::Selector>(mm::unitToAxisUnit<mm::S_pos_t>(config::selectorLimits.lenght * 2), mm::unitToAxisUnit<mm::S_speed_t>(config::selectorFeedrate));
+    dbg_logic_P(PSTR("Plan Homing Selector Back"));
+}
+
+bool Selector::FinishHomingAndPlanMoveToParkPos() {
+    // check the axis' length
+    int32_t axisEnd = mm::stepsToUnit<mm::S_pos_t>(mm::S_pos_t({ mm::motion.CurPosition(mm::Selector) }));
+    if (abs(axisEnd - axisStart) < (config::selectorLimits.lenght.v - 3)) { //@@TODO is 3mm ok?
+        return false; // we couldn't home correctly, we cannot set the Selector's position
+    }
+
     mm::motion.SetPosition(mm::Selector, mm::unitToSteps<mm::S_pos_t>(config::selectorLimits.lenght));
     currentSlot = -1;
 
@@ -32,6 +46,7 @@ void Selector::FinishHomingAndPlanMoveToParkPos() {
         plannedSlot = IdleSlotIndex();
     }
     InitMovement();
+    return true;
 }
 
 void Selector::FinishMove() {
@@ -46,7 +61,7 @@ Selector::OperationResult Selector::MoveToSlot(uint8_t slot) {
     plannedSlot = slot;
 
     // if we are homing right now, just record the desired planned slot and return Accepted
-    if (state == Homing) {
+    if (state == HomeBack) {
         return OperationResult::Accepted;
     }
 
@@ -72,9 +87,16 @@ bool Selector::Step() {
         PerformMove();
         //dbg_logic_P(PSTR("Moving Selector"));
         return false;
-    case Homing:
+    case HomeForward:
+        dbg_logic_P(PSTR("Homing Selector Forward"));
+        PerformHomeForward();
+        return false;
+    case HomeMoveAwayFromForward:
+        PerformMoveAwayFromForward();
+        return false;
+    case HomeBack:
         dbg_logic_P(PSTR("Homing Selector"));
-        PerformHome();
+        PerformHomeBack();
         return false;
     case Ready:
         if (!homingValid && mg::globals.FilamentLoaded() < mg::InSelector) {

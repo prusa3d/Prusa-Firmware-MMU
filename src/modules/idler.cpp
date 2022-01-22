@@ -17,12 +17,26 @@ void Idler::PrepareMoveToPlannedSlot() {
     dbg_logic_fP(PSTR("Prepare Move Idler slot %d"), plannedSlot);
 }
 
-void Idler::PlanHomingMove() {
-    mm::motion.PlanMove<mm::Idler>(mm::unitToAxisUnit<mm::I_pos_t>(-config::idlerLimits.lenght * 2), mm::unitToAxisUnit<mm::I_speed_t>(config::idlerFeedrate));
-    dbg_logic_P(PSTR("Plan Homing Idler"));
+void Idler::PlanHomingMoveForward() {
+    mm::motion.PlanMove<mm::Idler>(mm::unitToAxisUnit<mm::I_pos_t>(config::idlerLimits.lenght * 2), mm::unitToAxisUnit<mm::I_speed_t>(config::idlerFeedrate));
+    dbg_logic_P(PSTR("Plan Homing Idler Forward"));
 }
 
-void Idler::FinishHomingAndPlanMoveToParkPos() {
+void Idler::PlanHomingMoveBack() {
+    // we expect that we are at the front end of the axis, set the expected axis' position
+    mm::motion.SetPosition(mm::Idler, mm::unitToSteps<mm::I_pos_t>(config::idlerLimits.lenght));
+    axisStart = mm::stepsToUnit<mm::I_pos_t>(mm::I_pos_t({ mm::motion.CurPosition(mm::Idler) }));
+    mm::motion.PlanMove<mm::Idler>(mm::unitToAxisUnit<mm::I_pos_t>(-config::idlerLimits.lenght * 2), mm::unitToAxisUnit<mm::I_speed_t>(config::idlerFeedrate));
+    dbg_logic_P(PSTR("Plan Homing Idler Back"));
+}
+
+bool Idler::FinishHomingAndPlanMoveToParkPos() {
+    // check the axis' length
+    int32_t axisEnd = mm::stepsToUnit<mm::I_pos_t>(mm::I_pos_t({ mm::motion.CurPosition(mm::Idler) }));
+    if (abs(axisEnd - axisStart) < (config::idlerLimits.lenght.v - 10)) { //@@TODO is 10 degrees ok?
+        return false; // we couldn't home correctly, we cannot set the Idler's position
+    }
+
     mm::motion.SetPosition(mm::Idler, 0);
 
     // finish whatever has been planned before homing
@@ -30,6 +44,7 @@ void Idler::FinishHomingAndPlanMoveToParkPos() {
         plannedSlot = IdleSlotIndex();
     }
     InitMovement();
+    return true;
 }
 
 void Idler::FinishMove() {
@@ -48,7 +63,7 @@ Idler::OperationResult Idler::Disengage() {
 
     // coordinates invalid, first home, then disengage
     if (!homingValid) {
-        PerformHome();
+        PerformHomeForward();
         return OperationResult::Accepted;
     }
 
@@ -72,7 +87,7 @@ Idler::OperationResult Idler::Engage(uint8_t slot) {
     plannedEngage = true;
 
     // if we are homing right now, just record the desired planned slot and return Accepted
-    if (state == Homing) {
+    if (state == HomeBack) {
         return OperationResult::Accepted;
     }
 
@@ -101,9 +116,16 @@ bool Idler::Step() {
         // dbg_logic_P(PSTR("Moving Idler"));
         PerformMove();
         return false;
-    case Homing:
-        dbg_logic_P(PSTR("Homing Idler"));
-        PerformHome();
+    case HomeForward:
+        dbg_logic_P(PSTR("Homing Idler Forward"));
+        PerformHomeForward();
+        return false;
+    case HomeMoveAwayFromForward:
+        PerformMoveAwayFromForward();
+        return false;
+    case HomeBack:
+        dbg_logic_P(PSTR("Homing Idler Back"));
+        PerformHomeBack();
         return false;
     case Ready:
         if (!homingValid && mg::globals.FilamentLoaded() < mg::InFSensor) {
