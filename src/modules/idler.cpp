@@ -120,9 +120,6 @@ bool Idler::Step() {
         dbg_logic_P(PSTR("Homing Idler Forward"));
         PerformHomeForward();
         return false;
-    case HomeMoveAwayFromForward:
-        PerformMoveAwayFromForward();
-        return false;
     case HomeBack:
         dbg_logic_P(PSTR("Homing Idler Back"));
         PerformHomeBack();

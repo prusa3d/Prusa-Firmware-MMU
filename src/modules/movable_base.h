@@ -15,7 +15,6 @@ public:
         Ready = 0, // intentionally set as zero in order to allow zeroing the Idler structure upon startup -> avoid explicit initialization code
         Moving,
         HomeForward,
-        HomeMoveAwayFromForward,
         HomeBack,
         TMCFailed,
         HomingFailed
@@ -99,7 +98,6 @@ protected:
     void PerformMove();
 
     void PerformHomeForward();
-    void PerformMoveAwayFromForward();
     void PerformHomeBack();
 
     void HomeFailed();
