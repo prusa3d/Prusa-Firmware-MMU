@@ -47,16 +47,6 @@ void MovableBase::PerformHomeForward() {
         mm::motion.StallGuardReset(axis);
         mm::motion.AbortPlannedMoves(axis, true);
         PlanHomingMoveBack();
-        state = HomeMoveAwayFromForward;
-    } else if (mm::motion.QueueEmpty(axis)) {
-        HomeFailed();
-    }
-}
-
-void MovableBase::PerformMoveAwayFromForward() {
-    // need to wait for the TMC to report "no-stall", otherwise we may get stuck in the forward stalled position forever
-    if (!mm::motion.StallGuard(axis)) {
-        mm::motion.StallGuardReset(axis);
         state = HomeBack;
     } else if (mm::motion.QueueEmpty(axis)) {
         HomeFailed();

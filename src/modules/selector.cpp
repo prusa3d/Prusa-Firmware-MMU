@@ -91,9 +91,6 @@ bool Selector::Step() {
         dbg_logic_P(PSTR("Homing Selector Forward"));
         PerformHomeForward();
         return false;
-    case HomeMoveAwayFromForward:
-        PerformMoveAwayFromForward();
-        return false;
     case HomeBack:
         dbg_logic_P(PSTR("Homing Selector"));
         PerformHomeBack();
