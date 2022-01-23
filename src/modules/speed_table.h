@@ -5,6 +5,13 @@
 #include "../hal/cpu.h"
 #include "math.h"
 
+// Move speed tables into the bootloader section in debug builds to conserve data space
+#if defined(_DEBUG) && defined(__AVR__)
+#define ST_PROGMEM __attribute__((section(".boot1")))
+#else
+#define ST_PROGMEM PROGMEM
+#endif
+
 namespace modules {
 
 /// Speed  tables for acceleration calculations
@@ -17,10 +24,10 @@ static_assert(F_CPU / config::stepTimerFrequencyDivider == 2000000,
     "speed tables not compatible for the requested frequency");
 
 /// Lookup table for rates equal or higher than 8*256
-extern const st_timer_t speed_table_fast[256][2] PROGMEM;
+extern const st_timer_t speed_table_fast[256][2] ST_PROGMEM;
 
 /// Lookup table for lower step rates
-extern const st_timer_t speed_table_slow[256][2] PROGMEM;
+extern const st_timer_t speed_table_slow[256][2] ST_PROGMEM;
 
 /// Calculate the next timer interval and steps according to current step rate
 static inline st_timer_t calc_timer(st_timer_t step_rate, uint8_t &step_loops) {
