@@ -360,3 +360,10 @@ int main() {
     }
     return 0;
 }
+
+#if defined(_DEBUG) && defined(__AVR__)
+/// Bootloader trampoline to restart normal execution
+void __attribute__((naked, section(".boot"))) boot() {
+    asm volatile("jmp 0x0");
+}
+#endif

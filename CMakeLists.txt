@@ -135,15 +135,10 @@ add_executable(firmware)
 set_target_properties(firmware PROPERTIES CXX_STANDARD 14)
 
 if(CMAKE_CROSSCOMPILING)
-  #[[
-  # configure linker script
+  # configure the linker script
   set(LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/src/avr5.xn)
   target_link_options(firmware PUBLIC -Wl,-T,${LINKER_SCRIPT})
   add_link_dependency(firmware ${LINKER_SCRIPT})
-  #]]
-
-  # limit the text section to 28K (32K - 4k reserved for the bootloader)
-  target_link_options(firmware PUBLIC -Wl,--defsym=__TEXT_REGION_LENGTH__=28K)
 
   # generate firmware.bin file
   objcopy(firmware "ihex" ".hex")
