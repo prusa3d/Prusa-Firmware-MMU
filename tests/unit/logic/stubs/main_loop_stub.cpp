@@ -128,9 +128,10 @@ void SimulateIdlerHoming() {
     mm::motion.StallGuardReset(mm::Idler);
 
     // now do a correct amount of steps of each axis towards the other end
-    uint32_t idlerSteps = mm::unitToSteps<mm::I_pos_t>(config::idlerLimits.lenght) + 1;
+    uint32_t idlerSteps = mm::unitToSteps<mm::I_pos_t>(config::idlerLimits.lenght);
+    uint32_t maxSteps = idlerSteps + 1;
 
-    for (uint32_t i = 0; i < idlerSteps; ++i) {
+    for (uint32_t i = 0; i < maxSteps; ++i) {
         main_loop();
 
         if (i == idlerSteps) {
@@ -157,8 +158,9 @@ void SimulateSelectorHoming() {
 
     // now do a correct amount of steps of each axis towards the other end
     uint32_t selectorSteps = mm::unitToSteps<mm::S_pos_t>(config::selectorLimits.lenght) + 1;
+    uint32_t maxSteps = selectorSteps + 1;
 
-    for (uint32_t i = 0; i < selectorSteps; ++i) {
+    for (uint32_t i = 0; i < maxSteps; ++i) {
         main_loop();
 
         if (i == selectorSteps) {

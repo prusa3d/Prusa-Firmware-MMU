@@ -161,9 +161,10 @@ void FailedLoadToFindaResolveManual(uint8_t slot, logic::LoadFilament &lf) {
     // - basically it will just start homing
     // Moreover, the Idler is to disengage meanwhile, which makes the simulation even harder.
     // Therefore we just tick the stallguard of the Selector and hope for the best
-    mm::TriggerStallGuard(mm::Selector);
-    ms::selector.Step();
-    mm::motion.StallGuardReset(mm::Selector); // drop stallguard on Selector to avoid future confusion
+    //
+    // With the introduction of dual-side homing, the simulation gets even harder,
+    // so let's assume the MMU does its job -> prefer simulating selector homing properly and check the machine's state afterwards
+    SimulateSelectorHoming();
 
     // just one step is necessary to "finish" homing
     // but the selector then (correctly) plans its move to the original position
