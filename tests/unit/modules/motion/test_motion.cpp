@@ -26,7 +26,6 @@ ssize_t stepUntilDone(size_t maxSteps = 100000) {
 }
 
 void ResetMotionSim() {
-    stepUntilDone();
     REQUIRE(motion.QueueEmpty());
 
     motion.SetPosition(Idler, 0);
