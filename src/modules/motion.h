@@ -288,12 +288,6 @@ public:
     bool QueueEmpty(Axis axis) const {
         return axisData[axis].ctrl.QueueEmpty();
     }
-
-    void ResetAxesData() {
-        for (uint8_t i = 0; i != NUM_AXIS; ++i) {
-            axisData[i].ctrl.SetPosition(0);
-        }
-    }
 #else
     // Force STUB for testing
     bool QueueEmpty(Axis axis) const;
