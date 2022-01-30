@@ -176,13 +176,13 @@ public:
     /// Set the position of an axis. Should only be called when the queue is empty.
     /// @param axis axis affected
     /// @param x position to set
-    void SetPosition(Axis axis, pos_t x)
 #if !defined(UNITTEST) || defined(UNITTEST_MOTION)
-    {
+    void SetPosition(Axis axis, pos_t x) {
         axisData[axis].ctrl.SetPosition(x);
     }
 #else
-        ;
+    // Force STUB for testing
+    void SetPosition(Axis axis, pos_t x);
 #endif
 
     /// Get current acceleration for the selected axis
