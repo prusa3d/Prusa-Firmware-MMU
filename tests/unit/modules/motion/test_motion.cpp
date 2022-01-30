@@ -28,9 +28,14 @@ ssize_t stepUntilDone(size_t maxSteps = 100000) {
 void ResetMotionSim() {
     stepUntilDone();
     REQUIRE(motion.QueueEmpty());
-    motion.ResetAxesData();
+
+    motion.SetPosition(Idler, 0);
     REQUIRE(motion.Position(Idler) == 0);
+
+    motion.SetPosition(Selector, 0);
     REQUIRE(motion.Position(Selector) == 0);
+
+    motion.SetPosition(Pulley, 0);
     REQUIRE(motion.Position(Pulley) == 0);
 }
 
