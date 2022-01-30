@@ -250,11 +250,15 @@ public:
             timers[i] = axisData[i].residual;
             if (timers[i] <= config::stepTimerQuantum) {
                 if (timers[i] || !axisData[i].ctrl.QueueEmpty()) {
-                    if (st_timer_t next = axisData[i].ctrl.Step(axisParams[i].params)) {
+                    st_timer_t next = axisData[i].ctrl.Step(axisParams[i].params);
+                    if (next) {
                         timers[i] += next;
 
                         // axis has been moved, run the tmc2130 Isr for this axis
                         axisData[i].drv.Isr(axisParams[i].params);
+                    } else {
+                        // axis finished, reset residual
+                        timers[i] = 0;
                     }
                 }
             }
