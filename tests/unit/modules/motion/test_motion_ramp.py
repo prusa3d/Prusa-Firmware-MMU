@@ -156,6 +156,15 @@ def check_run(info, run):
     ax_info, data = run
     ax_count = len(ax_info)
 
+    # first and last interval should always be zero
+    assert (data[0][1] == 0)
+    assert (data[-1][1] == 0)
+
+    # ensure no interval is shorter than the specified quantum
+    for i in range(1, len(data) - 2):
+        interval = data[i][1]
+        assert (interval >= info['quantum'])
+
     # split axis information
     ax_data = []
     for ax in range(ax_count):
