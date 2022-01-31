@@ -112,14 +112,30 @@ static constexpr AU unitToAxisUnit(U v) {
     return { (typename AU::type_t)(v.v * axisScale[AU::axis].stepsPerUnit) };
 }
 
-/// Convert an AxisUnit to unit::Unit.
-/// The scaling factor is stored with the pair config::AxisConfig::uSteps and
-/// config::AxisConfig::stepsPerUnit (one per-axis).
-template <typename U, typename AU>
-static constexpr typename U::type_t axisUnitToUnit(AU v) {
+/// Convert an AxisUnit to a physical unit with a truncated integer type (normally int32_t).
+/// Inverse of unitToAxisUnit, with the additional constraint that type casts are
+/// performed earlier so that no floating point computation is required at runtime.
+/// @param U Base unit type (normally U_mm)
+/// @param AU AxisUnit type (implicit)
+/// @param T Resulting integer type
+/// @param v Value to truncate
+/// @param mul Optional pre-multiplier
+/// @returns Truncated unit (v * mul)
+/// @see unitToAxisUnit
+template <typename U, typename AU, typename T = int32_t>
+static constexpr T axisUnitToTruncatedUnit(AU v, long double mul = 1.) {
     static_assert(AU::unit == U::unit, "incorrect unit type conversion");
-    //static_assert(U::base == axisScale[AU::axis].base, "incorrect unit base conversion");
-    return { (typename U::type_t)(v.v / axisScale[AU::axis].stepsPerUnit) };
+    static_assert(U::base == axisScale[AU::axis].base, "incorrect unit base conversion");
+    return { ((T)v.v / (T)(axisScale[AU::axis].stepsPerUnit / mul)) };
+}
+
+/// Truncate an Unit type to an integer (normally int32_t)
+/// @param v Value to truncate
+/// @param mul Optional pre-multiplier
+/// @returns Truncated unit (v * mul)
+template <typename U, typename T = int32_t>
+static constexpr T truncatedUnit(U v, long double mul = 1.) {
+    return (T)(v.v * mul);
 }
 
 /// Convert a unit::Unit to a steps type (pos_t or steps_t).
@@ -127,13 +143,6 @@ static constexpr typename U::type_t axisUnitToUnit(AU v) {
 template <typename AU, typename U>
 static constexpr typename AU::type_t unitToSteps(U v) {
     return unitToAxisUnit<AU>(v).v;
-}
-
-/// Convert a steps type (pos_t or steps_t) to a unit::Unit.
-/// Extract the raw step count from an AxisUnit with type checking.
-template <typename U, typename AU>
-static constexpr typename U::type_t stepsToUnit(AU pos) {
-    return axisUnitToUnit<U, AU>(pos);
 }
 
 // Pulley
