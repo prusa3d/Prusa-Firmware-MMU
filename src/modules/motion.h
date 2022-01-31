@@ -166,12 +166,28 @@ public:
     /// @param axis axis affected
     pos_t Position(Axis axis) const;
 
+    /// @returns head position of an axis, but in AxisUnit.
+    /// The Axis needs to be supplied as the first template argument: Position<axis>().
+    /// @see Position
+    template <Axis A>
+    constexpr AxisUnit<pos_t, A, Lenght> Position() const {
+        return AxisUnit<pos_t, A, Lenght> { Position(A) };
+    }
+
     /// Fetch the current position of the axis while stepping. This function is expensive!
     /// It's necessary only in exceptional cases. For regular usage, Position() should
     /// probably be used instead.
     /// @param axis axis affected
     /// @returns the current position of the axis
     pos_t CurPosition(Axis axis) const { return axisData[axis].ctrl.CurPosition(); }
+
+    /// Fetch the current axis position, but in AxisUnit. This function is expensive!
+    /// The Axis needs to be supplied as the first template argument: CurPosition<axis>().
+    /// @see CurPosition
+    template <Axis A>
+    constexpr AxisUnit<pos_t, A, Lenght> CurPosition() const {
+        return AxisUnit<pos_t, A, Lenght> { CurPosition(A) };
+    }
 
     /// Set the position of an axis. Should only be called when the queue is empty.
     /// @param axis axis affected
