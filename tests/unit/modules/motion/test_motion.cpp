@@ -93,6 +93,8 @@ TEST_CASE("motion::unit", "[motion]") {
     motion.PlanMoveTo<Selector>(10.0_S_mm, 100.0_S_mm_s);
     CHECK(stepUntilDone() != -1);
     REQUIRE(motion.Position(Selector) == target);
+    S_pos_t s_target = motion.Position<Selector>();
+    REQUIRE(s_target.v == target);
 
     // move directly with physical units
     motion.PlanMoveTo<Selector>(10.0_mm, 100.0_mm_s);
@@ -103,6 +105,8 @@ TEST_CASE("motion::unit", "[motion]") {
     motion.PlanMove<Selector>(-5.0_S_mm, 100.0_S_mm_s);
     CHECK(stepUntilDone() != -1);
     REQUIRE(motion.Position(Selector) == target / 2);
+    s_target = motion.Position<Selector>();
+    REQUIRE(s_target.v == target / 2);
 
     // relative move with physical unit
     motion.PlanMove<Selector>(-5.0_mm, 100.0_mm_s);
