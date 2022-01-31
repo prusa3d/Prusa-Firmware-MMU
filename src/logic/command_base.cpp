@@ -90,8 +90,9 @@ bool CommandBase::WaitForOneModuleErrorRecovery(ErrorCode ec, modules::motion::M
                     // homing can be recovered
                     mui::Event ev = mui::userInput.ConsumeEvent();
                     if (ev == mui::Event::Middle) {
-                        m.InvalidateHoming(); // @@TODO invalidate and force initiate a new homing attempt
+                        m.PlanHome(); // force initiate a new homing attempt
                         state = ProgressCode::Homing;
+                        error = ErrorCode::RUNNING;
                     }
                 }
                 // TMC errors cannot be recovered safely, waiting for power cycling the MMU

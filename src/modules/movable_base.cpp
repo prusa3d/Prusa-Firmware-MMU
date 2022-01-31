@@ -7,6 +7,8 @@ namespace modules {
 namespace motion {
 
 void MovableBase::PlanHome() {
+    InvalidateHoming();
+
     // switch to normal mode on this axis
     mm::motion.InitAxis(axis);
     mm::motion.SetMode(axis, mm::Normal);
