@@ -34,7 +34,8 @@ int main(int argc, const char *argv[]) {
     const int maxJerk = 1;
 
     // write common parameters
-    fprintf(fd, "{\"timebase\": %lu}\n", F_CPU / config::stepTimerFrequencyDivider);
+    fprintf(fd, "{\"timebase\": %lu, \"quantum\": %u}\n",
+        F_CPU / config::stepTimerFrequencyDivider, config::stepTimerQuantum);
 
     for (int ax_cnt = 0; ax_cnt != 2; ++ax_cnt) {
         for (int accel = 2000; accel <= 50000; accel *= 2) {
