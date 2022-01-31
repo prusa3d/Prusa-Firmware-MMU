@@ -24,7 +24,7 @@ void UnloadToFinda::Reset(uint8_t maxTries) {
 
 // @@TODO this may end up somewhere else as more code may need to check the distance traveled by the filament
 int32_t CurrentPositionPulley_mm() {
-    return mm::stepsToUnit<mm::P_pos_t>(mm::P_pos_t({ mm::motion.CurPosition(mm::Pulley) }));
+    return mm::axisUnitToTruncatedUnit<config::U_mm>(mm::motion.CurPosition<mm::Pulley>());
 }
 
 bool UnloadToFinda::Step() {
@@ -48,7 +48,7 @@ bool UnloadToFinda::Step() {
         return false;
     case WaitingForFINDA: {
         int32_t currentPulley_mm = CurrentPositionPulley_mm();
-        if ((abs(unloadStart_mm - currentPulley_mm) > config::fsensorUnloadCheckDistance.v) && mfs::fsensor.Pressed()) {
+        if ((abs(unloadStart_mm - currentPulley_mm) > mm::truncatedUnit(config::fsensorUnloadCheckDistance)) && mfs::fsensor.Pressed()) {
             // fsensor didn't trigger within the first fsensorUnloadCheckDistance mm -> stop pulling, something failed, report an error
             // This scenario should not be tried again - repeating it may cause more damage to filament + potentially more collateral damage
             state = FailedFSensor;
