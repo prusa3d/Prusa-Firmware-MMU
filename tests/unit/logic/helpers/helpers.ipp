@@ -149,6 +149,6 @@ void PressButtonAndDebounce(SM &sm, uint8_t btnIndex){
     hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCLimits[btnIndex][0] + 1);
     while (!mb::buttons.ButtonPressed(btnIndex)) {
         main_loop();
-        sm.StepInner();
+        sm.Step(); // Inner
     }
 }

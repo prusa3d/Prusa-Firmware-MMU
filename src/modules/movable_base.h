@@ -59,6 +59,9 @@ public:
     /// (which makes homing completely transparent)
     inline void InvalidateHoming() { homingValid = false; }
 
+    /// Prepare a homing move of the axis
+    void PlanHome();
+
     inline bool HomingValid() const { return homingValid; }
 
     inline config::Axis Axis() const { return axis; }
@@ -91,9 +94,6 @@ protected:
     virtual void FinishMove() = 0;
 
     OperationResult InitMovement();
-
-    /// Prepare a homing move of the axis
-    void PlanHome();
 
     void PerformMove();
 
