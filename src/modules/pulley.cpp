@@ -40,7 +40,7 @@ void Pulley::PlanMove(unit::U_mm delta, unit::U_mm_s feed_rate, unit::U_mm_s end
 }
 
 int32_t Pulley::CurrentPosition_mm() {
-    return mm::stepsToUnit<mm::P_pos_t>(mm::P_pos_t({ mm::motion.CurPosition(mm::Pulley) }));
+    return mm::axisUnitToTruncatedUnit<config::U_mm>(mm::motion.CurPosition<mm::Pulley>());
 }
 
 void Pulley::InitAxis() {
