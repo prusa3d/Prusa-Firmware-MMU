@@ -26,14 +26,14 @@ void Selector::PlanHomingMoveForward() {
 void Selector::PlanHomingMoveBack() {
     // we expect that we are at the front end of the axis, set the expected axis' position
     mm::motion.SetPosition(mm::Selector, 0);
-    axisStart = mm::stepsToUnit<mm::S_pos_t>(mm::S_pos_t({ mm::motion.CurPosition(mm::Selector) }));
+    axisStart = mm::axisUnitToTruncatedUnit<config::U_mm>(mm::motion.CurPosition<mm::Selector>());
     mm::motion.PlanMove<mm::Selector>(mm::unitToAxisUnit<mm::S_pos_t>(config::selectorLimits.lenght * 2), mm::unitToAxisUnit<mm::S_speed_t>(config::selectorFeedrate));
     dbg_logic_P(PSTR("Plan Homing Selector Back"));
 }
 
 bool Selector::FinishHomingAndPlanMoveToParkPos() {
     // check the axis' length
-    int32_t axisEnd = mm::stepsToUnit<mm::S_pos_t>(mm::S_pos_t({ mm::motion.CurPosition(mm::Selector) }));
+    int32_t axisEnd = mm::axisUnitToTruncatedUnit<config::U_mm>(mm::motion.CurPosition<mm::Selector>());
     if (abs(axisEnd - axisStart) < (config::selectorLimits.lenght.v - 3)) { //@@TODO is 3mm ok?
         return false; // we couldn't home correctly, we cannot set the Selector's position
     }
