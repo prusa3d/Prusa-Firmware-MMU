@@ -63,7 +63,7 @@ void MovableBase::PerformHomeBack() {
         mm::motion.SetMode(axis, mg::globals.MotorsStealth() ? mm::Stealth : mm::Normal);
         if (!FinishHomingAndPlanMoveToParkPos()) {
             // the measured axis' length was incorrect, something is blocking it, report an error, homing procedure terminated
-            state = HomingFailed;
+            HomeFailed();
         } else {
             homingValid = true;
             // state = Ready; // not yet - we have to move to our parking position after homing the axis
@@ -74,9 +74,10 @@ void MovableBase::PerformHomeBack() {
 }
 
 void MovableBase::HomeFailed() {
-    // we ran out of planned moves but no StallGuard event has occurred - homing failed
+    // we ran out of planned moves but no StallGuard event has occurred
+    // or the measured length of axis was not within the accepted tolerance
     homingValid = false;
-    mm::motion.SetMode(axis, mg::globals.MotorsStealth() ? mm::Stealth : mm::Normal);
+    mm::motion.Disable(axis); // disable power to the axis - allows the user to do something with the device manually
     state = HomingFailed;
 }
 

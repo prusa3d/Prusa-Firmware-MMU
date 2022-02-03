@@ -82,34 +82,41 @@ bool CommandBase::WaitForOneModuleErrorRecovery(ErrorCode ec, modules::motion::M
             stateBeforeModuleFailed = state;
             error = ec;
             state = ProgressCode::ERRWaitingForUser; // such a situation always requires user's attention -> let the printer display an error screen
+        }
+
+        // are we already recovering an error - that would mean we got another one
+        if (recoveringMovableError) {
+            error = ec;
+            state = ProgressCode::ERRWaitingForUser; // such a situation always requires user's attention -> let the printer display an error screen
+        }
+
+        switch (state) {
+        case ProgressCode::ERRWaitingForUser: // waiting for a recovery - mask axis bits:
+            if (WithoutAxisBits(ec) == ErrorCode::HOMING_FAILED) {
+                // homing can be recovered
+                mui::Event ev = mui::userInput.ConsumeEvent();
+                if (ev == mui::Event::Middle) {
+                    recoveringMovableError = true;
+                    m.PlanHome(); // force initiate a new homing attempt
+                    state = ProgressCode::Homing;
+                    error = ErrorCode::RUNNING;
+                }
+            }
+            // TMC errors cannot be recovered safely, waiting for power cycling the MMU
             return true;
-        } else {
-            switch (state) {
-            case ProgressCode::ERRWaitingForUser: // waiting for a recovery - mask axis bits:
-                if (WithoutAxisBits(ec) == ErrorCode::HOMING_FAILED) {
-                    // homing can be recovered
-                    mui::Event ev = mui::userInput.ConsumeEvent();
-                    if (ev == mui::Event::Middle) {
-                        m.PlanHome(); // force initiate a new homing attempt
-                        state = ProgressCode::Homing;
-                        error = ErrorCode::RUNNING;
-                    }
-                }
-                // TMC errors cannot be recovered safely, waiting for power cycling the MMU
-                return true;
-            case ProgressCode::Homing:
-                if (m.HomingValid()) {
-                    // managed to recover from a homing problem
-                    state = stateBeforeModuleFailed;
-                    stateBeforeModuleFailed = ProgressCode::OK;
-                    return false;
-                }
-                return true;
-            default:
-                return true; // no idea what to do in other states ... set internal fw error state?
+        case ProgressCode::Homing:
+            if (m.HomingValid()) {
+                // managed to recover from a homing problem
+                state = stateBeforeModuleFailed;
+                recoveringMovableError = false;
+                stateBeforeModuleFailed = ProgressCode::OK;
+                return false;
             }
             return true;
+        default:
+            return true; // no idea what to do in other states ... set internal fw error state?
         }
+        return true;
     }
     return false;
 }

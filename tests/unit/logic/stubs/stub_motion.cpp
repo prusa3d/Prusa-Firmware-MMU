@@ -16,12 +16,12 @@ AxisSim axes[3] = {
 };
 
 bool Motion::InitAxis(Axis axis) {
-    axes[axis].enabled = true;
+    SetEnabled(axis, true);
     return true;
 }
 
 void Motion::SetEnabled(Axis axis, bool enabled) {
-    axes[axis].enabled = enabled;
+    axisData[axis].enabled = axes[axis].enabled = enabled;
 }
 
 bool Motion::StallGuard(Axis axis) {

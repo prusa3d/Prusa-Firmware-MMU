@@ -26,7 +26,8 @@ public:
     inline CommandBase()
         : state(ProgressCode::OK)
         , error(ErrorCode::OK)
-        , stateBeforeModuleFailed(ProgressCode::OK) {}
+        , stateBeforeModuleFailed(ProgressCode::OK)
+        , recoveringMovableError(false) {}
 
     // Normally, a base class should (must) have a virtual destructor to enable correct deallocation of superstructures.
     // However, in our case we don't want ANY destruction of these objects and moreover - adding a destructor like this
@@ -110,6 +111,7 @@ protected:
     ProgressCode state; ///< current progress state of the state machine
     ErrorCode error; ///< current error code
     ProgressCode stateBeforeModuleFailed; ///< saved state of the state machine before a common error happened
+    bool recoveringMovableError;
 };
 
 } // namespace logic
