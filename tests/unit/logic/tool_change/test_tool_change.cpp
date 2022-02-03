@@ -191,6 +191,7 @@ void ToolChangeFailLoadToFindaLeftBtn(logic::ToolChange &tc, uint8_t toSlot) {
     PressButtonAndDebounce(tc, mb::Left);
 
     REQUIRE(WhileTopState(tc, ProgressCode::ERREngagingIdler, 5000UL));
+    ClearButtons(tc);
 
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRHelpingFilament));
 
@@ -225,6 +226,8 @@ void ToolChangeFailLoadToFindaMiddleBtn(logic::ToolChange &tc, uint8_t toSlot) {
         200000UL));
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), toSlot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
 
+    ClearButtons(tc);
+
     // retry the whole operation
     // beware - the FeedToFinda state machine will leverage the already engaged Idler,
     // so the necessary number of steps to reach the FINDA is quite low (~200 was lowest once tested)
@@ -243,6 +246,8 @@ void ToolChangeFailLoadToFindaRightBtnFINDA_FSensor(logic::ToolChange &tc, uint8
     PressButtonAndDebounce(tc, mb::Right);
 
     CheckFinishedCorrectly(tc, toSlot);
+
+    ClearButtons(tc);
 }
 
 void ToolChangeFailLoadToFindaRightBtnFINDA(logic::ToolChange &tc, uint8_t toSlot) {
@@ -251,6 +256,8 @@ void ToolChangeFailLoadToFindaRightBtnFINDA(logic::ToolChange &tc, uint8_t toSlo
     PressButtonAndDebounce(tc, mb::Right);
 
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), toSlot, true, false, ml::off, ml::blink0, ErrorCode::FSENSOR_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));
+
+    ClearButtons(tc);
 }
 
 void ToolChangeFailLoadToFindaRightBtn(logic::ToolChange &tc, uint8_t toSlot) {
@@ -258,6 +265,8 @@ void ToolChangeFailLoadToFindaRightBtn(logic::ToolChange &tc, uint8_t toSlot) {
     PressButtonAndDebounce(tc, mb::Right);
 
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), toSlot, false, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));
+
+    ClearButtons(tc);
 }
 
 TEST_CASE("tool_change::load_fail_FINDA_resolve_btnL", "[tool_change]") {
