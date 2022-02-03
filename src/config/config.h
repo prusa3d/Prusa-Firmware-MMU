@@ -39,6 +39,7 @@ static constexpr const uint16_t findaDebounceMs = 100;
 static constexpr const uint8_t buttonCount = 3; ///< number of buttons currently supported
 static constexpr const uint16_t buttonsDebounceMs = 100;
 static constexpr const uint16_t buttonADCLimits[buttonCount][2] = { { 0, 50 }, { 80, 100 }, { 160, 180 } };
+static constexpr const uint16_t buttonADCMaxValue = 1023; ///< used in unit tests
 static constexpr const uint8_t buttonsADCIndex = 5; ///< ADC index of buttons input
 
 // Motion and planning
