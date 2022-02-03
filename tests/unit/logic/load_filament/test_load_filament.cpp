@@ -107,6 +107,8 @@ void FailedLoadToFindaResolveHelp(uint8_t slot, logic::LoadFilament &lf) {
     REQUIRE(WhileTopState(lf, ProgressCode::ERREngagingIdler, idlerEngageDisengageMaxSteps));
 
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRHelpingFilament));
+
+    ClearButtons(lf);
 }
 
 void FailedLoadToFindaResolveHelpFindaTriggered(uint8_t slot, logic::LoadFilament &lf) {
@@ -142,6 +144,8 @@ void FailedLoadToFindaResolveManual(uint8_t slot, logic::LoadFilament &lf) {
 
     // pulling filament back
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, true, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
+
+    ClearButtons(lf);
 
     // Stage 3 - retracting from finda
     // we'll assume the finda is working correctly here
@@ -182,6 +186,8 @@ void FailedLoadToFindaResolveManualNoFINDA(uint8_t slot, logic::LoadFilament &lf
 
     SimulateIdlerHoming();
 
+    ClearButtons(lf);
+
     // pulling filament back
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));
 }
@@ -191,6 +197,8 @@ void FailedLoadToFindaResolveTryAgain(uint8_t slot, logic::LoadFilament &lf) {
 
     // the state machine should have restarted
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
+    ClearButtons(lf);
+
     LoadFilamentSuccessful(slot, lf);
 }
 

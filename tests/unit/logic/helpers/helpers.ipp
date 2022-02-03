@@ -152,3 +152,12 @@ void PressButtonAndDebounce(SM &sm, uint8_t btnIndex){
         sm.Step(); // Inner
     }
 }
+
+template <typename SM>
+void ClearButtons(SM &sm){
+    hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCMaxValue);
+    while (mb::buttons.AnyButtonPressed()) {
+        main_loop();
+        sm.Step(); // Inner
+    }
+}
