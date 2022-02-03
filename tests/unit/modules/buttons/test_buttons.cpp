@@ -3,8 +3,6 @@
 #include "../stubs/stub_timebase.h"
 #include "buttons.h"
 
-static constexpr const uint16_t adcMaxValue = 1023U;
-
 bool Step_Basic_One_Button_Test(mb::Buttons &b, uint8_t oversampleFactor, uint8_t testedButtonIndex, uint8_t otherButton1, uint8_t otherButton2) {
     for (uint8_t i = 0; i < oversampleFactor; ++i) {
         b.Step(); // should detect the press but remain in detected state - wait for debounce
@@ -75,7 +73,7 @@ TEST_CASE("buttons::Step-basic-button", "[buttons]") {
     for (uint8_t i = 0; i < config::buttonCount; ++i) {
         CHECK(Step_Basic_One_Button({ M1(config::buttonADCLimits[i][0]),
                                         config::buttonADCLimits[i][1],
-                                        adcMaxValue },
+                                        config::buttonADCMaxValue },
             i));
     }
 }
@@ -84,9 +82,9 @@ TEST_CASE("buttons::Step-basic-button", "[buttons]") {
 /// and the Buttons class should press first button and release, then the second one and then the third one
 /// without being reinitialized.
 TEST_CASE("buttons::Step-basic-button-one-after-other", "[buttons]") {
-    hal::adc::TADCData d({ M1(config::buttonADCLimits[0][0]), config::buttonADCLimits[0][0] + 1, adcMaxValue,
-        M1(config::buttonADCLimits[1][0]), config::buttonADCLimits[1][0] + 1, adcMaxValue,
-        M1(config::buttonADCLimits[2][0]), config::buttonADCLimits[2][0] + 1, adcMaxValue });
+    hal::adc::TADCData d({ M1(config::buttonADCLimits[0][0]), config::buttonADCLimits[0][0] + 1, config::buttonADCMaxValue,
+        M1(config::buttonADCLimits[1][0]), config::buttonADCLimits[1][0] + 1, config::buttonADCMaxValue,
+        M1(config::buttonADCLimits[2][0]), config::buttonADCLimits[2][0] + 1, config::buttonADCMaxValue });
     mb::Buttons b;
 
     // need to oversample the data as debouncing takes 100 cycles to accept a pressed button
@@ -101,7 +99,7 @@ TEST_CASE("buttons::Step-basic-button-one-after-other", "[buttons]") {
 /// This test tries to simulate a bouncing effect on data from ADC on the first button
 TEST_CASE("buttons::Step-debounce-one-button", "[buttons]") {
     // make a bounce event on the first press
-    hal::adc::TADCData d({ 5, adcMaxValue, 5, 9, 6, 7, 8, adcMaxValue, adcMaxValue });
+    hal::adc::TADCData d({ 5, config::buttonADCMaxValue, 5, 9, 6, 7, 8, config::buttonADCMaxValue, config::buttonADCMaxValue });
 
     // need to oversample the data as debouncing takes 100 cycles to accept a pressed button
     constexpr uint8_t oversampleFactor = 25;
