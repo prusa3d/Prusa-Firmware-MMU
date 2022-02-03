@@ -58,21 +58,35 @@ TEST_CASE("homing::successful_run", "[homing]") {
     }
 }
 
-bool SelectorFailedRetry() {
-    // prepare startup conditions
-    ForceReinitAllAutomata();
+template <typename T>
+bool SimulateFailedHomePostfix(T &h) {
+    REQUIRE(WhileTopState(h, ProgressCode::Homing, 5));
+    REQUIRE(mi::idler.HomingValid());
 
-    // change the startup to what we need here
-    EnsureActiveSlotIndex(0, mg::FilamentLoadState::AtPulley);
+    REQUIRE(h.Error() == ErrorCode::HOMING_SELECTOR_FAILED);
+    REQUIRE(h.State() == ProgressCode::ERRWaitingForUser);
+    REQUIRE_FALSE(mm::motion.Enabled(mm::Selector));
 
-    // set FINDA OFF + debounce
-    SetFINDAStateAndDebounce(false);
+    // do a few steps before pushing the button
+    WhileTopState(h, ProgressCode::ERRWaitingForUser, 5);
 
-    logic::Home h;
-    REQUIRE(VerifyState(h, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), 0, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+    REQUIRE_FALSE(mm::motion.Enabled(mm::Selector));
 
-    h.Reset(0);
-    REQUIRE(VerifyState(h, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), 0, false, false, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::Homing));
+    PressButtonAndDebounce(h, mb::Middle);
+
+    // it shall start homing again
+    REQUIRE(h.Error() == ErrorCode::RUNNING);
+    REQUIRE(h.State() == ProgressCode::Homing);
+    REQUIRE_FALSE(ms::selector.HomingValid());
+    REQUIRE(mm::motion.Enabled(mm::Selector));
+
+    ClearButtons(h);
+
+    return true;
+}
+
+template <typename T>
+bool SimulateFailedHomeFirstTime(T &h) {
     REQUIRE_FALSE(mi::idler.HomingValid());
     REQUIRE_FALSE(ms::selector.HomingValid());
 
@@ -115,27 +129,70 @@ bool SelectorFailedRetry() {
             }
         }
 
-        // now the Selector shall perform a move into their parking positions
         while (ms::selector.State() != mm::MovableBase::HomingFailed)
             main_loop();
     }
 
-    REQUIRE(WhileTopState(h, ProgressCode::Homing, 5));
-    REQUIRE(mi::idler.HomingValid());
+    return SimulateFailedHomePostfix(h);
+}
 
-    // cannot check the whole environment easily, the selector's and idler's positions are elsewhere
-    REQUIRE(h.Error() == ErrorCode::HOMING_SELECTOR_FAILED);
-    REQUIRE(h.State() == ProgressCode::ERRWaitingForUser);
-
-    // do a few steps before pushing the button
-    WhileTopState(h, ProgressCode::ERRWaitingForUser, 5);
-
-    PressButtonAndDebounce(h, mb::Middle);
-
-    // it shall start homing again
-    REQUIRE(h.Error() == ErrorCode::RUNNING);
-    REQUIRE(h.State() == ProgressCode::Homing);
+template <typename T>
+bool SimulateFailedHomeSelectorRepeated(T &h) {
+    // we leave Idler aside in this case
     REQUIRE_FALSE(ms::selector.HomingValid());
+
+    {
+        // do 5 steps until we trigger the simulated stallguard
+        for (uint8_t i = 0; i < 5; ++i) {
+            main_loop();
+        }
+
+        mm::TriggerStallGuard(mm::Selector);
+        main_loop();
+        mm::motion.StallGuardReset(mm::Selector);
+    }
+    uint32_t selectorSteps = mm::unitToSteps<mm::S_pos_t>(config::selectorLimits.lenght) + 1;
+    uint32_t selectorTriggerShort = selectorSteps / 2;
+    uint32_t maxSteps = selectorTriggerShort + 1;
+    {
+        for (uint32_t i = 0; i < maxSteps; ++i) {
+            main_loop();
+
+            if (i == selectorTriggerShort) {
+                mm::TriggerStallGuard(mm::Selector);
+            } else {
+                mm::motion.StallGuardReset(mm::Selector);
+            }
+        }
+
+        while (ms::selector.State() != mm::MovableBase::HomingFailed)
+            main_loop();
+    }
+
+    return SimulateFailedHomePostfix(h);
+}
+
+bool SelectorFailedRetry() {
+    // prepare startup conditions
+    ForceReinitAllAutomata();
+
+    // change the startup to what we need here
+    EnsureActiveSlotIndex(0, mg::FilamentLoadState::AtPulley);
+
+    // set FINDA OFF + debounce
+    SetFINDAStateAndDebounce(false);
+
+    logic::Home h;
+    REQUIRE(VerifyState(h, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), 0, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+
+    h.Reset(0);
+    REQUIRE(VerifyState(h, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), 0, false, false, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::Homing));
+
+    REQUIRE(SimulateFailedHomeFirstTime(h));
+
+    for (uint8_t i = 0; i < 5; ++i) {
+        REQUIRE(SimulateFailedHomeSelectorRepeated(h));
+    }
 
     SimulateSelectorHoming();
 
