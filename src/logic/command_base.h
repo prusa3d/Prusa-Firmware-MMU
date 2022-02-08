@@ -26,8 +26,9 @@ public:
     inline CommandBase()
         : state(ProgressCode::OK)
         , error(ErrorCode::OK)
-        , stateBeforeModuleFailed(ProgressCode::OK)
-        , recoveringMovableError(false) {}
+        , stateBeforeModuleFailed(ProgressCode::Empty)
+        , errorBeforeModuleFailed(ErrorCode::OK)
+        , recoveringMovableErrorAxisMask(0) {}
 
     // Normally, a base class should (must) have a virtual destructor to enable correct deallocation of superstructures.
     // However, in our case we don't want ANY destruction of these objects and moreover - adding a destructor like this
@@ -97,7 +98,7 @@ protected:
     bool WaitForModulesErrorRecovery();
 
     /// @returns true when still waiting for a module to recover, false otherwise.
-    bool WaitForOneModuleErrorRecovery(ErrorCode iState, modules::motion::MovableBase &m);
+    bool WaitForOneModuleErrorRecovery(ErrorCode iState, modules::motion::MovableBase &m, uint8_t axisMask);
 
     /// Perform disengaging idler in ErrDisengagingIdler state
     void ErrDisengagingIdler();
@@ -111,7 +112,8 @@ protected:
     ProgressCode state; ///< current progress state of the state machine
     ErrorCode error; ///< current error code
     ProgressCode stateBeforeModuleFailed; ///< saved state of the state machine before a common error happened
-    bool recoveringMovableError;
+    ErrorCode errorBeforeModuleFailed; ///< saved error of the state machine before a common error happened
+    uint8_t recoveringMovableErrorAxisMask;
 };
 
 } // namespace logic

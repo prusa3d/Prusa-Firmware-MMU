@@ -14,6 +14,7 @@
 
 #include "../../modules/stubs/stub_adc.h"
 
+#include "../stubs/homing.h"
 #include "../stubs/main_loop_stub.h"
 #include "../stubs/stub_motion.h"
 
@@ -140,10 +141,10 @@ void FailedLoadToFindaResolveManual(uint8_t slot, logic::LoadFilament &lf) {
     PressButtonAndDebounce(lf, mb::Right);
 
     // the Idler also engages in this call as this is planned as the next step
-    SimulateIdlerHoming();
+    SimulateIdlerHoming(lf);
 
     // pulling filament back
-    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, true, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
 
     ClearButtons(lf);
 
@@ -168,7 +169,7 @@ void FailedLoadToFindaResolveManual(uint8_t slot, logic::LoadFilament &lf) {
     //
     // With the introduction of dual-side homing, the simulation gets even harder,
     // so let's assume the MMU does its job -> prefer simulating selector homing properly and check the machine's state afterwards
-    SimulateSelectorHoming();
+    SimulateSelectorHoming(lf);
 
     // just one step is necessary to "finish" homing
     // but the selector then (correctly) plans its move to the original position
@@ -184,7 +185,7 @@ void FailedLoadToFindaResolveManualNoFINDA(uint8_t slot, logic::LoadFilament &lf
     // Perform press on button 2 + debounce + keep FINDA OFF (i.e. the user didn't solve anything)
     PressButtonAndDebounce(lf, mb::Right);
 
-    SimulateIdlerHoming();
+    SimulateIdlerHoming(lf);
 
     ClearButtons(lf);
 
@@ -196,7 +197,8 @@ void FailedLoadToFindaResolveTryAgain(uint8_t slot, logic::LoadFilament &lf) {
     PressButtonAndDebounce(lf, mb::Middle);
 
     // the state machine should have restarted
-    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
+    // Idler's position needs to be ignored as it has started homing after the button press
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, config::toolCount, slot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
     ClearButtons(lf);
 
     LoadFilamentSuccessful(slot, lf);

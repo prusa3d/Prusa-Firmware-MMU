@@ -26,6 +26,7 @@ add_executable(
   ${MODULES_STUBS_DIR}/stub_shr16.cpp
   ${MODULES_STUBS_DIR}/stub_timebase.cpp
   ${MODULES_STUBS_DIR}/stub_tmc2130.cpp
+  ${LOGIC_STUBS_DIR}/homing.cpp
   ${LOGIC_STUBS_DIR}/main_loop_stub.cpp
   ${LOGIC_STUBS_DIR}/stub_motion.cpp
   test_eject_filament.cpp

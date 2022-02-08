@@ -19,17 +19,22 @@ bool VerifyEnvironmentState(mg::FilamentLoadState fls, uint8_t idlerSlotIndex, u
         return false;
         }
     }
-    CHECKED_ELSE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(idlerSlotIndex).v) {
-    return false;
+
+    if( idlerSlotIndex < config::toolCount ){ // abusing invalid index to skip checking of slot and position
+        CHECKED_ELSE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(idlerSlotIndex).v) {
+        return false;
+        }
+        CHECKED_ELSE(mi::idler.Engaged() == (idlerSlotIndex < config::toolCount)) {
+        return false;
+        }
     }
-    CHECKED_ELSE(mi::idler.Engaged() == (idlerSlotIndex < config::toolCount)) {
-    return false;
-    }
-    CHECKED_ELSE(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(selectorSlotIndex).v) {
-    return false;
-    }
-    CHECKED_ELSE(ms::selector.Slot() == selectorSlotIndex) {
-    return false;
+    if( selectorSlotIndex < config::toolCount ){ // abusing invalid index to skip checking of slot and position
+        CHECKED_ELSE(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(selectorSlotIndex).v) {
+        return false;
+        }
+        CHECKED_ELSE(ms::selector.Slot() == selectorSlotIndex) {
+        return false;
+        }
     }
     CHECKED_ELSE(mf::finda.Pressed() == findaPressed) {
     return false;
@@ -142,22 +147,4 @@ void InvalidSlot(SM &logicSM,  uint8_t activeSlot, uint8_t invSlot){
 
     logicSM.Reset(invSlot);
     REQUIRE(VerifyState(logicSM, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), activeSlot, false, false, ml::off, ml::off, ErrorCode::INVALID_TOOL, ProgressCode::OK));
-}
-
-template <typename SM>
-void PressButtonAndDebounce(SM &sm, uint8_t btnIndex){
-    hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCLimits[btnIndex][0] + 1);
-    while (!mb::buttons.ButtonPressed(btnIndex)) {
-        main_loop();
-        sm.Step(); // Inner
-    }
-}
-
-template <typename SM>
-void ClearButtons(SM &sm){
-    hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCMaxValue);
-    while (mb::buttons.AnyButtonPressed()) {
-        main_loop();
-        sm.Step(); // Inner
-    }
 }
