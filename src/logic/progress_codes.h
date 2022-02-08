@@ -37,4 +37,6 @@ enum class ProgressCode : uint_fast8_t {
     RetractingFromFinda, // P25
 
     Homing,
+
+    Empty = 0xff // dummy empty state
 };

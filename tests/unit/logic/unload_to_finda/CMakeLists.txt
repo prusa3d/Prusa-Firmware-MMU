@@ -1,6 +1,7 @@
 # define the test executable
 add_executable(
   unload_to_finda_tests
+  ${CMAKE_SOURCE_DIR}/src/logic/command_base.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/unload_to_finda.cpp
   ${CMAKE_SOURCE_DIR}/src/modules/buttons.cpp
   ${CMAKE_SOURCE_DIR}/src/modules/debouncer.cpp
@@ -21,6 +22,7 @@ add_executable(
   ${MODULES_STUBS_DIR}/stub_shr16.cpp
   ${MODULES_STUBS_DIR}/stub_timebase.cpp
   ${MODULES_STUBS_DIR}/stub_tmc2130.cpp
+  ${LOGIC_STUBS_DIR}/homing.cpp
   ${LOGIC_STUBS_DIR}/main_loop_stub.cpp
   ${LOGIC_STUBS_DIR}/stub_motion.cpp
   test_unload_to_finda.cpp

@@ -73,19 +73,20 @@ static inline ErrorCode WithoutAxisBits(ErrorCode ec) {
             | static_cast<uint16_t>(ErrorCode::TMC_PULLEY_BIT))));
 }
 
-bool CommandBase::WaitForOneModuleErrorRecovery(ErrorCode ec, modules::motion::MovableBase &m) {
+bool CommandBase::WaitForOneModuleErrorRecovery(ErrorCode ec, modules::motion::MovableBase &m, uint8_t axisMask) {
     if (ec != ErrorCode::RUNNING) {
-        if (stateBeforeModuleFailed == ProgressCode::OK) {
+        if (stateBeforeModuleFailed == ProgressCode::Empty) {
             // a new problem with the movable modules
             // @@TODO not sure how to prevent losing the previously accumulated error ... or do I really need to do it?
             // May be the TMC error word just gets updated with new flags as the motion proceeds
             stateBeforeModuleFailed = state;
+            errorBeforeModuleFailed = error;
             error = ec;
             state = ProgressCode::ERRWaitingForUser; // such a situation always requires user's attention -> let the printer display an error screen
         }
 
         // are we already recovering an error - that would mean we got another one
-        if (recoveringMovableError) {
+        if (recoveringMovableErrorAxisMask) {
             error = ec;
             state = ProgressCode::ERRWaitingForUser; // such a situation always requires user's attention -> let the printer display an error screen
         }
@@ -96,7 +97,7 @@ bool CommandBase::WaitForOneModuleErrorRecovery(ErrorCode ec, modules::motion::M
                 // homing can be recovered
                 mui::Event ev = mui::userInput.ConsumeEvent();
                 if (ev == mui::Event::Middle) {
-                    recoveringMovableError = true;
+                    recoveringMovableErrorAxisMask |= axisMask;
                     m.PlanHome(); // force initiate a new homing attempt
                     state = ProgressCode::Homing;
                     error = ErrorCode::RUNNING;
@@ -104,34 +105,33 @@ bool CommandBase::WaitForOneModuleErrorRecovery(ErrorCode ec, modules::motion::M
             }
             // TMC errors cannot be recovered safely, waiting for power cycling the MMU
             return true;
+        default:
+            return true; // prevent descendant from taking over while in an error state
+        }
+    } else if (recoveringMovableErrorAxisMask & axisMask) {
+        switch (state) {
         case ProgressCode::Homing:
             if (m.HomingValid()) {
                 // managed to recover from a homing problem
                 state = stateBeforeModuleFailed;
-                recoveringMovableError = false;
-                stateBeforeModuleFailed = ProgressCode::OK;
+                error = errorBeforeModuleFailed;
+                recoveringMovableErrorAxisMask &= (~axisMask);
+                stateBeforeModuleFailed = ProgressCode::Empty;
                 return false;
             }
-            return true;
+            return true; // prevent descendant from taking over while recovering
         default:
-            return true; // no idea what to do in other states ... set internal fw error state?
+            return false; // let descendant do its processing?
         }
-        return true;
     }
-    return false;
+    return recoveringMovableErrorAxisMask & axisMask;
 }
 
 bool CommandBase::WaitForModulesErrorRecovery() {
-    if (WaitForOneModuleErrorRecovery(CheckMovable(mi::idler), mi::idler))
-        return true;
-
-    if (WaitForOneModuleErrorRecovery(CheckMovable(ms::selector), ms::selector))
-        return true;
-
-    if (WaitForOneModuleErrorRecovery(CheckMovable(mpu::pulley), mpu::pulley))
-        return true;
-
-    return false;
+    bool rv = WaitForOneModuleErrorRecovery(CheckMovable(mi::idler), mi::idler, 0x1);
+    rv |= WaitForOneModuleErrorRecovery(CheckMovable(ms::selector), ms::selector, 0x2);
+    rv |= WaitForOneModuleErrorRecovery(CheckMovable(mpu::pulley), mpu::pulley, 0x4);
+    return rv;
 }
 
 bool CommandBase::Step() {

@@ -1,4 +1,5 @@
 #include "main_loop_stub.h"
+#include "homing.h"
 
 #include "../../modules/stubs/stub_adc.h"
 #include "../../modules/stubs/stub_eeprom.h"
@@ -15,6 +16,8 @@
 #include "../../../../src/modules/pulley.h"
 #include "../../../../src/modules/selector.h"
 #include "../../../../src/modules/user_input.h"
+
+#include "../../../../src/logic/no_command.h"
 
 #include "../stubs/stub_motion.h"
 
@@ -77,102 +80,8 @@ void ForceReinitAllAutomata() {
 void HomeIdlerAndSelector() {
     ms::selector.InvalidateHoming();
     mi::idler.InvalidateHoming();
-    SimulateIdlerAndSelectorHoming();
-}
-
-void SimulateIdlerAndSelectorHoming() {
-    // do 5 steps until we trigger the simulated stallguard
-    for (uint8_t i = 0; i < 5; ++i) {
-        main_loop();
-    }
-
-    mm::TriggerStallGuard(mm::Selector);
-    mm::TriggerStallGuard(mm::Idler);
-    main_loop();
-    mm::motion.StallGuardReset(mm::Selector);
-    mm::motion.StallGuardReset(mm::Idler);
-
-    // now do a correct amount of steps of each axis towards the other end
-    uint32_t idlerSteps = mm::unitToSteps<mm::I_pos_t>(config::idlerLimits.lenght);
-    uint32_t selectorSteps = mm::unitToSteps<mm::S_pos_t>(config::selectorLimits.lenght);
-    uint32_t maxSteps = std::max(idlerSteps, selectorSteps) + 1;
-
-    for (uint32_t i = 0; i < maxSteps; ++i) {
-        main_loop();
-
-        if (i == idlerSteps) {
-            mm::TriggerStallGuard(mm::Idler);
-        } else {
-            mm::motion.StallGuardReset(mm::Idler);
-        }
-        if (i == selectorSteps) {
-            mm::TriggerStallGuard(mm::Selector);
-        } else {
-            mm::motion.StallGuardReset(mm::Selector);
-        }
-    }
-
-    // now the Selector and Idler shall perform a move into their parking positions
-    while (ms::selector.State() != mm::MovableBase::Ready || mi::idler.State() != mm::MovableBase::Ready)
-        main_loop();
-}
-
-void SimulateIdlerHoming() {
-    // do 5 steps until we trigger the simulated stallguard
-    for (uint8_t i = 0; i < 5; ++i) {
-        main_loop();
-    }
-
-    mm::TriggerStallGuard(mm::Idler);
-    main_loop();
-    mm::motion.StallGuardReset(mm::Idler);
-
-    // now do a correct amount of steps of each axis towards the other end
-    uint32_t idlerSteps = mm::unitToSteps<mm::I_pos_t>(config::idlerLimits.lenght);
-    uint32_t maxSteps = idlerSteps + 1;
-
-    for (uint32_t i = 0; i < maxSteps; ++i) {
-        main_loop();
-
-        if (i == idlerSteps) {
-            mm::TriggerStallGuard(mm::Idler);
-        } else {
-            mm::motion.StallGuardReset(mm::Idler);
-        }
-    }
-
-    // now the Idler shall perform a move into their parking positions
-    while (mi::idler.State() != mm::MovableBase::Ready)
-        main_loop();
-}
-
-void SimulateSelectorHoming() {
-    // do 5 steps until we trigger the simulated stallguard
-    for (uint8_t i = 0; i < 5; ++i) {
-        main_loop();
-    }
-
-    mm::TriggerStallGuard(mm::Selector);
-    main_loop();
-    mm::motion.StallGuardReset(mm::Selector);
-
-    // now do a correct amount of steps of each axis towards the other end
-    uint32_t selectorSteps = mm::unitToSteps<mm::S_pos_t>(config::selectorLimits.lenght) + 1;
-    uint32_t maxSteps = selectorSteps + 1;
-
-    for (uint32_t i = 0; i < maxSteps; ++i) {
-        main_loop();
-
-        if (i == selectorSteps) {
-            mm::TriggerStallGuard(mm::Selector);
-        } else {
-            mm::motion.StallGuardReset(mm::Selector);
-        }
-    }
-
-    // now the Selector shall perform a move into their parking positions
-    while (ms::selector.State() != mm::MovableBase::Ready)
-        main_loop();
+    logic::NoCommand nc; // just a dummy instance which has an empty Step()
+    SimulateIdlerAndSelectorHoming(nc);
 }
 
 void EnsureActiveSlotIndex(uint8_t slot, mg::FilamentLoadState loadState) {
@@ -206,4 +115,20 @@ bool SimulateUnloadToFINDA(uint32_t step, uint32_t fsOff, uint32_t findaOff) {
         hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
     }
     return mf::finda.Pressed();
+}
+
+void PressButtonAndDebounce(logic::CommandBase &cb, uint8_t btnIndex) {
+    hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCLimits[btnIndex][0] + 1);
+    while (!mb::buttons.ButtonPressed(btnIndex)) {
+        main_loop();
+        cb.Step(); // Inner
+    }
+}
+
+void ClearButtons(logic::CommandBase &cb) {
+    hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCMaxValue);
+    while (mb::buttons.AnyButtonPressed()) {
+        main_loop();
+        cb.Step(); // Inner
+    }
 }

@@ -23,11 +23,12 @@ bool WhileTopState(SM &sm, ProgressCode state, uint32_t maxLoops = 5000) {
 }
 
 void EnsureActiveSlotIndex(uint8_t slot, modules::globals::FilamentLoadState loadState);
+
 void SetFINDAStateAndDebounce(bool press);
-void SimulateIdlerHoming();
-void SimulateSelectorHoming();
-void SimulateIdlerAndSelectorHoming();
 bool SimulateUnloadToFINDA(uint32_t step, uint32_t fsOff, uint32_t findaOff);
+
+void PressButtonAndDebounce(logic::CommandBase &cb, uint8_t btnIndex);
+void ClearButtons(logic::CommandBase &cb);
 
 // these are recommended max steps for simulated movement of the idler and selector
 // - roughly the amount of motion steps from one end to the other + some margin
