@@ -26,6 +26,8 @@ void EnsureActiveSlotIndex(uint8_t slot, modules::globals::FilamentLoadState loa
 
 void SetFINDAStateAndDebounce(bool press);
 bool SimulateUnloadToFINDA(uint32_t step, uint32_t fsOff, uint32_t findaOff);
+bool SimulateFeedToFINDA(uint32_t step, uint32_t findaOn);
+bool SimulateRetractFromFINDA(uint32_t step, uint32_t findaOff);
 
 void PressButtonAndDebounce(logic::CommandBase &cb, uint8_t btnIndex);
 void ClearButtons(logic::CommandBase &cb);
