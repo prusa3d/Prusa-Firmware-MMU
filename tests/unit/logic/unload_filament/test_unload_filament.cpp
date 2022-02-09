@@ -306,9 +306,9 @@ void FailedUnloadResolveManual(uint8_t slot, logic::UnloadFilament &uf) {
 
     REQUIRE(WhileTopState(uf, ProgressCode::RetractingFromFinda, idlerEngageDisengageMaxSteps));
 
-    REQUIRE(WhileTopState(uf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
-
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::AtPulley, config::toolCount, config::toolCount, false, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
     SimulateSelectorHoming(uf);
+    REQUIRE(WhileTopState(uf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
 
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
 }
