@@ -87,17 +87,21 @@ bool VerifyState2(SM &uf, mg::FilamentLoadState fls, uint8_t idlerSlotIndex, uin
     CHECKED_ELSE(mg::globals.FilamentLoaded() & fls) {
     return false;
     }
-    CHECKED_ELSE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(idlerSlotIndex).v) {
-    return false;
+    if( idlerSlotIndex < config::toolCount ){ // abusing invalid index to skip checking of slot and position
+        CHECKED_ELSE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(idlerSlotIndex).v) {
+        return false;
+        }
+        CHECKED_ELSE(mi::idler.Engaged() == (idlerSlotIndex < config::toolCount)) {
+        return false;
+        }
     }
-    CHECKED_ELSE(mi::idler.Engaged() == (idlerSlotIndex < config::toolCount)) {
-    return false;
-    }
-    CHECKED_ELSE(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(selectorSlotIndex).v) {
-    return false;
-    }
-    CHECKED_ELSE(ms::selector.Slot() == selectorSlotIndex) {
-    return false;
+    if( selectorSlotIndex < config::toolCount ){ // abusing invalid index to skip checking of slot and position
+        CHECKED_ELSE(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(selectorSlotIndex).v) {
+        return false;
+        }
+        CHECKED_ELSE(ms::selector.Slot() == selectorSlotIndex) {
+        return false;
+        }
     }
     CHECKED_ELSE(mf::finda.Pressed() == findaPressed) {
     return false;
@@ -116,10 +120,12 @@ bool VerifyState2(SM &uf, mg::FilamentLoadState fls, uint8_t idlerSlotIndex, uin
             return false;
             }
         } else {
-            CHECKED_ELSE(ml::leds.Mode(ledCheckIndex, ml::red) == redLEDMode) {
+            auto lmr = ml::leds.Mode(ledCheckIndex, ml::red);
+            CHECKED_ELSE(lmr == redLEDMode) {
             return false;
             }
-            CHECKED_ELSE(ml::leds.Mode(ledCheckIndex, ml::green) == greenLEDMode) {
+            auto lmg = ml::leds.Mode(ledCheckIndex, ml::green);
+            CHECKED_ELSE(lmg == greenLEDMode) {
             return false;
             }
         }

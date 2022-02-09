@@ -25,7 +25,9 @@ public:
 
     ErrorCode Error() const override;
 
+#ifndef UNITTEST
 private:
+#endif
     void GoToFeedingToBondtech();
 
     /// Common code for a correct completion of UnloadFilament

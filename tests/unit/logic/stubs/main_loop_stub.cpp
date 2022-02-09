@@ -117,6 +117,20 @@ bool SimulateUnloadToFINDA(uint32_t step, uint32_t fsOff, uint32_t findaOff) {
     return mf::finda.Pressed();
 }
 
+bool SimulateFeedToFINDA(uint32_t step, uint32_t findaOn) {
+    if (step == findaOn) {
+        hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
+    }
+    return !mf::finda.Pressed();
+}
+
+bool SimulateRetractFromFINDA(uint32_t step, uint32_t findaOff) {
+    if (step == findaOff) {
+        hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
+    }
+    return mf::finda.Pressed();
+}
+
 void PressButtonAndDebounce(logic::CommandBase &cb, uint8_t btnIndex) {
     hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCLimits[btnIndex][0] + 1);
     while (!mb::buttons.ButtonPressed(btnIndex)) {
