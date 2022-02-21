@@ -76,6 +76,7 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf, uint8_t en
     REQUIRE(WhileTopState(uf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
 
     if (selectorShallHomeAtEnd) {
+        REQUIRE(ms::selector.Slot() == 0xff);
         SimulateSelectorHoming(uf);
     }
 

@@ -28,6 +28,15 @@ bool VerifyEnvironmentState(mg::FilamentLoadState fls, uint8_t idlerSlotIndex, u
         return false;
         }
     }
+    if( mi::idler.State() == mi::Idler::HomeForward || mi::idler.State() == mi::Idler::HomeBack ){
+        CHECKED_ELSE(mi::idler.Slot() == 0xff){
+        return false;
+        }
+        CHECKED_ELSE(mi::idler.HomingValid() == false){
+        return false;
+        }
+    }
+
     if( selectorSlotIndex < config::toolCount ){ // abusing invalid index to skip checking of slot and position
         CHECKED_ELSE(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(selectorSlotIndex).v) {
         return false;
@@ -36,6 +45,15 @@ bool VerifyEnvironmentState(mg::FilamentLoadState fls, uint8_t idlerSlotIndex, u
         return false;
         }
     }
+    if( ms::selector.State() == ms::Selector::HomeForward || ms::selector.State() == ms::Selector::HomeBack ){
+        CHECKED_ELSE(ms::selector.Slot() == 0xff){
+        return false;
+        }
+        CHECKED_ELSE(ms::selector.HomingValid() == false){
+        return false;
+        }
+    }
+
     CHECKED_ELSE(mf::finda.Pressed() == findaPressed) {
     return false;
     }
