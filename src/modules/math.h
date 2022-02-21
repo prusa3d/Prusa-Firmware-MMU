@@ -64,7 +64,7 @@ static inline uint16_t mulU24X24toH16(const uint32_t &longIn1, const uint32_t &l
         "add r27, r1     \n\t"
         "adc %A0, r26    \n\t"
         "adc %B0, r26    \n\t"
-        "lsr r27         \n\t"
+        "lsl r27         \n\t"
         "adc %A0, r26    \n\t"
         "adc %B0, r26    \n\t"
         "clr r1          \n\t"
