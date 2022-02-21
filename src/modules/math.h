@@ -68,7 +68,7 @@ static inline uint16_t mulU24X24toH16(const uint32_t &longIn1, const uint32_t &l
         "clr r1          \n\t"
         : "=&r"(intRes)
         : "d"(longIn1), "d"(longIn2)
-        : "r26", "r27");
+        : "r0", "r1", "r26", "r27");
 #endif
     return intRes;
 }
