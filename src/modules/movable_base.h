@@ -38,8 +38,9 @@ public:
     /// virtual ~MovableBase(); intentionally disabled, see description in logic::CommandBase
 
     /// @returns currently active slot
-    /// this state is updated only when a planned move is successfully finished, so it is safe for higher-level
+    /// This state is updated only when a planned move is successfully finished, so it is safe for higher-level
     /// state machines to use this call as a waiting condition for the desired state of the derive class (idler/selector)
+    /// While homing, Slot() returns 0xff as the current slot index is invalid.
     inline uint8_t Slot() const { return currentSlot; }
 
     /// @returns internal state of the state machine

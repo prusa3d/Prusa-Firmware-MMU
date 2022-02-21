@@ -15,8 +15,9 @@ void MovableBase::PlanHome() {
     mm::motion.StallGuardReset(axis);
 
     // plan move at least as long as the axis can go from one side to the other
-    PlanHomingMoveForward(); // mm::motion.PlanMove(axis, delta, 1000);
+    PlanHomingMoveForward();
     state = HomeForward;
+    currentSlot = -1; // important - other state machines may be waiting for a valid Slot() which is not yet correct while homing in progress
 }
 
 MovableBase::OperationResult MovableBase::InitMovement() {
@@ -66,7 +67,7 @@ void MovableBase::PerformHomeBack() {
             HomeFailed();
         } else {
             homingValid = true;
-            // state = Ready; // not yet - we have to move to our parking position after homing the axis
+            // state = Ready; // not yet - we have to move to our parking or target position after homing the axis
         }
     } else if (mm::motion.QueueEmpty(axis)) {
         HomeFailed();
