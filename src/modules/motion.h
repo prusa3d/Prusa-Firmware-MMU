@@ -179,7 +179,7 @@ public:
     /// probably be used instead.
     /// @param axis axis affected
     /// @returns the current position of the axis
-    pos_t CurPosition(Axis axis) const { return axisData[axis].ctrl.CurPosition(); }
+    pos_t CurPosition(Axis axis) const;
 
     /// Fetch the current axis position, but in AxisUnit. This function is expensive!
     /// The Axis needs to be supplied as the first template argument: CurPosition<axis>().

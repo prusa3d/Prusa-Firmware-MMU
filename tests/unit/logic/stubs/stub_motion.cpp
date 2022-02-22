@@ -46,6 +46,10 @@ pos_t Motion::Position(Axis axis) const {
     return axes[axis].pos;
 }
 
+pos_t Motion::CurPosition(Axis axis) const {
+    return axes[axis].pos;
+}
+
 void Motion::SetPosition(Axis axis, pos_t x) {
     axes[axis].pos = x;
     axisData[axis].ctrl.SetPosition(axes[axis].pos);
