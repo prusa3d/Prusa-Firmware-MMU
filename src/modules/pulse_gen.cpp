@@ -1,6 +1,12 @@
 /// @file pulse_gen.cpp
 #include "pulse_gen.h"
 
+#ifdef AVR
+#include <util/atomic.h>
+#else
+#define ATOMIC_BLOCK(x) /**/
+#endif
+
 namespace modules {
 namespace pulse_gen {
 
@@ -90,59 +96,62 @@ void PulseGen::CalculateTrapezoid(block_t *block, steps_t entry_speed, steps_t e
 }
 
 bool PulseGen::PlanMoveTo(pos_t target, steps_t feed_rate, steps_t end_rate) {
-    // Prepare to set up new block
-    if (block_index.full())
-        return false;
-    block_t *block = &block_buffer[block_index.back()];
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+        // Prepare to set up new block
+        if (block_index.full())
+            return false;
+        block_t *block = &block_buffer[block_index.back()];
 
-    // Bail if this is a zero-length block
-    block->steps = abs(target - position);
-    if (block->steps <= config::dropSegments) {
-        // behave as-if the block has been scheduled
-        return true;
+        // Bail if this is a zero-length block
+        block->steps = abs(target - position);
+        if (block->steps <= config::dropSegments) {
+            // behave as-if the block has been scheduled
+            return true;
+        }
+
+        // Direction and speed for this block
+        block->direction = (target >= position);
+        block->nominal_rate = feed_rate;
+
+        // Acceleration of the segment, in steps/sec^2
+        block->acceleration = acceleration;
+        block->acceleration_rate = block->acceleration * (rate_t)((float)F_CPU / (F_CPU / config::stepTimerFrequencyDivider));
+
+        // Simplified forward jerk: do not handle reversals
+        steps_t entry_speed;
+        if (feed_rate >= last_rate)
+            entry_speed = last_rate + min(feed_rate - last_rate, max_jerk);
+        else
+            entry_speed = last_rate - min(last_rate - feed_rate, max_jerk);
+
+        // Perform the trapezoid calculations
+        CalculateTrapezoid(block, entry_speed, end_rate);
+        last_rate = block->final_rate;
+
+        // Move forward and update the state
+        block_index.push();
     }
-
-    // Direction and speed for this block
-    block->direction = (target >= position);
-    block->nominal_rate = feed_rate;
-
-    // Acceleration of the segment, in steps/sec^2
-    block->acceleration = acceleration;
-    block->acceleration_rate = block->acceleration * (rate_t)((float)F_CPU / (F_CPU / config::stepTimerFrequencyDivider));
-
-    // Simplified forward jerk: do not handle reversals
-    steps_t entry_speed;
-    if (feed_rate >= last_rate)
-        entry_speed = last_rate + min(feed_rate - last_rate, max_jerk);
-    else
-        entry_speed = last_rate - min(last_rate - feed_rate, max_jerk);
-
-    // Perform the trapezoid calculations
-    CalculateTrapezoid(block, entry_speed, end_rate);
-    last_rate = block->final_rate;
-
-    // Move forward and update the state
-    block_index.push();
     position = target;
     return true;
 }
 
 pos_t PulseGen::CurPosition() const {
     pos_t cur_pos = position;
-    circular_index_t iter = block_index;
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { // manipulating current_block needs sync
+        circular_index_t iter = block_index;
 
-    // if we have a live block remove the partial offset
-    if (current_block) {
-        cur_pos -= CurBlockShift();
-        iter.pop();
+        // if we have a live block remove the partial offset
+        if (current_block) {
+            cur_pos -= CurBlockShift();
+            iter.pop();
+        }
+
+        // rollback remaining blocks
+        while (!iter.empty()) {
+            cur_pos -= BlockShift(&block_buffer[iter.front()]);
+            iter.pop();
+        }
     }
-
-    // rollback remaining blocks
-    while (!iter.empty()) {
-        cur_pos -= BlockShift(&block_buffer[iter.front()]);
-        iter.pop();
-    }
-
     return cur_pos;
 }
 
@@ -150,17 +159,19 @@ void PulseGen::AbortPlannedMoves(bool halt) {
     // always update to effective position
     position = CurPosition();
 
-    // destroy the current block
-    if (current_block) {
-        last_rate = acc_step_rate;
-        current_block = nullptr;
-        while (!block_index.empty()) // drop all remaining blocks
-            block_index.pop();
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { // manipulating current_block needs sync
+        // destroy the current block
+        if (current_block) {
+            last_rate = acc_step_rate;
+            current_block = nullptr;
+            while (!block_index.empty()) // drop all remaining blocks
+                block_index.pop();
+        }
     }
-
     // truncate the last rate if halting
-    if (halt)
+    if (halt) {
         last_rate = 0;
+    }
 }
 
 } // namespace motor

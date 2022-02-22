@@ -74,6 +74,7 @@ public:
     bool Full() const { return block_index.full(); }
 
     /// Single-step the axis
+    /// Called from ISR
     /// @returns the interval for the next tick
     inline st_timer_t Step(const hal::tmc2130::MotorParams &motorParams) {
         if (!current_block) {
