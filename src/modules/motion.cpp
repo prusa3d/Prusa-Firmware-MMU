@@ -6,6 +6,7 @@
 // TODO: use proper timer abstraction
 #ifdef __AVR__
 #include <avr/interrupt.h>
+#include <util/atomic.h>
 #else
 //#include "../hal/timers.h"
 #endif
@@ -14,6 +15,42 @@ namespace modules {
 namespace motion {
 
 Motion motion;
+
+/// ISR state manipulation
+static inline void IsrSetEnabled(bool state) {
+#ifdef __AVR__
+    if (state)
+        TIMSK1 |= (1 << OCIE1A);
+    else
+        TIMSK1 &= ~(1 << OCIE1A);
+#endif
+}
+
+static inline bool IsrDisable() {
+#ifdef __AVR__
+    bool state;
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+        state = TIMSK1 & (1 << OCIE1A);
+        TIMSK1 &= ~(1 << OCIE1A);
+    }
+    return state;
+#else
+    return false;
+#endif
+}
+
+class SuspendIsr {
+    bool enabled;
+
+public:
+    SuspendIsr() {
+        enabled = IsrDisable();
+    }
+
+    ~SuspendIsr() {
+        IsrSetEnabled(enabled);
+    }
+};
 
 bool Motion::InitAxis(Axis axis) {
     // disable the axis and re-init the driver: this will clear the internal
@@ -63,6 +100,11 @@ pos_t Motion::Position(Axis axis) const {
     return axisData[axis].ctrl.Position();
 }
 
+pos_t Motion::CurPosition(Axis axis) const {
+    auto guard = SuspendIsr();
+    return axisData[axis].ctrl.CurPosition();
+}
+
 bool Motion::QueueEmpty() const {
     for (uint8_t i = 0; i != NUM_AXIS; ++i)
         if (!axisData[i].ctrl.QueueEmpty())
@@ -71,10 +113,12 @@ bool Motion::QueueEmpty() const {
 }
 
 void Motion::AbortPlannedMoves(Axis axis, bool halt) {
+    auto guard = SuspendIsr();
     axisData[axis].ctrl.AbortPlannedMoves(halt);
 }
 
 void Motion::AbortPlannedMoves(bool halt) {
+    auto guard = SuspendIsr();
     for (uint8_t i = 0; i != NUM_AXIS; ++i)
         AbortPlannedMoves((Axis)i, halt);
 }
@@ -113,10 +157,10 @@ void Init() {
     // Plan the first interrupt after 8ms from now.
     OCR1A = 0x4000;
     TCNT1 = 0;
+#endif
 
     // Enable interrupt
-    TIMSK1 |= (1 << OCIE1A);
-#endif
+    IsrSetEnabled(true);
 }
 
 } // namespace motion
