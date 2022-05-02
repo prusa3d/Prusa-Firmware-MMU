@@ -157,3 +157,78 @@ TEST_CASE("unload_to_finda::unload_without_FSensor_trigger", "[unload_to_finda]"
     REQUIRE(ff.State() == logic::UnloadToFinda::FailedFSensor);
     REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::InSelector);
 }
+
+TEST_CASE("unload_to_finda::unload_repeated", "[unload_to_finda]") {
+    ForceReinitAllAutomata();
+    EnsureActiveSlotIndex(0, mg::FilamentLoadState::AtPulley);
+
+    // we need finda ON
+    SetFINDAStateAndDebounce(true);
+    // fsensor should be ON
+    mfs::fsensor.ProcessMessage(true);
+    // and MMU "thinks" it has the filament loaded
+    mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InNozzle);
+
+    logic::UnloadToFinda ff;
+
+    // restart the automaton - 2 attempts
+    ff.Reset(2);
+
+    REQUIRE(ff.State() == logic::UnloadToFinda::EngagingIdler);
+
+    // it should have instructed the selector and idler to move to slot 1
+    // check if the idler and selector have the right command
+    CHECK(mm::axes[mm::Idler].targetPos == mi::Idler::SlotPosition(0).v);
+    CHECK(mm::axes[mm::Selector].targetPos == ms::Selector::SlotPosition(0).v);
+    CHECK(mm::axes[mm::Idler].enabled == true);
+
+    // engaging idler
+    REQUIRE(WhileCondition(
+        ff,
+        [&](uint32_t) { return !mi::idler.Engaged(); },
+        5000));
+
+    // now pulling the filament until finda triggers
+    REQUIRE(ff.State() == logic::UnloadToFinda::WaitingForFINDA);
+
+    // no changes to FINDA during unload - we'll pretend it never triggers
+    // but set FSensor correctly
+    // In this case it is vital to correctly compute the amount of steps
+    // to make the unload state machine restart after the 1st attempt
+    uint32_t unlSteps = mm::unitToSteps<mm::P_pos_t>(config::defaultBowdenLength + config::feedToFinda + config::filamentMinLoadedToMMU);
+    REQUIRE_FALSE(WhileCondition(ff, std::bind(SimulateUnloadToFINDA, _1, 10, 150000), unlSteps));
+
+    main_loop();
+    ff.Step();
+
+    REQUIRE(ff.State() == logic::UnloadToFinda::EngagingIdler);
+    REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::InSelector);
+
+    main_loop();
+    ff.Step();
+
+    REQUIRE(ff.State() == logic::UnloadToFinda::UnloadingToFinda);
+    REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::InSelector);
+
+    // make arbitrary amount of steps
+    uint32_t steps = GENERATE(range(1, 50));
+    for (uint32_t i = 0; i < steps; ++i) {
+        main_loop();
+        ff.Step();
+    }
+
+    REQUIRE(ff.State() == logic::UnloadToFinda::WaitingForFINDA);
+    REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::InSelector);
+
+    // now turn FINDA off - shall respond immediately
+    hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
+
+    main_loop();
+    ff.Step();
+
+    REQUIRE(ff.State() == logic::UnloadToFinda::OK);
+    REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::InSelector);
+
+    main_loop();
+    REQUIRE(ff.Step() == true);
+}
