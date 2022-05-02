@@ -83,6 +83,15 @@ void setup() {
     // which is abused to let the LEDs shine for ~100ms
     mf::finda.BlockingInit();
 
+    if (mf::finda.Pressed() && mg::globals.FilamentLoaded() < mg::InFSensor) {
+        // This is a tricky situation - EEPROM doesn't have a record about loaded filament (blocking the Selector)
+        // To be on the safe side, we have to override the EEPROM information about filament position - at least InFSensor
+        // Moreover - we need to override the active slot position as well, because we cannot know where the Selector is.
+        // For this we speculatively set the active slot to 2 (in the middle ;) )
+        // Ideally this should be signalled as an error state and displayed on the printer and recovered properly.
+        mg::globals.SetFilamentLoaded(2, mg::InFSensor);
+    }
+
     /// Turn off all leds
     for (uint8_t i = 0; i < config::toolCount; i++) {
         ml::leds.SetMode(i, ml::green, ml::off);
