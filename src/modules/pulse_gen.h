@@ -26,16 +26,16 @@ public:
     PulseGen(steps_t max_jerk, steps_t acceleration);
 
     /// @returns the jerk for the axis
-    steps_t Jerk() const { return max_jerk; };
+    inline steps_t Jerk() const { return max_jerk; };
 
     /// Set maximum jerk for the axis
-    void SetJerk(steps_t max_jerk) { this->max_jerk = max_jerk; };
+    inline void SetJerk(steps_t max_jerk) { this->max_jerk = max_jerk; };
 
     /// @returns the acceleration for the axis
-    steps_t Acceleration() const { return acceleration; };
+    inline steps_t Acceleration() const { return acceleration; };
 
     /// Set acceleration for the axis
-    void SetAcceleration(steps_t accel) { acceleration = accel; }
+    inline void SetAcceleration(steps_t accel) { acceleration = accel; }
 
     /// Enqueue a single move in steps starting and ending at zero speed with maximum
     /// feedrate. Moves can only be enqueued if the axis is not Full().
@@ -61,17 +61,19 @@ public:
     /// Set the position of the axis
     /// Should only be called when the queue is empty.
     /// @param x position to set
-    void SetPosition(pos_t x) { position = x; }
+    inline void SetPosition(pos_t x) { position = x; }
 
     /// Fetch the target rate of the last planned segment, or the current effective rate
     /// when the move has been aborted.
-    steps_t Rate() const { return last_rate; }
+    inline steps_t Rate() const { return last_rate; }
 
     /// @returns true if all planned moves have been finished
-    bool QueueEmpty() const { return block_index.empty(); }
+    inline bool QueueEmpty() const { return block_index.empty(); }
 
     /// @returns false if new moves can still be planned
-    bool Full() const { return block_index.full(); }
+    inline bool Full() const { return block_index.full(); }
+
+    inline uint8_t PlannedMoves() const { return block_index.count(); }
 
     /// Single-step the axis
     /// @returns the interval for the next tick

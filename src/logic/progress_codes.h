@@ -36,7 +36,8 @@ enum class ProgressCode : uint_fast8_t {
     EjectingFilament, // P24
     RetractingFromFinda, // P25
 
-    Homing,
+    Homing, // P26
+    MovingSelector, // P27
 
     Empty = 0xff // dummy empty state
 };
