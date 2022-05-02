@@ -15,6 +15,7 @@ struct FeedToFinda {
     enum {
         EngagingIdler,
         PushingFilament,
+        PushingFilamentUnlimited,
         UnloadBackToPTFE,
         DisengagingIdler,
         OK,

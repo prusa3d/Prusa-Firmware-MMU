@@ -17,12 +17,16 @@ public:
     /// @param param index of filament slot to load
     void Reset(uint8_t param) override;
 
+    /// Restart the automaton for unlimited rotation of the Pulley
+    /// @param param index of filament slot to load
+    void ResetUnlimited(uint8_t param);
+
     /// @returns true if the state machine finished its job, false otherwise
     bool StepInner() override;
 
 private:
     void GoToRetractingFromFinda();
-    void Reset2();
+    void Reset2(bool unlimited);
 
     /// Common code for a correct completion of UnloadFilament
     void FinishedCorrectly();

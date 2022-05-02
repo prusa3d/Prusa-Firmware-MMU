@@ -30,6 +30,7 @@
 #include "logic/eject_filament.h"
 #include "logic/home.h"
 #include "logic/load_filament.h"
+#include "logic/move_selector.h"
 #include "logic/no_command.h"
 #include "logic/set_mode.h"
 #include "logic/tool_change.h"
@@ -42,7 +43,7 @@
 static mp::Protocol protocol;
 
 /// A command that resulted in the currently on-going operation
-logic::CommandBase *currentCommand = &logic::noCommand;
+static logic::CommandBase *currentCommand = &logic::noCommand;
 
 /// Remember the request message that started the currently running command
 /// For the start we report "Reset finished" which in fact corresponds with the MMU state pretty closely
@@ -50,7 +51,9 @@ logic::CommandBase *currentCommand = &logic::noCommand;
 /// And, since the default startup command is the noCommand, which always returns "Finished"
 /// the implementation is clean and straightforward - the response to the first Q0 messages
 /// will look like "X0 F" until a command (T, L, U ...) has been issued.
-mp::RequestMsg currentCommandRq(mp::RequestMsgCodes::Reset, 0);
+static mp::RequestMsg currentCommandRq(mp::RequestMsgCodes::Reset, 0);
+
+static uint16_t lastCommandProcessedMs = 0;
 
 /// One-time setup of HW and SW components
 /// Called before entering the loop() function
@@ -205,6 +208,7 @@ void ReportRunningCommand() {
         break;
     case ErrorCode::OK:
         commandStatus = mp::ResponseMsgParamCodes::Finished;
+        lastCommandProcessedMs = mt::timebase.Millis();
         break;
     default:
         commandStatus = mp::ResponseMsgParamCodes::Error;
@@ -322,6 +326,41 @@ void Panic(ErrorCode ec) {
     currentCommand->Panic(ec);
 }
 
+bool CheckManualOperation() {
+    if (currentCommand == &logic::noCommand
+        && mg::globals.FilamentLoaded() <= mg::FilamentLoadState::AtPulley
+        && lastCommandProcessedMs + 5000 < mt::timebase.Millis()) {
+        lastCommandProcessedMs = mt::timebase.Millis() - 5000; // @@TODO prevent future overflows - must be called every time
+        if (mui::userInput.AnyEvent()) {
+            switch (mui::userInput.ConsumeEvent()) {
+            case mui::Event::Left:
+                // move selector left if possible
+                if (mg::globals.ActiveSlot() > 0) {
+                    currentCommand = &logic::moveSelector;
+                    currentCommand->Reset(mg::globals.ActiveSlot() - 1);
+                }
+                break;
+            case mui::Event::Middle:
+                // plan load
+                if (mg::globals.ActiveSlot() < config::toolCount) { // do we have a meaningful selector position?
+                    logic::loadFilament.ResetUnlimited(mg::globals.ActiveSlot());
+                    currentCommand = &logic::loadFilament;
+                }
+                break;
+            case mui::Event::Right:
+                // move selector right if possible (including the park position)
+                if (mg::globals.ActiveSlot() < config::toolCount) {
+                    currentCommand = &logic::moveSelector;
+                    currentCommand->Reset(mg::globals.ActiveSlot() + 1); // we allow also the park position
+                }
+                break;
+            default:
+                break;
+            }
+        }
+    }
+}
+
 /// Main loop of the firmware
 /// Proposed architecture
 ///   checkMsgs();
@@ -337,9 +376,12 @@ void Panic(ErrorCode ec) {
 /// The idea behind the Step* routines is to keep each automaton non-blocking allowing for some “concurrency”.
 /// Some FW components will leverage ISR to do their stuff (UART, motor stepping?, etc.)
 void loop() {
+    CheckManualOperation();
+
     if (CheckMsgs()) {
         ProcessRequestMsg(protocol.GetRequestMsg());
     }
+
     mb::buttons.Step();
     ml::leds.Step();
     mf::finda.Step();

@@ -55,6 +55,11 @@ public:
         return mask(head);
     }
 
+    /// @returns number of elements in the buffer
+    inline index_t count() const {
+        return 0; // @@TODO
+    }
+
 protected:
     index_t tail; ///< cursor of the element to read (pop/extract) from the buffer
     index_t head; ///< cursor of the empty spot or element insertion (write)

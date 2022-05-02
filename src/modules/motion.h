@@ -313,6 +313,11 @@ public:
     bool QueueEmpty(Axis axis) const;
 #endif
 
+    /// @returns number of planned moves on an axis
+    uint8_t PlannedMoves(Axis axis) const {
+        return axisData[axis].ctrl.QueueEmpty();
+    }
+
     /// @returns false if new moves can still be planned for one axis
     /// @param axis axis requested
     bool Full(Axis axis) const { return axisData[axis].ctrl.Full(); }

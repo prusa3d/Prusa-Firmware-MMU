@@ -21,13 +21,22 @@ void LoadFilament::Reset(uint8_t param) {
     }
     dbg_logic_P(PSTR("Load Filament"));
     mg::globals.SetFilamentLoaded(param, mg::FilamentLoadState::AtPulley); // still at pulley, haven't moved yet
-    Reset2();
+    Reset2(false);
 }
 
-void logic::LoadFilament::Reset2() {
+void LoadFilament::ResetUnlimited(uint8_t param) {
+    if (!CheckToolIndex(param)) {
+        return;
+    }
+    dbg_logic_P(PSTR("Load Filament"));
+    mg::globals.SetFilamentLoaded(param, mg::FilamentLoadState::AtPulley); // still at pulley, haven't moved yet
+    Reset2(true);
+}
+
+void logic::LoadFilament::Reset2(bool unlimited) {
     state = ProgressCode::FeedingToFinda;
     error = ErrorCode::RUNNING;
-    feed.Reset(true, true);
+    feed.Reset(unlimited, true);
     ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
 }
 
