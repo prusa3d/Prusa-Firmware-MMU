@@ -112,7 +112,7 @@ static constexpr AxisConfig pulley = {
 static constexpr PulleyLimits pulleyLimits = {
     .lenght = 1000.0_mm, // TODO
     .jerk = 4.0_mm_s,
-    .accel = 800.0_mm_s2,
+    .accel = 200.0_mm_s2,
 };
 
 static constexpr U_mm_s pulleyUnloadFeedrate = 120._mm_s;
