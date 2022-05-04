@@ -19,10 +19,11 @@
 #include "../stubs/stub_motion.h"
 
 using Catch::Matchers::Equals;
+using namespace std::placeholders;
 
 #include "../helpers/helpers.ipp"
 
-void LoadFilamentCommonSetup(uint8_t slot, logic::LoadFilament &lf) {
+void LoadFilamentCommonSetup(uint8_t slot, logic::LoadFilament &lf, bool feedUnlimited) {
     ForceReinitAllAutomata();
 
     // change the startup to what we need here
@@ -32,7 +33,11 @@ void LoadFilamentCommonSetup(uint8_t slot, logic::LoadFilament &lf) {
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
 
     // restart the automaton
-    lf.Reset(slot);
+    if (feedUnlimited) {
+        lf.ResetUnlimited(slot);
+    } else {
+        lf.Reset(slot);
+    }
 
     // Stage 0 - verify state just after Reset()
     // we assume the filament is not loaded
@@ -76,7 +81,7 @@ void LoadFilamentSuccessful(uint8_t slot, logic::LoadFilament &lf) {
 TEST_CASE("load_filament::regular_load_to_slot_0-4", "[load_filament]") {
     for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
         logic::LoadFilament lf;
-        LoadFilamentCommonSetup(slot, lf);
+        LoadFilamentCommonSetup(slot, lf, false);
         LoadFilamentSuccessful(slot, lf);
     }
 }
@@ -207,7 +212,7 @@ void FailedLoadToFindaResolveTryAgain(uint8_t slot, logic::LoadFilament &lf) {
 TEST_CASE("load_filament::failed_load_to_finda_0-4_resolve_help_second_ok", "[load_filament]") {
     for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
         logic::LoadFilament lf;
-        LoadFilamentCommonSetup(slot, lf);
+        LoadFilamentCommonSetup(slot, lf, false);
         FailedLoadToFinda(slot, lf);
         FailedLoadToFindaResolveHelp(slot, lf);
         FailedLoadToFindaResolveHelpFindaTriggered(slot, lf);
@@ -217,7 +222,7 @@ TEST_CASE("load_filament::failed_load_to_finda_0-4_resolve_help_second_ok", "[lo
 TEST_CASE("load_filament::failed_load_to_finda_0-4_resolve_help_second_fail", "[load_filament]") {
     for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
         logic::LoadFilament lf;
-        LoadFilamentCommonSetup(slot, lf);
+        LoadFilamentCommonSetup(slot, lf, false);
         FailedLoadToFinda(slot, lf);
         FailedLoadToFindaResolveHelp(slot, lf);
         FailedLoadToFindaResolveHelpFindaDidntTrigger(slot, lf);
@@ -240,7 +245,7 @@ TEST_CASE("load_filament::state_machine_reusal", "[load_filament]") {
             if (toSlot >= config::toolCount) {
                 InvalidSlot<logic::LoadFilament>(lf, fromSlot, toSlot);
             } else {
-                LoadFilamentCommonSetup(toSlot, lf);
+                LoadFilamentCommonSetup(toSlot, lf, false);
                 LoadFilamentSuccessful(toSlot, lf);
             }
         }
@@ -250,7 +255,7 @@ TEST_CASE("load_filament::state_machine_reusal", "[load_filament]") {
 TEST_CASE("load_filament::failed_load_to_finda_0-4_resolve_manual", "[load_filament]") {
     for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
         logic::LoadFilament lf;
-        LoadFilamentCommonSetup(slot, lf);
+        LoadFilamentCommonSetup(slot, lf, false);
         FailedLoadToFinda(slot, lf);
         FailedLoadToFindaResolveManual(slot, lf);
     }
@@ -259,7 +264,7 @@ TEST_CASE("load_filament::failed_load_to_finda_0-4_resolve_manual", "[load_filam
 TEST_CASE("load_filament::failed_load_to_finda_0-4_resolve_manual_no_FINDA", "[load_filament]") {
     for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
         logic::LoadFilament lf;
-        LoadFilamentCommonSetup(slot, lf);
+        LoadFilamentCommonSetup(slot, lf, false);
         FailedLoadToFinda(slot, lf);
         FailedLoadToFindaResolveManualNoFINDA(slot, lf);
     }
@@ -268,7 +273,7 @@ TEST_CASE("load_filament::failed_load_to_finda_0-4_resolve_manual_no_FINDA", "[l
 TEST_CASE("load_filament::failed_load_to_finda_0-4_try_again", "[load_filament]") {
     for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
         logic::LoadFilament lf;
-        LoadFilamentCommonSetup(slot, lf);
+        LoadFilamentCommonSetup(slot, lf, false);
         FailedLoadToFinda(slot, lf);
         FailedLoadToFindaResolveTryAgain(slot, lf);
     }

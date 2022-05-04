@@ -37,8 +37,8 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
 
     // it should have instructed the selector and idler to move to slot 0
     // check if the idler and selector have the right command
-    CHECK(mm::axes[mm::Idler].targetPos == mi::Idler::SlotPosition(0).v);
-    CHECK(mm::axes[mm::Selector].targetPos == ms::Selector::SlotPosition(0).v);
+    CHECK(mm::AxisNearestTargetPos(mm::Idler) == mi::Idler::SlotPosition(0).v);
+    CHECK(mm::AxisNearestTargetPos(mm::Selector) == ms::Selector::SlotPosition(0).v);
     CHECK(mm::axes[mm::Idler].enabled == true);
 
     // engaging idler

@@ -14,6 +14,7 @@ TEST_CASE("circular_buffer::basic", "[circular_buffer]") {
 
     // since its capacity was defined as 32, at least one element must be successfully inserted
     CHECK(cb.push(1));
+    CHECK(cb.count() == 1);
 
     // is the element there?
     REQUIRE(!cb.empty());
@@ -24,6 +25,7 @@ TEST_CASE("circular_buffer::basic", "[circular_buffer]") {
     CHECK(cb.pop(b));
     CHECK(b == 1);
     CHECK(cb.empty());
+    CHECK(cb.count() == 0);
 }
 
 TEST_CASE("circular_buffer::fill", "[circular_buffer]") {
@@ -34,24 +36,30 @@ TEST_CASE("circular_buffer::fill", "[circular_buffer]") {
     // start with an empty buffer
     CB cb;
     REQUIRE(cb.empty());
+    REQUIRE(cb.count() == 0);
 
     // ensure we can fill the buffer
     for (auto i = 0; i != size; ++i) {
         CHECK(!cb.full());
         cb.push(i);
+        CHECK(cb.count() == i + 1);
     }
     REQUIRE(cb.full());
+    REQUIRE(cb.count() == size);
 
     // ensure another push fails
     REQUIRE(!cb.push(0));
+    REQUIRE(cb.count() == size);
 
     // retrieve all elements
     for (auto i = 0; i != size; ++i) {
         uint8_t v;
         CHECK(cb.pop(v));
         CHECK(v == i);
+        REQUIRE(cb.count() == size - i - 1);
     }
     REQUIRE(cb.empty());
+    REQUIRE(cb.count() == 0);
 }
 
 TEST_CASE("circular_buffer::wrap_around", "[circular_buffer]") {
@@ -84,15 +92,18 @@ TEST_CASE("circular_buffer::wrap_around", "[circular_buffer]") {
             CHECK(!cb.full());
             cb.push(i);
             CHECK(!cb.empty());
+            CHECK(cb.count() == i + 1);
         }
         REQUIRE(cb.full());
         REQUIRE(!cb.empty());
+        REQUIRE(cb.count() == size);
 
         // retrieve all elements
         for (auto i = 0; i != size; ++i) {
             uint8_t v;
             CHECK(cb.pop(v));
             CHECK(v == i);
+            CHECK(cb.count() == size - i - 1);
         }
         REQUIRE(cb.empty());
     }

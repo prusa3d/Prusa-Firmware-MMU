@@ -10,9 +10,9 @@ Motion motion;
 // Intentionally inited with strange values
 // Need to call ReinitMotion() each time we start some unit test
 AxisSim axes[3] = {
-    { -32767, -32767, false, false, false }, // pulley
-    { -32767, -32767, false, false, false }, // selector //@@TODO proper selector positions once defined
-    { -32767, -32767, false, false, false }, // idler
+    { -32767, false, false, false, {} }, // pulley
+    { -32767, false, false, false, {} }, // selector //@@TODO proper selector positions once defined
+    { -32767, false, false, false, {} }, // idler
 };
 
 bool Motion::InitAxis(Axis axis) {
@@ -37,7 +37,7 @@ void TriggerStallGuard(Axis axis) {
 }
 
 void Motion::PlanMoveTo(Axis axis, pos_t pos, steps_t feed_rate, steps_t end_rate) {
-    axes[axis].targetPos = pos;
+    axes[axis].plannedMoves.push_back(pos);
     if (!axisData[axis].enabled)
         SetEnabled(axis, true);
 }
@@ -60,10 +60,15 @@ void Motion::SetMode(Axis axis, hal::tmc2130::MotorMode mode) {
 
 st_timer_t Motion::Step() {
     for (uint8_t i = 0; i < 3; ++i) {
-        if (axes[i].pos != axes[i].targetPos) {
-            int8_t dirInc = (axes[i].pos < axes[i].targetPos) ? 1 : -1;
-            axes[i].pos += dirInc;
-            axisData[i].ctrl.SetPosition(axes[i].pos);
+        if (!axes[i].plannedMoves.empty()) {
+            pos_t axisTargetPos = axes[i].plannedMoves.front();
+            if (axes[i].pos != axisTargetPos) {
+                int8_t dirInc = (axes[i].pos < axisTargetPos) ? 1 : -1;
+                axes[i].pos += dirInc;
+                axisData[i].ctrl.SetPosition(axes[i].pos);
+            } else if (!axes[i].plannedMoves.empty()) {
+                axes[i].plannedMoves.pop_front(); // one move completed, plan the next one
+            }
         }
     }
     return 0;
@@ -71,14 +76,18 @@ st_timer_t Motion::Step() {
 
 bool Motion::QueueEmpty() const {
     for (uint8_t i = 0; i < 3; ++i) {
-        if (axes[i].pos != axes[i].targetPos)
+        if (!axes[i].plannedMoves.empty())
             return false;
     }
     return true;
 }
 
 bool Motion::QueueEmpty(Axis axis) const {
-    return axes[axis].pos == axes[axis].targetPos;
+    return axes[axis].plannedMoves.empty();
+}
+
+uint8_t Motion::PlannedMoves(Axis axis) const {
+    return axes[axis].plannedMoves.size();
 }
 
 void Motion::AbortPlannedMoves(bool halt) {
@@ -88,23 +97,29 @@ void Motion::AbortPlannedMoves(bool halt) {
 }
 
 void Motion::AbortPlannedMoves(config::Axis i, bool) {
-    axes[i].targetPos = axes[i].pos; // leave the axis where it was at the time of abort
+    axes[i].plannedMoves.clear(); // leave the axis where it was at the time of abort
     axisData[i].ctrl.SetPosition(axes[i].pos);
 }
 
 void ReinitMotion() {
     // reset the simulation data to defaults
-    axes[0] = AxisSim({ 0, 0, false, false, false }); // pulley
+    axes[0] = AxisSim({ 0, false, false, false, {} }); // pulley
     axes[1] = AxisSim({ unitToSteps<S_pos_t>(config::selectorSlotPositions[0]),
-        unitToSteps<S_pos_t>(config::selectorSlotPositions[0]),
-        false, false, false }); // selector
+        false, false, false, {} }); // selector
     axes[2] = AxisSim({ unitToSteps<I_pos_t>(config::idlerSlotPositions[mi::Idler::IdleSlotIndex()]),
-        unitToSteps<I_pos_t>(config::idlerSlotPositions[mi::Idler::IdleSlotIndex()]),
-        false, false, false }); // idler
+        false, false, false, {} }); // idler
 }
 
 bool PulleyEnabled() {
     return axes[0].enabled;
+}
+
+pos_t AxisNearestTargetPos(Axis axis) {
+    if (axes[axis].plannedMoves.empty()) {
+        return axes[axis].pos;
+    } else {
+        return axes[axis].plannedMoves.front();
+    }
 }
 
 /// probably higher-level operations knowing the semantic meaning of axes
