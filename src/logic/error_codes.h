@@ -39,6 +39,8 @@ enum class ErrorCode : uint_fast16_t {
     HOMING_IDLER_FAILED = HOMING_FAILED | TMC_IDLER_BIT, ///< E33031 the Idler was unable to home properly - that means something is blocking its movement
     STALLED_PULLEY = HOMING_FAILED | TMC_PULLEY_BIT, ///< E32839 for the Pulley "homing" means just stallguard detected during Pulley's operation (Pulley doesn't home)
 
+    FINDA_VS_EEPROM_DISREPANCY = 0x8008, ///< E32776 FINDA is pressed but we have no such record in EEPROM - this can only happen at the start of the MMU and can be resolved by issuing an Unload command
+
     QUEUE_FULL = 0x802b, ///< E32811 internal logic error - attempt to move with a full queue
 
     VERSION_MISMATCH = 0x802c, ///< E32812 internal error of the printer - incompatible version of the MMU FW

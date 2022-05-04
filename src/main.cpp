@@ -27,6 +27,8 @@
 
 #include "application.h"
 
+#include "logic/no_command.h"
+
 /// One-time setup of HW and SW components
 /// Called before entering the loop() function
 /// Green LEDs signalize the progress of initialization. If anything goes wrong we shall turn on a red LED
@@ -90,6 +92,7 @@ void setup() {
         // For this we speculatively set the active slot to 2 (in the middle ;) )
         // Ideally this should be signalled as an error state and displayed on the printer and recovered properly.
         mg::globals.SetFilamentLoaded(2, mg::InFSensor);
+        logic::noCommand.SetInitError(ErrorCode::FINDA_VS_EEPROM_DISREPANCY);
     }
 
     /// Turn off all leds
