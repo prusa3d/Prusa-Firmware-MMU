@@ -56,8 +56,15 @@ public:
     }
 
     /// @returns number of elements in the buffer
+    /// @@TODO better solution if it exists
     inline index_t count() const {
-        return 0; // @@TODO
+        index_t i = tail;
+        index_t c = 0;
+        while (i != head) {
+            i = next(i);
+            ++c;
+        }
+        return c;
     }
 
 protected:
@@ -120,6 +127,10 @@ public:
         elem = front();
         index.pop();
         return true;
+    }
+
+    index_t count() const {
+        return index.count();
     }
 
 protected:

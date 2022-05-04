@@ -303,9 +303,11 @@ void FailedUnloadResolveManual(uint8_t slot, logic::UnloadFilament &uf) {
     // we still need to feed to FINDA and back to verify the position of the filament
     SimulateIdlerHoming(uf);
 
-    REQUIRE(WhileTopState(uf, ProgressCode::FeedingToFinda, 5000));
+    REQUIRE(WhileCondition(uf, std::bind(SimulateFeedToFINDA, _1, 100), 5000));
 
-    REQUIRE(WhileTopState(uf, ProgressCode::RetractingFromFinda, idlerEngageDisengageMaxSteps));
+    REQUIRE(WhileCondition(uf, std::bind(SimulateRetractFromFINDA, _1, 100), 5000));
+    REQUIRE(WhileCondition(
+        uf, [&](uint32_t) { return uf.State() == ProgressCode::RetractingFromFinda; }, 50000));
 
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::AtPulley, config::toolCount, config::toolCount, false, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
     SimulateSelectorHoming(uf);
@@ -367,8 +369,13 @@ TEST_CASE("unload_filament::unload_homing_retry", "[unload_filament][homing]") {
     hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
     PressButtonAndDebounce(uf, mb::Right);
     SimulateIdlerHoming(uf); // make Idler happy
-    REQUIRE(WhileTopState(uf, ProgressCode::FeedingToFinda, 5000));
-    REQUIRE(WhileTopState(uf, ProgressCode::RetractingFromFinda, idlerEngageDisengageMaxSteps));
+
+    REQUIRE(WhileCondition(uf, std::bind(SimulateFeedToFINDA, _1, 100), 5000));
+
+    REQUIRE(WhileCondition(uf, std::bind(SimulateRetractFromFINDA, _1, 100), 5000));
+    REQUIRE(WhileCondition(
+        uf, [&](uint32_t) { return uf.State() == ProgressCode::RetractingFromFinda; }, 50000));
+
     REQUIRE(WhileTopState(uf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
 
     // now fail homing of the Selector

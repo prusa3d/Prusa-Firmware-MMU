@@ -21,7 +21,7 @@ void LoadFilament::Reset(uint8_t param) {
     }
     dbg_logic_P(PSTR("Load Filament"));
     mg::globals.SetFilamentLoaded(param, mg::FilamentLoadState::AtPulley); // still at pulley, haven't moved yet
-    Reset2(false);
+    Reset2(true);
 }
 
 void LoadFilament::ResetUnlimited(uint8_t param) {
@@ -30,13 +30,13 @@ void LoadFilament::ResetUnlimited(uint8_t param) {
     }
     dbg_logic_P(PSTR("Load Filament"));
     mg::globals.SetFilamentLoaded(param, mg::FilamentLoadState::AtPulley); // still at pulley, haven't moved yet
-    Reset2(true);
+    Reset2(false);
 }
 
-void logic::LoadFilament::Reset2(bool unlimited) {
+void logic::LoadFilament::Reset2(bool feedPhaseLimited) {
     state = ProgressCode::FeedingToFinda;
     error = ErrorCode::RUNNING;
-    feed.Reset(unlimited, true);
+    feed.Reset(feedPhaseLimited, true);
     ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
 }
 
@@ -100,7 +100,7 @@ bool LoadFilament::StepInner() {
         case mui::Event::Middle: // try again the whole sequence
             // however it depends on the state of FINDA - if it is on, we must perform unload first
             if (!mf::finda.Pressed()) {
-                Reset2();
+                Reset2(false);
             } else {
                 GoToRetractingFromFinda();
             }

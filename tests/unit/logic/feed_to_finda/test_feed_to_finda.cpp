@@ -37,8 +37,8 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
 
     // it should have instructed the selector and idler to move to slot 1
     // check if the idler and selector have the right command
-    CHECK(mm::axes[mm::Idler].targetPos == mi::Idler::SlotPosition(0).v);
-    CHECK(mm::axes[mm::Selector].targetPos == ms::Selector::SlotPosition(0).v);
+    CHECK(mm::AxisNearestTargetPos(mm::Idler) == mi::Idler::SlotPosition(0).v);
+    CHECK(mm::AxisNearestTargetPos(mm::Selector) == ms::Selector::SlotPosition(0).v);
 
     // engaging idler
     REQUIRE(WhileCondition(
@@ -51,7 +51,7 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
     CHECK(mm::axes[mm::Pulley].enabled == true);
 
     // idler engaged, selector in position, we'll start pushing filament
-    REQUIRE(ff.State() == FeedToFinda::PushingFilament);
+    REQUIRE(ff.State() == FeedToFinda::PushingFilamentUnlimited);
     // at least at the beginning the LED should shine green (it should be blinking, but this mode has been already verified in the LED's unit test)
     REQUIRE(ml::leds.Mode(mg::globals.ActiveSlot(), ml::green) == ml::blink0);
 
@@ -60,7 +60,7 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
 
     REQUIRE(WhileCondition(
         ff,
-        [&](uint32_t) { return ff.State() == FeedToFinda::PushingFilament; },
+        [&](uint32_t) { return ff.State() == FeedToFinda::PushingFilamentUnlimited; },
         1500));
     // From now on the FINDA is reported as ON
 
@@ -105,8 +105,8 @@ TEST_CASE("feed_to_finda::FINDA_failed", "[feed_to_finda]") {
 
     // it should have instructed the selector and idler to move to slot 1
     // check if the idler and selector have the right command
-    CHECK(mm::axes[mm::Idler].targetPos == mi::Idler::SlotPosition(0).v);
-    CHECK(mm::axes[mm::Selector].targetPos == ms::Selector::SlotPosition(0).v);
+    CHECK(mm::AxisNearestTargetPos(mm::Idler) == mi::Idler::SlotPosition(0).v);
+    CHECK(mm::AxisNearestTargetPos(mm::Selector) == ms::Selector::SlotPosition(0).v);
 
     // engaging idler
     REQUIRE(WhileCondition(

@@ -26,7 +26,7 @@ public:
 
 private:
     void GoToRetractingFromFinda();
-    void Reset2(bool unlimited);
+    void Reset2(bool feedPhaseLimited);
 
     /// Common code for a correct completion of UnloadFilament
     void FinishedCorrectly();
