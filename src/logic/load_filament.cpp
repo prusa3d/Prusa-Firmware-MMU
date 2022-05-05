@@ -58,12 +58,19 @@ bool LoadFilament::StepInner() {
     switch (state) {
     case ProgressCode::FeedingToFinda:
         if (feed.Step()) {
-            if (feed.State() == FeedToFinda::Failed) {
-                // @@TODO - try to repeat 6x - push/pull sequence - probably something to put into feed_to_finda as an option
+            switch (feed.State()) {
+            case FeedToFinda::Failed: // @@TODO - try to repeat 6x - push/pull sequence - probably something to put into feed_to_finda as an option
                 GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_ON); // signal loading error
-            } else {
+                break;
+            case FeedToFinda::OK:
                 state = ProgressCode::RetractingFromFinda;
                 retract.Reset();
+                break;
+            case FeedToFinda::Stopped:
+                // the user stopped the load for whatever reason
+                // - we are considering the LoadFlament operation as completed
+                state = ProgressCode::OK;
+                break;
             }
         }
         break;
