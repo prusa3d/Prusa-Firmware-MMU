@@ -6,7 +6,7 @@
 
 namespace logic {
 
-MoveSelector home;
+MoveSelector moveSelector;
 
 void MoveSelector::Reset(uint8_t param) {
     state = ProgressCode::MovingSelector;
