@@ -19,7 +19,8 @@ struct FeedToFinda {
         UnloadBackToPTFE,
         DisengagingIdler,
         OK,
-        Failed
+        Failed,
+        Stopped
     };
 
     inline FeedToFinda()

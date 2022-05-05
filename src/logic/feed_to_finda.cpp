@@ -71,7 +71,8 @@ bool FeedToFinda::Step() {
             mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InSelector);
             dbg_logic_P(PSTR("Feed to Finda --> Idler disengaged"));
             dbg_logic_fP(PSTR("Pulley end steps %u"), mpu::pulley.CurrentPositionPulley_mm());
-            state = OK;
+            state = mui::userInput.AnyEvent() ? Stopped : OK;
+            mui::userInput.Clear();
             return true; // return immediately to allow for a seamless planning of another move (like feeding to bondtech)
         } else if (mm::motion.PlannedMoves(mm::Pulley) < 2) {
             // plan another move to make the illusion of unlimited moves

@@ -7,6 +7,7 @@ target_sources(
           feed_to_finda.cpp
           home.cpp
           load_filament.cpp
+          move_selector.cpp
           no_command.cpp
           retract_from_finda.cpp
           set_mode.cpp
