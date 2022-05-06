@@ -109,6 +109,9 @@ protected:
     /// Transit the state machine into ErrEngagingIdler
     void GoToErrEngagingIdler();
 
+    /// Process end of command which finished OK
+    void FinishedOK();
+
     ProgressCode state; ///< current progress state of the state machine
     ErrorCode error; ///< current error code
     ProgressCode stateBeforeModuleFailed; ///< saved state of the state machine before a common error happened

@@ -6,6 +6,7 @@ target_sources(
           feed_to_bondtech.cpp
           feed_to_finda.cpp
           home.cpp
+          idle_mode.cpp
           load_filament.cpp
           move_selector.cpp
           no_command.cpp

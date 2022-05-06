@@ -92,8 +92,7 @@ bool CutFilament::StepInner() {
         break;
     case ProgressCode::ReturningSelector:
         if (ms::selector.Slot() == 5) { // selector returned to position, feed the filament back to FINDA
-            state = ProgressCode::OK;
-            error = ErrorCode::OK;
+            FinishedOK();
             ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::on, ml::off);
             feed.Reset(true, true);
         }

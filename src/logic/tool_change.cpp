@@ -52,10 +52,9 @@ void logic::ToolChange::GoToFeedingToBondtech() {
     error = ErrorCode::RUNNING;
 }
 
-void logic::ToolChange::FinishedCorrectly() {
+void logic::ToolChange::ToolChangeFinishedCorrectly() {
     ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::on, ml::off);
-    state = ProgressCode::OK;
-    error = ErrorCode::OK;
+    FinishedOK();
 }
 
 bool ToolChange::StepInner() {
@@ -85,7 +84,7 @@ bool ToolChange::StepInner() {
             if (james.State() == FeedToBondtech::Failed) {
                 GoToErrDisengagingIdler(ErrorCode::FSENSOR_DIDNT_SWITCH_ON); // signal loading error
             } else {
-                FinishedCorrectly();
+                ToolChangeFinishedCorrectly();
             }
         }
         break;
@@ -122,7 +121,7 @@ bool ToolChange::StepInner() {
             } else {
                 // all sensors are ok, we assume the user pushed the filament into the nozzle
                 mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::InNozzle);
-                FinishedCorrectly();
+                ToolChangeFinishedCorrectly();
             }
             break;
         default: // no event, continue waiting for user input

@@ -31,7 +31,7 @@ private:
     void GoToFeedingToBondtech();
 
     /// Common code for a correct completion of UnloadFilament
-    void FinishedCorrectly();
+    void ToolChangeFinishedCorrectly();
 
     UnloadFilament unl; ///< a high-level command/operation may be used as a building block of other operations as well
     FeedToFinda feed;

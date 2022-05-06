@@ -210,33 +210,33 @@ uint8_t Protocol::EncodeResponseVersion(const RequestMsg &msg, uint8_t value, ui
     return dst - txbuff + 1;
 }
 
-uint8_t Protocol::EncodeResponseQueryOperation(const RequestMsg &msg, ResponseMsgParamCodes code, uint16_t value, uint8_t *txbuff) {
+uint8_t Protocol::EncodeResponseQueryOperation(const RequestMsg &msg, ResponseCommandStatus rcs, uint8_t *txbuff) {
     txbuff[0] = (uint8_t)msg.code;
     txbuff[1] = msg.value + '0';
     txbuff[2] = ' ';
-    txbuff[3] = (uint8_t)code;
+    txbuff[3] = (uint8_t)rcs.code;
     uint8_t *dst = txbuff + 4;
-    if (code != ResponseMsgParamCodes::Finished) {
-        if (value < 10) {
-            *dst++ = value + '0';
-        } else if (value < 100) {
-            *dst++ = value / 10 + '0';
-            *dst++ = value % 10 + '0';
-        } else if (value < 1000) {
-            *dst++ = value / 100 + '0';
-            *dst++ = (value / 10) % 10 + '0';
-            *dst++ = value % 10 + '0';
-        } else if (value < 10000) {
-            *dst++ = value / 1000 + '0';
-            *dst++ = (value / 100) % 10 + '0';
-            *dst++ = (value / 10) % 10 + '0';
-            *dst++ = value % 10 + '0';
+    if (rcs.code != ResponseMsgParamCodes::Finished) {
+        if (rcs.value < 10) {
+            *dst++ = rcs.value + '0';
+        } else if (rcs.value < 100) {
+            *dst++ = rcs.value / 10 + '0';
+            *dst++ = rcs.value % 10 + '0';
+        } else if (rcs.value < 1000) {
+            *dst++ = rcs.value / 100 + '0';
+            *dst++ = (rcs.value / 10) % 10 + '0';
+            *dst++ = rcs.value % 10 + '0';
+        } else if (rcs.value < 10000) {
+            *dst++ = rcs.value / 1000 + '0';
+            *dst++ = (rcs.value / 100) % 10 + '0';
+            *dst++ = (rcs.value / 10) % 10 + '0';
+            *dst++ = rcs.value % 10 + '0';
         } else {
-            *dst++ = value / 10000 + '0';
-            *dst++ = (value / 1000) % 10 + '0';
-            *dst++ = (value / 100) % 10 + '0';
-            *dst++ = (value / 10) % 10 + '0';
-            *dst++ = value % 10 + '0';
+            *dst++ = rcs.value / 10000 + '0';
+            *dst++ = (rcs.value / 1000) % 10 + '0';
+            *dst++ = (rcs.value / 100) % 10 + '0';
+            *dst++ = (rcs.value / 10) % 10 + '0';
+            *dst++ = rcs.value % 10 + '0';
         }
     }
     *dst = '\n';

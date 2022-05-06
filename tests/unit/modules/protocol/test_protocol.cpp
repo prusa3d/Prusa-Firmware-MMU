@@ -230,7 +230,7 @@ TEST_CASE("protocol::EncodeResponseQueryOperation", "[protocol]") {
 
     uint16_t encodedParamValue = responseStatus == mp::ResponseMsgParamCodes::Error ? (uint16_t)error : (uint16_t)value;
 
-    uint8_t msglen = mp::Protocol::EncodeResponseQueryOperation(requestMsg, responseStatus, encodedParamValue, txbuff.data());
+    uint8_t msglen = mp::Protocol::EncodeResponseQueryOperation(requestMsg, mp::ResponseCommandStatus(responseStatus, encodedParamValue), txbuff.data());
 
     CHECK(msglen <= txbuff.size());
     CHECK(txbuff[0] == (uint8_t)requestMsg.code);
