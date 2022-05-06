@@ -47,9 +47,8 @@ void logic::LoadFilament::GoToRetractingFromFinda() {
     retract.Reset();
 }
 
-void logic::LoadFilament::FinishedCorrectly() {
-    state = ProgressCode::OK;
-    error = ErrorCode::OK;
+void logic::LoadFilament::LoadFinishedCorrectly() {
+    FinishedOK();
     ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::off);
     mpu::pulley.Disable();
 }
@@ -69,7 +68,7 @@ bool LoadFilament::StepInner() {
             case FeedToFinda::Stopped:
                 // the user stopped the load for whatever reason
                 // - we are considering the LoadFlament operation as completed
-                state = ProgressCode::OK;
+                FinishedOK();
                 break;
             }
         }
@@ -89,7 +88,7 @@ bool LoadFilament::StepInner() {
         // and if the selector decided to re-home, we have to wait for it as well
         // therefore: 'if (!mi::idler.Engaged())' : alone is not enough
         if (!mi::idler.Engaged() && ms::selector.Slot() == mg::globals.ActiveSlot()) {
-            FinishedCorrectly();
+            LoadFinishedCorrectly();
         }
         break;
     case ProgressCode::OK:

@@ -14,6 +14,7 @@ target_sources(
           pulley.cpp
           pulse_gen.cpp
           selector.cpp
+          serial.cpp
           speed_table.cpp
           timebase.cpp
           usb_cdc.cpp

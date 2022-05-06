@@ -47,7 +47,7 @@ struct RequestMsg {
 
     /// @param code of the request message
     /// @param value of the request message
-    inline RequestMsg(RequestMsgCodes code, uint8_t value)
+    inline constexpr RequestMsg(RequestMsgCodes code, uint8_t value)
         : code(code)
         , value(value) {}
 };
@@ -61,10 +61,19 @@ struct ResponseMsg {
     /// @param request the source request message this response is a reply to
     /// @param paramCode code of the parameter
     /// @param paramValue value of the parameter
-    inline ResponseMsg(RequestMsg request, ResponseMsgParamCodes paramCode, uint16_t paramValue)
+    inline constexpr ResponseMsg(RequestMsg request, ResponseMsgParamCodes paramCode, uint16_t paramValue)
         : request(request)
         , paramCode(paramCode)
         , paramValue(paramValue) {}
+};
+
+/// Combined commandStatus and its value into one data structure (optimization purposes)
+struct ResponseCommandStatus {
+    ResponseMsgParamCodes code;
+    uint16_t value;
+    inline constexpr ResponseCommandStatus(ResponseMsgParamCodes code, uint16_t value)
+        : code(code)
+        , value(value) {}
 };
 
 /// Message decoding return values
@@ -131,7 +140,7 @@ public:
     /// @param value related to status of operation(e.g. error code or progress)
     /// @param txbuff where to format the message
     /// @returns number of bytes written into txbuff
-    static uint8_t EncodeResponseQueryOperation(const RequestMsg &msg, ResponseMsgParamCodes code, uint16_t value, uint8_t *txbuff);
+    static uint8_t EncodeResponseQueryOperation(const RequestMsg &msg, ResponseCommandStatus rcs, uint8_t *txbuff);
 
     /// @returns the most recently lexed request message
     inline const RequestMsg GetRequestMsg() const { return requestMsg; }

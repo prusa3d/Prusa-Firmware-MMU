@@ -22,8 +22,7 @@ bool Home::StepInner() {
     switch (state) {
     case ProgressCode::Homing:
         if (mi::idler.State() == mi::Idler::Ready && ms::selector.State() == ms::selector.Ready) {
-            state = ProgressCode::OK;
-            error = ErrorCode::OK;
+            FinishedOK();
         }
         break;
     case ProgressCode::OK:

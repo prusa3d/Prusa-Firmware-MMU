@@ -1,5 +1,6 @@
 /// @file command_base.cpp
 #include "command_base.h"
+#include "idle_mode.h"
 #include "../modules/globals.h"
 #include "../modules/finda.h"
 #include "../modules/fsensor.h"
@@ -204,6 +205,12 @@ void CommandBase::GoToErrEngagingIdler() {
     state = ProgressCode::ERREngagingIdler;
     error = ErrorCode::RUNNING;
     mi::idler.Engage(mg::globals.ActiveSlot());
+}
+
+void CommandBase::FinishedOK() {
+    state = ProgressCode::OK;
+    error = ErrorCode::OK;
+    idleMode.CommandFinishedCorrectly();
 }
 
 } // namespace logic

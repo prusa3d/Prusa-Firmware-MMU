@@ -58,6 +58,9 @@ void Motion::SetPosition(Axis axis, pos_t x) {
 void Motion::SetMode(Axis axis, hal::tmc2130::MotorMode mode) {
 }
 
+void Motion::SetMode(MotorMode mode) {
+}
+
 st_timer_t Motion::Step() {
     for (uint8_t i = 0; i < 3; ++i) {
         if (!axes[i].plannedMoves.empty()) {

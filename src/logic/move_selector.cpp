@@ -23,8 +23,8 @@ bool MoveSelector::StepInner() {
     switch (state) {
     case ProgressCode::MovingSelector:
         if (ms::selector.State() == ms::selector.Ready) {
-            state = ProgressCode::OK;
-            error = ErrorCode::OK;
+            mg::globals.SetFilamentLoaded(ms::selector.Slot(), mg::FilamentLoadState::AtPulley);
+            FinishedOK();
         }
         break;
     case ProgressCode::OK:

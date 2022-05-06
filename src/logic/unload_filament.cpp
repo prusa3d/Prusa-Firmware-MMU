@@ -32,9 +32,8 @@ void UnloadFilament::Reset(uint8_t /*param*/) {
     ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::off);
 }
 
-void UnloadFilament::FinishedCorrectly() {
-    state = ProgressCode::OK;
-    error = ErrorCode::OK;
+void UnloadFilament::UnloadFinishedCorrectly() {
+    FinishedOK();
     mpu::pulley.Disable();
     mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::AtPulley); // filament unloaded
     ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::off);
@@ -80,7 +79,7 @@ bool UnloadFilament::StepInner() {
         return false;
     case ProgressCode::DisengagingIdler:
         if (!mi::idler.Engaged() && ms::selector.State() == ms::Selector::Ready) {
-            FinishedCorrectly();
+            UnloadFinishedCorrectly();
         }
         return false;
     case ProgressCode::ERRDisengagingIdler: // couldn't unload to FINDA

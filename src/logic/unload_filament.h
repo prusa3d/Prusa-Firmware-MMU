@@ -25,7 +25,7 @@ private:
     constexpr static const uint8_t maxRetries = 3;
 
     /// Common code for a correct completion of UnloadFilament
-    void FinishedCorrectly();
+    void UnloadFinishedCorrectly();
     void GoToRetractingFromFinda();
     void GoToRecheckFilamentAgainstFINDA();
 

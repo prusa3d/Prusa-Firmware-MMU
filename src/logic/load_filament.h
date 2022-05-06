@@ -29,7 +29,7 @@ private:
     void Reset2(bool feedPhaseLimited);
 
     /// Common code for a correct completion of UnloadFilament
-    void FinishedCorrectly();
+    void LoadFinishedCorrectly();
 
     FeedToFinda feed;
     RetractFromFinda retract;

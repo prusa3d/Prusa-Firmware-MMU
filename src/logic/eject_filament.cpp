@@ -24,7 +24,7 @@ void EjectFilament::Reset(uint8_t param) {
     slot = param;
 
     if (mg::globals.FilamentLoaded() == mg::FilamentLoadState::NotLoaded) {
-        state = ProgressCode::OK;
+        FinishedOK();
         dbg_logic_P(PSTR("Already ejected"));
     } else if (mg::globals.FilamentLoaded() >= mg::FilamentLoadState::AtPulley) {
         state = ProgressCode::UnloadingFilament;
@@ -68,8 +68,7 @@ bool EjectFilament::StepInner() {
         if (!mi::idler.Engaged()) { // idler disengaged
             mpu::pulley.Disable();
             mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::NotLoaded);
-            state = ProgressCode::OK;
-            error = ErrorCode::OK;
+            FinishedOK();
         }
         break;
     case ProgressCode::OK:
