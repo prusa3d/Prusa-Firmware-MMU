@@ -2,6 +2,7 @@
 #include "../logic/error_codes.h"
 #include "../logic/progress_codes.h"
 #include "protocol.h"
+#include <array>
 
 using Catch::Matchers::Equals;
 
