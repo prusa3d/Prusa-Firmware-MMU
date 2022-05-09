@@ -179,7 +179,7 @@ static constexpr AxisConfig idler = {
     .iHold = 23, /// 398mA
     .stealth = false,
     .stepsPerUnit = (200 * 16 / 360.),
-    .sg_thrs = 5,
+    .sg_thrs = 7,
 };
 
 /// Idler motion limits
