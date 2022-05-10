@@ -21,7 +21,7 @@ bool RetractFromFinda::Step() {
     switch (state) {
     case EngagingIdler:
         if (mi::idler.Engaged()) {
-            dbg_logic_fP(PSTR("Pulley start steps %u"), mpu::pulley.CurrentPositionPulley_mm());
+            dbg_logic_fP(PSTR("Pulley start steps %u"), mpu::pulley.CurrentPosition_mm());
             state = UnloadBackToPTFE;
             mpu::pulley.PlanMove(-(config::cuttingEdgeToFindaMidpoint + config::cuttingEdgeRetract), config::pulleyUnloadFeedrate);
         }
@@ -32,7 +32,7 @@ bool RetractFromFinda::Step() {
             if (!mf::finda.Pressed()) { // FINDA switched off correctly while the move was performed
                 state = OK;
                 mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::AtPulley);
-                dbg_logic_fP(PSTR("Pulley end steps %u"), mpu::pulley.CurrentPositionPulley_mm());
+                dbg_logic_fP(PSTR("Pulley end steps %u"), mpu::pulley.CurrentPosition_mm());
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
             } else { // FINDA didn't switch off
                 state = Failed;
