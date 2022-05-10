@@ -28,7 +28,7 @@ bool FeedToFinda::Step() {
     case EngagingIdler:
         if (mi::idler.Engaged() && ms::selector.Slot() == mg::globals.ActiveSlot()) {
             dbg_logic_P(PSTR("Feed to Finda --> Idler engaged"));
-            dbg_logic_fP(PSTR("Pulley start steps %u"), mpu::pulley.CurrentPositionPulley_mm());
+            dbg_logic_fP(PSTR("Pulley start steps %u"), mpu::pulley.CurrentPosition_mm());
             mpu::pulley.InitAxis();
             // @@TODO this may never happen as load filament always assumes the filament is at least at the pulley
             //            if (mg::globals.FilamentLoaded() == mg::FilamentLoadState::NotLoaded) { // feed slowly filament to PTFE
@@ -54,7 +54,7 @@ bool FeedToFinda::Step() {
             // FINDA triggered - that means it works and detected the filament tip
             mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InSelector);
             dbg_logic_P(PSTR("Feed to Finda --> Idler disengaged"));
-            dbg_logic_fP(PSTR("Pulley end steps %u"), mpu::pulley.CurrentPositionPulley_mm());
+            dbg_logic_fP(PSTR("Pulley end steps %u"), mpu::pulley.CurrentPosition_mm());
             state = OK;
             return true; // return immediately to allow for a seamless planning of another move (like feeding to bondtech)
         } else if (mm::motion.QueueEmpty()) { // all moves have been finished and FINDA didn't switch on
@@ -70,7 +70,7 @@ bool FeedToFinda::Step() {
             // FINDA triggered - that means it works and detected the filament tip
             mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InSelector);
             dbg_logic_P(PSTR("Feed to Finda --> Idler disengaged"));
-            dbg_logic_fP(PSTR("Pulley end steps %u"), mpu::pulley.CurrentPositionPulley_mm());
+            dbg_logic_fP(PSTR("Pulley end steps %u"), mpu::pulley.CurrentPosition_mm());
             state = mui::userInput.AnyEvent() ? Stopped : OK;
             mui::userInput.Clear();
             return true; // return immediately to allow for a seamless planning of another move (like feeding to bondtech)

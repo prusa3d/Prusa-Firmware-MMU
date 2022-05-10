@@ -33,7 +33,7 @@ bool FeedToBondtech::Step() {
     case EngagingIdler:
         if (mi::idler.Engaged()) {
             dbg_logic_P(PSTR("Feed to Bondtech --> Idler engaged"));
-            dbg_logic_fP(PSTR("Pulley start steps %u"), mpu::pulley.CurrentPositionPulley_mm());
+            dbg_logic_fP(PSTR("Pulley start steps %u"), mpu::pulley.CurrentPosition_mm());
             state = PushingFilamentToFSensor;
             mpu::pulley.InitAxis();
             mpu::pulley.PlanMove(config::defaultBowdenLength, config::pulleyLoadFeedrate, config::pulleySlowFeedrate);
@@ -63,7 +63,7 @@ bool FeedToBondtech::Step() {
     case DisengagingIdler:
         if (!mi::idler.Engaged()) {
             dbg_logic_P(PSTR("Feed to Bondtech --> Idler disengaged"));
-            dbg_logic_fP(PSTR("Pulley end steps %u"), mpu::pulley.CurrentPositionPulley_mm());
+            dbg_logic_fP(PSTR("Pulley end steps %u"), mpu::pulley.CurrentPosition_mm());
             state = OK;
             mpu::pulley.Disable();
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
