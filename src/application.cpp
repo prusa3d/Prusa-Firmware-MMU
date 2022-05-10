@@ -1,5 +1,5 @@
 /// @file
-#include "idle_mode.h"
+#include "application.h"
 
 #include "modules/leds.h"
 #include "modules/globals.h"
@@ -26,14 +26,14 @@
 /// Global instance of the protocol codec
 static mp::Protocol protocol;
 
-IdleMode idleMode;
+Application application;
 
-IdleMode::IdleMode()
+Application::Application()
     : lastCommandProcessedMs(0)
     , currentCommand(&logic::noCommand)
     , currentCommandRq(mp::RequestMsgCodes::Reset, 0) {}
 
-void IdleMode::CheckManualOperation() {
+void Application::CheckManualOperation() {
     uint16_t ms = mt::timebase.Millis();
     constexpr uint16_t idleDelay = 1000U;
     if (ms - lastCommandProcessedMs < idleDelay) {
@@ -76,7 +76,7 @@ void IdleMode::CheckManualOperation() {
     }
 }
 
-mp::ResponseCommandStatus IdleMode::RunningCommandStatus() const {
+mp::ResponseCommandStatus Application::RunningCommandStatus() const {
     switch (currentCommand->Error()) {
     case ErrorCode::RUNNING:
         return mp::ResponseCommandStatus(mp::ResponseMsgParamCodes::Processing, (uint16_t)currentCommand->State());
@@ -89,13 +89,13 @@ mp::ResponseCommandStatus IdleMode::RunningCommandStatus() const {
 
 static constexpr const uint8_t maxMsgLen = 10;
 
-void IdleMode::ReportCommandAccepted(const mp::RequestMsg &rq, mp::ResponseMsgParamCodes status) {
+void Application::ReportCommandAccepted(const mp::RequestMsg &rq, mp::ResponseMsgParamCodes status) {
     uint8_t tmp[maxMsgLen];
     uint8_t len = protocol.EncodeResponseCmdAR(rq, status, tmp);
     modules::serial::WriteToUSART(tmp, len);
 }
 
-void IdleMode::PlanCommand(const modules::protocol::RequestMsg &rq) {
+void Application::PlanCommand(const modules::protocol::RequestMsg &rq) {
     if (currentCommand->State() == ProgressCode::OK) {
         // We are allowed to start a new command as the previous one is in the OK finished state
         // The previous command may be in an error state, but as long as it is in ProgressCode::OK (aka finished)
@@ -135,7 +135,7 @@ void IdleMode::PlanCommand(const modules::protocol::RequestMsg &rq) {
     }
 }
 
-void IdleMode::ReportFINDA(const mp::RequestMsg &rq) {
+void Application::ReportFINDA(const mp::RequestMsg &rq) {
 #ifdef DEBUG_FINDA
     using namespace hal;
     hu::usart1.puts("FINDA:");
@@ -150,7 +150,7 @@ void IdleMode::ReportFINDA(const mp::RequestMsg &rq) {
     modules::serial::WriteToUSART(rsp, len);
 }
 
-void IdleMode::ReportVersion(const mp::RequestMsg &rq) {
+void Application::ReportVersion(const mp::RequestMsg &rq) {
     uint8_t v = 0;
 
     switch (rq.value) {
@@ -178,13 +178,13 @@ void IdleMode::ReportVersion(const mp::RequestMsg &rq) {
     modules::serial::WriteToUSART(rsp, len);
 }
 
-void IdleMode::ReportRunningCommand() {
+void Application::ReportRunningCommand() {
     uint8_t rsp[maxMsgLen];
     uint8_t len = protocol.EncodeResponseQueryOperation(currentCommandRq, RunningCommandStatus(), rsp);
     modules::serial::WriteToUSART(rsp, len);
 }
 
-void IdleMode::ProcessRequestMsg(const mp::RequestMsg &rq) {
+void Application::ProcessRequestMsg(const mp::RequestMsg &rq) {
     switch (rq.code) {
     case mp::RequestMsgCodes::Button:
         // behave just like if the user pressed a button
@@ -225,7 +225,7 @@ void IdleMode::ProcessRequestMsg(const mp::RequestMsg &rq) {
     }
 }
 
-bool IdleMode::CheckMsgs() {
+bool Application::CheckMsgs() {
     using mpd = mp::DecodeStatus;
     while (modules::serial::Available()) {
         switch (protocol.DecodeRequest(modules::serial::ConsumeByte())) {
@@ -244,11 +244,11 @@ bool IdleMode::CheckMsgs() {
     return false;
 }
 
-void IdleMode::Panic(ErrorCode ec) {
+void Application::Panic(ErrorCode ec) {
     currentCommand->Panic(ec);
 }
 
-void IdleMode::Step() {
+void Application::Step() {
     CheckManualOperation();
 
     if (CheckMsgs()) {

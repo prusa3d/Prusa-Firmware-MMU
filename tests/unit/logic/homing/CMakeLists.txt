@@ -1,7 +1,7 @@
 # define the test executable
 add_executable(
   homing_tests
-  ${CMAKE_SOURCE_DIR}/src/idle_mode.cpp
+  ${CMAKE_SOURCE_DIR}/src/application.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/command_base.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/cut_filament.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/eject_filament.cpp

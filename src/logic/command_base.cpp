@@ -1,6 +1,6 @@
 /// @file command_base.cpp
 #include "command_base.h"
-#include "../idle_mode.h"
+#include "../application.h"
 #include "../modules/globals.h"
 #include "../modules/finda.h"
 #include "../modules/fsensor.h"
@@ -210,7 +210,7 @@ void CommandBase::GoToErrEngagingIdler() {
 void CommandBase::FinishedOK() {
     state = ProgressCode::OK;
     error = ErrorCode::OK;
-    idleMode.CommandFinishedCorrectly();
+    application.CommandFinishedCorrectly();
 }
 
 } // namespace logic

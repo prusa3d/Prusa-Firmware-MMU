@@ -1,4 +1,4 @@
-target_sources(firmware PRIVATE main.cpp debug.cpp idle_mode.cpp)
+target_sources(firmware PRIVATE application.cpp debug.cpp main.cpp)
 
 target_link_libraries(firmware LUFA)
 

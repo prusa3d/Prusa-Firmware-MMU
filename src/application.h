@@ -9,9 +9,9 @@ namespace logic {
 class CommandBase;
 }
 
-class IdleMode {
+class Application {
 public:
-    IdleMode();
+    Application();
 
     inline void CommandFinishedCorrectly() {
         lastCommandProcessedMs = mt::timebase.Millis();
@@ -55,4 +55,4 @@ private:
     mp::RequestMsg currentCommandRq;
 };
 
-extern IdleMode idleMode;
+extern Application application;
