@@ -195,15 +195,18 @@ private:
     /// Calculate the trapezoid parameters for the block
     void CalculateTrapezoid(block_t *block, steps_t entry_speed, steps_t exit_speed);
 
+    /// Return the axis shift introduced by the specified full block
+    static inline pos_t BlockShift(const block_t *block) {
+        return block->direction ? block->steps : -block->steps;
+    }
+
+#ifdef UNITTEST_MOTION
+public:
+#endif
     /// Return the axis shift introduced by the current (live) block
     inline pos_t CurBlockShift() const {
         steps_t steps_missing = (current_block->steps - steps_completed);
         return current_block->direction ? steps_missing : -steps_missing;
-    }
-
-    /// Return the axis shift introduced by the specified full block
-    static inline pos_t BlockShift(const block_t *block) {
-        return block->direction ? block->steps : -block->steps;
     }
 };
 
