@@ -270,7 +270,7 @@ TEST_CASE("pulse_gen::accel_ramp", "[pulse_gen]") {
         .mRes = config::idler.mRes
     };
 
-    // TODO: output ramps still to be checked
+    // full test is performed as part of motion tests
     for (int accel = 100; accel <= 5000; accel *= 2) {
         PulseGen pg(10, accel);
         pg.PlanMoveTo(100000, 10000);
