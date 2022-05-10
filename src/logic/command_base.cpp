@@ -1,6 +1,6 @@
 /// @file command_base.cpp
 #include "command_base.h"
-#include "idle_mode.h"
+#include "../idle_mode.h"
 #include "../modules/globals.h"
 #include "../modules/finda.h"
 #include "../modules/fsensor.h"

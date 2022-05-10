@@ -25,7 +25,7 @@
 #include "modules/motion.h"
 #include "modules/usb_cdc.h"
 
-#include "logic/idle_mode.h"
+#include "idle_mode.h"
 
 /// One-time setup of HW and SW components
 /// Called before entering the loop() function
@@ -101,7 +101,7 @@ void setup() {
 }
 
 void Panic(ErrorCode ec) {
-    logic::idleMode.Panic(ec);
+    idleMode.Panic(ec);
 }
 
 /// Main loop of the firmware
@@ -130,7 +130,7 @@ void loop() {
     hal::cpu::Step();
     mu::cdc.Step();
 
-    logic::idleMode.Step();
+    idleMode.Step();
 
     hal::watchdog::Reset();
 }

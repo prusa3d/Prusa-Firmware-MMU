@@ -1,39 +1,36 @@
 /// @file
 #include "idle_mode.h"
 
-#include "../modules/timebase.h"
-#include "../modules/leds.h"
-#include "../modules/globals.h"
-#include "../modules/user_input.h"
-#include "../modules/finda.h"
-#include "../modules/fsensor.h"
-#include "../modules/serial.h"
+#include "modules/leds.h"
+#include "modules/globals.h"
+#include "modules/user_input.h"
+#include "modules/finda.h"
+#include "modules/fsensor.h"
+#include "modules/serial.h"
 
-#include "command_base.h"
-#include "cut_filament.h"
-#include "eject_filament.h"
-#include "home.h"
-#include "load_filament.h"
-#include "move_selector.h"
-#include "no_command.h"
-#include "set_mode.h"
-#include "tool_change.h"
-#include "unload_filament.h"
+#include "logic/command_base.h"
+#include "logic/cut_filament.h"
+#include "logic/eject_filament.h"
+#include "logic/home.h"
+#include "logic/load_filament.h"
+#include "logic/move_selector.h"
+#include "logic/no_command.h"
+#include "logic/set_mode.h"
+#include "logic/tool_change.h"
+#include "logic/unload_filament.h"
 
-#include "../version.h"
+#include "version.h"
 
-#include "../panic.h"
+#include "panic.h"
 
 /// Global instance of the protocol codec
 static mp::Protocol protocol;
-
-namespace logic {
 
 IdleMode idleMode;
 
 IdleMode::IdleMode()
     : lastCommandProcessedMs(0)
-    , currentCommand(&noCommand)
+    , currentCommand(&logic::noCommand)
     , currentCommandRq(mp::RequestMsgCodes::Reset, 0) {}
 
 void IdleMode::CheckManualOperation() {
@@ -54,22 +51,22 @@ void IdleMode::CheckManualOperation() {
             case mui::Event::Left:
                 // move selector left if possible
                 if (mg::globals.ActiveSlot() > 0) {
-                    moveSelector.Reset(mg::globals.ActiveSlot() - 1);
-                    currentCommand = &moveSelector;
+                    logic::moveSelector.Reset(mg::globals.ActiveSlot() - 1);
+                    currentCommand = &logic::moveSelector;
                 }
                 break;
             case mui::Event::Middle:
                 // plan load
                 if (mg::globals.ActiveSlot() < config::toolCount) { // do we have a meaningful selector position?
-                    loadFilament.Reset(mg::globals.ActiveSlot());
-                    currentCommand = &loadFilament;
+                    logic::loadFilament.Reset(mg::globals.ActiveSlot());
+                    currentCommand = &logic::loadFilament;
                 }
                 break;
             case mui::Event::Right:
                 // move selector right if possible (including the park position)
                 if (mg::globals.ActiveSlot() < config::toolCount) {
-                    moveSelector.Reset(mg::globals.ActiveSlot() + 1); // we allow also the park position
-                    currentCommand = &moveSelector;
+                    logic::moveSelector.Reset(mg::globals.ActiveSlot() + 1); // we allow also the park position
+                    currentCommand = &logic::moveSelector;
                 }
                 break;
             default:
@@ -106,28 +103,28 @@ void IdleMode::PlanCommand(const modules::protocol::RequestMsg &rq) {
         // before issuing another one - if needed.
         switch (rq.code) {
         case mp::RequestMsgCodes::Cut:
-            currentCommand = &cutFilament;
+            currentCommand = &logic::cutFilament;
             break;
         case mp::RequestMsgCodes::Eject:
-            currentCommand = &ejectFilament;
+            currentCommand = &logic::ejectFilament;
             break;
         case mp::RequestMsgCodes::Home:
             currentCommand = &logic::home;
             break;
         case mp::RequestMsgCodes::Load:
-            currentCommand = &loadFilament;
+            currentCommand = &logic::loadFilament;
             break;
         case mp::RequestMsgCodes::Tool:
-            currentCommand = &toolChange;
+            currentCommand = &logic::toolChange;
             break;
         case mp::RequestMsgCodes::Unload:
-            currentCommand = &unloadFilament;
+            currentCommand = &logic::unloadFilament;
             break;
         case mp::RequestMsgCodes::Mode:
-            currentCommand = &setMode;
+            currentCommand = &logic::setMode;
             break;
         default:
-            currentCommand = &noCommand;
+            currentCommand = &logic::noCommand;
             break;
         }
         currentCommandRq = rq; // save the Current Command Request for indentification of responses
@@ -183,7 +180,7 @@ void IdleMode::ReportVersion(const mp::RequestMsg &rq) {
 
 void IdleMode::ReportRunningCommand() {
     uint8_t rsp[maxMsgLen];
-    uint8_t len = protocol.EncodeResponseQueryOperation(currentCommandRq, logic::idleMode.RunningCommandStatus(), rsp);
+    uint8_t len = protocol.EncodeResponseQueryOperation(currentCommandRq, RunningCommandStatus(), rsp);
     modules::serial::WriteToUSART(rsp, len);
 }
 
@@ -260,5 +257,3 @@ void IdleMode::Step() {
 
     currentCommand->Step();
 }
-
-} // namespace logic
