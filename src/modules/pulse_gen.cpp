@@ -96,14 +96,15 @@ bool PulseGen::PlanMoveTo(pos_t target, steps_t feed_rate, steps_t end_rate) {
     block_t *block = &block_buffer[block_index.back()];
 
     // Bail if this is a zero-length block
-    block->steps = abs(target - position);
+    pos_t steps = target - position;
+    block->steps = abs(steps);
     if (block->steps <= config::dropSegments) {
         // behave as-if the block has been scheduled
         return true;
     }
 
     // Direction and speed for this block
-    block->direction = (target >= position);
+    block->direction = steps >= 0;
     block->nominal_rate = feed_rate;
 
     // Acceleration of the segment, in steps/sec^2

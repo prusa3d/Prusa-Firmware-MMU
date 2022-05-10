@@ -278,3 +278,27 @@ TEST_CASE("motion::long_pulley_move", "[motion]") {
     motion.PlanMoveTo<Pulley>(mm400, 1._mm_s);
     REQUIRE(stepUntilDone() == p);
 }
+
+TEST_CASE("motion::pos_overflow", "[motion]") {
+    ResetMotionSim();
+
+    // set a position _at_ the overflow limit
+    mm::pos_t pos_max = std::numeric_limits<mm::pos_t>::max();
+    mm::motion.SetPosition(mm::Pulley, pos_max);
+    REQUIRE(mm::motion.Position(mm::Pulley) == pos_max);
+
+    // plan a move which will overflow
+    mm::pos_t steps = 10;
+    mm::motion.PlanMove(mm::Pulley, steps, 1);
+
+    // ensure we did overflow
+    REQUIRE(mm::motion.Position(mm::Pulley) < pos_max);
+
+    // step once to setup current_block
+    mm::motion.Step();
+
+    // ensure the move direction and step count is correct despite the overflow
+    // abuse CurBlockShift to get both, accounting for the useless single step
+    // we performed just above.
+    REQUIRE(mm::motion.CtrlForAxis(mm::Pulley).CurBlockShift() == steps - 1);
+}
