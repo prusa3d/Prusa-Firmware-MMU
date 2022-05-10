@@ -61,7 +61,7 @@ void IdleMode::CheckManualOperation() {
             case mui::Event::Middle:
                 // plan load
                 if (mg::globals.ActiveSlot() < config::toolCount) { // do we have a meaningful selector position?
-                    loadFilament.ResetUnlimited(mg::globals.ActiveSlot());
+                    loadFilament.Reset(mg::globals.ActiveSlot());
                     currentCommand = &loadFilament;
                 }
                 break;
