@@ -216,7 +216,7 @@ TEST_CASE("motion::triple_move", "[motion]") {
     motion.PlanMoveTo(Pulley, p, 1);
 
     // perform the move with a maximum step limit
-    REQUIRE(stepUntilDone(std::max({ i, s, p }) + 1) != -1);
+    REQUIRE(stepUntilDone(i + s + p) != -1);
 
     // check queue status
     REQUIRE(motion.QueueEmpty());
