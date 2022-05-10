@@ -21,16 +21,16 @@ void LoadFilament::Reset(uint8_t param) {
     }
     dbg_logic_P(PSTR("Load Filament"));
     mg::globals.SetFilamentLoaded(param, mg::FilamentLoadState::AtPulley); // still at pulley, haven't moved yet
-    Reset2(true);
+    Reset2(false);
 }
 
-void LoadFilament::ResetUnlimited(uint8_t param) {
+void LoadFilament::ResetLimited(uint8_t param) {
     if (!CheckToolIndex(param)) {
         return;
     }
     dbg_logic_P(PSTR("Load Filament"));
     mg::globals.SetFilamentLoaded(param, mg::FilamentLoadState::AtPulley); // still at pulley, haven't moved yet
-    Reset2(false);
+    Reset2(true);
 }
 
 void logic::LoadFilament::Reset2(bool feedPhaseLimited) {

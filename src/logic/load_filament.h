@@ -13,13 +13,13 @@ public:
     inline LoadFilament()
         : CommandBase() {}
 
-    /// Restart the automaton
+    /// Restart the automaton - performs unlimited rotation of the Pulley
     /// @param param index of filament slot to load
     void Reset(uint8_t param) override;
 
-    /// Restart the automaton for unlimited rotation of the Pulley
+    /// Restart the automaton for a limited rotation of the Pulley
     /// @param param index of filament slot to load
-    void ResetUnlimited(uint8_t param);
+    void ResetLimited(uint8_t param);
 
     /// @returns true if the state machine finished its job, false otherwise
     bool StepInner() override;
