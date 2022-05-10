@@ -1,13 +1,13 @@
 /// @file
 #pragma once
 #include <stdint.h>
-#include "../modules/timebase.h"
-#include "../modules/protocol.h"
-#include "error_codes.h"
+#include "modules/timebase.h"
+#include "modules/protocol.h"
+#include "logic/error_codes.h"
 
 namespace logic {
-
 class CommandBase;
+}
 
 class IdleMode {
 public:
@@ -44,7 +44,7 @@ private:
     uint16_t lastCommandProcessedMs;
 
     /// A command that resulted in the currently on-going operation
-    CommandBase *currentCommand;
+    logic::CommandBase *currentCommand;
 
     /// Remember the request message that started the currently running command
     /// For the start we report "Reset finished" which in fact corresponds with the MMU state pretty closely
@@ -56,5 +56,3 @@ private:
 };
 
 extern IdleMode idleMode;
-
-} // namespace logic

@@ -1,6 +1,7 @@
 # define the test executable
 add_executable(
   tool_change_tests
+  ${CMAKE_SOURCE_DIR}/src/idle_mode.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/command_base.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/cut_filament.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/eject_filament.cpp
@@ -8,7 +9,6 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/src/logic/feed_to_bondtech.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/feed_to_finda.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/home.cpp
-  ${CMAKE_SOURCE_DIR}/src/logic/idle_mode.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/load_filament.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/move_selector.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/no_command.cpp
