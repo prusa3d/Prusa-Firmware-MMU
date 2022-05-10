@@ -340,6 +340,11 @@ public:
         return axisData[axis].drv;
     }
 
+    /// @returns the controller associated with the particular axis
+    inline const pulse_gen::PulseGen &CtrlForAxis(Axis axis) const {
+        return axisData[axis].ctrl;
+    }
+
 private:
     struct AxisData {
         TMC2130 drv; ///< Motor driver
