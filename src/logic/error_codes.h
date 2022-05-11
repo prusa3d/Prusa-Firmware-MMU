@@ -41,6 +41,11 @@ enum class ErrorCode : uint_fast16_t {
 
     FINDA_VS_EEPROM_DISREPANCY = 0x8008, ///< E32776 FINDA is pressed but we have no such record in EEPROM - this can only happen at the start of the MMU and can be resolved by issuing an Unload command
 
+    MOVE_FAILED = 0x8009, ///< generic move failed error - always reported with the corresponding axis bit set (Idler or Selector) as follows:
+    MOVE_SELECTOR_FAILED = MOVE_FAILED | TMC_SELECTOR_BIT, ///< E32905 the Selector was unable to move to desired position properly - that means something is blocking its movement, e.g. a piece of filament got out of pulley body
+    MOVE_IDLER_FAILED = MOVE_FAILED | TMC_IDLER_BIT, ///< E33033 the Idler was unable to move - unused at the time of creation, but added for completeness
+    MOVE_PULLEY_FAILED = MOVE_FAILED | TMC_PULLEY_BIT, ///< E32841 the Pulley was unable to move - unused at the time of creation, but added for completeness
+
     QUEUE_FULL = 0x802b, ///< E32811 internal logic error - attempt to move with a full queue
 
     VERSION_MISMATCH = 0x802c, ///< E32812 internal error of the printer - incompatible version of the MMU FW

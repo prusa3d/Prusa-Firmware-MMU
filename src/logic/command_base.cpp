@@ -13,11 +13,11 @@
 
 namespace logic {
 
-inline ErrorCode &operator|=(ErrorCode &a, ErrorCode b) {
+constexpr ErrorCode &operator|=(ErrorCode &a, ErrorCode b) {
     return a = (ErrorCode)((uint16_t)a | (uint16_t)b);
 }
 
-static ErrorCode TMC2130ToErrorCode(const hal::tmc2130::ErrorFlags &ef) {
+constexpr ErrorCode TMC2130ToErrorCode(const hal::tmc2130::ErrorFlags &ef) {
     ErrorCode e = ErrorCode::RUNNING;
 
     if (ef.reset_flag) {
@@ -39,7 +39,7 @@ static ErrorCode TMC2130ToErrorCode(const hal::tmc2130::ErrorFlags &ef) {
     return e;
 }
 
-static ErrorCode AddErrorAxisBit(ErrorCode ec, uint8_t tmcIndex) {
+constexpr ErrorCode AddErrorAxisBit(ErrorCode ec, uint8_t tmcIndex) {
     switch (tmcIndex) {
     case config::Axis::Pulley:
         ec |= ErrorCode::TMC_PULLEY_BIT;
@@ -61,12 +61,14 @@ ErrorCode CheckMovable(mm::MovableBase &m) {
     case mm::MovableBase::TMCFailed:
         return AddErrorAxisBit(TMC2130ToErrorCode(m.TMCErrorFlags()), m.Axis());
     case mm::MovableBase::HomingFailed:
-        return AddErrorAxisBit(ErrorCode::HOMING_FAILED, m.Axis());
+        return m.SupportsHoming() ? AddErrorAxisBit(ErrorCode::HOMING_FAILED, m.Axis()) : ErrorCode::RUNNING;
+    case mm::MovableBase::MoveFailed:
+        return m.SupportsHoming() ? AddErrorAxisBit(ErrorCode::MOVE_FAILED, m.Axis()) : ErrorCode::RUNNING;
     }
     return ErrorCode::RUNNING;
 }
 
-static inline ErrorCode WithoutAxisBits(ErrorCode ec) {
+constexpr ErrorCode WithoutAxisBits(ErrorCode ec) {
     return static_cast<ErrorCode>(
         static_cast<uint16_t>(ec)
         & (~(static_cast<uint16_t>(ErrorCode::TMC_SELECTOR_BIT)
@@ -93,19 +95,35 @@ bool CommandBase::WaitForOneModuleErrorRecovery(ErrorCode ec, modules::motion::M
         }
 
         switch (state) {
-        case ProgressCode::ERRWaitingForUser: // waiting for a recovery - mask axis bits:
-            if (WithoutAxisBits(ec) == ErrorCode::HOMING_FAILED) {
-                // homing can be recovered
-                mui::Event ev = mui::userInput.ConsumeEvent();
-                if (ev == mui::Event::Middle) {
-                    recoveringMovableErrorAxisMask |= axisMask;
-                    m.PlanHome(); // force initiate a new homing attempt
+        case ProgressCode::ERRWaitingForUser: { // waiting for a recovery - mask axis bits:
+            mui::Event ev = mui::userInput.ConsumeEvent();
+            if (ev == mui::Event::Middle) {
+                switch (WithoutAxisBits(ec)) {
+                case ErrorCode::MOVE_FAILED:
+                    // A failed move can be recovered for Idler and Selector (doesn't make sense on the Pulley).
+                    // But - force initiate a new homing attempt of BOTH Idler and Selector (that's the main difference from HomingFailed)
+                    // because we expect the user disassembled the whole MMU to remove a stuck piece of filament
+                    // and therefore we cannot rely on Idler's and Selector's position
+                    recoveringMovableErrorAxisMask |= 0x3; // @@TODO better axis masks
+                    mi::idler.PlanHome();
+                    ms::selector.PlanHome();
                     state = ProgressCode::Homing;
                     error = ErrorCode::RUNNING;
+                    break;
+                case ErrorCode::HOMING_FAILED:
+                    // A failed homing can be recovered
+                    recoveringMovableErrorAxisMask |= axisMask;
+                    m.PlanHome(); // force initiate a new homing attempt just on the failed axis
+                    state = ProgressCode::Homing;
+                    error = ErrorCode::RUNNING;
+                    break;
+                default:
+                    break;
                 }
             }
             // TMC errors cannot be recovered safely, waiting for power cycling the MMU
             return true;
+        }
         default:
             return true; // prevent descendant from taking over while in an error state
         }
