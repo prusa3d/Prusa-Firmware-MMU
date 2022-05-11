@@ -36,6 +36,13 @@ void MovableBase::PerformMove() {
         // TMC2130 entered some error state, the planned move couldn't have been finished - result of operation is Failed
         tmcErrorFlags = mm::motion.DriverForAxis(axis).GetErrorFlags(); // save the failed state
         state = TMCFailed;
+    } else if (mm::motion.StallGuard(axis) && SupportsHoming()) {
+        // Axis stalled while moving - dangerous especially with the Selector
+        // Checked only for axes which support homing (because we plan a homing move after the error is resolved to regain precise position)
+        mm::motion.StallGuardReset(axis);
+        mm::motion.AbortPlannedMoves(axis, true);
+        // @@TODO move a bit back from where it came from to enable easier removal of whatever is blocking the axis
+        state = MoveFailed;
     } else if (mm::motion.QueueEmpty(axis)) {
         // move finished
         currentSlot = plannedSlot;

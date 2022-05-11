@@ -17,7 +17,8 @@ public:
         HomeForward,
         HomeBack,
         TMCFailed,
-        HomingFailed
+        HomingFailed,
+        MoveFailed,
     };
 
     /// Operation (Engage/Disengage/MoveToSlot) return values
@@ -66,6 +67,8 @@ public:
     inline bool HomingValid() const { return homingValid; }
 
     inline config::Axis Axis() const { return axis; }
+
+    virtual bool SupportsHoming() = 0;
 
 protected:
     /// internal state of the automaton

@@ -40,6 +40,8 @@ public:
     /// - blocked -> set selector's position according to the active filament slot
     void Init();
 
+    virtual bool SupportsHoming() override { return true; }
+
 protected:
     virtual void PrepareMoveToPlannedSlot() override;
     virtual void PlanHomingMoveForward() override;

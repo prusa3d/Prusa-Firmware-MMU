@@ -34,6 +34,8 @@ public:
     void InitAxis();
     void Disable();
 
+    virtual bool SupportsHoming() override { return false; }
+
 protected:
     virtual void PrepareMoveToPlannedSlot() override {}
     virtual void PlanHomingMoveForward() override {}
