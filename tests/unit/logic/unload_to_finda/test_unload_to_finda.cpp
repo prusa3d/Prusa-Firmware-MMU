@@ -178,8 +178,8 @@ TEST_CASE("unload_to_finda::unload_repeated", "[unload_to_finda]") {
 
     // it should have instructed the selector and idler to move to slot 1
     // check if the idler and selector have the right command
-    CHECK(mm::axes[mm::Idler].targetPos == mi::Idler::SlotPosition(0).v);
-    CHECK(mm::axes[mm::Selector].targetPos == ms::Selector::SlotPosition(0).v);
+    CHECK(mm::AxisNearestTargetPos(mm::Idler) == mi::Idler::SlotPosition(0).v);
+    CHECK(mm::AxisNearestTargetPos(mm::Selector) == ms::Selector::SlotPosition(0).v);
     CHECK(mm::axes[mm::Idler].enabled == true);
 
     // engaging idler
@@ -195,7 +195,7 @@ TEST_CASE("unload_to_finda::unload_repeated", "[unload_to_finda]") {
     // but set FSensor correctly
     // In this case it is vital to correctly compute the amount of steps
     // to make the unload state machine restart after the 1st attempt
-    uint32_t unlSteps = mm::unitToSteps<mm::P_pos_t>(config::defaultBowdenLength + config::feedToFinda + config::filamentMinLoadedToMMU);
+    uint32_t unlSteps = 1 + mm::unitToSteps<mm::P_pos_t>(config::defaultBowdenLength + config::feedToFinda + config::filamentMinLoadedToMMU);
     REQUIRE_FALSE(WhileCondition(ff, std::bind(SimulateUnloadToFINDA, _1, 10, 150000), unlSteps));
 
     main_loop();
