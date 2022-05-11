@@ -11,7 +11,8 @@ namespace logic {
 class LoadFilament : public CommandBase {
 public:
     inline LoadFilament()
-        : CommandBase() {}
+        : CommandBase()
+        , verifyLoadedFilament(0) {}
 
     /// Restart the automaton - performs unlimited rotation of the Pulley
     /// @param param index of filament slot to load
@@ -33,6 +34,12 @@ private:
 
     FeedToFinda feed;
     RetractFromFinda retract;
+
+    /// As requested in MMU-116:
+    /// Once the filament gets retracted after first feed, perform a short re-check by doing a limited load + retract.
+    /// That ensures the filament can be loaded into the selector later when needed.
+    /// verifyLoadedFilament holds the number of re-checks to be performed (we expect >1 re-checks will be requested one day ;) )
+    uint8_t verifyLoadedFilament;
 };
 
 /// The one and only instance of LoadFilament state machine in the FW

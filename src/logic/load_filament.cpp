@@ -21,6 +21,7 @@ void LoadFilament::Reset(uint8_t param) {
     }
     dbg_logic_P(PSTR("Load Filament"));
     mg::globals.SetFilamentLoaded(param, mg::FilamentLoadState::AtPulley); // still at pulley, haven't moved yet
+    verifyLoadedFilament = 1;
     Reset2(false);
 }
 
@@ -61,10 +62,12 @@ bool LoadFilament::StepInner() {
             case FeedToFinda::Failed: // @@TODO - try to repeat 6x - push/pull sequence - probably something to put into feed_to_finda as an option
                 GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_ON); // signal loading error
                 break;
+            case FeedToFinda::Stopped:
+                // as requested in MMU-116 - stopping an unsuccessful feed should retract as well but not check the filament
+                verifyLoadedFilament = 0;
+                // [[fallthrough]]
             case FeedToFinda::OK:
-            case FeedToFinda::Stopped: // as requested in MMU-77 - stopping an unsuccessful feed should retract as well
-                state = ProgressCode::RetractingFromFinda;
-                retract.Reset();
+                GoToRetractingFromFinda();
                 break;
             }
         }
@@ -74,8 +77,15 @@ bool LoadFilament::StepInner() {
             if (retract.State() == RetractFromFinda::Failed) {
                 GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_OFF); // signal loading error
             } else {
-                state = ProgressCode::DisengagingIdler;
-                mi::idler.Disengage();
+                if (verifyLoadedFilament) {
+                    --verifyLoadedFilament;
+                    // as requested in MMU-116 - once the filament gets retracted after first feed, perform a short re-check
+                    // by doing a limited load + retract. That ensures the filament can be loaded into the selector later when needed.
+                    ResetLimited(mg::globals.ActiveSlot());
+                } else {
+                    state = ProgressCode::DisengagingIdler;
+                    mi::idler.Disengage();
+                }
             }
         }
         break;
