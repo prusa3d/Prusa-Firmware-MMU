@@ -287,7 +287,7 @@ TEST_CASE("motion::pos_overflow", "[motion]") {
     mm::motion.SetPosition(mm::Pulley, pos_max);
     REQUIRE(mm::motion.Position(mm::Pulley) == pos_max);
 
-    // plan a move which will overflow
+    // plan a move that will overflow
     mm::pos_t steps = 10;
     mm::motion.PlanMove(mm::Pulley, steps, 1);
 
@@ -297,8 +297,23 @@ TEST_CASE("motion::pos_overflow", "[motion]") {
     // step once to setup current_block
     mm::motion.Step();
 
-    // ensure the move direction and step count is correct despite the overflow
-    // abuse CurBlockShift to get both, accounting for the useless single step
-    // we performed just above.
+    // ensure the move direction and step count is correct despite the overflow - abuse
+    // CurBlockShift to get both, accounting for the useless single step we performed just above
     REQUIRE(mm::motion.CtrlForAxis(mm::Pulley).CurBlockShift() == steps - 1);
+}
+
+TEST_CASE("motion::pos_underflow", "[motion]") {
+    ResetMotionSim();
+
+    mm::pos_t pos_min = std::numeric_limits<mm::pos_t>::min();
+    mm::motion.SetPosition(mm::Pulley, pos_min);
+    REQUIRE(mm::motion.Position(mm::Pulley) == pos_min);
+
+    mm::pos_t steps = 10;
+    mm::motion.PlanMove(mm::Pulley, -steps, 1);
+    REQUIRE(mm::motion.Position(mm::Pulley) > pos_min);
+
+    mm::motion.Step();
+
+    REQUIRE(mm::motion.CtrlForAxis(mm::Pulley).CurBlockShift() == -(steps - 1));
 }
