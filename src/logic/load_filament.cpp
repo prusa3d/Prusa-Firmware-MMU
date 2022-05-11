@@ -62,13 +62,9 @@ bool LoadFilament::StepInner() {
                 GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_ON); // signal loading error
                 break;
             case FeedToFinda::OK:
+            case FeedToFinda::Stopped: // as requested in MMU-77 - stopping an unsuccessful feed should retract as well
                 state = ProgressCode::RetractingFromFinda;
                 retract.Reset();
-                break;
-            case FeedToFinda::Stopped:
-                // the user stopped the load for whatever reason
-                // - we are considering the LoadFlament operation as completed
-                FinishedOK();
                 break;
             }
         }
