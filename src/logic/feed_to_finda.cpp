@@ -81,6 +81,7 @@ bool FeedToFinda::Step() {
     }
         return false;
     case OK:
+    case Stopped:
         dbg_logic_P(PSTR("Feed to FINDA OK"));
         return true;
     case Failed:

@@ -9,6 +9,7 @@
 #include "../../../../src/modules/motion.h"
 #include "../../../../src/modules/permanent_storage.h"
 #include "../../../../src/modules/selector.h"
+#include "../../../../src/modules/user_input.h"
 
 #include "../../../../src/logic/load_filament.h"
 
@@ -276,5 +277,77 @@ TEST_CASE("load_filament::failed_load_to_finda_0-4_try_again", "[load_filament]"
         LoadFilamentCommonSetup(slot, lf, true);
         FailedLoadToFinda(slot, lf);
         FailedLoadToFindaResolveTryAgain(slot, lf);
+    }
+}
+
+void LoadFilamentSuccessWithRecheck(uint8_t slot, logic::LoadFilament &lf) {
+    // Stage 2 - feeding to finda
+    // we'll assume the finda is working correctly here
+    REQUIRE(WhileCondition(
+        lf,
+        [&](uint32_t step) -> bool {
+            if(step == 100){ // on 100th step make FINDA trigger
+                hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
+            }
+            return lf.TopLevelState() == ProgressCode::FeedingToFinda; },
+        5000));
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
+
+    // Stage 3 - retracting from finda
+    // we'll assume the finda is working correctly here
+    REQUIRE(WhileCondition(
+        lf,
+        [&](uint32_t step) -> bool {
+            if(step == 50){ // on 50th step make FINDA trigger
+                hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
+            }
+            return lf.TopLevelState() == ProgressCode::RetractingFromFinda; },
+        5000));
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, slot, slot, false, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
+
+    // make FINDA switch on
+    REQUIRE(WhileCondition(lf, std::bind(SimulateFeedToFINDA, _1, 100), 5000));
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
+
+    // make FINDA switch off
+    REQUIRE(WhileCondition(lf, std::bind(SimulateRetractFromFINDA, _1, 100), 5000));
+    REQUIRE(WhileCondition(
+        lf, [&](uint32_t) { return lf.State() == ProgressCode::RetractingFromFinda; }, 50000));
+}
+
+TEST_CASE("load_filament::unlimited_load", "[load_filament]") {
+    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
+        logic::LoadFilament lf;
+        LoadFilamentCommonSetup(slot, lf, false);
+        LoadFilamentSuccessWithRecheck(slot, lf);
+    }
+}
+
+void LoadFilamentStopped(uint8_t slot, logic::LoadFilament &lf) {
+    // Stage 2 - feeding to finda
+    // we'll assume the finda is working correctly here, but we stop the load sequence with a button press
+    // just step a bit
+    REQUIRE_FALSE(WhileTopState(lf, ProgressCode::FeedingToFinda, 5000));
+
+    // now press a button
+    PressButtonAndDebounce(lf, mb::Middle);
+
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, false, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
+
+    // Stage 3 - retracting from finda, but no FINDA trigger since we stopped the load with a button press
+    // - actually, we should be safe though as FINDA is not triggered at all
+    REQUIRE(WhileTopState(lf, ProgressCode::RetractingFromFinda));
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, slot, slot, false, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
+
+    // Stage 4 - disengaging idler
+    REQUIRE(WhileTopState(lf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+}
+
+TEST_CASE("load_filament::unlimited_load_manual_stop", "[load_filament]") {
+    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
+        logic::LoadFilament lf;
+        LoadFilamentCommonSetup(slot, lf, false);
+        LoadFilamentStopped(slot, lf);
     }
 }
