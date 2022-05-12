@@ -22,6 +22,7 @@ void MovableBase::PlanHome() {
 
 MovableBase::OperationResult MovableBase::InitMovement() {
     if (motion.InitAxis(axis)) {
+        mm::motion.StallGuardReset(axis);
         PrepareMoveToPlannedSlot();
         state = Moving;
         return OperationResult::Accepted;
@@ -36,7 +37,7 @@ void MovableBase::PerformMove() {
         // TMC2130 entered some error state, the planned move couldn't have been finished - result of operation is Failed
         tmcErrorFlags = mm::motion.DriverForAxis(axis).GetErrorFlags(); // save the failed state
         state = TMCFailed;
-    } else if (mm::motion.StallGuard(axis) && SupportsHoming()) {
+    } else if (SupportsHoming() && (!mg::globals.MotorsStealth()) && mm::motion.StallGuard(axis)) {
         // Axis stalled while moving - dangerous especially with the Selector
         // Checked only for axes which support homing (because we plan a homing move after the error is resolved to regain precise position)
         mm::motion.StallGuardReset(axis);
