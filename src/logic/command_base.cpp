@@ -85,12 +85,14 @@ bool CommandBase::WaitForOneModuleErrorRecovery(ErrorCode ec, modules::motion::M
             stateBeforeModuleFailed = state;
             errorBeforeModuleFailed = error;
             error = ec;
+            //            mui::userInput.Clear(); // @@TODO
             state = ProgressCode::ERRWaitingForUser; // such a situation always requires user's attention -> let the printer display an error screen
         }
 
         // are we already recovering an error - that would mean we got another one
         if (recoveringMovableErrorAxisMask) {
             error = ec;
+            //            mui::userInput.Clear(); // @@TODO
             state = ProgressCode::ERRWaitingForUser; // such a situation always requires user's attention -> let the printer display an error screen
         }
 
