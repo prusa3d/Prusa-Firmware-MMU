@@ -131,7 +131,7 @@ static constexpr AxisConfig selector = {
     .iHold = 5, /// 99mA
     .stealth = false,
     .stepsPerUnit = (200 * 8 / 8.),
-    .sg_thrs = 3,
+    .sg_thrs = 5, // 6 looks like too much on my MMU
 };
 
 /// Selector motion limits
