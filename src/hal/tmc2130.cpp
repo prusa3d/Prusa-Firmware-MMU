@@ -22,7 +22,8 @@ bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, Mot
     if (((IOIN >> 24U) != 0x11) | !(IOIN & (1U << 6U)))
         return false; // @@TODO return some kind of failure
 
-    ///clear reset_flag as we are (re)initializing
+    // read GSTAT to clear reset_flag as we are (re)initializing
+    CheckForErrors(params);
     errorFlags.reset_flag = false;
 
     ///apply chopper parameters
