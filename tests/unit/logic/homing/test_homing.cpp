@@ -120,12 +120,12 @@ bool SimulateFailedMoveFirstTime(logic::CommandBase &cb) {
 
     REQUIRE(cb.Error() == ErrorCode::MOVE_SELECTOR_FAILED);
     REQUIRE(cb.State() == ProgressCode::ERRWaitingForUser);
-    //    REQUIRE_FALSE(mm::motion.Enabled(mm::Selector));
+    REQUIRE_FALSE(mm::motion.Enabled(mm::Selector));
 
     // do a few steps before pushing the button
     WhileTopState(cb, ProgressCode::ERRWaitingForUser, 5);
 
-    //    REQUIRE_FALSE(mm::motion.Enabled(mm::Selector));
+    REQUIRE_FALSE(mm::motion.Enabled(mm::Selector));
 
     PressButtonAndDebounce(cb, mb::Middle);
 
