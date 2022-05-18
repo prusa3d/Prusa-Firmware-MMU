@@ -38,7 +38,7 @@ int main(int argc, const char *argv[]) {
         F_CPU / config::stepTimerFrequencyDivider, config::stepTimerQuantum);
 
     for (int ax_cnt = 0; ax_cnt != 2; ++ax_cnt) {
-        for (int accel = 2000; accel <= 50000; accel *= 2) {
+        for (int accel = 50; accel <= 50000; accel += accel / 2) {
             // first axis defines the nominal values
             motion.SetJerk(ax_a, maxJerk);
             motion.SetPosition(ax_a, 0);
