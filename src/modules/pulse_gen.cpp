@@ -109,7 +109,12 @@ bool PulseGen::PlanMoveTo(pos_t target, steps_t feed_rate, steps_t end_rate) {
 
     // Acceleration of the segment, in steps/sec^2
     block->acceleration = acceleration;
-    block->acceleration_rate = block->acceleration * (rate_t)((float)F_CPU / (F_CPU / config::stepTimerFrequencyDivider));
+
+    // Calculate the ratio to 2^24 so that the rate division in Step() can be just a right shift
+    constexpr float ratio = (float)(1lu << 24) / (F_CPU / config::stepTimerFrequencyDivider);
+    constexpr rate_t mul = 8; // pre-multiply to increase the integer division resolution
+    static_assert(!(mul & (mul - 1)), "mul must be a power of two");
+    block->acceleration_rate = block->acceleration * (rate_t)(ratio * mul) / mul;
 
     // Simplified forward jerk: do not handle reversals
     steps_t entry_speed;
