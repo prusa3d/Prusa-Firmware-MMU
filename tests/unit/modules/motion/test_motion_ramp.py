@@ -40,7 +40,7 @@ def check_axis(info, ax_info, data, fine_check):
     tb = info['timebase']
 
     # remove duplicate positions (meaning another axis was moved, not the current)
-    data = data[data['pos'].diff() != 0]
+    data = data[data['pos'].diff() != 0].reset_index()
 
     # recalculate intervals just for this axis
     data['int'] = data['ts'].diff()
@@ -61,18 +61,21 @@ def check_axis(info, ax_info, data, fine_check):
     data['ts_s'] = data['ts'] / tb
     data['int_s'] = data['int'] / tb
 
-    maxdev_fine = 20  # absolute maximum deviation
-    maxdev_acc = 0.05  # 5% acceleration deviation
-    maxdev_coarse = 0.1  # 10% speed deviation
-    ramp_smp_skip = 3  # skip initial null values
+    if fine_check:
+        maxdev = 0.1  # 10% rate deviation tolerance
+    else:
+        maxdev = 0.2  # higher tolerance due to quantization
+
+    # initial samples to skip
+    ramp_smp_skip = 3
 
     if fine_check:
         # exact rate
         data['rate'] = 1 / data['int_s']
 
     else:
-        # reconstruct the rate from 3 samples
-        data['rate'] = 1 / data.rolling(3)['int_s'].median()
+        # reconstruct the rate from 5 samples
+        data['rate'] = 1 / data.rolling(5)['int_s'].median()
         data['rate'].bfill(inplace=True)
 
     # ensure we never _exceed_ max feedrate
@@ -93,11 +96,10 @@ def check_axis(info, ax_info, data, fine_check):
         # check cruising speed
         cruise_data = data[(data['pos'] > acc_dist + 2)
                            & (data['pos'] < acc_dist + 2 + c_dist)]
-        cruise_maxdev = 1 if fine_check else maxrate * maxdev_coarse
-        assert ((cruise_data['rate'] - maxrate).abs().max() < cruise_maxdev)
+        assert ((cruise_data['rate'] - maxrate).abs().max() < 1)
 
     # checking acceleration segments require a decent number of samples for good results
-    if acc_dist < 10:
+    if acc_dist < 20:
         return
 
     # TODO: minrate is currently hardcoded in the FW as a function of the timer type (we
@@ -106,49 +108,29 @@ def check_axis(info, ax_info, data, fine_check):
     startrate = data['rate'].iat[ramp_smp_skip]
     endrate = data['rate'].iat[-1]
 
-    # check acceleration segment (coarse)
+    # check acceleration segment
     acc_data = data[(data['pos'] < acc_dist)][ramp_smp_skip:]
     acc_data['ts_s'] -= acc_data['ts_s'].iat[0]
     acc_time = acc_data['ts_s'].iat[-1]
-    acc_data['exp_rate'] = startrate + acc_data['ts_s'] \
-        / acc_time * (maxrate - startrate)
+    acc_data['exp_rate'] = startrate + acc_data['ts_s'] * ax_info['accel']
     assert ((acc_data['exp_rate'] - acc_data['rate']).abs().max() <
-            maxrate * maxdev_coarse)
+            maxrate * maxdev)
 
-    # acceleration (fine)
-    acc_data['exp_fine'] = acc_data['rate'].iat[0] + acc_data['ts_s'] \
-        / acc_time * (acc_data['rate'].iat[-1] - startrate)
-    if fine_check:
-        assert ((acc_data['exp_fine'] - acc_data['rate']).abs().max() <
-                maxdev_fine)
+    # check acceleration rate
+    acc_acc = (acc_data['rate'].iat[-1] - acc_data['rate'].iat[0]) / acc_time
+    assert (abs(acc_acc - ax_info['accel']) / ax_info['accel'] < maxdev)
 
-    # check effective acceleration rate
-    acc_vel = (acc_data['rate'].iat[-1] - acc_data['rate'].iat[0]) / acc_time
-    if fine_check:
-        assert (abs(acc_vel - ax_info['accel']) / ax_info['accel'] <
-                maxdev_acc)
-
-    # deceleration (coarse)
-    dec_data = data[(data['pos'] > (data['pos'].iat[-1] - acc_dist))][2:]
+    # deceleration segment
+    dec_data = data[(data['pos'] >
+                     (data['pos'].iat[-1] - acc_dist))][ramp_smp_skip:]
     dec_data['ts_s'] -= dec_data['ts_s'].iat[0]
     dec_time = dec_data['ts_s'].iat[-1]
-    dec_data['exp_rate'] = maxrate - dec_data['ts_s'] \
-        / dec_time * (maxrate - endrate)
-    assert ((dec_data['exp_rate'] - dec_data['rate']).abs().max() <
-            maxrate * maxdev_coarse)
+    dec_data['exp_rate'] = dec_data['rate'].iat[
+        0] - dec_data['ts_s'] * ax_info['accel']
 
-    # deceleration (fine)
-    dec_data['exp_fine'] = dec_data['rate'].iat[0] - dec_data['ts_s'] \
-        / dec_time * (dec_data['rate'].iat[0] - endrate)
-    if fine_check:
-        assert ((dec_data['exp_fine'] - dec_data['rate']).abs().max() <
-                maxdev_fine)
-
-    # check effective deceleration rate
-    dec_vel = (dec_data['rate'].iat[0] - dec_data['rate'].iat[-1]) / dec_time
-    if fine_check:
-        # TODO: deceleration rate is not as accurate as acceleration!
-        assert (abs(dec_vel - ax_info['accel']) / ax_info['accel'] < 0.15)
+    # check deceleration rate
+    dec_acc = (dec_data['rate'].iat[0] - dec_data['rate'].iat[-1]) / dec_time
+    assert (abs(dec_acc - ax_info['accel']) / ax_info['accel'] < maxdev)
 
 
 def check_run(info, run):
