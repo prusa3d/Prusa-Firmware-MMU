@@ -131,14 +131,14 @@ static constexpr AxisConfig selector = {
     .iHold = 5, /// 99mA
     .stealth = false,
     .stepsPerUnit = (200 * 8 / 8.),
-    .sg_thrs = 5, // 6 looks like too much on my MMU
+    .sg_thrs = 3, // 6 looks like too much on my MMU
 };
 
 /// Selector motion limits
 static constexpr SelectorLimits selectorLimits = {
     .lenght = 75.0_mm, // @@TODO how does this relate to SelectorOffsetFromMin?
     .jerk = 1.0_mm_s,
-    .accel = 200.0_mm_s2,
+    .accel = 350.0_mm_s2,
 };
 
 static constexpr U_mm SelectorSlotDistance = 14.0_mm; /// Selector distance between two slots

@@ -40,7 +40,7 @@ void MovableBase::PerformMove() {
         state = TMCFailed;
     } else if (mm::motion.QueueEmpty(axis)) {
         // move finished
-        //        ml::leds.SetMode(4, ml::red, ml::off); // @@TODO - temporary signal of the finished move
+        ml::leds.SetMode(4, ml::red, ml::off); // @@TODO - temporary signal of the finished move
         currentSlot = plannedSlot;
         FinishMove();
         state = Ready;
@@ -48,7 +48,7 @@ void MovableBase::PerformMove() {
         // Beware - the ordering of these if statements is important.
         // We shall only check stallguard when motion queue is not empty for this axis - i.e. ! mm::motion.QueueEmpty(axis)
         // Such a check has already been done in the previous else-if branch.
-        //        ml::leds.SetMode(4, ml::red, ml::on); // @@TODO - temporary signal of the stall guard
+        ml::leds.SetMode(4, ml::red, ml::on); // @@TODO - temporary signal of the stall guard
         // Axis stalled while moving - dangerous especially with the Selector
         // Checked only for axes which support homing (because we plan a homing move after the error is resolved to regain precise position)
         mm::motion.StallGuardReset(axis);
