@@ -36,7 +36,10 @@ bool FeedToBondtech::Step() {
             dbg_logic_fP(PSTR("Pulley start steps %u"), mpu::pulley.CurrentPosition_mm());
             state = PushingFilamentToFSensor;
             mpu::pulley.InitAxis();
-            mpu::pulley.PlanMove(config::defaultBowdenLength, config::pulleyLoadFeedrate, config::pulleySlowFeedrate);
+            // plan a fast move while in the safe minimal length
+            mpu::pulley.PlanMove(config::minimumBowdenLength, config::pulleyLoadFeedrate, config::pulleySlowFeedrate);
+            // plan additional slow move while waiting for fsensor to trigger
+            mpu::pulley.PlanMove(config::maximumBowdenLength - config::minimumBowdenLength, config::pulleySlowFeedrate, config::pulleySlowFeedrate);
         }
         return false;
     case PushingFilamentToFSensor:
