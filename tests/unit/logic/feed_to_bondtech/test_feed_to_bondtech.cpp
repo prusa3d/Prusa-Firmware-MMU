@@ -29,6 +29,13 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
     ForceReinitAllAutomata();
     REQUIRE(EnsureActiveSlotIndex(slot, mg::FilamentLoadState::AtPulley));
 
+    // reset bowden lenghts in EEPROM
+    InitBowdenLengths();
+    // check bowden lengths
+    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
+        REQUIRE(mps::BowdenLength::Get(mg::globals.ActiveSlot()) == config::minimumBowdenLength.v);
+    }
+
     FeedToBondtech fb;
     main_loop();
 
@@ -71,7 +78,7 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
         if( step == 100 ){
             mfs::fsensor.ProcessMessage(true);
         }
-        return fb.State() == FeedToBondtech::PushingFilamentToFSensorFast; },
+        return fb.State() == FeedToBondtech::PushingFilamentToFSensor; },
         1500));
 
     REQUIRE(mfs::fsensor.Pressed());

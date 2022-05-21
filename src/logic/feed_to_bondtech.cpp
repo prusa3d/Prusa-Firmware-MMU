@@ -9,6 +9,7 @@
 #include "../modules/permanent_storage.h"
 #include "../modules/pulley.h"
 #include "../debug.h"
+#include "../config/axis.h"
 
 namespace logic {
 
@@ -40,18 +41,18 @@ void FeedToBondtech::UpdateBowdenLength(int32_t feedEnd_mm) {
     }
 }
 
-bool FeedToBondtech::PushingFilament() {
-    if (mfs::fsensor.Pressed()) {
-        mm::motion.AbortPlannedMoves(); // stop pushing filament
-        GoToPushToNozzle();
-    } else if (mm::motion.StallGuard(mm::Pulley)) {
-        // stall guard occurred during movement - the filament got stuck
-        state = Failed; // @@TODO may be even report why it failed
-    } else if (mm::motion.QueueEmpty()) {
-        return false;
-    }
-    return true;
-}
+//bool FeedToBondtech::PushingFilament() {
+//    if (mfs::fsensor.Pressed()) {
+//        mm::motion.AbortPlannedMoves(); // stop pushing filament
+//        GoToPushToNozzle();
+//    } else if (mm::motion.StallGuard(mm::Pulley)) {
+//        // stall guard occurred during movement - the filament got stuck
+//        state = Failed; // @@TODO may be even report why it failed
+//    } else if (mm::motion.QueueEmpty()) {
+//        return false;
+//    }
+//    return true;
+//}
 
 bool FeedToBondtech::Step() {
     switch (state) {
@@ -92,30 +93,6 @@ bool FeedToBondtech::Step() {
             //            // stall guard occurred during movement - the filament got stuck
             //            state = PulleyStalled;
         } else if (mm::motion.QueueEmpty()) { // all moves have been finished and the fsensor didn't switch on
-/*=======
-            dbg_logic_fP(PSTR("Pulley start steps %u"), mm::motion.CurPosition(mm::Pulley));
-            state = PushingFilamentToFSensorFast;
-            mm::motion.InitAxis(mm::Pulley);
-            feedStart_mm = mm::stepsToUnit<mm::P_pos_t>(mm::P_pos_t({ mm::motion.CurPosition(mm::Pulley) }));
-            // fast feed in millimeters - if the EEPROM value is incorrect, we'll get the default length
-            mm::motion.PlanMove<mm::Pulley>(
-                { (long double)mps::BowdenLength::Get(mg::globals.ActiveSlot()) },
-                config::pulleyFeedrate, config::pulleySlowFeedrate);
-        }
-        return false;
-    case PushingFilamentToFSensorFast:
-        if (!PushingFilament()) { // ran out of stored bowden length, continue slowly
-            state = PushingFilamentToFSensorSlow;
-            // do the remaining move up to maximum bowden length slowly
-            mm::motion.PlanMove<mm::Pulley>(
-                { (long double)abs(config::maximumBowdenLength.v - mps::BowdenLength::Get(mg::globals.ActiveSlot())) }, // fast feed in millimeters - if the EEPROM value is incorrect, we'll
-                config::pulleySlowFeedrate, config::pulleySlowFeedrate);
-        }
-        return false;
-    case PushingFilamentToFSensorSlow:
-        if (!PushingFilament()) { // all moves have been finished and the fsensor didn't switch on
->>>>>>> Add bowden length runtime detection and tuning
-*/
             state = Failed;
         }
         return false;

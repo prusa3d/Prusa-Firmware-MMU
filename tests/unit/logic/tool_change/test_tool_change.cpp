@@ -65,6 +65,7 @@ void CheckFinishedCorrectly(logic::ToolChange &tc, uint8_t toSlot) {
 
 void ToolChange(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
     ForceReinitAllAutomata();
+    InitBowdenLengths();
 
     REQUIRE(EnsureActiveSlotIndex(fromSlot, mg::FilamentLoadState::InNozzle));
     SetFINDAStateAndDebounce(true);
@@ -96,6 +97,7 @@ void ToolChange(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
 
 void NoToolChange(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
     ForceReinitAllAutomata();
+    InitBowdenLengths();
 
     REQUIRE(EnsureActiveSlotIndex(fromSlot, mg::FilamentLoadState::InNozzle));
     // the filament is LOADED
@@ -114,6 +116,7 @@ void NoToolChange(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
 
 void JustLoadFilament(logic::ToolChange &tc, uint8_t slot) {
     ForceReinitAllAutomata();
+    InitBowdenLengths();
 
     REQUIRE(EnsureActiveSlotIndex(slot, mg::FilamentLoadState::AtPulley));
 
@@ -175,6 +178,7 @@ TEST_CASE("tool_change::same_slot_just_unloaded_filament", "[tool_change]") {
 
 void ToolChangeFailLoadToFinda(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
     ForceReinitAllAutomata();
+    InitBowdenLengths();
 
     REQUIRE(EnsureActiveSlotIndex(fromSlot, mg::FilamentLoadState::InNozzle));
     SetFINDAStateAndDebounce(true);
@@ -340,6 +344,7 @@ TEST_CASE("tool_change::load_fail_FINDA_resolve_btnR_FINDA", "[tool_change]") {
 void ToolChangeFailFSensor(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
     using namespace std::placeholders;
     ForceReinitAllAutomata();
+    InitBowdenLengths();
 
     REQUIRE(EnsureActiveSlotIndex(fromSlot, mg::FilamentLoadState::InNozzle));
     SetFINDAStateAndDebounce(true);

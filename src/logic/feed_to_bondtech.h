@@ -55,7 +55,7 @@ private:
     void UpdateBowdenLength(int32_t feedEnd_mm);
 
     /// Common processing of pushing filament into fsensor (reused by multiple states)
-    bool PushingFilament();
+    //    bool PushingFilament();
 
     uint8_t state;
     uint8_t maxRetries;

@@ -158,6 +158,13 @@ void ClearButtons(logic::CommandBase &cb) {
     }
 }
 
+void InitBowdenLengths() {
+    // reset bowdenLenght in EEPROM
+    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
+        mps::BowdenLength::Set(slot, config::minimumBowdenLength.v);
+    }
+}
+
 void SetFSensorStateAndDebounce(bool press) {
     mfs::fsensor.ProcessMessage(press);
     for (uint8_t fs = 0; fs < config::fsensorDebounceMs + 1; ++fs) {
