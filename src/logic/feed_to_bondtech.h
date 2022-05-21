@@ -14,11 +14,14 @@ struct FeedToBondtech {
     /// internal states of the state machine
     enum {
         EngagingIdler,
+        PushingFilamentFast,
         PushingFilamentToFSensor,
         PushingFilamentIntoNozzle,
         DisengagingIdler,
         OK,
-        Failed
+        Failed,
+        FSensorTooEarly,
+        //        PulleyStalled
     };
 
     inline FeedToBondtech()

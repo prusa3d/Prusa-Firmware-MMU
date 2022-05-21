@@ -52,14 +52,21 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
     CHECK(mm::axes[mm::Pulley].enabled);
 
     // idler engaged, selector in position, we'll start pushing filament
-    REQUIRE(fb.State() == FeedToBondtech::PushingFilamentToFSensor);
+    REQUIRE(fb.State() == FeedToBondtech::PushingFilamentFast);
     // at least at the beginning the LED should shine green (it should be blinking, but this mode has been already verified in the LED's unit test)
     REQUIRE(ml::leds.Mode(mg::globals.ActiveSlot(), ml::green) == ml::blink0);
 
+    // fast load - no fsensor trigger
+    REQUIRE(WhileCondition(
+        fb,
+        [&](uint32_t) { return fb.State() == FeedToBondtech::PushingFilamentFast; },
+        mm::unitToSteps<mm::P_pos_t>(config::minimumBowdenLength) + 2));
+
+    // slow load - expecting fsensor trigger
     REQUIRE(WhileCondition(
         fb,
         [&](uint32_t step) {
-        if( step == 1000 ){
+        if( step == 100 ){
             mfs::fsensor.ProcessMessage(true);
         }
         return fb.State() == FeedToBondtech::PushingFilamentToFSensor; },

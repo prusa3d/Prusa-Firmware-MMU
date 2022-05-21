@@ -81,9 +81,14 @@ bool ToolChange::StepInner() {
         break;
     case ProgressCode::FeedingToBondtech:
         if (james.Step()) {
-            if (james.State() == FeedToBondtech::Failed) {
+            switch (james.State()) {
+            case FeedToBondtech::Failed:
                 GoToErrDisengagingIdler(ErrorCode::FSENSOR_DIDNT_SWITCH_ON); // signal loading error
-            } else {
+                break;
+            case FeedToBondtech::FSensorTooEarly:
+                GoToErrDisengagingIdler(ErrorCode::FSENSOR_TOO_EARLY); // signal loading error
+                break;
+            default:
                 ToolChangeFinishedCorrectly();
             }
         }
@@ -163,6 +168,15 @@ ProgressCode ToolChange::State() const {
     switch (state) {
     case ProgressCode::UnloadingFilament:
         return unl.State(); // report sub-automaton states properly
+    case ProgressCode::FeedingToBondtech:
+        // only process the important states
+        switch (james.State()) {
+        case FeedToBondtech::PushingFilamentToFSensor:
+            return ProgressCode::FeedingToFSensor;
+        case FeedToBondtech::PushingFilamentIntoNozzle:
+            return ProgressCode::FeedingToNozzle;
+        }
+        // [[fallthrough]] // everything else is reported as FeedingToBondtech
     default:
         return state;
     }

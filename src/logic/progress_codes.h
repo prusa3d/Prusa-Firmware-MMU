@@ -39,5 +39,7 @@ enum class ProgressCode : uint_fast8_t {
     Homing, // P26
     MovingSelector, // P27
 
+    FeedingToFSensor, // P28
+
     Empty = 0xff // dummy empty state
 };

@@ -42,15 +42,17 @@ void FeedingToFinda(logic::ToolChange &tc, uint8_t toSlot, uint32_t triggerAt = 
 }
 
 void FeedingToBondtech(logic::ToolChange &tc, uint8_t toSlot) {
-    // james is feeding
+    // james is feeding fast and then slowly
+    // FSensor must not trigger too early
+    REQUIRE_FALSE(mfs::fsensor.Pressed());
     REQUIRE(WhileCondition(
         tc,
         [&](uint32_t step) -> bool {
-        if(step == 2000){ // on 2000th step make filament sensor trigger
+        if(step == mm::unitToSteps<mm::P_pos_t>(config::minimumBowdenLength)+10){ // on the correct step make filament sensor trigger
             mfs::fsensor.ProcessMessage(true);
         }
         return tc.TopLevelState() == ProgressCode::FeedingToBondtech; },
-        20000UL));
+        mm::unitToSteps<mm::P_pos_t>(config::minimumBowdenLength) + 10000));
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::InNozzle, mi::Idler::IdleSlotIndex(), toSlot, true, false, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
 }
 
@@ -73,7 +75,9 @@ void ToolChange(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
     REQUIRE(WhileCondition(
         tc,
         [&](uint32_t step) -> bool {
-        if(step == 2000){ // on 2000th step make FINDA trigger
+        if(step == 20){ // on 20th step make FSensor switch off
+            mfs::fsensor.ProcessMessage(false);
+        } else if(step == mm::unitToSteps<mm::P_pos_t>(config::minimumBowdenLength)){ // on 2000th step make FINDA trigger
             hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
         }
         return tc.TopLevelState() == ProgressCode::UnloadingFilament; },
