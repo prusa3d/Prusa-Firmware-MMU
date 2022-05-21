@@ -34,7 +34,7 @@ bool FeedToBondtech::Step() {
         if (mi::idler.Engaged()) {
             dbg_logic_P(PSTR("Feed to Bondtech --> Idler engaged"));
             dbg_logic_fP(PSTR("Pulley start steps %u"), mpu::pulley.CurrentPosition_mm());
-            state = PushingFilamentToFSensor;
+            state = PushingFilamentFast;
             mpu::pulley.InitAxis();
             // plan a fast move while in the safe minimal length
             mpu::pulley.PlanMove(config::minimumBowdenLength, config::pulleyLoadFeedrate, config::pulleySlowFeedrate);
@@ -42,14 +42,26 @@ bool FeedToBondtech::Step() {
             mpu::pulley.PlanMove(config::maximumBowdenLength - config::minimumBowdenLength, config::pulleySlowFeedrate, config::pulleySlowFeedrate);
         }
         return false;
+    case PushingFilamentFast:
+        if (mfs::fsensor.Pressed()) {
+            // Safety precaution - if the fsensor triggers while pushing the filament fast, we must stop pushing immediately
+            // With a correctly set-up MMU this shouldn't happen
+            mm::motion.AbortPlannedMoves(); // stop pushing filament
+            state = FSensorTooEarly;
+        } else if (mm::motion.PlannedMoves(mm::Pulley) == 1) {
+            // a bit of a hack - the fast (already planned) move has finished, doing the slow part
+            // -> just switch to FeedingToFSensor
+            state = PushingFilamentToFSensor;
+        }
+        return false;
     case PushingFilamentToFSensor:
         //dbg_logic_P(PSTR("Feed to Bondtech --> Pushing"));
         if (mfs::fsensor.Pressed()) {
             mm::motion.AbortPlannedMoves(); // stop pushing filament
             GoToPushToNozzle();
-        } else if (mm::motion.StallGuard(mm::Pulley)) {
-            // stall guard occurred during movement - the filament got stuck
-            state = Failed; // @@TODO may be even report why it failed
+            //        } else if (mm::motion.StallGuard(mm::Pulley)) {
+            //            // stall guard occurred during movement - the filament got stuck
+            //            state = PulleyStalled;
         } else if (mm::motion.QueueEmpty()) { // all moves have been finished and the fsensor didn't switch on
             state = Failed;
         }
@@ -76,6 +88,8 @@ bool FeedToBondtech::Step() {
         dbg_logic_P(PSTR("Feed to Bondtech OK"));
         return true;
     case Failed:
+    case FSensorTooEarly:
+        //    case PulleyStalled:
         dbg_logic_P(PSTR("Feed to Bondtech FAILED"));
         return true;
     default:
