@@ -63,7 +63,10 @@ bool FeedToBondtech::Step() {
             state = PushingFilamentFast;
             mpu::pulley.InitAxis();
             // plan a fast move while in the safe minimal length
-            mpu::pulley.PlanMove(config::minimumBowdenLength,
+            feedStart_mm = mm::stepsToUnit<mm::P_pos_t>(mm::P_pos_t({ mm::motion.CurPosition(mm::Pulley) }));
+            // fast feed in millimeters - if the EEPROM value is incorrect, we'll get the default length
+            unit::U_mm fastFeedDistance = { (long double)mps::BowdenLength::Get(mg::globals.ActiveSlot()) };
+             mpu::pulley.PlanMove(config::minimumBowdenLength,
                 mg::globals.PulleyLoadFeedrate_mm_s(),
                 mg::globals.PulleySlowFeedrate_mm_s());
             // plan additional slow move while waiting for fsensor to trigger
