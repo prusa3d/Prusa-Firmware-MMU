@@ -39,7 +39,8 @@ enum class ErrorCode : uint_fast16_t {
     HOMING_IDLER_FAILED = HOMING_FAILED | TMC_IDLER_BIT, ///< E33031 the Idler was unable to home properly - that means something is blocking its movement
     STALLED_PULLEY = HOMING_FAILED | TMC_PULLEY_BIT, ///< E32839 for the Pulley "homing" means just stallguard detected during Pulley's operation (Pulley doesn't home)
 
-    FINDA_VS_EEPROM_DISREPANCY = 0x8008, ///< E32776 FINDA is pressed but we have no such record in EEPROM - this can only happen at the start of the MMU and can be resolved by issuing an Unload command
+    FINDA_PRESSED_BUT_NO_EEPROM_RECORD = 0x8008, ///< E32776 FINDA is pressed but we have no such record in EEPROM - this can only happen at the start of the MMU and can be resolved by issuing an Unload command
+    NO_FINDA_BUT_EEPROM_HAS_FILAMENT = 0x800b, ///< E32779 opposite scenario - FINDA not pressed but there is a filament record in the EEPROM. Resolve: Unload, Done (clears the EEPROM)
 
     FSENSOR_TOO_EARLY = 0x8009, ///< E32777 FSensor triggered while doing FastFeedToBondtech - that means either:
     ///< - the PTFE is too short

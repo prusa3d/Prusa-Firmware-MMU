@@ -92,7 +92,15 @@ void setup() {
         // For this we speculatively set the active slot to 2 (in the middle ;) )
         // Ideally this should be signalled as an error state and displayed on the printer and recovered properly.
         mg::globals.SetFilamentLoaded(2, mg::InFSensor);
-        logic::noCommand.SetInitError(ErrorCode::FINDA_VS_EEPROM_DISREPANCY);
+        logic::noCommand.SetInitError(ErrorCode::FINDA_PRESSED_BUT_NO_EEPROM_RECORD);
+    }
+
+    if (!mf::finda.Pressed() && mg::globals.FilamentLoaded() >= mg::InSelector) {
+        // Opposite situation - not so dangerous, but definitely confusing to users.
+        // FINDA is not pressed but we have a record in the EEPROM.
+        // The user must tell us if there is filament (FINDA doesn't work correctly)
+        // or not (filament pulled out while the MMU was off - which is the usual case)
+        logic::noCommand.SetInitError(ErrorCode::NO_FINDA_BUT_EEPROM_HAS_FILAMENT);
     }
 
     /// Turn off all leds
