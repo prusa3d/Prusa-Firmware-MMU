@@ -95,6 +95,14 @@ void setup() {
         logic::noCommand.SetInitError(ErrorCode::FINDA_VS_EEPROM_DISREPANCY);
     }
 
+    if (!mf::finda.Pressed() && mg::globals.FilamentLoaded() >= mg::InSelector) {
+        // Opposite situation - not so dangerous, but definitely confusing to users.
+        // FINDA is not pressed but we have a record in the EEPROM.
+        // It has been decided, that we shall clear such a record from EEPROM automagically
+        // and presume there is no filament at all (requires working FINDA)
+        mg::globals.SetFilamentLoaded(config::toolCount, mg::AtPulley);
+    }
+
     /// Turn off all leds
     for (uint8_t i = 0; i < config::toolCount; i++) {
         ml::leds.SetMode(i, ml::green, ml::off);
