@@ -12,9 +12,13 @@ static uint8_t oversample = 1; ///< current count of oversampled values returned
 
 void ReinitADC(uint8_t channel, TADCData &&d, uint8_t ovsmpl) {
     values2Return[channel] = std::move(d);
-    oversampleFactor = ovsmpl;
+    oversampleFactor = ovsmpl - 1;
     oversample = ovsmpl;
     rdptr[channel] = values2Return[channel].cbegin();
+}
+
+uint16_t CurrentADC(uint8_t adc) {
+    return rdptr[adc] != values2Return[adc].end() ? *rdptr[adc] : values2Return[adc].back();
 }
 
 /// ADC access routines
@@ -26,7 +30,7 @@ uint16_t ReadADC(uint8_t adc) {
     } else {
         --oversample;
     }
-    return rdptr[adc] != values2Return[adc].end() ? *rdptr[adc] : values2Return[adc].back();
+    return CurrentADC(adc);
 }
 
 void SetADC(uint8_t channel, uint16_t value) {
