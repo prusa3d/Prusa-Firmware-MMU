@@ -175,6 +175,8 @@ ProgressCode ToolChange::State() const {
             return ProgressCode::FeedingToFSensor;
         case FeedToBondtech::PushingFilamentIntoNozzle:
             return ProgressCode::FeedingToNozzle;
+        case FeedToBondtech::DisengagingIdler:
+            return ProgressCode::DisengagingIdler;
         }
         // [[fallthrough]] // everything else is reported as FeedingToBondtech
     default:

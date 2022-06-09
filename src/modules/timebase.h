@@ -24,6 +24,10 @@ public:
 
     void Isr();
 
+    /// @returns true if the timeout elapsed from the start
+    /// handles correctly timer counter overflows
+    bool Elapsed(uint16_t start, uint16_t timeout) const;
+
 private:
     uint16_t ms;
 };

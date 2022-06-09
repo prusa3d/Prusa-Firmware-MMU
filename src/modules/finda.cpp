@@ -14,10 +14,10 @@ void FINDA::Step() {
 }
 
 void FINDA::BlockingInit() {
-    auto tgtMs = mt::timebase.Millis() + config::findaDebounceMs + 1;
-    Step(); // let FINDA settle down - we're gonna need its state for selector homing
-    while (tgtMs < mt::timebase.Millis()) {
-        mf::finda.Step();
+    uint16_t start = mt::timebase.Millis();
+    // let FINDA settle down - we're gonna need its state for selector homing
+    while (!mt::timebase.Elapsed(start, config::findaDebounceMs + 1)) {
+        Step();
     }
 }
 
