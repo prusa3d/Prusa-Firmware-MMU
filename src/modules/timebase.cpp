@@ -20,6 +20,12 @@ void Timebase::Isr() {
     ms++;
 }
 
+bool Timebase::Elapsed(uint16_t start, uint16_t timeout) const {
+    uint16_t ms_from_start = Millis(); // beware the uint16_t!
+    ms_from_start -= start;
+    return ms_from_start > timeout;
+}
+
 uint16_t Timebase::Millis() const {
     return ms;
 }

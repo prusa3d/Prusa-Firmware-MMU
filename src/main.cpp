@@ -32,7 +32,8 @@
 /// One-time setup of HW and SW components
 /// Called before entering the loop() function
 /// Green LEDs signalize the progress of initialization. If anything goes wrong we shall turn on a red LED
-void setup() {
+/// Executed with interrupts disabled
+static void setup() {
     hal::cpu::Init();
 
     mt::timebase.Init();
@@ -80,7 +81,10 @@ void setup() {
     ml::leds.Step();
 
     mu::cdc.Init();
+}
 
+/// Second part of setup - executed with interrupts enabled
+static void setup2() {
     // waits at least finda debounce period
     // which is abused to let the LEDs shine for ~100ms
     mf::finda.BlockingInit();
@@ -93,9 +97,7 @@ void setup() {
         // Ideally this should be signalled as an error state and displayed on the printer and recovered properly.
         mg::globals.SetFilamentLoaded(2, mg::InFSensor);
         logic::noCommand.SetInitError(ErrorCode::FINDA_VS_EEPROM_DISREPANCY);
-    }
-
-    if (!mf::finda.Pressed() && mg::globals.FilamentLoaded() >= mg::InSelector) {
+    } else if (!mf::finda.Pressed() && mg::globals.FilamentLoaded() >= mg::InSelector) {
         // Opposite situation - not so dangerous, but definitely confusing to users.
         // FINDA is not pressed but we have a record in the EEPROM.
         // It has been decided, that we shall clear such a record from EEPROM automagically
@@ -158,6 +160,7 @@ void loop() {
 int main() {
     setup();
     sei(); ///enable interrupts
+    setup2();
     for (;;) {
         loop();
     }
