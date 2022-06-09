@@ -14,5 +14,8 @@ void ReinitADC(uint8_t channel, TADCData &&d, uint8_t ovsmpl);
 /// set ADC value on a channel to some fixed value from now on
 void SetADC(uint8_t channel, uint16_t value);
 
+/// @returns current ADC value without advancing to the next one
+uint16_t CurrentADC(uint8_t adc);
+
 } // namespace adc
 } // namespace hal

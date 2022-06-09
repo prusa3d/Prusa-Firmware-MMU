@@ -250,7 +250,7 @@ void ToolChangeFailLoadToFindaMiddleBtn(logic::ToolChange &tc, uint8_t toSlot) {
 
 void ToolChangeFailLoadToFindaRightBtnFINDA_FSensor(logic::ToolChange &tc, uint8_t toSlot) {
     // now waiting for user input - press FINDA and FSensor
-    hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
+    SetFINDAStateAndDebounce(true);
     mfs::fsensor.ProcessMessage(true);
     PressButtonAndDebounce(tc, mb::Right);
 
@@ -261,7 +261,7 @@ void ToolChangeFailLoadToFindaRightBtnFINDA_FSensor(logic::ToolChange &tc, uint8
 
 void ToolChangeFailLoadToFindaRightBtnFINDA(logic::ToolChange &tc, uint8_t toSlot) {
     // now waiting for user input - press FINDA
-    hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
+    SetFINDAStateAndDebounce(true);
     PressButtonAndDebounce(tc, mb::Right);
 
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), toSlot, true, false, ml::off, ml::blink0, ErrorCode::FSENSOR_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));
