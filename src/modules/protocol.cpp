@@ -40,14 +40,16 @@ DecodeStatus Protocol::DecodeRequest(uint8_t c) {
         case 'S':
         case 'B':
         case 'E':
-        case 'W':
+        case 'W': // write is gonna be a special one
         case 'K':
         case 'F':
         case 'f':
         case 'H':
+        case 'R':
             requestMsg.code = (RequestMsgCodes)c;
             requestMsg.value = 0;
-            rqState = RequestStates::Value;
+            requestMsg.value2 = 0;
+            rqState = (c == 'W') ? RequestStates::Address : RequestStates::Value; // prepare special automaton path for Write commands
             return DecodeStatus::NeedMoreData;
         default:
             requestMsg.code = RequestMsgCodes::unknown;
@@ -55,9 +57,35 @@ DecodeStatus Protocol::DecodeRequest(uint8_t c) {
             return DecodeStatus::Error;
         }
     case RequestStates::Value:
-        if (IsDigit(c)) {
-            requestMsg.value *= 10;
-            requestMsg.value += c - '0';
+        if (IsHexDigit(c)) {
+            requestMsg.value <<= 4U;
+            requestMsg.value |= Char2Nibble(c);
+            return DecodeStatus::NeedMoreData;
+        } else if (IsNewLine(c)) {
+            rqState = RequestStates::Code;
+            return DecodeStatus::MessageCompleted;
+        } else {
+            requestMsg.code = RequestMsgCodes::unknown;
+            rqState = RequestStates::Error;
+            return DecodeStatus::Error;
+        }
+    case RequestStates::Address:
+        if (IsHexDigit(c)) {
+            requestMsg.value <<= 4U;
+            requestMsg.value |= Char2Nibble(c);
+            return DecodeStatus::NeedMoreData;
+        } else if (c == ' ') { // end of address, value coming
+            rqState = RequestStates::WriteValue;
+            return DecodeStatus::NeedMoreData;
+        } else {
+            requestMsg.code = RequestMsgCodes::unknown;
+            rqState = RequestStates::Error;
+            return DecodeStatus::Error;
+        }
+    case RequestStates::WriteValue:
+        if (IsHexDigit(c)) {
+            requestMsg.value2 <<= 4U;
+            requestMsg.value2 |= Char2Nibble(c);
             return DecodeStatus::NeedMoreData;
         } else if (IsNewLine(c)) {
             rqState = RequestStates::Code;
@@ -80,12 +108,41 @@ DecodeStatus Protocol::DecodeRequest(uint8_t c) {
 }
 
 uint8_t Protocol::EncodeRequest(const RequestMsg &msg, uint8_t *txbuff) {
-    constexpr uint8_t reqSize = 3;
+    uint8_t i = 1;
     txbuff[0] = (uint8_t)msg.code;
-    txbuff[1] = msg.value + '0';
-    txbuff[2] = '\n';
-    return reqSize;
-    static_assert(reqSize <= MaxRequestSize(), "Request message length exceeded the maximum size, increase the magic constant in MaxRequestSize()");
+    uint8_t v = msg.value >> 4;
+    if (v != 0) { // skip the first '0' if any
+        txbuff[i] = Nibble2Char(v);
+        ++i;
+    }
+    v = msg.value & 0xf;
+    txbuff[i] = Nibble2Char(v);
+    ++i;
+    txbuff[i] = '\n';
+    ++i;
+    return i;
+    static_assert(4 <= MaxRequestSize(), "Request message length exceeded the maximum size, increase the magic constant in MaxRequestSize()");
+}
+
+uint8_t Protocol::EncodeWriteRequest(const RequestMsg &msg, uint16_t value2, uint8_t *txbuff) {
+    uint8_t i = 1;
+    txbuff[0] = (uint8_t)msg.code;
+    uint8_t v = msg.value >> 4;
+    if (v != 0) { // skip the first '0' if any
+        txbuff[i] = Nibble2Char(v);
+        ++i;
+    }
+    v = msg.value & 0xf;
+    txbuff[i] = Nibble2Char(v);
+    ++i;
+    txbuff[i] = ' ';
+    ++i;
+    // dump the value
+    i += Value2Hex(value2, txbuff + i);
+
+    txbuff[i] = '\n';
+    ++i;
+    return i;
 }
 
 DecodeStatus Protocol::DecodeResponse(uint8_t c) {
@@ -107,6 +164,7 @@ DecodeStatus Protocol::DecodeResponse(uint8_t c) {
         case 'F':
         case 'f':
         case 'H':
+        case 'R':
             responseMsg.request.code = (RequestMsgCodes)c;
             responseMsg.request.value = 0;
             rspState = ResponseStates::RequestValue;
@@ -120,9 +178,9 @@ DecodeStatus Protocol::DecodeResponse(uint8_t c) {
             return DecodeStatus::Error;
         }
     case ResponseStates::RequestValue:
-        if (IsDigit(c)) {
-            responseMsg.request.value *= 10;
-            responseMsg.request.value += c - '0';
+        if (IsHexDigit(c)) {
+            responseMsg.request.value <<= 4U;
+            responseMsg.request.value += Char2Nibble(c);
             return DecodeStatus::NeedMoreData;
         } else if (c == ' ') {
             rspState = ResponseStates::ParamCode;
@@ -149,9 +207,9 @@ DecodeStatus Protocol::DecodeResponse(uint8_t c) {
             return DecodeStatus::Error;
         }
     case ResponseStates::ParamValue:
-        if (IsDigit(c)) {
-            responseMsg.paramValue *= 10;
-            responseMsg.paramValue += c - '0';
+        if (IsHexDigit(c)) {
+            responseMsg.paramValue <<= 4U;
+            responseMsg.paramValue += Char2Nibble(c);
             return DecodeStatus::NeedMoreData;
         } else if (IsNewLine(c)) {
             rspState = ResponseStates::RequestCode;
@@ -173,42 +231,46 @@ DecodeStatus Protocol::DecodeResponse(uint8_t c) {
 }
 
 uint8_t Protocol::EncodeResponseCmdAR(const RequestMsg &msg, ResponseMsgParamCodes ar, uint8_t *txbuff) {
+    uint8_t i = 1;
     txbuff[0] = (uint8_t)msg.code;
-    txbuff[1] = msg.value + '0';
-    txbuff[2] = ' ';
-    txbuff[3] = (uint8_t)ar;
-    txbuff[4] = '\n';
-    return 5;
+    uint8_t v = msg.value >> 4U;
+    if (v != 0) { // skip the first '0' if any
+        txbuff[i] = Nibble2Char(v);
+        ++i;
+    }
+    v = msg.value & 0xfU;
+    txbuff[i] = Nibble2Char(v);
+    ++i;
+    txbuff[i] = ' ';
+    ++i;
+    txbuff[i] = (uint8_t)ar;
+    ++i;
+    txbuff[i] = '\n';
+    ++i;
+    return i;
 }
 
 uint8_t Protocol::EncodeResponseReadFINDA(const RequestMsg &msg, uint8_t findaValue, uint8_t *txbuff) {
-    txbuff[0] = (uint8_t)msg.code;
-    txbuff[1] = msg.value + '0';
-    txbuff[2] = ' ';
-    txbuff[3] = (uint8_t)ResponseMsgParamCodes::Accepted;
-    txbuff[4] = findaValue + '0';
-    txbuff[5] = '\n';
-    return 6;
+    //    txbuff[0] = (uint8_t)msg.code;
+    //    txbuff[1] = msg.value + '0';
+    //    txbuff[2] = ' ';
+    //    txbuff[3] = (uint8_t)ResponseMsgParamCodes::Accepted;
+    //    txbuff[4] = findaValue + '0';
+    //    txbuff[5] = '\n';
+    //    return 6;
+    return EncodeResponseRead(msg, true, findaValue, txbuff);
 }
 
-uint8_t Protocol::EncodeResponseVersion(const RequestMsg &msg, uint8_t value, uint8_t *txbuff) {
-    txbuff[0] = (uint8_t)msg.code;
-    txbuff[1] = msg.value + '0';
-    txbuff[2] = ' ';
-    txbuff[3] = (uint8_t)ResponseMsgParamCodes::Accepted;
-    uint8_t *dst = txbuff + 4;
-    if (value < 10) {
-        *dst++ = value + '0';
-    } else if (value < 100) {
-        *dst++ = value / 10 + '0';
-        *dst++ = value % 10 + '0';
-    } else {
-        *dst++ = value / 100 + '0';
-        *dst++ = (value / 10) % 10 + '0';
-        *dst++ = value % 10 + '0';
-    }
-    *dst = '\n';
-    return dst - txbuff + 1;
+uint8_t Protocol::EncodeResponseVersion(const RequestMsg &msg, uint16_t value, uint8_t *txbuff) {
+    //    txbuff[0] = (uint8_t)msg.code;
+    //    txbuff[1] = msg.value + '0';
+    //    txbuff[2] = ' ';
+    //    txbuff[3] = (uint8_t)ResponseMsgParamCodes::Accepted;
+    //    uint8_t *dst = txbuff + 4;
+    //    dst += Value2Hex(value, dst);
+    //    *dst = '\n';
+    //    return dst - txbuff + 1;
+    return EncodeResponseRead(msg, true, value, txbuff);
 }
 
 uint8_t Protocol::EncodeResponseQueryOperation(const RequestMsg &msg, ResponseCommandStatus rcs, uint8_t *txbuff) {
@@ -218,30 +280,59 @@ uint8_t Protocol::EncodeResponseQueryOperation(const RequestMsg &msg, ResponseCo
     txbuff[3] = (uint8_t)rcs.code;
     uint8_t *dst = txbuff + 4;
     if (rcs.code != ResponseMsgParamCodes::Finished) {
-        if (rcs.value < 10) {
-            *dst++ = rcs.value + '0';
-        } else if (rcs.value < 100) {
-            *dst++ = rcs.value / 10 + '0';
-            *dst++ = rcs.value % 10 + '0';
-        } else if (rcs.value < 1000) {
-            *dst++ = rcs.value / 100 + '0';
-            *dst++ = (rcs.value / 10) % 10 + '0';
-            *dst++ = rcs.value % 10 + '0';
-        } else if (rcs.value < 10000) {
-            *dst++ = rcs.value / 1000 + '0';
-            *dst++ = (rcs.value / 100) % 10 + '0';
-            *dst++ = (rcs.value / 10) % 10 + '0';
-            *dst++ = rcs.value % 10 + '0';
-        } else {
-            *dst++ = rcs.value / 10000 + '0';
-            *dst++ = (rcs.value / 1000) % 10 + '0';
-            *dst++ = (rcs.value / 100) % 10 + '0';
-            *dst++ = (rcs.value / 10) % 10 + '0';
-            *dst++ = rcs.value % 10 + '0';
-        }
+        dst += Value2Hex(rcs.value, dst);
     }
     *dst = '\n';
     return dst - txbuff + 1;
+}
+
+uint8_t Protocol::EncodeResponseRead(const RequestMsg &msg, bool accepted, uint16_t value2, uint8_t *txbuff) {
+    uint8_t i = 1;
+    txbuff[0] = (uint8_t)msg.code;
+    uint8_t v = msg.value >> 4U;
+    if (v != 0) { // skip the first '0' if any
+        txbuff[i] = Nibble2Char(v);
+        ++i;
+    }
+    v = msg.value & 0xfU;
+    txbuff[i] = Nibble2Char(v);
+    ++i;
+    txbuff[i] = ' ';
+    ++i;
+
+    if (accepted) {
+        txbuff[i] = (uint8_t)ResponseMsgParamCodes::Accepted;
+        ++i;
+        // dump the value
+        i += Value2Hex(value2, txbuff + i);
+    } else {
+        txbuff[i] = (uint8_t)ResponseMsgParamCodes::Rejected;
+        ++i;
+    }
+    txbuff[i] = '\n';
+    ++i;
+    return i;
+}
+
+uint8_t Protocol::Value2Hex(uint16_t value, uint8_t *dst) {
+    constexpr uint16_t topNibbleMask = 0xf000;
+    if (value == 0) {
+        *dst = '0';
+        return 1;
+    }
+    // skip initial zeros
+    uint8_t charsOut = 4;
+    while ((value & topNibbleMask) == 0) {
+        value <<= 4U;
+        --charsOut;
+    }
+    for (uint8_t i = 0; i < charsOut; ++i) {
+        uint8_t n = (value & topNibbleMask) >> (8U + 4U);
+        value <<= 4U;
+        *dst = Nibble2Char(n);
+        ++dst;
+    }
+    return charsOut;
 }
 
 } // namespace protocol
