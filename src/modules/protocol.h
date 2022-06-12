@@ -23,11 +23,12 @@ enum class RequestMsgCodes : uint8_t {
     Version = 'S',
     Button = 'B',
     Eject = 'E',
-    Wait = 'W',
+    Write = 'W',
     Cut = 'K',
     FilamentType = 'F',
     FilamentSensor = 'f',
-    Home = 'H'
+    Home = 'H',
+    Read = 'R'
 };
 
 /// Definition of response message parameter codes
@@ -44,13 +45,15 @@ enum class ResponseMsgParamCodes : uint8_t {
 /// A request message - requests are being sent by the printer into the MMU.
 struct RequestMsg {
     RequestMsgCodes code; ///< code of the request message
-    uint8_t value; ///< value of the request message
+    uint8_t value; ///< value of the request message or address of variable to read/write
+    uint16_t value2; ///< in case or write messages - value to be written into the register
 
     /// @param code of the request message
     /// @param value of the request message
     inline constexpr RequestMsg(RequestMsgCodes code, uint8_t value)
         : code(code)
-        , value(value) {}
+        , value(value)
+        , value2(0) {}
 };
 
 /// A response message - responses are being sent from the MMU into the printer as a response to a request message.
@@ -110,9 +113,14 @@ public:
     /// @returns number of bytes written into txbuff
     static uint8_t EncodeRequest(const RequestMsg &msg, uint8_t *txbuff);
 
+    /// Encodes Write request message msg into txbuff memory
+    /// It is expected the txbuff is large enough to fit the message
+    /// @returns number of bytes written into txbuff
+    static uint8_t EncodeWriteRequest(const RequestMsg &msg, uint16_t value2, uint8_t *txbuff);
+
     /// @returns the maximum byte length necessary to encode a request message
     /// Beneficial in case of pre-allocating a buffer for enconding a RequestMsg.
-    static constexpr uint8_t MaxRequestSize() { return 3; }
+    static constexpr uint8_t MaxRequestSize() { return 4; }
 
     /// Encode generic response Command Accepted or Rejected
     /// @param msg source request message for this response
@@ -133,7 +141,7 @@ public:
     /// @param value version number (0-255)
     /// @param txbuff where to format the message
     /// @returns number of bytes written into txbuff
-    static uint8_t EncodeResponseVersion(const RequestMsg &msg, uint8_t value, uint8_t *txbuff);
+    static uint8_t EncodeResponseVersion(const RequestMsg &msg, uint16_t value, uint8_t *txbuff);
 
     /// Encode response to Query operation status
     /// @param msg source request message for this response
@@ -142,6 +150,14 @@ public:
     /// @param txbuff where to format the message
     /// @returns number of bytes written into txbuff
     static uint8_t EncodeResponseQueryOperation(const RequestMsg &msg, ResponseCommandStatus rcs, uint8_t *txbuff);
+
+    /// Encode response to Read query
+    /// @param msg source request message for this response
+    /// @param accepted true if the read query was accepted
+    /// @param value2 variable value
+    /// @param txbuff where to format the message
+    /// @returns number of bytes written into txbuff
+    static uint8_t EncodeResponseRead(const RequestMsg &msg, bool accepted, uint16_t value2, uint8_t *txbuff);
 
     /// @returns the most recently lexed request message
     inline const RequestMsg GetRequestMsg() const { return requestMsg; }
@@ -159,10 +175,14 @@ public:
         rspState = ResponseStates::RequestCode;
     }
 
+#ifndef UNITTEST
 private:
+#endif
     enum class RequestStates : uint8_t {
         Code, ///< starting state - expects message code
         Value, ///< expecting code value
+        Address, ///< expecting address for Write command
+        WriteValue, ///< value to be written (Write command)
         Error ///< automaton in error state
     };
 
@@ -180,12 +200,67 @@ private:
     ResponseStates rspState;
     ResponseMsg responseMsg;
 
-    static bool IsNewLine(uint8_t c) {
+    static constexpr bool IsNewLine(uint8_t c) {
         return c == '\n' || c == '\r';
     }
-    static bool IsDigit(uint8_t c) {
+    static constexpr bool IsDigit(uint8_t c) {
         return c >= '0' && c <= '9';
     }
+    static constexpr bool IsHexDigit(uint8_t c) {
+        return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f');
+    }
+    static constexpr uint8_t Char2Nibble(uint8_t c) {
+        switch (c) {
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            return c - '0';
+        case 'a':
+        case 'b':
+        case 'c':
+        case 'd':
+        case 'e':
+        case 'f':
+            return c - 'a' + 10;
+        default:
+            return 0;
+        }
+    }
+
+    static constexpr uint8_t Nibble2Char(uint8_t n) {
+        switch (n) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+            return n + '0';
+        case 0xa:
+        case 0xb:
+        case 0xc:
+        case 0xd:
+        case 0xe:
+        case 0xf:
+            return n - 10 + 'a';
+        default:
+            return 0;
+        }
+    }
+
+    /// @returns number of characters written
+    static uint8_t Value2Hex(uint16_t value, uint8_t *dst);
 };
 
 } // namespace protocol

@@ -6,6 +6,52 @@
 
 using Catch::Matchers::Equals;
 
+TEST_CASE("protocol::Char2Nibble2Char", "[protocol]") {
+    uint8_t character, value;
+    std::tie(character, value) = GENERATE(
+        std::make_tuple('0', 0),
+        std::make_tuple('1', 1),
+        std::make_tuple('2', 2),
+        std::make_tuple('3', 3),
+        std::make_tuple('4', 4),
+        std::make_tuple('5', 5),
+        std::make_tuple('6', 6),
+        std::make_tuple('7', 7),
+        std::make_tuple('8', 8),
+        std::make_tuple('9', 9),
+        std::make_tuple('a', 0xa),
+        std::make_tuple('b', 0xb),
+        std::make_tuple('c', 0xc),
+        std::make_tuple('d', 0xd),
+        std::make_tuple('e', 0xe),
+        std::make_tuple('f', 0xf),
+        std::make_tuple('g', 0) // invalid character defaults to 0
+    );
+    REQUIRE(mp::Protocol::Char2Nibble(character) == value);
+    if (character != 'g') { // skip the invalid char
+        REQUIRE(mp::Protocol::Nibble2Char(value) == character);
+    }
+}
+
+TEST_CASE("protocol::Value2Hex", "[protocol]") {
+    for (uint32_t v = 0; v < 0xffff; ++v) {
+        constexpr size_t buffSize = 5;
+        uint8_t tmp[buffSize];
+        uint8_t chars = mp::Protocol::Value2Hex((uint16_t)v, tmp);
+        if (v < 0x10) {
+            REQUIRE(chars == 1);
+        } else if (v < 0x100) {
+            REQUIRE(chars == 2);
+        } else if (v < 0x1000) {
+            REQUIRE(chars == 3);
+        } else if (v < 0x10000) {
+            REQUIRE(chars == 4);
+        }
+        std::string tmps(tmp, tmp + chars);
+        REQUIRE(std::stoul(tmps, nullptr, 16) == v);
+    }
+}
+
 TEST_CASE("protocol::EncodeRequests", "[protocol]") {
     mp::RequestMsgCodes code;
     uint8_t value;
@@ -35,7 +81,6 @@ TEST_CASE("protocol::EncodeRequests", "[protocol]") {
         std::make_tuple(mp::RequestMsgCodes::Version, 0),
         std::make_tuple(mp::RequestMsgCodes::Version, 1),
         std::make_tuple(mp::RequestMsgCodes::Version, 2),
-        std::make_tuple(mp::RequestMsgCodes::Wait, 0),
         std::make_tuple(mp::RequestMsgCodes::unknown, 0));
 
     std::array<uint8_t, 3> txbuff;
@@ -87,19 +132,51 @@ TEST_CASE("protocol::EncodeResponseCmdAR", "[protocol]") {
 
         mp::RequestMsg(mp::RequestMsgCodes::Unload, 0),
 
-        mp::RequestMsg(mp::RequestMsgCodes::Wait, 0));
+        mp::RequestMsg(mp::RequestMsgCodes::Write, 0),
+        mp::RequestMsg(mp::RequestMsgCodes::Write, 9),
+        mp::RequestMsg(mp::RequestMsgCodes::Write, 0xa),
+        mp::RequestMsg(mp::RequestMsgCodes::Write, 0xf),
+        mp::RequestMsg(mp::RequestMsgCodes::Write, 10),
+        mp::RequestMsg(mp::RequestMsgCodes::Write, 19),
+        mp::RequestMsg(mp::RequestMsgCodes::Write, 0xfa),
+        mp::RequestMsg(mp::RequestMsgCodes::Write, 0xff));
 
     auto responseStatus = GENERATE(mp::ResponseMsgParamCodes::Accepted, mp::ResponseMsgParamCodes::Rejected, mp::ResponseMsgParamCodes::Button);
 
     std::array<uint8_t, 8> txbuff;
     uint8_t msglen = mp::Protocol::EncodeResponseCmdAR(requestMsg, responseStatus, txbuff.data());
 
-    CHECK(msglen == 5);
-    CHECK(txbuff[0] == (uint8_t)requestMsg.code);
-    CHECK(txbuff[1] == requestMsg.value + '0');
-    CHECK(txbuff[2] == ' ');
-    CHECK(txbuff[3] == (uint8_t)responseStatus);
-    CHECK(txbuff[4] == '\n');
+    if (requestMsg.value < 10) {
+        CHECK(msglen == 5);
+        CHECK(txbuff[0] == (uint8_t)requestMsg.code);
+        CHECK(txbuff[1] == requestMsg.value + '0');
+        CHECK(txbuff[2] == ' ');
+        CHECK(txbuff[3] == (uint8_t)responseStatus);
+        CHECK(txbuff[4] == '\n');
+    } else if (requestMsg.value < 16) {
+        CHECK(msglen == 5);
+        CHECK(txbuff[0] == (uint8_t)requestMsg.code);
+        CHECK(txbuff[1] == requestMsg.value - 10 + 'a');
+        CHECK(txbuff[2] == ' ');
+        CHECK(txbuff[3] == (uint8_t)responseStatus);
+        CHECK(txbuff[4] == '\n');
+    } else if (requestMsg.value < 0x1a) {
+        CHECK(msglen == 6);
+        CHECK(txbuff[0] == (uint8_t)requestMsg.code);
+        CHECK(txbuff[1] == (requestMsg.value >> 4U) + '0');
+        CHECK(txbuff[2] == (requestMsg.value & 0xfU) + '0');
+        CHECK(txbuff[3] == ' ');
+        CHECK(txbuff[4] == (uint8_t)responseStatus);
+        CHECK(txbuff[5] == '\n');
+    } else {
+        CHECK(msglen == 6);
+        CHECK(txbuff[0] == (uint8_t)requestMsg.code);
+        CHECK(txbuff[1] == (requestMsg.value >> 4U) - 10 + 'a');
+        CHECK(txbuff[2] == (requestMsg.value & 0xfU) - 10 + 'a');
+        CHECK(txbuff[3] == ' ');
+        CHECK(txbuff[4] == (uint8_t)responseStatus);
+        CHECK(txbuff[5] == '\n');
+    }
 }
 
 TEST_CASE("protocol::EncodeResponseReadFINDA", "[protocol]") {
@@ -123,29 +200,26 @@ TEST_CASE("protocol::EncodeResponseVersion", "[protocol]") {
     std::uint8_t versionQueryType = GENERATE(0, 1, 2, 3);
     auto requestMsg = mp::RequestMsg(mp::RequestMsgCodes::Version, versionQueryType);
 
-    auto version = GENERATE(0, 1, 2, 3, 4, 10, 11, 12, 20, 99, 100, 101, 255);
+    for (uint32_t version = 0; version < 0xffff; ++version) {
+        std::array<uint8_t, 9> txbuff;
+        uint8_t msglen = mp::Protocol::EncodeResponseVersion(requestMsg, (uint16_t)version, txbuff.data());
 
-    std::array<uint8_t, 8> txbuff;
-    uint8_t msglen = mp::Protocol::EncodeResponseVersion(requestMsg, version, txbuff.data());
+        CHECK(msglen <= 9);
+        CHECK(txbuff[0] == (uint8_t)requestMsg.code);
+        CHECK(txbuff[1] == requestMsg.value + '0');
+        CHECK(txbuff[2] == ' ');
+        CHECK(txbuff[3] == (uint8_t)mp::ResponseMsgParamCodes::Accepted);
 
-    CHECK(msglen <= 8);
-    CHECK(txbuff[0] == (uint8_t)requestMsg.code);
-    CHECK(txbuff[1] == requestMsg.value + '0');
-    CHECK(txbuff[2] == ' ');
-    CHECK(txbuff[3] == (uint8_t)mp::ResponseMsgParamCodes::Accepted);
+        char chk[6];
+        int chars = snprintf(chk, 6, "%x\n", version);
+        REQUIRE(chars < 6);
+        std::string chks(chk, chk + chars);
+        std::string vers((const char *)(&txbuff[4]), (const char *)(&txbuff[msglen]));
 
-    if (version < 10) {
-        CHECK(txbuff[4] == version + '0');
-    } else if (version < 100) {
-        CHECK(txbuff[4] == version / 10 + '0');
-        CHECK(txbuff[5] == version % 10 + '0');
-    } else {
-        CHECK(txbuff[4] == version / 100 + '0');
-        CHECK(txbuff[5] == (version / 10) % 10 + '0');
-        CHECK(txbuff[6] == version % 10 + '0');
+        REQUIRE(chks == vers);
+
+        CHECK(txbuff[msglen - 1] == '\n');
     }
-
-    CHECK(txbuff[msglen - 1] == '\n');
 }
 
 TEST_CASE("protocol::EncodeResponseQueryOperation", "[protocol]") {
@@ -174,9 +248,7 @@ TEST_CASE("protocol::EncodeResponseQueryOperation", "[protocol]") {
         mp::RequestMsg(mp::RequestMsgCodes::Tool, 3),
         mp::RequestMsg(mp::RequestMsgCodes::Tool, 4),
 
-        mp::RequestMsg(mp::RequestMsgCodes::Unload, 0),
-
-        mp::RequestMsg(mp::RequestMsgCodes::Wait, 0));
+        mp::RequestMsg(mp::RequestMsgCodes::Unload, 0));
 
     auto responseStatus = GENERATE(mp::ResponseMsgParamCodes::Processing, mp::ResponseMsgParamCodes::Error, mp::ResponseMsgParamCodes::Finished);
 
@@ -242,28 +314,12 @@ TEST_CASE("protocol::EncodeResponseQueryOperation", "[protocol]") {
         CHECK(txbuff[4] == '\n');
         CHECK(msglen == 5);
     } else {
-        if (encodedParamValue < 10) {
-            CHECK(txbuff[4] == encodedParamValue + '0');
-        } else if (encodedParamValue < 100) {
-            CHECK(txbuff[4] == encodedParamValue / 10 + '0');
-            CHECK(txbuff[5] == encodedParamValue % 10 + '0');
-        } else if (encodedParamValue < 1000) {
-            CHECK(txbuff[4] == encodedParamValue / 100 + '0');
-            CHECK(txbuff[5] == (encodedParamValue / 10) % 10 + '0');
-            CHECK(txbuff[6] == encodedParamValue % 10 + '0');
-        } else if (encodedParamValue < 10000) {
-            CHECK(txbuff[4] == encodedParamValue / 1000 + '0');
-            CHECK(txbuff[5] == (encodedParamValue / 100) % 10 + '0');
-            CHECK(txbuff[6] == (encodedParamValue / 10) % 10 + '0');
-            CHECK(txbuff[7] == encodedParamValue % 10 + '0');
-        } else {
-            CHECK(txbuff[4] == encodedParamValue / 10000 + '0');
-            CHECK(txbuff[5] == (encodedParamValue / 1000) % 10 + '0');
-            CHECK(txbuff[6] == (encodedParamValue / 100) % 10 + '0');
-            CHECK(txbuff[7] == (encodedParamValue / 10) % 10 + '0');
-            CHECK(txbuff[8] == encodedParamValue % 10 + '0');
-        }
-
+        char chk[6];
+        int chars = snprintf(chk, 6, "%x\n", encodedParamValue);
+        REQUIRE(chars < 6);
+        std::string chks(chk, chk + chars);
+        std::string txs((const char *)(&txbuff[4]), (const char *)(&txbuff[msglen]));
+        REQUIRE(chk == txs);
         CHECK(txbuff[msglen - 1] == '\n');
     }
 }
@@ -284,7 +340,6 @@ TEST_CASE("protocol::DecodeRequest", "[protocol]") {
         "S0\n", "S1\n", "S2\n", "S3\n",
         "T0\n", "T1\n", "T2\n", "T3\n",
         "U0\n",
-        "W0\n",
         "X0\n");
 
     const char *pc = rxbuff;
@@ -335,7 +390,7 @@ TEST_CASE("protocol::DecodeResponseReadFinda", "[protocol]") {
     CHECK((uint8_t)rsp.paramValue == rxbuff[4] - '0');
 }
 
-TEST_CASE("protocol::DecodeResponseQueryOperation", "[protocol]") {
+TEST_CASE("protocol::DecodeResponseQueryOperation", "[protocol][.]") {
     mp::Protocol p;
     const char *cmdReference = GENERATE(
         "E0", "E1", "E2", "E3", "E4",
@@ -343,8 +398,7 @@ TEST_CASE("protocol::DecodeResponseQueryOperation", "[protocol]") {
         "K0", "K1", "K2", "K3", "K4",
         "L0", "L1", "L2", "L3", "L4",
         "T0", "T1", "T2", "T3", "T4",
-        "U0",
-        "W0");
+        "U0");
 
     const char *status = GENERATE(
         "P0", "P1", "E0", "E1", "E9", "F", "B0", "B1", "B2");
@@ -448,6 +502,72 @@ TEST_CASE("protocol::DecodeResponseErrors", "[protocol]") {
     CHECK(p.GetRequestMsg().code == mp::RequestMsgCodes::unknown);
 }
 
+TEST_CASE("protocol::WriteRequest", "[protocol]") {
+    // write requests need special handling
+    std::array<uint8_t, 10> txbuff;
+    mp::Protocol p;
+    for (uint8_t address = 0; address < 255; ++address) {
+        for (uint32_t value2 = 2; value2 < 0x10000; ++value2) {
+            mp::RequestMsg msg(mp::RequestMsgCodes::Write, address);
+            uint8_t bytes = mp::Protocol::EncodeWriteRequest(msg, (uint16_t)value2, txbuff.data());
+
+            p.ResetRequestDecoder();
+            for (uint8_t i = 0; i < bytes; ++i) {
+                p.DecodeRequest(txbuff[i]);
+            }
+
+            REQUIRE(p.requestMsg.code == mp::RequestMsgCodes::Write);
+            REQUIRE(p.requestMsg.value == address);
+            REQUIRE(p.requestMsg.value2 == (uint16_t)value2);
+        }
+    }
+}
+
+TEST_CASE("protocol::ReadRequest", "[protocol]") {
+    std::array<uint8_t, 10> txbuff;
+    mp::Protocol p;
+    for (uint16_t address = 0; address <= 255; ++address) {
+        mp::RequestMsg msg(mp::RequestMsgCodes::Read, (uint8_t)address);
+        uint8_t bytes = mp::Protocol::EncodeRequest(msg, txbuff.data());
+
+        p.ResetRequestDecoder();
+        for (uint8_t i = 0; i < bytes; ++i) {
+            p.DecodeRequest(txbuff[i]);
+        }
+
+        REQUIRE(p.requestMsg.code == mp::RequestMsgCodes::Read);
+        REQUIRE(p.requestMsg.value == (uint8_t)address);
+    }
+}
+
+TEST_CASE("protocol::ReadResponse", "[protocol]") {
+    std::array<uint8_t, 10> txbuff;
+    mp::Protocol p;
+    for (uint8_t address = 0; address < 255; ++address) {
+        for (uint32_t value2 = 2; value2 < 0x10000; ++value2) {
+            for (uint8_t ar = 0; ar <= 1; ++ar) {
+                mp::RequestMsg msg(mp::RequestMsgCodes::Read, address);
+                uint8_t bytes = mp::Protocol::EncodeResponseRead(msg, ar != 0, value2, txbuff.data());
+
+                p.ResetResponseDecoder();
+                for (uint8_t i = 0; i < bytes; ++i) {
+                    p.DecodeResponse(txbuff[i]);
+                }
+
+                REQUIRE(p.responseMsg.request.code == mp::RequestMsgCodes::Read);
+                REQUIRE(p.responseMsg.request.value == address);
+                if (ar) {
+                    REQUIRE(p.responseMsg.paramCode == mp::ResponseMsgParamCodes::Accepted);
+                    REQUIRE(p.responseMsg.paramValue == value2);
+                } else {
+                    REQUIRE(p.responseMsg.paramCode == mp::ResponseMsgParamCodes::Rejected);
+                    REQUIRE(p.responseMsg.paramValue == 0);
+                }
+            }
+        }
+    }
+}
+
 // Beware - this test makes 18M+ combinations, run only when changing the implementation of the codec
 // Therefore it is disabled [.] by default
 TEST_CASE("protocol::DecodeResponseErrorsCross", "[protocol][.]") {
@@ -457,7 +577,7 @@ TEST_CASE("protocol::DecodeResponseErrorsCross", "[protocol][.]") {
     const char *invalidInitialSpaces = GENERATE(" ", "  ");
     bool viInitialSpace = GENERATE(true, false);
 
-    const char *validReqCode = GENERATE("B", "E", "H", "F", "f", "K", "L", "M", "P", "Q", "S", "T", "U", "W", "X");
+    const char *validReqCode = GENERATE("B", "E", "H", "F", "f", "K", "L", "M", "P", "Q", "S", "T", "U", "X");
     const char *invalidReqCode = GENERATE("A", "R");
     bool viReqCode = GENERATE(true, false);
 

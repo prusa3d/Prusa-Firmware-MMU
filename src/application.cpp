@@ -213,7 +213,9 @@ void Application::ProcessRequestMsg(const mp::RequestMsg &rq) {
     case mp::RequestMsgCodes::Version:
         ReportVersion(rq);
         break;
-    case mp::RequestMsgCodes::Wait:
+    case mp::RequestMsgCodes::Read:
+        break; // @@TODO - not used anywhere yet
+    case mp::RequestMsgCodes::Write:
         break; // @@TODO - not used anywhere yet
     case mp::RequestMsgCodes::Cut:
     case mp::RequestMsgCodes::Eject:
