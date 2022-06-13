@@ -39,6 +39,8 @@ private:
     void ReportFINDA(const mp::RequestMsg &rq);
     void ReportVersion(const mp::RequestMsg &rq);
     void ReportRunningCommand();
+    void ReportReadRegister(const mp::RequestMsg &rq);
+    void ReportWriteRegister(const mp::RequestMsg &rq);
     void ProcessRequestMsg(const mp::RequestMsg &rq);
 
     uint16_t lastCommandProcessedMs;

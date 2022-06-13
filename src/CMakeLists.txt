@@ -1,4 +1,4 @@
-target_sources(firmware PRIVATE application.cpp debug.cpp main.cpp)
+target_sources(firmware PRIVATE application.cpp debug.cpp main.cpp registers.cpp version.c)
 
 target_link_libraries(firmware LUFA)
 
