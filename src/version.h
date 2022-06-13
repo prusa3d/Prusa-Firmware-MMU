@@ -1,5 +1,6 @@
 /// @file version.h
 #pragma once
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,8 +22,14 @@ extern const char project_version_suffix[];
 /// Project's short version suffix (+1035)
 extern const char project_version_suffix_short[];
 
+/// Project's major version
+extern const uint8_t project_major;
+
+/// Project's minor version
+extern const uint8_t project_minor;
+
 /// Project's build number (number of commits in a branch)
-extern const int project_build_number;
+extern const uint16_t project_build_number;
 
 /// Firmware name
 extern const char project_firmware_name[];

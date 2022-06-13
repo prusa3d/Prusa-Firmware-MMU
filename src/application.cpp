@@ -1,5 +1,6 @@
 /// @file
 #include "application.h"
+#include "registers.h"
 
 #include "modules/leds.h"
 #include "modules/globals.h"
@@ -157,37 +158,52 @@ void Application::ReportFINDA(const mp::RequestMsg &rq) {
     modules::serial::WriteToUSART(rsp, len);
 }
 
-void Application::ReportVersion(const mp::RequestMsg &rq) {
-    uint8_t v = 0;
+//void Application::ReportVersion(const mp::RequestMsg &rq) {
+//    uint8_t v = 0;
 
-    switch (rq.value) {
-    case 0:
-        v = project_version_major;
-        break;
-    case 1:
-        v = project_version_minor;
-        break;
-    case 2:
-        v = project_version_revision;
-        break;
-    case 3:
-        // @@TODO may be allow reporting uint16_t number of errors,
-        // but anything beyond 255 errors means there is something seriously wrong with the MMU
-        v = mg::globals.DriveErrors();
-        break;
-    default:
-        v = 0;
-        break;
-    }
+//    switch (rq.value) {
+//    case 0:
+//        v = project_version_major;
+//        break;
+//    case 1:
+//        v = project_version_minor;
+//        break;
+//    case 2:
+//        v = project_version_revision;
+//        break;
+//    case 3:
+//        // @@TODO may be allow reporting uint16_t number of errors,
+//        // but anything beyond 255 errors means there is something seriously wrong with the MMU
+//        v = mg::globals.DriveErrors();
+//        break;
+//    default:
+//        v = 0;
+//        break;
+//    }
 
-    uint8_t rsp[10];
-    uint8_t len = protocol.EncodeResponseVersion(rq, v, rsp);
-    modules::serial::WriteToUSART(rsp, len);
-}
+//    uint8_t rsp[10];
+//    uint8_t len = protocol.EncodeResponseVersion(rq, v, rsp);
+//    modules::serial::WriteToUSART(rsp, len);
+//}
 
 void Application::ReportRunningCommand() {
     uint8_t rsp[maxMsgLen];
     uint8_t len = protocol.EncodeResponseQueryOperation(currentCommandRq, RunningCommandStatus(), rsp);
+    modules::serial::WriteToUSART(rsp, len);
+}
+
+void Application::ReportReadRegister(const mp::RequestMsg &rq) {
+    uint8_t rsp[maxMsgLen];
+    uint16_t value2;
+    bool accepted = ReadRegister(rq.value, value2);
+    uint8_t len = protocol.EncodeResponseRead(rq, accepted, value2, rsp);
+    modules::serial::WriteToUSART(rsp, len);
+}
+
+void Application::ReportWriteRegister(const mp::RequestMsg &rq) {
+    uint8_t rsp[maxMsgLen];
+    mp::ResponseMsgParamCodes ar = WriteRegister(rq.value, rq.value2) ? mp::ResponseMsgParamCodes::Accepted : mp::ResponseMsgParamCodes::Rejected;
+    uint8_t len = protocol.EncodeResponseCmdAR(rq, ar, rsp);
     modules::serial::WriteToUSART(rsp, len);
 }
 
@@ -211,12 +227,12 @@ void Application::ProcessRequestMsg(const mp::RequestMsg &rq) {
         hal::cpu::Reset();
         break;
     case mp::RequestMsgCodes::Version:
-        ReportVersion(rq);
-        break;
     case mp::RequestMsgCodes::Read:
-        break; // @@TODO - not used anywhere yet
+        ReportReadRegister(rq);
+        break;
     case mp::RequestMsgCodes::Write:
-        break; // @@TODO - not used anywhere yet
+        ReportWriteRegister(rq);
+        break;
     case mp::RequestMsgCodes::Cut:
     case mp::RequestMsgCodes::Eject:
     case mp::RequestMsgCodes::Home:
