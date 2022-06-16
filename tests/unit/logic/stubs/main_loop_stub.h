@@ -22,7 +22,7 @@ bool WhileTopState(SM &sm, ProgressCode state, uint32_t maxLoops = 5000) {
         sm, [&](uint32_t) { return sm.TopLevelState() == state; }, maxLoops);
 }
 
-void EnsureActiveSlotIndex(uint8_t slot, modules::globals::FilamentLoadState loadState);
+bool EnsureActiveSlotIndex(uint8_t slot, modules::globals::FilamentLoadState loadState);
 
 void SetFINDAStateAndDebounce(bool press);
 bool SimulateUnloadToFINDA(uint32_t step, uint32_t fsOff, uint32_t findaOff);
@@ -37,3 +37,5 @@ void ClearButtons(logic::CommandBase &cb);
 // ... could be computed in the future from the pre-set number of microsteps and real positions
 static constexpr uint32_t idlerEngageDisengageMaxSteps = 40000UL;
 static constexpr uint32_t selectorMoveMaxSteps = 40000UL;
+
+void HomeIdlerAndSelector();

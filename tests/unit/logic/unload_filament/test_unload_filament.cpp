@@ -28,7 +28,7 @@ void RegularUnloadFromSlot04Init(uint8_t slot, logic::UnloadFilament &uf) {
     ForceReinitAllAutomata();
 
     // change the startup to what we need here
-    EnsureActiveSlotIndex(slot, mg::FilamentLoadState::InNozzle);
+    REQUIRE(EnsureActiveSlotIndex(slot, mg::FilamentLoadState::InNozzle));
 
     // set FINDA ON + debounce
     SetFINDAStateAndDebounce(true);
@@ -108,7 +108,7 @@ void FindaDidntTriggerCommonSetup(uint8_t slot, logic::UnloadFilament &uf) {
 
     // change the startup to what we need here
     // move selector to the right spot
-    EnsureActiveSlotIndex(slot, mg::FilamentLoadState::InNozzle);
+    REQUIRE(EnsureActiveSlotIndex(slot, mg::FilamentLoadState::InNozzle));
 
     // set FINDA ON + debounce
     SetFINDAStateAndDebounce(true);
@@ -279,7 +279,7 @@ TEST_CASE("unload_filament::not_loaded", "[unload_filament]") {
 
     // change the startup to what we need here
     // move selector to the right spot
-    EnsureActiveSlotIndex(0, mg::FilamentLoadState::AtPulley);
+    REQUIRE(EnsureActiveSlotIndex(0, mg::FilamentLoadState::AtPulley));
 
     // verify startup conditions
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), 0, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));

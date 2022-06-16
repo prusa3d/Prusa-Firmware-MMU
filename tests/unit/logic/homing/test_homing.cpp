@@ -29,7 +29,7 @@ bool SuccessfulHome(uint8_t slot) {
     ForceReinitAllAutomata();
 
     // change the startup to what we need here
-    EnsureActiveSlotIndex(slot, mg::FilamentLoadState::AtPulley);
+    REQUIRE(EnsureActiveSlotIndex(slot, mg::FilamentLoadState::AtPulley));
 
     // set FINDA OFF + debounce
     SetFINDAStateAndDebounce(false);
@@ -64,7 +64,7 @@ bool SelectorFailedRetry() {
     ForceReinitAllAutomata();
 
     // change the startup to what we need here
-    EnsureActiveSlotIndex(0, mg::FilamentLoadState::AtPulley);
+    REQUIRE(EnsureActiveSlotIndex(0, mg::FilamentLoadState::AtPulley));
 
     // set FINDA OFF + debounce
     SetFINDAStateAndDebounce(false);
@@ -94,4 +94,59 @@ bool SelectorFailedRetry() {
 
 TEST_CASE("homing::selector_failed_retry", "[homing]") {
     REQUIRE(SelectorFailedRetry());
+}
+
+bool RefusedMove(uint8_t slot) {
+    // prepare startup conditions
+    ForceReinitAllAutomata();
+
+    // change the startup to what we need here
+    HomeIdlerAndSelector();
+
+    SetFINDAStateAndDebounce(true);
+    mg::globals.SetFilamentLoaded(slot, mg::FilamentLoadState::InSelector);
+
+    // move selector to the right spot - should not be possible
+    REQUIRE(ms::selector.MoveToSlot(slot) == ms::Selector::OperationResult::Refused);
+    return true;
+}
+
+bool RefusedHome(uint8_t slot) {
+    // prepare startup conditions
+    ForceReinitAllAutomata();
+
+    // change the startup to what we need here
+    HomeIdlerAndSelector();
+
+    SetFINDAStateAndDebounce(true);
+    mg::globals.SetFilamentLoaded(slot, mg::FilamentLoadState::InSelector);
+
+    ms::selector.InvalidateHoming();
+
+    // selector should not start homing, because something is in the FINDA
+    for (uint8_t i = 0; i < 100; ++i) {
+        main_loop();
+        REQUIRE_FALSE(ms::selector.HomingValid());
+        REQUIRE(ms::selector.State() == ms::Selector::Ready);
+    }
+    // unpress FINDA
+    SetFINDAStateAndDebounce(false);
+    mg::globals.SetFilamentLoaded(slot, mg::FilamentLoadState::AtPulley);
+
+    // selector should start the homing sequence
+    main_loop();
+    REQUIRE(ms::selector.State() == ms::Selector::HomeForward);
+    return true;
+}
+
+TEST_CASE("homing::refused_move", "[homing]") {
+    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
+        REQUIRE(RefusedMove(slot));
+    }
+}
+
+TEST_CASE("homing::refused_home", "[homing]") {
+    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
+        REQUIRE(RefusedHome(slot));
+    }
 }

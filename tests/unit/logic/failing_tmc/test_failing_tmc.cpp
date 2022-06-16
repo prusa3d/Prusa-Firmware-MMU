@@ -40,7 +40,7 @@ void FailingMovableUnload(hal::tmc2130::ErrorFlags ef, ErrorCode ec, config::Axi
     ForceReinitAllAutomata();
 
     // change the startup to what we need here
-    EnsureActiveSlotIndex(0, mg::FilamentLoadState::InNozzle);
+    REQUIRE(EnsureActiveSlotIndex(0, mg::FilamentLoadState::InNozzle));
 
     // set FINDA ON + debounce
     SetFINDAStateAndDebounce(true);
@@ -90,7 +90,7 @@ void FailingMovableLoad(hal::tmc2130::ErrorFlags ef, ErrorCode ec, config::Axis 
     ForceReinitAllAutomata();
 
     // change the startup to what we need here
-    EnsureActiveSlotIndex(5, mg::FilamentLoadState::AtPulley);
+    REQUIRE(EnsureActiveSlotIndex(5, mg::FilamentLoadState::AtPulley));
 
     // set FINDA OFF + debounce
     SetFINDAStateAndDebounce(false);
