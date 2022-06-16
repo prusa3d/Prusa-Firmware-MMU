@@ -12,10 +12,11 @@ namespace logic {
 
 Home home;
 
-void Home::Reset(uint8_t /*param*/) {
+bool Home::Reset(uint8_t /*param*/) {
     error = ErrorCode::RUNNING;
     state = ProgressCode::Homing;
     InvalidateHomingAndFilamentState();
+    return true;
 }
 
 bool Home::StepInner() {

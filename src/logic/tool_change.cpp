@@ -17,15 +17,15 @@ namespace logic {
 
 ToolChange toolChange;
 
-void ToolChange::Reset(uint8_t param) {
+bool ToolChange::Reset(uint8_t param) {
     if (!CheckToolIndex(param)) {
-        return;
+        return false;
     }
 
     if (param == mg::globals.ActiveSlot() && (mg::globals.FilamentLoaded() == mg::FilamentLoadState::InNozzle)) {
         // we are already at the correct slot and the filament is loaded in the nozzle - nothing to do
         dbg_logic_P(PSTR("we are already at the correct slot and the filament is loaded - nothing to do\n"));
-        return;
+        return true;
     }
 
     // we are either already at the correct slot, just the filament is not loaded - load the filament directly
@@ -43,6 +43,7 @@ void ToolChange::Reset(uint8_t param) {
         mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::InSelector);
         feed.Reset(true, false);
     }
+    return true;
 }
 
 void logic::ToolChange::GoToFeedingToBondtech() {

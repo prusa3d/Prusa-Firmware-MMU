@@ -15,9 +15,9 @@ namespace logic {
 
 EjectFilament ejectFilament;
 
-void EjectFilament::Reset(uint8_t param) {
+bool EjectFilament::Reset(uint8_t param) {
     if (!CheckToolIndex(param)) {
-        return;
+        return false;
     }
 
     error = ErrorCode::RUNNING;
@@ -32,6 +32,7 @@ void EjectFilament::Reset(uint8_t param) {
     } else {
         MoveSelectorAside();
     }
+    return true;
 }
 
 void EjectFilament::MoveSelectorAside() {

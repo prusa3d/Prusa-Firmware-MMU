@@ -38,7 +38,8 @@ public:
 
     /// resets the automaton
     /// @param param numerical parameter that comes with some commands (e.g. T1 for tool change 1)
-    virtual void Reset(uint8_t param) = 0;
+    /// @returns true if the command was accepted and started (which may not be possible e.g. due to filament position)
+    virtual bool Reset(uint8_t param) = 0;
 
     /// Steps the state machine. This is the preferred way of stepping the machine
     /// as it handles the global HW error states uniformly (so that the derived classes do not have to deal

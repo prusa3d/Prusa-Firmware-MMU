@@ -17,7 +17,7 @@ public:
         : CommandBase() {}
 
     /// Restart the automaton
-    void Reset(uint8_t param) override;
+    bool Reset(uint8_t param) override;
 
     /// @returns true if the state machine finished its job, false otherwise
     /// Since we perform the TMC2130 mode change in the Reset directly, the return is always true here (command finished ok)

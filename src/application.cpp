@@ -128,8 +128,8 @@ void Application::PlanCommand(const modules::protocol::RequestMsg &rq) {
             break;
         }
         currentCommandRq = rq; // save the Current Command Request for indentification of responses
-        currentCommand->Reset(rq.value);
-        ReportCommandAccepted(rq, mp::ResponseMsgParamCodes::Accepted);
+        bool accepted = currentCommand->Reset(rq.value);
+        ReportCommandAccepted(rq, accepted ? mp::ResponseMsgParamCodes::Accepted : mp::ResponseMsgParamCodes::Rejected);
     } else {
         ReportCommandAccepted(rq, mp::ResponseMsgParamCodes::Rejected);
     }
