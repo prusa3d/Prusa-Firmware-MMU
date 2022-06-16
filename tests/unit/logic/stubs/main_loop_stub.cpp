@@ -84,16 +84,18 @@ void HomeIdlerAndSelector() {
     SimulateIdlerAndSelectorHoming(nc);
 }
 
-void EnsureActiveSlotIndex(uint8_t slot, mg::FilamentLoadState loadState) {
+bool EnsureActiveSlotIndex(uint8_t slot, mg::FilamentLoadState loadState) {
     HomeIdlerAndSelector();
 
     // move selector to the right spot
-    ms::selector.MoveToSlot(slot);
+    if (ms::selector.MoveToSlot(slot) == ms::Selector::OperationResult::Refused)
+        return false;
     while (ms::selector.Slot() != slot)
         main_loop();
 
     // mg::globals.SetActiveSlot(slot);
     mg::globals.SetFilamentLoaded(slot, loadState);
+    return true;
 }
 
 void SetFINDAStateAndDebounce(bool press) {

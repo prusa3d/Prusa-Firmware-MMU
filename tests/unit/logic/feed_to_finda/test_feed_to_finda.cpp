@@ -25,7 +25,7 @@ TEST_CASE("feed_to_finda::feed_phase_unlimited", "[feed_to_finda]") {
     using namespace logic;
 
     ForceReinitAllAutomata();
-    EnsureActiveSlotIndex(0, mg::FilamentLoadState::AtPulley);
+    REQUIRE(EnsureActiveSlotIndex(0, mg::FilamentLoadState::AtPulley));
 
     FeedToFinda ff;
     main_loop();
@@ -93,7 +93,7 @@ TEST_CASE("feed_to_finda::FINDA_failed", "[feed_to_finda]") {
     using namespace logic;
 
     ForceReinitAllAutomata();
-    EnsureActiveSlotIndex(0, mg::FilamentLoadState::AtPulley);
+    REQUIRE(EnsureActiveSlotIndex(0, mg::FilamentLoadState::AtPulley));
 
     FeedToFinda ff;
     main_loop();

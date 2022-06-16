@@ -65,6 +65,12 @@ Selector::OperationResult Selector::MoveToSlot(uint8_t slot) {
         return OperationResult::Accepted;
     }
 
+    if (mf::finda.Pressed()) {
+        // @@TODO not sure why (if) this happens, but anyway - we must not move the selector if FINDA is pressed
+        // That includes the CutFilament operation as well
+        return OperationResult::Refused;
+    }
+
     // coordinates invalid, first home, then engage
     if (!homingValid && mg::globals.FilamentLoaded() < mg::FilamentLoadState::InSelector) {
         PlanHome();
@@ -96,7 +102,7 @@ bool Selector::Step() {
         PerformHomeBack();
         return false;
     case Ready:
-        if (!homingValid && mg::globals.FilamentLoaded() < mg::InSelector) {
+        if (!homingValid && mg::globals.FilamentLoaded() < mg::InSelector && (!mf::finda.Pressed())) {
             PlanHome();
             return false;
         }

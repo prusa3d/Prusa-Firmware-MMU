@@ -65,9 +65,9 @@ void CheckFinishedCorrectly(logic::ToolChange &tc, uint8_t toSlot) {
 void ToolChange(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
     ForceReinitAllAutomata();
 
+    REQUIRE(EnsureActiveSlotIndex(fromSlot, mg::FilamentLoadState::InNozzle));
     SetFINDAStateAndDebounce(true);
     mfs::fsensor.ProcessMessage(true);
-    EnsureActiveSlotIndex(fromSlot, mg::FilamentLoadState::InNozzle);
 
     // restart the automaton
     tc.Reset(toSlot);
@@ -96,10 +96,10 @@ void ToolChange(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
 void NoToolChange(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
     ForceReinitAllAutomata();
 
+    REQUIRE(EnsureActiveSlotIndex(fromSlot, mg::FilamentLoadState::InNozzle));
     // the filament is LOADED
-    SetFINDAStateAndDebounce(true);
     mfs::fsensor.ProcessMessage(true);
-    EnsureActiveSlotIndex(fromSlot, mg::FilamentLoadState::InNozzle);
+    SetFINDAStateAndDebounce(true);
 
     REQUIRE(VerifyEnvironmentState(mg::FilamentLoadState::InNozzle, mi::Idler::IdleSlotIndex(), toSlot, true, false, ml::off, ml::off));
 
@@ -114,7 +114,7 @@ void NoToolChange(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
 void JustLoadFilament(logic::ToolChange &tc, uint8_t slot) {
     ForceReinitAllAutomata();
 
-    EnsureActiveSlotIndex(slot, mg::FilamentLoadState::AtPulley);
+    REQUIRE(EnsureActiveSlotIndex(slot, mg::FilamentLoadState::AtPulley));
 
     // verify filament NOT loaded
     REQUIRE(VerifyEnvironmentState(mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off));
@@ -175,9 +175,9 @@ TEST_CASE("tool_change::same_slot_just_unloaded_filament", "[tool_change]") {
 void ToolChangeFailLoadToFinda(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
     ForceReinitAllAutomata();
 
+    REQUIRE(EnsureActiveSlotIndex(fromSlot, mg::FilamentLoadState::InNozzle));
     SetFINDAStateAndDebounce(true);
     mfs::fsensor.ProcessMessage(true);
-    EnsureActiveSlotIndex(fromSlot, mg::FilamentLoadState::InNozzle);
 
     // restart the automaton
     tc.Reset(toSlot);
@@ -330,9 +330,9 @@ void ToolChangeFailFSensor(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSl
     using namespace std::placeholders;
     ForceReinitAllAutomata();
 
+    REQUIRE(EnsureActiveSlotIndex(fromSlot, mg::FilamentLoadState::InNozzle));
     SetFINDAStateAndDebounce(true);
     mfs::fsensor.ProcessMessage(true);
-    EnsureActiveSlotIndex(fromSlot, mg::FilamentLoadState::InNozzle);
 
     // restart the automaton
     tc.Reset(toSlot);

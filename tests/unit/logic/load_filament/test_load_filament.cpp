@@ -28,7 +28,7 @@ void LoadFilamentCommonSetup(uint8_t slot, logic::LoadFilament &lf, bool feedLim
     ForceReinitAllAutomata();
 
     // change the startup to what we need here
-    EnsureActiveSlotIndex(slot, mg::FilamentLoadState::AtPulley);
+    REQUIRE(EnsureActiveSlotIndex(slot, mg::FilamentLoadState::AtPulley));
 
     // verify startup conditions
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
@@ -375,8 +375,8 @@ TEST_CASE("load_filament::avoid_load_filament_finda", "[load_filament]") {
         for (uint8_t activeSlot = 0; activeSlot < config::toolCount; ++activeSlot) {
             logic::LoadFilament lf;
             ForceReinitAllAutomata();
-            SetFINDAStateAndDebounce(true);
-            EnsureActiveSlotIndex(activeSlot, fls);
+            REQUIRE(EnsureActiveSlotIndex(activeSlot, fls));
+            SetFINDAStateAndDebounce(true); // beware - selector will refuse to move if FINDA is pressed - must set active slot first and then FINDA
             REQUIRE(VerifyState(lf, fls, mi::Idler::IdleSlotIndex(), activeSlot, true, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
             bool accepted = lf.Reset(slot);
             if (activeSlot != slot) {
