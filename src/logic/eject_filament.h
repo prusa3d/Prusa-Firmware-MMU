@@ -27,7 +27,7 @@ public:
 
     /// Restart the automaton
     /// @param param index of filament slot to eject
-    void Reset(uint8_t param) override;
+    bool Reset(uint8_t param) override;
 
     /// @returns true if the state machine finished its job, false otherwise
     bool StepInner() override;

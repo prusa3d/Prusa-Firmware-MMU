@@ -7,11 +7,12 @@ namespace logic {
 
 SetMode setMode;
 
-void SetMode::Reset(uint8_t param) {
+bool SetMode::Reset(uint8_t param) {
     mg::globals.SetMotorsMode(param != 0); // remember the last mode set
     // distribute the mode to all motors immediately
     mm::motion.SetMode((param == 0) ? mm::Normal : mm::Stealth);
     FinishedOK();
+    return true;
 }
 
 } // namespace logic

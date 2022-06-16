@@ -351,3 +351,41 @@ TEST_CASE("load_filament::unlimited_load_manual_stop", "[load_filament]") {
         LoadFilamentStopped(slot, lf);
     }
 }
+
+void LoadFilamentAlreadyPresentFilament(uint8_t slot, logic::LoadFilament &lf) {
+    //one of the first steps of the state machine should pick up the fact that FINDA is on and transfer into the retracting phase
+    REQUIRE(WhileTopState(lf, ProgressCode::FeedingToFinda, 5000));
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
+    REQUIRE(WhileCondition(lf, std::bind(SimulateRetractFromFINDA, _1, 100), 5000));
+    REQUIRE(WhileTopState(lf, ProgressCode::RetractingFromFinda, 5000));
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, slot, slot, false, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
+    // make FINDA switch on again
+    REQUIRE(WhileCondition(lf, std::bind(SimulateFeedToFINDA, _1, 100), 5000));
+    REQUIRE(WhileTopState(lf, ProgressCode::FeedingToFinda, 5000));
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
+    // make FINDA switch off again
+    REQUIRE(WhileCondition(lf, std::bind(SimulateRetractFromFINDA, _1, 100), 5000));
+    REQUIRE(WhileTopState(lf, ProgressCode::RetractingFromFinda, 5000));
+}
+
+TEST_CASE("load_filament::avoid_load_filament_finda", "[load_filament]") {
+    auto fls = GENERATE(mg::FilamentLoadState::InSelector, mg::FilamentLoadState::InFSensor, mg::FilamentLoadState::InNozzle);
+
+    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
+        for (uint8_t activeSlot = 0; activeSlot < config::toolCount; ++activeSlot) {
+            logic::LoadFilament lf;
+            ForceReinitAllAutomata();
+            SetFINDAStateAndDebounce(true);
+            EnsureActiveSlotIndex(activeSlot, fls);
+            REQUIRE(VerifyState(lf, fls, mi::Idler::IdleSlotIndex(), activeSlot, true, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+            bool accepted = lf.Reset(slot);
+            if (activeSlot != slot) {
+                REQUIRE_FALSE(accepted);
+            } else if (activeSlot == slot && fls <= mg::FilamentLoadState::InSelector) {
+                LoadFilamentAlreadyPresentFilament(slot, lf);
+            } else {
+                REQUIRE_FALSE(accepted);
+            }
+        }
+    }
+}

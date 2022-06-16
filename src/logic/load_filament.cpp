@@ -15,14 +15,22 @@ namespace logic {
 
 LoadFilament loadFilament;
 
-void LoadFilament::Reset(uint8_t param) {
+bool LoadFilament::Reset(uint8_t param) {
     if (!CheckToolIndex(param)) {
-        return;
+        return false;
+    }
+    if (mg::globals.FilamentLoaded() > mg::FilamentLoadState::InSelector) {
+        return false; // avoid starting loadfilament if there is already some filament in the selector in some OTHER slot
+    }
+    // there is one special case though - same slot AND filament load state == InSelector (it MUST NOT be anywhere farther)
+    if (mg::globals.FilamentLoaded() > mg::FilamentLoadState::AtPulley && mg::globals.ActiveSlot() != param) {
+        return false;
     }
     dbg_logic_P(PSTR("Load Filament"));
     mg::globals.SetFilamentLoaded(param, mg::FilamentLoadState::AtPulley); // still at pulley, haven't moved yet
     verifyLoadedFilament = 1;
     Reset2(false);
+    return true;
 }
 
 void LoadFilament::ResetLimited(uint8_t param) {

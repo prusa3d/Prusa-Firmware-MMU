@@ -14,9 +14,9 @@ namespace logic {
 
 CutFilament cutFilament;
 
-void CutFilament::Reset(uint8_t param) {
+bool CutFilament::Reset(uint8_t param) {
     if (!CheckToolIndex(param)) {
-        return;
+        return false;
     }
 
     error = ErrorCode::RUNNING;
@@ -28,6 +28,7 @@ void CutFilament::Reset(uint8_t param) {
     } else {
         SelectFilamentSlot();
     }
+    return true;
 }
 
 void CutFilament::SelectFilamentSlot() {

@@ -16,7 +16,7 @@ public:
 
     /// Restart the automaton
     /// @param param is not used, always unloads from the active slot
-    void Reset(uint8_t param) override;
+    bool Reset(uint8_t param) override;
 
     /// @returns true if the state machine finished its job, false otherwise
     bool StepInner() override;

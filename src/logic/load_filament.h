@@ -16,7 +16,7 @@ public:
 
     /// Restart the automaton - performs unlimited rotation of the Pulley
     /// @param param index of filament slot to load
-    void Reset(uint8_t param) override;
+    bool Reset(uint8_t param) override;
 
     /// Restart the automaton for a limited rotation of the Pulley
     /// @param param index of filament slot to load

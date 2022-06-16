@@ -8,14 +8,16 @@ namespace logic {
 
 MoveSelector moveSelector;
 
-void MoveSelector::Reset(uint8_t param) {
+bool MoveSelector::Reset(uint8_t param) {
     state = ProgressCode::MovingSelector;
 
     if (ms::selector.MoveToSlot(param) != ms::Selector::OperationResult::Refused) {
         // operation accepted
         error = ErrorCode::RUNNING;
+        return true;
     } else {
         error = ErrorCode::HOMING_SELECTOR_FAILED; // @@TODO
+        return false;
     }
 }
 
