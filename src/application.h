@@ -23,6 +23,9 @@ public:
     /// Perform one step of top level
     void Step();
 
+    uint8_t CurrentProgressCode();
+    uint16_t CurrentErrorCode();
+
 private:
     /// Checks if the MMU can enter manual mode (user can move the selector with buttons)
     /// The MMU enters idle mode after 5s from the last command finished and there must be no filament present in the selector.
