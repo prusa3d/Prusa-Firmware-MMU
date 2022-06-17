@@ -143,6 +143,7 @@ if(CMAKE_CROSSCOMPILING)
   #]]
 
   # limit the text section to 28K (32K - 4k reserved for the bootloader)
+  set_target_properties(firmware PROPERTIES INTERPROCEDURAL_OPTIMIZATION True)
   target_link_options(firmware PUBLIC -Wl,--defsym=__TEXT_REGION_LENGTH__=28K)
 
   # generate firmware.bin file
