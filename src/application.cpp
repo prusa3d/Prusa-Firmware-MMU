@@ -283,3 +283,11 @@ void Application::Step() {
 
     currentCommand->Step();
 }
+
+uint8_t Application::CurrentProgressCode() {
+    return (uint8_t)currentCommand->State();
+}
+
+uint16_t Application::CurrentErrorCode() {
+    return (uint16_t)currentCommand->Error();
+}
