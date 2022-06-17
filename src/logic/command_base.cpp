@@ -189,6 +189,7 @@ bool CommandBase::CheckToolIndex(uint8_t index) {
 void CommandBase::ErrDisengagingIdler() {
     if (!mi::idler.Engaged()) {
         state = ProgressCode::ERRWaitingForUser;
+        mg::globals.IncDriveErrors();
         mpu::pulley.Disable();
         mui::userInput.Clear(); // remove all buffered events if any just before we wait for some input
     }
