@@ -29,6 +29,7 @@ public:
 private:
 #endif
     void GoToFeedingToBondtech();
+    void GoToFeedingToFinda();
 
     /// Common code for a correct completion of UnloadFilament
     void ToolChangeFinishedCorrectly();

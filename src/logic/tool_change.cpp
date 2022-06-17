@@ -63,6 +63,13 @@ void logic::ToolChange::ToolChangeFinishedCorrectly() {
     FinishedOK();
 }
 
+void logic::ToolChange::GoToFeedingToFinda() {
+    state = ProgressCode::FeedingToFinda;
+    error = ErrorCode::RUNNING;
+    mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::AtPulley);
+    feed.Reset(true, false);
+}
+
 bool ToolChange::StepInner() {
     switch (state) {
     case ProgressCode::UnloadingFilament:
@@ -70,10 +77,7 @@ bool ToolChange::StepInner() {
             // unloading sequence finished - basically, no errors can occurr here
             // as UnloadFilament should handle all the possible error states on its own
             // There is no way the UnloadFilament to finish in an error state
-            state = ProgressCode::FeedingToFinda;
-            error = ErrorCode::RUNNING;
-            mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::AtPulley);
-            feed.Reset(true, false);
+            GoToFeedingToFinda();
         }
         break;
     case ProgressCode::FeedingToFinda:
@@ -113,7 +117,14 @@ bool ToolChange::StepInner() {
             GoToErrEngagingIdler();
             break;
         case mui::Event::Middle: // try again the whole sequence
-            Reset(mg::globals.ActiveSlot());
+            // It looks like we don't have to reset the whole state machine but jump straight into the feeding phase.
+            // The reasons are multiple:
+            // - If an error happens during the unload phase, it is handled separately in the UnloadFilament state machine
+            // - If an error happens during the feeding phase, the unload has been already successfully completed.
+            //   And when restarted from the very beginning, the ToolChange does the last retract sequence from the UnloadFilament phase
+            //   -> that is not healthy, because the filament gets pushed away from the Pulley and causes another error.
+            //Reset(mg::globals.ActiveSlot());
+            GoToFeedingToFinda();
             break;
         case mui::Event::Right: // problem resolved - the user pushed the fillament by hand?
             // we should check the state of all the sensors and either report another error or confirm the correct state
