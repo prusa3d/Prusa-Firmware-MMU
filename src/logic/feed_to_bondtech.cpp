@@ -24,7 +24,9 @@ void logic::FeedToBondtech::GoToPushToNozzle() {
     mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InFSensor);
     // plan a slow move to help push filament into the nozzle
     //@@TODO the speed in mm/s must correspond to printer's feeding speed!
-    mpu::pulley.PlanMove(config::fsensorToNozzle, config::pulleySlowFeedrate);
+    mpu::pulley.PlanMove(
+        config::U_mm({ (long double)mg::globals.FSensorToNozzleMM() }),
+        config::U_mm_s({ (long double)mg::globals.FSensorToNozzleFeedrate() }));
     state = PushingFilamentIntoNozzle;
 }
 

@@ -61,6 +61,14 @@ public:
     /// @returns true if the motors are to be operated in stealth mode
     bool MotorsStealth() const { return stealthMode; }
 
+    uint8_t FSensorToNozzleMM() const { return fsensorToNozzleMM; }
+    void ResetFSensorToNozzleMM();
+    void SetFSensorToNozzleMM(uint8_t fss2NozzleMM) { fsensorToNozzleMM = fss2NozzleMM; }
+
+    uint8_t FSensorToNozzleFeedrate() const { return fsensorToNozzleFeedrate; }
+    void ResetFSensorToNozzleFeedrate();
+    void SetFSensorToNozzleFeedrate(uint8_t fs2NozzleFeedrate) { fsensorToNozzleFeedrate = fs2NozzleFeedrate; }
+
 private:
     /// Sets the active slot, usually after some command/operation.
     /// Also updates the EEPROM records accordingly
@@ -70,6 +78,8 @@ private:
     uint8_t activeSlot;
     FilamentLoadState filamentLoaded;
     bool stealthMode;
+    uint8_t fsensorToNozzleMM;
+    uint8_t fsensorToNozzleFeedrate;
 };
 
 /// The one and only instance of global state variables
