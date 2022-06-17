@@ -113,7 +113,6 @@ endif()
 
 # enable all warnings (well, not all, but some)
 add_compile_options(-Wall -Wsign-compare)
-add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++14>)
 
 # support _DEBUG macro (some code uses to recognize debug builds)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -132,7 +131,7 @@ add_subdirectory(lib)
 
 add_executable(firmware)
 
-set_target_properties(firmware PROPERTIES CXX_STANDARD 14)
+set_target_properties(firmware PROPERTIES CXX_STANDARD 17)
 
 if(CMAKE_CROSSCOMPILING)
   #[[
