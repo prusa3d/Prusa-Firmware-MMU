@@ -20,8 +20,8 @@ struct Tim8bit_TypeDef {
     volatile uint8_t OCRxB;
 };
 
-constexpr volatile uint8_t *TIFR = &TIFR0;
-constexpr volatile uint8_t *TIMSK = &TIMSK0;
+static volatile uint8_t *const TIFR = &TIFR0;
+static volatile uint8_t *const TIMSK = &TIMSK0;
 
 struct Tim8bit_CTC_config {
     uint8_t cs : 3; ///clock source as per datasheet. It is not consistent between timer types

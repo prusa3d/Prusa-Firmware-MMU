@@ -3,7 +3,10 @@
 #include <inttypes.h>
 #include "gpio.h"
 
-#define SPI0 ((hal::spi::SPI_TypeDef *)&SPCR)
+#ifdef __AVR__
+#define SPI0 ((hal::spi::SPI_TypeDef *const) & SPCR)
+#endif
+
 namespace hal {
 
 /// SPI interface
@@ -30,9 +33,9 @@ void Init(SPI_TypeDef *const hspi, SPI_InitTypeDef *const conf);
 uint8_t TxRx(SPI_TypeDef *hspi, uint8_t val);
 
 #ifdef __AVR__
-constexpr SPI_TypeDef *TmcSpiBus = SPI0;
+static SPI_TypeDef *const TmcSpiBus = SPI0;
 #else
-constexpr SPI_TypeDef *TmcSpiBus = nullptr;
+static SPI_TypeDef *const TmcSpiBus = nullptr;
 #endif
 
 }
