@@ -1,3 +1,5 @@
+#include <avr/pgmspace.h>
+
 #include "registers.h"
 #include "version.h"
 #include "application.h"
@@ -62,7 +64,7 @@ struct RegisterRec {
 // @@TODO it is nice to see all the supported registers at one spot,
 // however it requires including all bunch of dependencies
 // which makes unit testing and separation of modules much harder.
-static const RegisterRec registers[] = {
+static const RegisterRec registers[] PROGMEM = {
     RegisterRec(false, &project_major),
 
     RegisterRec(false, &project_minor),
