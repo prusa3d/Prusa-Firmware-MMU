@@ -125,18 +125,7 @@ uint8_t Protocol::EncodeRequest(const RequestMsg &msg, uint8_t *txbuff) {
 }
 
 uint8_t Protocol::EncodeWriteRequest(const RequestMsg &msg, uint16_t value2, uint8_t *txbuff) {
-    uint8_t i = 1;
-    txbuff[0] = (uint8_t)msg.code;
-    uint8_t v = msg.value >> 4;
-    if (v != 0) { // skip the first '0' if any
-        txbuff[i] = Nibble2Char(v);
-        ++i;
-    }
-    v = msg.value & 0xf;
-    txbuff[i] = Nibble2Char(v);
-    ++i;
-    txbuff[i] = ' ';
-    ++i;
+    uint8_t i = BeginEncodeRequest(msg, txbuff);
     // dump the value
     i += Value2Hex(value2, txbuff + i);
 
@@ -231,18 +220,7 @@ DecodeStatus Protocol::DecodeResponse(uint8_t c) {
 }
 
 uint8_t Protocol::EncodeResponseCmdAR(const RequestMsg &msg, ResponseMsgParamCodes ar, uint8_t *txbuff) {
-    uint8_t i = 1;
-    txbuff[0] = (uint8_t)msg.code;
-    uint8_t v = msg.value >> 4U;
-    if (v != 0) { // skip the first '0' if any
-        txbuff[i] = Nibble2Char(v);
-        ++i;
-    }
-    v = msg.value & 0xfU;
-    txbuff[i] = Nibble2Char(v);
-    ++i;
-    txbuff[i] = ' ';
-    ++i;
+    uint8_t i = BeginEncodeRequest(msg, txbuff);
     txbuff[i] = (uint8_t)ar;
     ++i;
     txbuff[i] = '\n';
@@ -287,19 +265,7 @@ uint8_t Protocol::EncodeResponseQueryOperation(const RequestMsg &msg, ResponseCo
 }
 
 uint8_t Protocol::EncodeResponseRead(const RequestMsg &msg, bool accepted, uint16_t value2, uint8_t *txbuff) {
-    uint8_t i = 1;
-    txbuff[0] = (uint8_t)msg.code;
-    uint8_t v = msg.value >> 4U;
-    if (v != 0) { // skip the first '0' if any
-        txbuff[i] = Nibble2Char(v);
-        ++i;
-    }
-    v = msg.value & 0xfU;
-    txbuff[i] = Nibble2Char(v);
-    ++i;
-    txbuff[i] = ' ';
-    ++i;
-
+    uint8_t i = BeginEncodeRequest(msg, txbuff);
     if (accepted) {
         txbuff[i] = (uint8_t)ResponseMsgParamCodes::Accepted;
         ++i;
@@ -333,6 +299,21 @@ uint8_t Protocol::Value2Hex(uint16_t value, uint8_t *dst) {
         ++dst;
     }
     return charsOut;
+}
+
+uint8_t Protocol::BeginEncodeRequest(const RequestMsg &msg, uint8_t *txbuff) {
+    uint8_t i = 1;
+    txbuff[0] = (uint8_t)msg.code;
+    uint8_t v = msg.value >> 4U;
+    if (v != 0) { // skip the first '0' if any
+        txbuff[i] = Nibble2Char(v);
+        ++i;
+    }
+    v = msg.value & 0xfU;
+    txbuff[i] = Nibble2Char(v);
+    ++i;
+    txbuff[i] = ' ';
+    return i + 1;
 }
 
 } // namespace protocol
