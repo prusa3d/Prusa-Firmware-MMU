@@ -1,4 +1,8 @@
+#ifndef UNITTEST
 #include <avr/pgmspace.h>
+#else
+#define PROGMEM /* */
+#endif
 
 #include "registers.h"
 #include "version.h"
@@ -95,6 +99,21 @@ static const RegisterRec registers[] PROGMEM = {
         1),
 
     RegisterRec([]() -> uint16_t { return mg::globals.MotorsStealth(); }, 1), // mode (stealth = 1/normal = 0)
+
+    RegisterRec( // extra load distance after fsensor triggered (30mm default)
+        []() -> uint16_t { return mg::globals.FSensorToNozzleMM(); },
+        [](uint16_t d) { mg::globals.SetFSensorToNozzleMM(d); },
+        1),
+
+    // The lambas seem to be pretty cheap:
+    //    void SetFSensorToNozzleFeedrate(uint8_t fs2NozzleFeedrate) { fsensorToNozzleFeedrate = fs2NozzleFeedrate; }
+    // compiles to:
+    // sts <modules::globals::globals+0x4>, r24
+    // ret
+    RegisterRec( // extra load distance after fsensor triggered - feedrate (20mm/s default)
+        []() -> uint16_t { return mg::globals.FSensorToNozzleFeedrate(); },
+        [](uint16_t d) { mg::globals.SetFSensorToNozzleFeedrate(d); },
+        1),
 };
 
 static constexpr uint8_t registersSize = sizeof(registers) / sizeof(RegisterRec);
