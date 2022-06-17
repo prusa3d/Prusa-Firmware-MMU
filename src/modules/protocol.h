@@ -261,6 +261,8 @@ private:
 
     /// @returns number of characters written
     static uint8_t Value2Hex(uint16_t value, uint8_t *dst);
+
+    static uint8_t BeginEncodeRequest(const RequestMsg &msg, uint8_t *txbuff);
 };
 
 } // namespace protocol
