@@ -1,9 +1,8 @@
 /// @file pulley.h
 #pragma once
 #include "../config/config.h"
-#include "axisunit.h"
-#include "../unit.h"
 #include "movable_base.h"
+#include "motion.h"
 
 namespace modules {
 
@@ -25,7 +24,14 @@ public:
     /// @returns true if the pulley is ready to accept new commands (i.e. it has finished the last operation)
     bool Step();
 
-    void PlanMove(unit::U_mm delta, unit::U_mm_s feed_rate, unit::U_mm_s end_rate = { 0 });
+    void PlanMove(mm::P_pos_t delta, mm::P_speed_t feed_rate, mm::P_speed_t end_rate = { 0 });
+
+    // NOTE: always_inline is required here to force gcc <= 7.x to evaluate each call at compile time
+    void __attribute__((always_inline)) PlanMove(unit::U_mm delta, unit::U_mm_s feed_rate, unit::U_mm_s end_rate = { 0 }) {
+        PlanMove(mm::unitToAxisUnit<mm::P_pos_t>(delta),
+            mm::unitToAxisUnit<mm::P_speed_t>(feed_rate),
+            mm::unitToAxisUnit<mm::P_speed_t>(end_rate));
+    }
 
     /// @returns rounded current position (rotation) of the Pulley
     /// This exists purely to avoid expensive float (long double) computations of distance traveled by the filament

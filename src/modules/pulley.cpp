@@ -3,7 +3,6 @@
 #include "buttons.h"
 #include "globals.h"
 #include "leds.h"
-#include "motion.h"
 #include "permanent_storage.h"
 #include "../debug.h"
 
@@ -34,7 +33,7 @@ bool Pulley::Step() {
     }
 }
 
-void Pulley::PlanMove(unit::U_mm delta, unit::U_mm_s feed_rate, unit::U_mm_s end_rate) {
+void Pulley::PlanMove(mm::P_pos_t delta, mm::P_speed_t feed_rate, mm::P_speed_t end_rate) {
     mm::motion.PlanMove<mm::Pulley>(delta, feed_rate, end_rate);
     state = Moving;
 }
