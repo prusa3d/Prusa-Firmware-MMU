@@ -132,6 +132,7 @@ add_subdirectory(lib)
 add_executable(firmware)
 
 set_target_properties(firmware PROPERTIES CXX_STANDARD 17)
+set_target_properties(firmware PROPERTIES INTERPROCEDURAL_OPTIMIZATION True)
 
 if(CMAKE_CROSSCOMPILING)
   #[[
