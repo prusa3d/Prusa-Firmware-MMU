@@ -28,6 +28,10 @@ bool ToolChange::Reset(uint8_t param) {
         return true;
     }
 
+    // @@TODO establish printer in charge of UI processing for the ToolChange command only.
+    // We'll see how that works and then probably we'll introduce some kind of protocol settings to switch UI handling.
+    mui::userInput.SetPrinterInCharge(true);
+
     // we are either already at the correct slot, just the filament is not loaded - load the filament directly
     // or we are standing at another slot ...
     plannedSlot = param;
@@ -55,6 +59,7 @@ void logic::ToolChange::GoToFeedingToBondtech() {
 
 void logic::ToolChange::ToolChangeFinishedCorrectly() {
     ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::on, ml::off);
+    mui::userInput.SetPrinterInCharge(false);
     FinishedOK();
 }
 
