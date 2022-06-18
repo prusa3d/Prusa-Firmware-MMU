@@ -31,7 +31,7 @@ TEST_CASE("unload_to_finda::regular_unload", "[unload_to_finda]") {
     // we need finda ON
     SetFINDAStateAndDebounce(true);
     // fsensor should be ON
-    mfs::fsensor.ProcessMessage(true);
+    SetFSensorStateAndDebounce(true);
     // and MMU "thinks" it has the filament loaded
     mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InNozzle);
 
@@ -83,7 +83,7 @@ TEST_CASE("unload_to_finda::unload_without_FINDA_trigger", "[unload_to_finda]") 
     // we need finda ON
     SetFINDAStateAndDebounce(true);
     // fsensor should be ON
-    mfs::fsensor.ProcessMessage(true);
+    SetFSensorStateAndDebounce(true);
     // and MMU "thinks" it has the filament loaded
     mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InNozzle);
 
@@ -124,7 +124,7 @@ TEST_CASE("unload_to_finda::unload_without_FSensor_trigger", "[unload_to_finda]"
     // we need finda ON
     SetFINDAStateAndDebounce(true);
     // fsensor should be ON
-    mfs::fsensor.ProcessMessage(true);
+    SetFSensorStateAndDebounce(true);
     // and MMU "thinks" it has the filament loaded
     mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InNozzle);
 
@@ -165,7 +165,7 @@ TEST_CASE("unload_to_finda::unload_repeated", "[unload_to_finda]") {
     // we need finda ON
     SetFINDAStateAndDebounce(true);
     // fsensor should be ON
-    mfs::fsensor.ProcessMessage(true);
+    SetFSensorStateAndDebounce(true);
     // and MMU "thinks" it has the filament loaded
     mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InNozzle);
 

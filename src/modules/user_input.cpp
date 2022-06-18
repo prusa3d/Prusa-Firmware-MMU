@@ -17,23 +17,39 @@ void UserInput::Step() {
 }
 
 void UserInput::ProcessMessage(uint8_t ev) {
-    eventQueue.push((Event)ev);
+    eventQueue.push((Event)(ev | Event::FromPrinter));
+}
+
+Event UserInput::StripFromPrinterBit(uint8_t e) {
+    e &= (uint8_t)(~Event::FromPrinter);
+    return (Event)e;
 }
 
 Event UserInput::ConsumeEvent() {
     if (printerInCharge) {
+        Event rv = eventQueue.front();
+        if (rv & Event::FromPrinter) {
+            eventQueue.pop(rv);
+            return StripFromPrinterBit(rv);
+        }
         return Event::NoEvent;
     } else {
-        return ConsumeEventForPrinter();
+        Event rv;
+        eventQueue.pop(rv);
+        return StripFromPrinterBit(rv);
     }
 }
 
 Event UserInput::ConsumeEventForPrinter() {
     if (eventQueue.empty())
         return Event::NoEvent;
-    Event rv;
+    Event rv = eventQueue.front();
+    if (rv & Event::FromPrinter) {
+        // do not send the same buttons back but leave them in the queue for the MMU FW
+        return Event::NoEvent;
+    }
     eventQueue.pop(rv);
-    return rv;
+    return StripFromPrinterBit(rv);
 }
 
 void UserInput::Clear() {

@@ -58,6 +58,7 @@ void ForceReinitAllAutomata() {
     new (&mpu::pulley) mpu::Pulley();
     new (&ms::selector) ms::Selector();
     new (&mm::motion) mm::Motion();
+    new (&mui::userInput) mui::UserInput();
 
     hal::eeprom::ClearEEPROM();
 
@@ -133,11 +134,17 @@ bool SimulateRetractFromFINDA(uint32_t step, uint32_t findaOff) {
     return mf::finda.Pressed();
 }
 
-void PressButtonAndDebounce(logic::CommandBase &cb, uint8_t btnIndex) {
-    hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCLimits[btnIndex][0] + 1);
-    while (!mb::buttons.ButtonPressed(btnIndex)) {
+void PressButtonAndDebounce(logic::CommandBase &cb, uint8_t btnIndex, bool fromPrinter) {
+    if (fromPrinter) {
+        mui::userInput.ProcessMessage(btnIndex);
         main_loop();
-        cb.Step(); // Inner
+        cb.Step();
+    } else {
+        hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCLimits[btnIndex][0] + 1);
+        while (!mb::buttons.ButtonPressed(btnIndex)) {
+            main_loop();
+            cb.Step(); // Inner
+        }
     }
 }
 
@@ -146,5 +153,12 @@ void ClearButtons(logic::CommandBase &cb) {
     while (mb::buttons.AnyButtonPressed()) {
         main_loop();
         cb.Step(); // Inner
+    }
+}
+
+void SetFSensorStateAndDebounce(bool press) {
+    mfs::fsensor.ProcessMessage(press);
+    for (uint8_t fs = 0; fs < config::fsensorDebounceMs + 1; ++fs) {
+        main_loop();
     }
 }

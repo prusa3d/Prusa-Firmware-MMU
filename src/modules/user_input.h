@@ -9,11 +9,12 @@ namespace modules {
 namespace user_input {
 
 /// Beware - button codes intentionally match the protocol button encoding for optimization purposes
-enum class Event : int8_t {
-    NoEvent = -1,
-    Left = 0,
+enum Event : uint8_t {
+    NoEvent = 0x7f,
+    Right = 0,
     Middle = 1,
-    Right = 2
+    Left = 2,
+    FromPrinter = 0x80
 };
 
 class UserInput {
@@ -58,6 +59,8 @@ public:
 private:
     CircularBuffer<Event, uint_fast8_t, 4> eventQueue;
     bool printerInCharge = false;
+
+    static Event StripFromPrinterBit(uint8_t e);
 };
 
 extern UserInput userInput;

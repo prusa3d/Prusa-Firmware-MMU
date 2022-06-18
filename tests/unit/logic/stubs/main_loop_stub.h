@@ -29,8 +29,10 @@ bool SimulateUnloadToFINDA(uint32_t step, uint32_t fsOff, uint32_t findaOff);
 bool SimulateFeedToFINDA(uint32_t step, uint32_t findaOn);
 bool SimulateRetractFromFINDA(uint32_t step, uint32_t findaOff);
 
-void PressButtonAndDebounce(logic::CommandBase &cb, uint8_t btnIndex);
+void PressButtonAndDebounce(logic::CommandBase &cb, uint8_t btnIndex, bool fromPrinter);
 void ClearButtons(logic::CommandBase &cb);
+
+void SetFSensorStateAndDebounce(bool press);
 
 // these are recommended max steps for simulated movement of the idler and selector
 // - roughly the amount of motion steps from one end to the other + some margin

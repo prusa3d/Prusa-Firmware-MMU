@@ -22,7 +22,7 @@ static constexpr const uint8_t toolCount = 5U; ///< Max number of extruders/tool
 static_assert(toolCount < 15, "Up to 14 valid slots (+1 parking) is supported in EEPROM storage");
 
 // Printer's filament sensor setup
-static constexpr const uint16_t fsensorDebounceMs = 10;
+static constexpr const uint16_t fsensorDebounceMs = 2;
 
 // LEDS
 /// The complete period of LED's blinking (i.e. ON and OFF together)
