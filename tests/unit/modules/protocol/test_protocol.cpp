@@ -89,7 +89,7 @@ TEST_CASE("protocol::EncodeResponseCmdAR", "[protocol]") {
 
         mp::RequestMsg(mp::RequestMsgCodes::Wait, 0));
 
-    auto responseStatus = GENERATE(mp::ResponseMsgParamCodes::Accepted, mp::ResponseMsgParamCodes::Rejected);
+    auto responseStatus = GENERATE(mp::ResponseMsgParamCodes::Accepted, mp::ResponseMsgParamCodes::Rejected, mp::ResponseMsgParamCodes::Button);
 
     std::array<uint8_t, 8> txbuff;
     uint8_t msglen = mp::Protocol::EncodeResponseCmdAR(requestMsg, responseStatus, txbuff.data());
@@ -347,7 +347,7 @@ TEST_CASE("protocol::DecodeResponseQueryOperation", "[protocol]") {
         "W0");
 
     const char *status = GENERATE(
-        "P0", "P1", "E0", "E1", "E9", "F");
+        "P0", "P1", "E0", "E1", "E9", "F", "B0", "B1", "B2");
 
     std::string rxbuff(cmdReference);
     rxbuff += ' ';
