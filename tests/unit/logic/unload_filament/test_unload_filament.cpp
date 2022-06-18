@@ -171,7 +171,7 @@ void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
     // In this case we check the first option
 
     // Perform press on button 0 + debounce
-    PressButtonAndDebounce(uf, mb::Left);
+    PressButtonAndDebounce(uf, mb::Left, false);
 
     // we still think we have filament loaded at this stage
     // idler should have been disengaged
@@ -179,6 +179,8 @@ void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
     // FINDA still on
     // red LED should blink, green LED should be off
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, false, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERREngagingIdler));
+
+    SimulateIdlerHoming(uf);
 
     // Stage 4 - engage the idler
     REQUIRE(WhileTopState(uf, ProgressCode::ERREngagingIdler, idlerEngageDisengageMaxSteps));
@@ -249,7 +251,7 @@ void FindaDidntTriggerResolveTryAgain(uint8_t slot, logic::UnloadFilament &uf) {
     // - resolve the problem by hand - after pressing the button we shall check, that FINDA is off and we should do what?
 
     // In this case we check the second option
-    PressButtonAndDebounce(uf, mb::Middle);
+    PressButtonAndDebounce(uf, mb::Middle, false);
 
     // we still think we have filament loaded at this stage
     // idler should have been disengaged
@@ -296,7 +298,7 @@ void FailedUnloadResolveManual(uint8_t slot, logic::UnloadFilament &uf) {
 
     // Perform press on button 2 + debounce + switch off FINDA
     hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
-    PressButtonAndDebounce(uf, mb::Right);
+    PressButtonAndDebounce(uf, mb::Right, false);
 
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
 
@@ -320,7 +322,7 @@ void FailedUnloadResolveManualFINDAon(uint8_t slot, logic::UnloadFilament &uf) {
     // simulate the user fixed the issue himself
 
     // Perform press on button 2 + debounce + keep FINDA on
-    PressButtonAndDebounce(uf, mb::Right);
+    PressButtonAndDebounce(uf, mb::Right, false);
 
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRWaitingForUser));
 }
@@ -329,9 +331,9 @@ void FailedUnloadResolveManualFSensorOn(uint8_t slot, logic::UnloadFilament &uf)
     // simulate the user fixed the issue himself
 
     // Perform press on button 2 + debounce + keep FSensor on
-    mfs::fsensor.ProcessMessage(true);
+    SetFSensorStateAndDebounce(true);
     hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
-    PressButtonAndDebounce(uf, mb::Right);
+    PressButtonAndDebounce(uf, mb::Right, false);
 
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::blink0, ErrorCode::FSENSOR_DIDNT_SWITCH_OFF, ProgressCode::ERRWaitingForUser));
 }
@@ -367,7 +369,7 @@ TEST_CASE("unload_filament::unload_homing_retry", "[unload_filament][homing]") {
 
     // simulate the user fixed the issue himself (not really important, we are after a failed homing of the selector)
     hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
-    PressButtonAndDebounce(uf, mb::Right);
+    PressButtonAndDebounce(uf, mb::Right, false);
     SimulateIdlerHoming(uf); // make Idler happy
 
     REQUIRE(WhileCondition(uf, std::bind(SimulateFeedToFINDA, _1, 100), 5000));

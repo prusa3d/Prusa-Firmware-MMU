@@ -134,7 +134,7 @@ bool SimulateFailedHomeSelectorPostfix(logic::CommandBase &cb) {
     if (mm::motion.Enabled(mm::Selector))
         return false;
 
-    PressButtonAndDebounce(cb, mb::Middle);
+    PressButtonAndDebounce(cb, mb::Middle, false);
 
     // it shall start homing again
     if (cb.Error() != ErrorCode::RUNNING)
