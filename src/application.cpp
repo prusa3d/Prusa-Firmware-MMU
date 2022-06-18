@@ -77,6 +77,13 @@ void Application::CheckManualOperation() {
 }
 
 mp::ResponseCommandStatus Application::RunningCommandStatus() const {
+    if (mui::userInput.PrinterInCharge()) {
+        mui::Event event = mui::userInput.ConsumeEventForPrinter();
+        if (event != mui::Event::NoEvent) {
+            return mp::ResponseCommandStatus(mp::ResponseMsgParamCodes::Button, (uint8_t)event);
+        }
+    }
+
     switch (currentCommand->Error()) {
     case ErrorCode::RUNNING:
         return mp::ResponseCommandStatus(mp::ResponseMsgParamCodes::Processing, (uint16_t)currentCommand->State());

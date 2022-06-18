@@ -21,6 +21,14 @@ void UserInput::ProcessMessage(uint8_t ev) {
 }
 
 Event UserInput::ConsumeEvent() {
+    if (printerInCharge) {
+        return Event::NoEvent;
+    } else {
+        return ConsumeEventForPrinter();
+    }
+}
+
+Event UserInput::ConsumeEventForPrinter() {
     if (eventQueue.empty())
         return Event::NoEvent;
     Event rv;
