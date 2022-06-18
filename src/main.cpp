@@ -167,7 +167,7 @@ int main() {
     return 0;
 }
 
-// make lto happy...
+// avoid avr-gcc 5.4 link time code generation bug
 extern "C" void __cxa_pure_virtual() {
     while (1)
         ;
