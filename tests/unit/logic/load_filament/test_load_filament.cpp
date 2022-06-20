@@ -129,7 +129,9 @@ void FailedLoadToFindaResolveHelp(uint8_t slot, logic::LoadFilament &lf) {
 
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERREngagingIdler));
 
-    SimulateIdlerHoming(lf);
+    if (!mi::idler.HomingValid()) {
+        SimulateIdlerHoming(lf);
+    }
 
     // Stage 4 - engage the idler
     REQUIRE(WhileTopState(lf, ProgressCode::ERREngagingIdler, idlerEngageDisengageMaxSteps));
