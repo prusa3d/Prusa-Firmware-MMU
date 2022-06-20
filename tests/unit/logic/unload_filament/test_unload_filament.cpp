@@ -9,6 +9,7 @@
 #include "../../../../src/modules/motion.h"
 #include "../../../../src/modules/permanent_storage.h"
 #include "../../../../src/modules/selector.h"
+#include "../../../../src/modules/user_input.h"
 
 #include "../../../../src/logic/unload_filament.h"
 
@@ -170,8 +171,10 @@ void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
 
     // In this case we check the first option
 
+    REQUIRE_FALSE(mui::userInput.AnyEvent());
     // Perform press on button 0 + debounce
     PressButtonAndDebounce(uf, mb::Left, false);
+    REQUIRE_FALSE(mui::userInput.AnyEvent()); // button processed and nothing remains
 
     // we still think we have filament loaded at this stage
     // idler should have been disengaged
@@ -180,7 +183,9 @@ void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
     // red LED should blink, green LED should be off
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, false, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERREngagingIdler));
 
-    SimulateIdlerHoming(uf);
+    if (!mi::idler.HomingValid()) {
+        SimulateIdlerHoming(uf);
+    }
 
     // Stage 4 - engage the idler
     REQUIRE(WhileTopState(uf, ProgressCode::ERREngagingIdler, idlerEngageDisengageMaxSteps));
