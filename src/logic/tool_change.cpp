@@ -123,8 +123,14 @@ bool ToolChange::StepInner() {
             // - If an error happens during the feeding phase, the unload has been already successfully completed.
             //   And when restarted from the very beginning, the ToolChange does the last retract sequence from the UnloadFilament phase
             //   -> that is not healthy, because the filament gets pushed away from the Pulley and causes another error.
-            //Reset(mg::globals.ActiveSlot());
-            GoToFeedingToFinda();
+            // However - if we run into "FSensor didn't trigger", the situation is exactly opposite - it is beneficial
+            // to unload the filament and try the whole sequence again
+            // Therefore we only switch to FeedingToFinda if FINDA is not pressed (we suppose the filament is unloaded completely)
+            if (mf::finda.Pressed()) {
+                Reset(mg::globals.ActiveSlot());
+            } else {
+                GoToFeedingToFinda();
+            }
             break;
         case mui::Event::Right: // problem resolved - the user pushed the fillament by hand?
             // we should check the state of all the sensors and either report another error or confirm the correct state
