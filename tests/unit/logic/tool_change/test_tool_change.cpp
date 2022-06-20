@@ -198,6 +198,7 @@ void ToolChangeFailLoadToFinda(logic::ToolChange &tc, uint8_t fromSlot, uint8_t 
 
 void ToolChangeFailLoadToFindaLeftBtn(logic::ToolChange &tc, uint8_t toSlot) {
     // now waiting for user input
+    REQUIRE_FALSE(mui::userInput.AnyEvent());
     PressButtonAndDebounce(tc, mb::Left, true);
 
     REQUIRE(WhileTopState(tc, ProgressCode::ERREngagingIdler, 5000UL));
@@ -224,6 +225,7 @@ void ToolChangeFailLoadToFindaLeftBtn(logic::ToolChange &tc, uint8_t toSlot) {
 
 void ToolChangeFailLoadToFindaMiddleBtn(logic::ToolChange &tc, uint8_t toSlot) {
     // now waiting for user input
+    REQUIRE_FALSE(mui::userInput.AnyEvent());
     PressButtonAndDebounce(tc, mb::Middle, true);
 
     REQUIRE(WhileCondition(
@@ -255,6 +257,8 @@ void ToolChangeFailLoadToFindaRightBtnFINDA_FSensor(logic::ToolChange &tc, uint8
     REQUIRE(mf::finda.Pressed());
     SetFSensorStateAndDebounce(true);
     REQUIRE(mfs::fsensor.Pressed());
+
+    REQUIRE_FALSE(mui::userInput.AnyEvent());
     PressButtonAndDebounce(tc, mb::Right, true);
 
     CheckFinishedCorrectly(tc, toSlot);
@@ -265,6 +269,8 @@ void ToolChangeFailLoadToFindaRightBtnFINDA_FSensor(logic::ToolChange &tc, uint8
 void ToolChangeFailLoadToFindaRightBtnFINDA(logic::ToolChange &tc, uint8_t toSlot) {
     // now waiting for user input - press FINDA
     SetFINDAStateAndDebounce(true);
+
+    REQUIRE_FALSE(mui::userInput.AnyEvent());
     PressButtonAndDebounce(tc, mb::Right, true);
 
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), toSlot, true, false, ml::off, ml::blink0, ErrorCode::FSENSOR_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));
@@ -274,6 +280,7 @@ void ToolChangeFailLoadToFindaRightBtnFINDA(logic::ToolChange &tc, uint8_t toSlo
 
 void ToolChangeFailLoadToFindaRightBtn(logic::ToolChange &tc, uint8_t toSlot) {
     // now waiting for user input - do not press anything
+    REQUIRE_FALSE(mui::userInput.AnyEvent());
     PressButtonAndDebounce(tc, mb::Right, true);
 
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), toSlot, false, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));
@@ -352,7 +359,9 @@ void ToolChangeFailFSensorMiddleBtn(logic::ToolChange &tc, uint8_t fromSlot, uin
 
     // user pulls filament out from the fsensor and presses Retry
     SetFSensorStateAndDebounce(false);
+    REQUIRE_FALSE(mui::userInput.AnyEvent());
     PressButtonAndDebounce(tc, mb::Middle, true);
+
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, mi::idler.IdleSlotIndex(), fromSlot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingFilament));
     REQUIRE(tc.unl.State() == ProgressCode::FeedingToFinda); // MMU must find out where the filament is FS is OFF, FINDA is OFF
 

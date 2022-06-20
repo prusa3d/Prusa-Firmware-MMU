@@ -36,16 +36,20 @@ TEST_CASE("user_input::printer_in_charge", "[user_input]") {
     mui::userInput.ProcessMessage(button);
     // i.e. we should NOT be able to extract that message with ConsumeEventForPrinter()
     REQUIRE(mui::userInput.ConsumeEventForPrinter() == mui::NoEvent);
+    REQUIRE(mui::userInput.AnyEvent());
     // but we should be able to extract that message with ConsumeEvent()
     REQUIRE(mui::userInput.ConsumeEvent() == event);
+    REQUIRE_FALSE(mui::userInput.AnyEvent());
 
     // press a button on the MMU
     PressButtonAndDebounce(button);
     REQUIRE(mb::buttons.ButtonPressed(button));
     // we should NOT be able to extract the event with ConsumeEvent
     REQUIRE(mui::userInput.ConsumeEvent() == mui::NoEvent);
+    REQUIRE(mui::userInput.AnyEvent());
     // but we should be able to extract that message with ConsumeEventForPrinter
     REQUIRE(mui::userInput.ConsumeEventForPrinter() == event);
+    REQUIRE_FALSE(mui::userInput.AnyEvent());
 }
 
 TEST_CASE("user_input::button_pressed_MMU", "[user_input]") {
@@ -67,5 +71,21 @@ TEST_CASE("user_input::button_pressed_MMU", "[user_input]") {
     PressButtonAndDebounce(button);
     REQUIRE(mb::buttons.ButtonPressed(button));
     // we should be able to extract the event with ConsumeEvent
+    REQUIRE(mui::userInput.AnyEvent());
     REQUIRE(mui::userInput.ConsumeEvent() == event);
+    REQUIRE_FALSE(mui::userInput.AnyEvent());
+}
+
+TEST_CASE("user_input::empty_queue", "[user_input]") {
+    mt::ReinitTimebase();
+    mb::Buttons b;
+
+    // reset UI
+    new (&mui::userInput) mui::UserInput();
+    REQUIRE_FALSE(mui::userInput.PrinterInCharge());
+
+    REQUIRE_FALSE(mui::userInput.AnyEvent());
+    // try extracting something
+    REQUIRE(mui::userInput.ConsumeEvent() == mui::NoEvent);
+    REQUIRE(mui::userInput.ConsumeEventForPrinter() == mui::NoEvent);
 }

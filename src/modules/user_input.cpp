@@ -26,6 +26,8 @@ Event UserInput::StripFromPrinterBit(uint8_t e) {
 }
 
 Event UserInput::ConsumeEvent() {
+    if (eventQueue.empty())
+        return Event::NoEvent;
     if (printerInCharge) {
         Event rv = eventQueue.front();
         if (rv & Event::FromPrinter) {
