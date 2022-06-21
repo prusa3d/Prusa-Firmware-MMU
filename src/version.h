@@ -7,7 +7,7 @@ extern "C" {
 
 #define project_version_major 2
 #define project_version_minor 0
-#define project_version_revision 0
+#define project_version_revision 18
 
 /// Project's version (2.0.0)
 extern const char project_version[];
