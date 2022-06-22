@@ -67,6 +67,10 @@ static constexpr uint16_t stepTimerQuantum = 256; // 256 = 128us
 /// Max retries of FeedToBondtech used in LoadFilament
 static constexpr uint8_t feedToBondtechMaxRetries = 2;
 
+/// Max attempts of ToolChange before throwing out an error - obviously, this has to be >= 1
+static constexpr uint8_t toolChangeAttempts = 3;
+static_assert(toolChangeAttempts >= 1);
+
 /// Distances
 static constexpr U_mm pulleyToCuttingEdge = 33.0_mm; /// 33.0_mm /// Pulley to cutting edge.
 /// Case 1: FINDA working: This should be the max retraction after FINDA un-triggers.

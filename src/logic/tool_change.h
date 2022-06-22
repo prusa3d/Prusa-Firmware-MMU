@@ -11,8 +11,7 @@ namespace logic {
 /// @brief  A high-level command state machine - handles the complex logic of tool change - which is basically a chain of an Unload and a Load operation.
 class ToolChange : public CommandBase {
 public:
-    inline ToolChange()
-        : CommandBase() {}
+    ToolChange();
 
     /// Restart the automaton
     /// @param param index of filament slot to change to - i.e. to load
@@ -27,9 +26,13 @@ public:
 
 #ifndef UNITTEST
 private:
+#else
+    inline void SetAttempts(uint8_t att) { attempts = att; }
 #endif
     void GoToFeedingToBondtech();
     void GoToFeedingToFinda();
+    bool Reset(uint8_t param, uint8_t att);
+    void GoToRetryIfPossible(ErrorCode ec);
 
     /// Common code for a correct completion of UnloadFilament
     void ToolChangeFinishedCorrectly();
@@ -38,6 +41,7 @@ private:
     FeedToFinda feed;
     FeedToBondtech james; // bond ;)
     uint8_t plannedSlot;
+    uint8_t attempts; ///< how many attempts shall the state machine try before throwing out an error - obviously this has to be >= 1
 };
 
 /// The one and only instance of ToolChange state machine in the FW

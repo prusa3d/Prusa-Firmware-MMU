@@ -17,6 +17,10 @@ namespace logic {
 
 ToolChange toolChange;
 
+ToolChange::ToolChange()
+    : CommandBase()
+    , attempts(config::toolChangeAttempts) {}
+
 bool ToolChange::Reset(uint8_t param) {
     if (!CheckToolIndex(param)) {
         return false;
@@ -28,6 +32,10 @@ bool ToolChange::Reset(uint8_t param) {
         return true;
     }
 
+    return Reset(param, config::toolChangeAttempts);
+}
+
+bool ToolChange::Reset(uint8_t param, uint8_t att) {
     // @@TODO establish printer in charge of UI processing for the ToolChange command only.
     // We'll see how that works and then probably we'll introduce some kind of protocol settings to switch UI handling.
     mui::userInput.SetPrinterInCharge(true);
@@ -35,6 +43,7 @@ bool ToolChange::Reset(uint8_t param) {
     // we are either already at the correct slot, just the filament is not loaded - load the filament directly
     // or we are standing at another slot ...
     plannedSlot = param;
+    attempts = att;
 
     if (mg::globals.FilamentLoaded() >= mg::FilamentLoadState::InSelector) {
         dbg_logic_P(PSTR("Filament is loaded --> unload"));
@@ -48,6 +57,14 @@ bool ToolChange::Reset(uint8_t param) {
         feed.Reset(true, false);
     }
     return true;
+}
+
+void ToolChange::GoToRetryIfPossible(ErrorCode ec) {
+    if (--attempts) {
+        Reset(mg::globals.ActiveSlot(), attempts);
+    } else {
+        GoToErrDisengagingIdler(ec);
+    }
 }
 
 void logic::ToolChange::GoToFeedingToBondtech() {
@@ -83,7 +100,7 @@ bool ToolChange::StepInner() {
     case ProgressCode::FeedingToFinda:
         if (feed.Step()) {
             if (feed.State() == FeedToFinda::Failed) {
-                GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_ON); // signal loading error
+                GoToRetryIfPossible(ErrorCode::FINDA_DIDNT_SWITCH_ON); // signal loading error
             } else {
                 GoToFeedingToBondtech();
             }
@@ -93,10 +110,10 @@ bool ToolChange::StepInner() {
         if (james.Step()) {
             switch (james.State()) {
             case FeedToBondtech::Failed:
-                GoToErrDisengagingIdler(ErrorCode::FSENSOR_DIDNT_SWITCH_ON); // signal loading error
+                GoToRetryIfPossible(ErrorCode::FSENSOR_DIDNT_SWITCH_ON); // signal loading error
                 break;
             case FeedToBondtech::FSensorTooEarly:
-                GoToErrDisengagingIdler(ErrorCode::FSENSOR_TOO_EARLY); // signal loading error
+                GoToRetryIfPossible(ErrorCode::FSENSOR_TOO_EARLY); // signal loading error
                 break;
             default:
                 ToolChangeFinishedCorrectly();

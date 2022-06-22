@@ -72,6 +72,7 @@ void ToolChange(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
 
     // restart the automaton
     tc.Reset(toSlot);
+    tc.SetAttempts(1);
 
     REQUIRE(WhileCondition(
         tc,
@@ -106,6 +107,7 @@ void NoToolChange(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
 
     // restart the automaton
     tc.Reset(toSlot);
+    tc.SetAttempts(1);
 
     // should not do anything
     REQUIRE(tc.TopLevelState() == ProgressCode::OK);
@@ -122,6 +124,7 @@ void JustLoadFilament(logic::ToolChange &tc, uint8_t slot) {
 
     // restart the automaton
     tc.Reset(slot);
+    tc.SetAttempts(1);
 
     FeedingToFinda(tc, slot);
 
@@ -182,6 +185,7 @@ void ToolChangeFailLoadToFinda(logic::ToolChange &tc, uint8_t fromSlot, uint8_t 
 
     // restart the automaton
     tc.Reset(toSlot);
+    tc.SetAttempts(1);
 
     REQUIRE(WhileCondition(tc, std::bind(SimulateUnloadToFINDA, _1, 100, 2'000), 200'000));
     REQUIRE(WhileTopState(tc, ProgressCode::UnloadingFilament, 5000));
@@ -346,6 +350,7 @@ void ToolChangeFailFSensor(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSl
 
     // restart the automaton
     tc.Reset(toSlot);
+    tc.SetAttempts(1);
 
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::InNozzle, mi::idler.IdleSlotIndex(), fromSlot, true, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingFilament));
     // simulate unload to finda but fail the fsensor test
