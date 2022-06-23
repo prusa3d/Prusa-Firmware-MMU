@@ -73,6 +73,7 @@ void ToolChange(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
     // restart the automaton
     tc.Reset(toSlot);
     tc.SetAttempts(1);
+    tc.unl.SetAttempts(1);
 
     REQUIRE(WhileCondition(
         tc,
@@ -108,6 +109,7 @@ void NoToolChange(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
     // restart the automaton
     tc.Reset(toSlot);
     tc.SetAttempts(1);
+    tc.unl.SetAttempts(1);
 
     // should not do anything
     REQUIRE(tc.TopLevelState() == ProgressCode::OK);
@@ -125,6 +127,7 @@ void JustLoadFilament(logic::ToolChange &tc, uint8_t slot) {
     // restart the automaton
     tc.Reset(slot);
     tc.SetAttempts(1);
+    tc.unl.SetAttempts(1);
 
     FeedingToFinda(tc, slot);
 
@@ -176,7 +179,7 @@ TEST_CASE("tool_change::same_slot_just_unloaded_filament", "[tool_change]") {
     }
 }
 
-void ToolChangeFailLoadToFinda(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
+void ToolChangeFailLoadToFinda(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot, uint8_t attempts) {
     ForceReinitAllAutomata();
 
     REQUIRE(EnsureActiveSlotIndex(fromSlot, mg::FilamentLoadState::InNozzle));
@@ -185,15 +188,23 @@ void ToolChangeFailLoadToFinda(logic::ToolChange &tc, uint8_t fromSlot, uint8_t 
 
     // restart the automaton
     tc.Reset(toSlot);
-    tc.SetAttempts(1);
+    tc.SetAttempts(attempts);
+    tc.unl.SetAttempts(1); // do not complicate the test with unload attempts
 
     REQUIRE(WhileCondition(tc, std::bind(SimulateUnloadToFINDA, _1, 100, 2'000), 200'000));
     REQUIRE(WhileTopState(tc, ProgressCode::UnloadingFilament, 5000));
 
     REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::AtPulley);
 
-    // feeding to finda, but fails - do not trigger FINDA
-    REQUIRE(WhileTopState(tc, ProgressCode::FeedingToFinda, 50000UL));
+    // Feeding to finda, but fails - do not trigger FINDA
+    // In case there are multiple attempts, we have to check that only one is processed at a time
+    // A repeated attempt should try FeedToFinda again
+    for (int a = attempts; a > 0; --a) {
+        REQUIRE(WhileCondition(
+            tc,
+            [&](uint32_t) { return tc.TopLevelState() == ProgressCode::FeedingToFinda && tc.Attempts() == a; },
+            50000UL));
+    }
 
     // should end up in error disengage idler
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRDisengagingIdler));
@@ -294,11 +305,13 @@ void ToolChangeFailLoadToFindaRightBtn(logic::ToolChange &tc, uint8_t toSlot) {
 
 TEST_CASE("tool_change::load_fail_FINDA_resolve_btnL", "[tool_change]") {
     logic::ToolChange tc;
-    for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
-        for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
-            if (fromSlot != toSlot) {
-                ToolChangeFailLoadToFinda(tc, fromSlot, toSlot);
-                ToolChangeFailLoadToFindaLeftBtn(tc, toSlot);
+    for (uint8_t attempts = 1; attempts < 4; ++attempts) {
+        for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
+            for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
+                if (fromSlot != toSlot) {
+                    ToolChangeFailLoadToFinda(tc, fromSlot, toSlot, attempts);
+                    ToolChangeFailLoadToFindaLeftBtn(tc, toSlot);
+                }
             }
         }
     }
@@ -306,11 +319,13 @@ TEST_CASE("tool_change::load_fail_FINDA_resolve_btnL", "[tool_change]") {
 
 TEST_CASE("tool_change::load_fail_FINDA_resolve_btnM", "[tool_change]") {
     logic::ToolChange tc;
-    for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
-        for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
-            if (fromSlot != toSlot) {
-                ToolChangeFailLoadToFinda(tc, fromSlot, toSlot);
-                ToolChangeFailLoadToFindaMiddleBtn(tc, toSlot);
+    for (uint8_t attempts = 1; attempts < 4; ++attempts) {
+        for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
+            for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
+                if (fromSlot != toSlot) {
+                    ToolChangeFailLoadToFinda(tc, fromSlot, toSlot, attempts);
+                    ToolChangeFailLoadToFindaMiddleBtn(tc, toSlot);
+                }
             }
         }
     }
@@ -318,11 +333,13 @@ TEST_CASE("tool_change::load_fail_FINDA_resolve_btnM", "[tool_change]") {
 
 TEST_CASE("tool_change::load_fail_FINDA_resolve_btnR_FINDA_FSensor", "[tool_change]") {
     logic::ToolChange tc;
-    for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
-        for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
-            if (fromSlot != toSlot) {
-                ToolChangeFailLoadToFinda(tc, fromSlot, toSlot);
-                ToolChangeFailLoadToFindaRightBtnFINDA_FSensor(tc, toSlot);
+    for (uint8_t attempts = 1; attempts < 4; ++attempts) {
+        for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
+            for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
+                if (fromSlot != toSlot) {
+                    ToolChangeFailLoadToFinda(tc, fromSlot, toSlot, attempts);
+                    ToolChangeFailLoadToFindaRightBtnFINDA_FSensor(tc, toSlot);
+                }
             }
         }
     }
@@ -330,17 +347,19 @@ TEST_CASE("tool_change::load_fail_FINDA_resolve_btnR_FINDA_FSensor", "[tool_chan
 
 TEST_CASE("tool_change::load_fail_FINDA_resolve_btnR_FINDA", "[tool_change]") {
     logic::ToolChange tc;
-    for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
-        for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
-            if (fromSlot != toSlot) {
-                ToolChangeFailLoadToFinda(tc, fromSlot, toSlot);
-                ToolChangeFailLoadToFindaRightBtnFINDA(tc, toSlot);
+    for (uint8_t attempts = 1; attempts < 4; ++attempts) {
+        for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
+            for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
+                if (fromSlot != toSlot) {
+                    ToolChangeFailLoadToFinda(tc, fromSlot, toSlot, attempts);
+                    ToolChangeFailLoadToFindaRightBtnFINDA(tc, toSlot);
+                }
             }
         }
     }
 }
 
-void ToolChangeFailFSensor(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
+void ToolChangeFailFSensor(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot, uint8_t attempts) {
     using namespace std::placeholders;
     ForceReinitAllAutomata();
 
@@ -350,11 +369,12 @@ void ToolChangeFailFSensor(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSl
 
     // restart the automaton
     tc.Reset(toSlot);
-    tc.SetAttempts(1);
+    tc.SetAttempts(attempts);
+    tc.unl.SetAttempts(attempts); // unload will do its attempts on its own
 
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::InNozzle, mi::idler.IdleSlotIndex(), fromSlot, true, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingFilament));
     // simulate unload to finda but fail the fsensor test
-    REQUIRE(WhileCondition(tc, std::bind(SimulateUnloadToFINDA, _1, 500'000, 10'000), 200'000));
+    REQUIRE(WhileCondition(tc, std::bind(SimulateUnloadToFINDA, _1, 1500'000, 10'000), 1200'000));
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, mi::idler.IdleSlotIndex(), fromSlot, false, false, ml::off, ml::blink0, ErrorCode::FSENSOR_DIDNT_SWITCH_OFF, ProgressCode::UnloadingFilament));
     REQUIRE(tc.unl.State() == ProgressCode::ERRWaitingForUser);
 }
@@ -408,8 +428,24 @@ TEST_CASE("tool_change::load_fail_FSensor_resolve_btnM", "[tool_change]") {
     for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
         for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
             if (fromSlot != toSlot) {
-                ToolChangeFailFSensor(tc, fromSlot, toSlot);
+                ToolChangeFailFSensor(tc, fromSlot, toSlot, 1);
                 ToolChangeFailFSensorMiddleBtn(tc, fromSlot, toSlot);
+            }
+        }
+    }
+}
+
+// @@TODO test case temporarily disabled, because it is unknown if we want to resolve the errors just on the MMU side
+// or if the printer shall be the "brain" of the operation ... it looks more like the printer...
+TEST_CASE("tool_change::load_fail_FSensor_retry_resolve_btnM", "[tool_change][.]") {
+    logic::ToolChange tc;
+    for (uint8_t attempts = 1; attempts < 4; ++attempts) {
+        for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
+            for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
+                if (fromSlot != toSlot) {
+                    ToolChangeFailFSensor(tc, fromSlot, toSlot, attempts);
+                    ToolChangeFailFSensorMiddleBtn(tc, fromSlot, toSlot);
+                }
             }
         }
     }

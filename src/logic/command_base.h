@@ -23,12 +23,13 @@ namespace logic {
 /// These tasks report their progress and only one of these tasks is allowed to run at once.
 class CommandBase {
 public:
-    inline CommandBase()
+    constexpr CommandBase(uint8_t attempts)
         : state(ProgressCode::OK)
         , error(ErrorCode::OK)
         , stateBeforeModuleFailed(ProgressCode::Empty)
         , errorBeforeModuleFailed(ErrorCode::OK)
-        , recoveringMovableErrorAxisMask(0) {}
+        , recoveringMovableErrorAxisMask(0)
+        , attempts(attempts) {}
 
     // Normally, a base class should (must) have a virtual destructor to enable correct deallocation of superstructures.
     // However, in our case we don't want ANY destruction of these objects and moreover - adding a destructor like this
@@ -87,7 +88,16 @@ public:
     /// filament presence according to known sensors (FINDA+FSensor)
     static void InvalidateHomingAndFilamentState();
 
+#ifdef UNITTEST
+    inline void SetAttempts(uint8_t att) { attempts = att; }
+    inline uint8_t Attempts() const { return attempts; }
+#endif
+
 protected:
+    /// Inner part of Reset - sets the number of attempts for each Command
+    /// Contains the default implementation for commands, which do not cause any retry-errors (for optimization purposes)
+    virtual bool Reset(uint8_t param, uint8_t att) { return true; }
+
     /// @returns true if the slot/tool index is within specified range (0 - config::toolCount)
     /// If not, it returns false and sets the error to ErrorCode::INVALID_TOOL
     bool CheckToolIndex(uint8_t index);
@@ -104,6 +114,10 @@ protected:
     /// Perform disengaging idler in ErrDisengagingIdler state
     void ErrDisengagingIdler();
 
+    /// Try to repeat the Command if attempts > 0
+    /// Go to ErrDisengageIdler if no more attempts are available
+    void GoToRetryIfPossible(uint8_t slot, ErrorCode ec);
+
     /// Transit the state machine into ErrDisengagingIdler
     void GoToErrDisengagingIdler(ErrorCode ec);
 
@@ -118,6 +132,7 @@ protected:
     ProgressCode stateBeforeModuleFailed; ///< saved state of the state machine before a common error happened
     ErrorCode errorBeforeModuleFailed; ///< saved error of the state machine before a common error happened
     uint8_t recoveringMovableErrorAxisMask;
+    uint8_t attempts; ///< how many attempts shall the state machine try before throwing out an error - obviously this has to be >= 1
 };
 
 } // namespace logic

@@ -20,8 +20,8 @@ namespace logic {
 /// This high-level command is just a way to invoke re-homing from the printer while all safety measures are kept.
 class Home : public CommandBase {
 public:
-    inline Home()
-        : CommandBase() {}
+    constexpr Home()
+        : CommandBase(1) {}
 
     /// Restart the automaton
     /// @param param unused
@@ -29,6 +29,11 @@ public:
 
     /// @returns true if the state machine finished its job, false otherwise
     bool StepInner() override;
+
+#ifndef UNITTEST
+protected:
+#endif
+    virtual bool Reset(uint8_t param, uint8_t att) override { return true; };
 };
 
 /// The one and only instance of Home state machine in the FW

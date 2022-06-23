@@ -20,7 +20,7 @@ struct RetractFromFinda {
         Failed
     };
 
-    inline RetractFromFinda()
+    constexpr RetractFromFinda()
         : state(OK) {}
 
     /// Restart the automaton

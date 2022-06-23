@@ -10,9 +10,7 @@ namespace logic {
 /// @brief A high-level command state machine - handles the complex logic of loading filament into a filament slot.
 class LoadFilament : public CommandBase {
 public:
-    inline LoadFilament()
-        : CommandBase()
-        , verifyLoadedFilament(0) {}
+    LoadFilament();
 
     /// Restart the automaton - performs unlimited rotation of the Pulley
     /// @param param index of filament slot to load
@@ -24,6 +22,11 @@ public:
 
     /// @returns true if the state machine finished its job, false otherwise
     bool StepInner() override;
+
+#ifndef UNITTEST
+protected:
+#endif
+    virtual bool Reset(uint8_t param, uint8_t att) override;
 
 private:
     void GoToRetractingFromFinda();

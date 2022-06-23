@@ -23,7 +23,7 @@ static constexpr modules::motion::P_speed_t ejectSpeed = 1000.0_P_mm_s; //@@TODO
 class EjectFilament : public CommandBase {
 public:
     inline EjectFilament()
-        : CommandBase() {}
+        : CommandBase(1) {}
 
     /// Restart the automaton
     /// @param param index of filament slot to eject
@@ -35,6 +35,10 @@ public:
     ProgressCode State() const override;
 
     ErrorCode Error() const override;
+#ifndef UNITTEST
+protected:
+#endif
+    virtual bool Reset(uint8_t param, uint8_t att) override;
 
 private:
     UnloadFilament unl; ///< a high-level command/operation may be used as a building block of other operations as well

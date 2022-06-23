@@ -19,8 +19,13 @@ bool CutFilament::Reset(uint8_t param) {
         return false;
     }
 
+    return Reset(param, config::toolChangeAttempts);
+}
+
+bool CutFilament::Reset(uint8_t param, uint8_t att) {
     error = ErrorCode::RUNNING;
     cutSlot = param;
+    attempts = att;
 
     if (mg::globals.FilamentLoaded() >= mg::FilamentLoadState::InSelector) {
         state = ProgressCode::UnloadingFilament;

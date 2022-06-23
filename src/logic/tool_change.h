@@ -23,16 +23,16 @@ public:
     ProgressCode State() const override;
 
     ErrorCode Error() const override;
+#ifndef UNITTEST
+protected:
+#endif
+    virtual bool Reset(uint8_t param, uint8_t att) override;
 
 #ifndef UNITTEST
 private:
-#else
-    inline void SetAttempts(uint8_t att) { attempts = att; }
 #endif
     void GoToFeedingToBondtech();
     void GoToFeedingToFinda();
-    bool Reset(uint8_t param, uint8_t att);
-    void GoToRetryIfPossible(ErrorCode ec);
 
     /// Common code for a correct completion of UnloadFilament
     void ToolChangeFinishedCorrectly();
@@ -41,7 +41,6 @@ private:
     FeedToFinda feed;
     FeedToBondtech james; // bond ;)
     uint8_t plannedSlot;
-    uint8_t attempts; ///< how many attempts shall the state machine try before throwing out an error - obviously this has to be >= 1
 };
 
 /// The one and only instance of ToolChange state machine in the FW

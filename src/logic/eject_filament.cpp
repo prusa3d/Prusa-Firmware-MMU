@@ -20,8 +20,13 @@ bool EjectFilament::Reset(uint8_t param) {
         return false;
     }
 
+    return Reset(param, config::toolChangeAttempts);
+}
+
+bool EjectFilament::Reset(uint8_t param, uint8_t att) {
     error = ErrorCode::RUNNING;
     slot = param;
+    attempts = att;
 
     if (mg::globals.FilamentLoaded() == mg::FilamentLoadState::NotLoaded) {
         FinishedOK();

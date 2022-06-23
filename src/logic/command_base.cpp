@@ -186,6 +186,14 @@ bool CommandBase::CheckToolIndex(uint8_t index) {
     }
 }
 
+void CommandBase::GoToRetryIfPossible(uint8_t slot, ErrorCode ec) {
+    if (--attempts) {
+        Reset(slot, attempts);
+    } else {
+        GoToErrDisengagingIdler(ec);
+    }
+}
+
 void CommandBase::ErrDisengagingIdler() {
     if (!mi::idler.Engaged()) {
         state = ProgressCode::ERRWaitingForUser;

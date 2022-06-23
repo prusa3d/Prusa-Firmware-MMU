@@ -23,9 +23,10 @@ struct FeedToFinda {
         Stopped
     };
 
-    inline FeedToFinda()
+    constexpr FeedToFinda()
         : state(OK)
-        , feedPhaseLimited(true) {}
+        , feedPhaseLimited(true)
+        , haltAtEnd(true) {}
 
     /// Restart the automaton
     /// @param feedPhaseLimited

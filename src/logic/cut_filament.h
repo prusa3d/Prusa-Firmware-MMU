@@ -11,7 +11,7 @@ namespace logic {
 class CutFilament : public CommandBase {
 public:
     inline CutFilament()
-        : CommandBase() {}
+        : CommandBase(1) {}
 
     /// Restart the automaton
     /// @param param index of filament slot to perform cut onto
@@ -23,6 +23,10 @@ public:
     ProgressCode State() const override;
 
     ErrorCode Error() const override;
+#ifndef UNITTEST
+protected:
+#endif
+    virtual bool Reset(uint8_t param, uint8_t att) override;
 
 private:
     constexpr static const uint16_t cutStepsPre = 700;

@@ -11,8 +11,7 @@ namespace logic {
 /// @brief A high-level command state machine - handles the complex logic of unloading filament
 class UnloadFilament : public CommandBase {
 public:
-    inline UnloadFilament()
-        : CommandBase() {}
+    UnloadFilament();
 
     /// Restart the automaton
     /// @param param is not used, always unloads from the active slot
@@ -21,9 +20,12 @@ public:
     /// @returns true if the state machine finished its job, false otherwise
     bool StepInner() override;
 
-private:
-    constexpr static const uint8_t maxRetries = 1;
+#ifndef UNITTEST
+protected:
+#endif
+    virtual bool Reset(uint8_t param, uint8_t att) override;
 
+private:
     /// Common code for a correct completion of UnloadFilament
     void UnloadFinishedCorrectly();
     void GoToRetractingFromFinda();

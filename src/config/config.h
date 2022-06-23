@@ -69,7 +69,15 @@ static constexpr uint8_t feedToBondtechMaxRetries = 2;
 
 /// Max attempts of ToolChange before throwing out an error - obviously, this has to be >= 1
 static constexpr uint8_t toolChangeAttempts = 3;
-static_assert(toolChangeAttempts >= 1);
+static_assert(toolChangeAttempts >= 1, "ToolChange's attempts must be > 0");
+
+/// Max attempts of UnloadFilament before throwing out an error - obviously, this has to be >= 1
+static constexpr uint8_t unloadAttempts = 3;
+static_assert(unloadAttempts >= 1, "UnloadFilament's attempts must be > 0");
+
+/// Max attempts of LoadFilament before throwing out an error - obviously, this has to be >= 1
+static constexpr uint8_t loadAttempts = 1;
+static_assert(loadAttempts >= 1, "LoadFilament's attempts must be > 0");
 
 /// Distances
 static constexpr U_mm pulleyToCuttingEdge = 33.0_mm; /// 33.0_mm /// Pulley to cutting edge.
@@ -183,7 +191,7 @@ static constexpr AxisConfig idler = {
     .iHold = 23, /// 398mA
     .stealth = false,
     .stepsPerUnit = (200 * 16 / 360.),
-    .sg_thrs = 7,
+    .sg_thrs = 6,
 };
 
 /// Idler motion limits

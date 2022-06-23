@@ -15,6 +15,10 @@ namespace logic {
 
 LoadFilament loadFilament;
 
+LoadFilament::LoadFilament()
+    : CommandBase(config::loadAttempts)
+    , verifyLoadedFilament(0) {}
+
 bool LoadFilament::Reset(uint8_t param) {
     if (!CheckToolIndex(param)) {
         return false;
@@ -26,9 +30,15 @@ bool LoadFilament::Reset(uint8_t param) {
     if (mg::globals.FilamentLoaded() > mg::FilamentLoadState::AtPulley && mg::globals.ActiveSlot() != param) {
         return false;
     }
+
+    return Reset(param, config::toolChangeAttempts);
+}
+
+bool LoadFilament::Reset(uint8_t param, uint8_t att) {
     dbg_logic_P(PSTR("Load Filament"));
     mg::globals.SetFilamentLoaded(param, mg::FilamentLoadState::AtPulley); // still at pulley, haven't moved yet
     verifyLoadedFilament = 1;
+    attempts = att;
     Reset2(false);
     return true;
 }
@@ -68,7 +78,7 @@ bool LoadFilament::StepInner() {
         if (feed.Step()) {
             switch (feed.State()) {
             case FeedToFinda::Failed: // @@TODO - try to repeat 6x - push/pull sequence - probably something to put into feed_to_finda as an option
-                GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_ON); // signal loading error
+                GoToRetryIfPossible(mg::globals.ActiveSlot(), ErrorCode::FINDA_DIDNT_SWITCH_ON); // signal loading error
                 break;
             case FeedToFinda::Stopped:
                 // as requested in MMU-116 - stopping an unsuccessful feed should retract as well but not check the filament
@@ -83,7 +93,7 @@ bool LoadFilament::StepInner() {
     case ProgressCode::RetractingFromFinda:
         if (retract.Step()) {
             if (retract.State() == RetractFromFinda::Failed) {
-                GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_OFF); // signal loading error
+                GoToRetryIfPossible(mg::globals.ActiveSlot(), ErrorCode::FINDA_DIDNT_SWITCH_OFF); // signal loading error
             } else {
                 if (verifyLoadedFilament) {
                     --verifyLoadedFilament;

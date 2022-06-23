@@ -18,8 +18,7 @@ namespace logic {
 ToolChange toolChange;
 
 ToolChange::ToolChange()
-    : CommandBase()
-    , attempts(config::toolChangeAttempts) {}
+    : CommandBase(config::toolChangeAttempts) {}
 
 bool ToolChange::Reset(uint8_t param) {
     if (!CheckToolIndex(param)) {
@@ -32,39 +31,31 @@ bool ToolChange::Reset(uint8_t param) {
         return true;
     }
 
-    return Reset(param, config::toolChangeAttempts);
-}
-
-bool ToolChange::Reset(uint8_t param, uint8_t att) {
     // @@TODO establish printer in charge of UI processing for the ToolChange command only.
     // We'll see how that works and then probably we'll introduce some kind of protocol settings to switch UI handling.
     mui::userInput.SetPrinterInCharge(true);
 
+    return Reset(param, config::toolChangeAttempts);
+}
+
+bool ToolChange::Reset(uint8_t param, uint8_t att) {
     // we are either already at the correct slot, just the filament is not loaded - load the filament directly
     // or we are standing at another slot ...
     plannedSlot = param;
     attempts = att;
 
-    if (mg::globals.FilamentLoaded() >= mg::FilamentLoadState::InSelector) {
+    // Not sure if we can reach InSelector and NOT finda.Pressed() or vice versa, may be in case of an error.
+    // In any case - if the FINDA is pressed we must do an unload
+    if (mg::globals.FilamentLoaded() >= mg::FilamentLoadState::InSelector && mf::finda.Pressed()) {
         dbg_logic_P(PSTR("Filament is loaded --> unload"));
         state = ProgressCode::UnloadingFilament;
         unl.Reset(mg::globals.ActiveSlot());
     } else {
-        state = ProgressCode::FeedingToFinda;
-        error = ErrorCode::RUNNING;
-        dbg_logic_P(PSTR("Filament is not loaded --> load"));
-        mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::InSelector);
-        feed.Reset(true, false);
+        GoToFeedingToFinda();
+        // @@TODO originally we set: mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::InSelector);
+        // GoToFeedingToFinda sets it to AtPulley (may cause autohome)
     }
     return true;
-}
-
-void ToolChange::GoToRetryIfPossible(ErrorCode ec) {
-    if (--attempts) {
-        Reset(mg::globals.ActiveSlot(), attempts);
-    } else {
-        GoToErrDisengagingIdler(ec);
-    }
 }
 
 void logic::ToolChange::GoToFeedingToBondtech() {
@@ -100,7 +91,7 @@ bool ToolChange::StepInner() {
     case ProgressCode::FeedingToFinda:
         if (feed.Step()) {
             if (feed.State() == FeedToFinda::Failed) {
-                GoToRetryIfPossible(ErrorCode::FINDA_DIDNT_SWITCH_ON); // signal loading error
+                GoToRetryIfPossible(mg::globals.ActiveSlot(), ErrorCode::FINDA_DIDNT_SWITCH_ON); // signal loading error
             } else {
                 GoToFeedingToBondtech();
             }
@@ -110,10 +101,10 @@ bool ToolChange::StepInner() {
         if (james.Step()) {
             switch (james.State()) {
             case FeedToBondtech::Failed:
-                GoToRetryIfPossible(ErrorCode::FSENSOR_DIDNT_SWITCH_ON); // signal loading error
+                GoToRetryIfPossible(mg::globals.ActiveSlot(), ErrorCode::FSENSOR_DIDNT_SWITCH_ON); // signal loading error
                 break;
             case FeedToBondtech::FSensorTooEarly:
-                GoToRetryIfPossible(ErrorCode::FSENSOR_TOO_EARLY); // signal loading error
+                GoToRetryIfPossible(mg::globals.ActiveSlot(), ErrorCode::FSENSOR_TOO_EARLY); // signal loading error
                 break;
             default:
                 ToolChangeFinishedCorrectly();
@@ -143,11 +134,8 @@ bool ToolChange::StepInner() {
             // However - if we run into "FSensor didn't trigger", the situation is exactly opposite - it is beneficial
             // to unload the filament and try the whole sequence again
             // Therefore we only switch to FeedingToFinda if FINDA is not pressed (we suppose the filament is unloaded completely)
-            if (mf::finda.Pressed()) {
-                Reset(mg::globals.ActiveSlot());
-            } else {
-                GoToFeedingToFinda();
-            }
+            // Moved the reset logic into the Reset method
+            Reset(mg::globals.ActiveSlot(), attempts);
             break;
         case mui::Event::Right: // problem resolved - the user pushed the fillament by hand?
             // we should check the state of all the sensors and either report another error or confirm the correct state

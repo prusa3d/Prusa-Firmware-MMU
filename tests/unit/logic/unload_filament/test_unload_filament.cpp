@@ -39,6 +39,7 @@ void RegularUnloadFromSlot04Init(uint8_t slot, logic::UnloadFilament &uf) {
 
     // restart the automaton
     uf.Reset(slot);
+    uf.SetAttempts(1);
 }
 
 void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf, uint8_t entryIdlerSlotIndex,
@@ -121,6 +122,7 @@ void FindaDidntTriggerCommonSetup(uint8_t slot, logic::UnloadFilament &uf) {
 
     // restart the automaton
     uf.Reset(slot);
+    uf.SetAttempts(1);
 
     // Stage 0 - verify state just after Reset()
     // we still think we have filament loaded at this stage
@@ -293,6 +295,7 @@ TEST_CASE("unload_filament::not_loaded", "[unload_filament]") {
 
     // restart the automaton
     uf.Reset(0);
+    uf.SetAttempts(1);
 
     // Stage 0 - unload filament should finish immediately as there is no filament loaded
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), 0, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));

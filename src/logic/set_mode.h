@@ -14,7 +14,7 @@ namespace logic {
 class SetMode : public CommandBase {
 public:
     inline SetMode()
-        : CommandBase() {}
+        : CommandBase(1) {}
 
     /// Restart the automaton
     bool Reset(uint8_t param) override;
@@ -22,6 +22,11 @@ public:
     /// @returns true if the state machine finished its job, false otherwise
     /// Since we perform the TMC2130 mode change in the Reset directly, the return is always true here (command finished ok)
     bool StepInner() override { return true; }
+
+#ifndef UNITTEST
+protected:
+#endif
+    virtual bool Reset(uint8_t param, uint8_t att) override { return true; };
 };
 
 /// The one and only instance of NoCommand state machine in the FW

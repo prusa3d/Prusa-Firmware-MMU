@@ -8,8 +8,8 @@ namespace logic {
 /// @brief A dummy No-command operation just to make the init of the firmware consistent (and cleaner code during processing).
 class NoCommand : public CommandBase {
 public:
-    inline NoCommand()
-        : CommandBase() {}
+    constexpr NoCommand()
+        : CommandBase(1) {}
 
     /// Restart the automaton
     bool Reset(uint8_t /*param*/) override { return true; }
