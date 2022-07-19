@@ -196,6 +196,7 @@ void Application::ProcessRequestMsg(const mp::RequestMsg &rq) {
     case mp::RequestMsgCodes::Button:
         // behave just like if the user pressed a button
         mui::userInput.ProcessMessage(rq.value);
+        ReportCommandAccepted(rq, mp::ResponseMsgParamCodes::Accepted);
         break;
     case mp::RequestMsgCodes::Finda:
         // immediately report FINDA status
