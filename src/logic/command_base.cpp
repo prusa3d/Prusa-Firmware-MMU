@@ -189,15 +189,17 @@ bool CommandBase::CheckToolIndex(uint8_t index) {
 void CommandBase::ErrDisengagingIdler() {
     if (!mi::idler.Engaged()) {
         state = ProgressCode::ERRWaitingForUser;
+        error = deferredErrorCode;
+        deferredErrorCode = ErrorCode::OK; // and clear the deferredEC just for safety
         mg::globals.IncDriveErrors();
         mpu::pulley.Disable();
         mui::userInput.Clear(); // remove all buffered events if any just before we wait for some input
     }
 }
 
-void CommandBase::GoToErrDisengagingIdler(ErrorCode ec) {
+void CommandBase::GoToErrDisengagingIdler(ErrorCode deferredEC) {
     state = ProgressCode::ERRDisengagingIdler;
-    error = ec;
+    deferredErrorCode = deferredEC;
     ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::blink0);
     mi::idler.Disengage();
 }

@@ -26,6 +26,7 @@ public:
     inline CommandBase()
         : state(ProgressCode::OK)
         , error(ErrorCode::OK)
+        , deferredErrorCode(ErrorCode::OK)
         , stateBeforeModuleFailed(ProgressCode::Empty)
         , errorBeforeModuleFailed(ErrorCode::OK)
         , recoveringMovableErrorAxisMask(0) {}
@@ -105,7 +106,7 @@ protected:
     void ErrDisengagingIdler();
 
     /// Transit the state machine into ErrDisengagingIdler
-    void GoToErrDisengagingIdler(ErrorCode ec);
+    void GoToErrDisengagingIdler(ErrorCode deferredEC);
 
     /// Transit the state machine into ErrEngagingIdler
     void GoToErrEngagingIdler();
@@ -115,6 +116,7 @@ protected:
 
     ProgressCode state; ///< current progress state of the state machine
     ErrorCode error; ///< current error code
+    ErrorCode deferredErrorCode; ///< planned error code - occurs when doing GoToErrDisengagingIdler - after the idler disengaged, the error is set (not before)
     ProgressCode stateBeforeModuleFailed; ///< saved state of the state machine before a common error happened
     ErrorCode errorBeforeModuleFailed; ///< saved error of the state machine before a common error happened
     uint8_t recoveringMovableErrorAxisMask;
