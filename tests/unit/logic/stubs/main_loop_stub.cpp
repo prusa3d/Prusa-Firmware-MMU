@@ -1,3 +1,4 @@
+#include "catch2/catch.hpp"
 #include "main_loop_stub.h"
 #include "homing.h"
 
@@ -161,4 +162,18 @@ void SetFSensorStateAndDebounce(bool press) {
     for (uint8_t fs = 0; fs < config::fsensorDebounceMs + 1; ++fs) {
         main_loop();
     }
+}
+
+void SimulateErrDisengagingIdler(logic::CommandBase &cb, ErrorCode deferredEC) {
+    REQUIRE(WhileCondition(
+        cb, [&](uint32_t) {
+            if (cb.TopLevelState() == ProgressCode::ERRDisengagingIdler) {
+                REQUIRE(cb.Error() == ErrorCode::RUNNING); // ensure the error gets never set while disengaging the idler
+                return true;
+            } else {
+                REQUIRE(cb.Error() == deferredEC);
+                return false;
+            }
+        },
+        idlerEngageDisengageMaxSteps));
 }
