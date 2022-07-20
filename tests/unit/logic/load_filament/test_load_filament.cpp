@@ -113,7 +113,8 @@ void FailedLoadToFinda(uint8_t slot, logic::LoadFilament &lf) {
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
 
     // Stage 3 - disengaging idler in error mode
-    REQUIRE(WhileTopState(lf, ProgressCode::ERRDisengagingIdler, idlerEngageDisengageMaxSteps));
+    SimulateErrDisengagingIdler(lf, ErrorCode::FINDA_DIDNT_SWITCH_ON);
+
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));
 }
 

@@ -41,3 +41,5 @@ static constexpr uint32_t idlerEngageDisengageMaxSteps = 40000UL;
 static constexpr uint32_t selectorMoveMaxSteps = 40000UL;
 
 void HomeIdlerAndSelector();
+
+void SimulateErrDisengagingIdler(logic::CommandBase &cb, ErrorCode deferredEC);
