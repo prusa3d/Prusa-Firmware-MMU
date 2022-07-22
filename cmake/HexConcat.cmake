@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 2.8)
+set(HEX_PREFIX "\; device = mm-control\n\n")
+set(HEX_NAME "MM-control-01.hex")
+file(READ ${WORK_DIR}/firmware.hex HEX)
+file(WRITE ${WORK_DIR}/${HEX_NAME} ${HEX_PREFIX})
+file(APPEND ${WORK_DIR}/${HEX_NAME} ${HEX})
+message(status "Successfully built MM-control-01.hex!")

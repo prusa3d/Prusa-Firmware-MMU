@@ -161,6 +161,15 @@ if(CMAKE_CROSSCOMPILING)
 
   # generate linker map file
   target_link_options(firmware PUBLIC -Wl,-Map=firmware.map)
+
+  # Put Prusa Magic™ at the beginning of the hex
+  add_custom_command(
+    TARGET firmware POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -D WORK_DIR=${CMAKE_BINARY_DIR} -P
+            ${CMAKE_SOURCE_DIR}/cmake/HexConcat.cmake
+    DEPENDS firmware.hex
+    )
+
 endif()
 
 target_include_directories(firmware PRIVATE src lib)
