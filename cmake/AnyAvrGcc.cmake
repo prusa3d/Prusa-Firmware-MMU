@@ -2,6 +2,10 @@ get_filename_component(PROJECT_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
 include("${PROJECT_CMAKE_DIR}/Utilities.cmake")
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR avr)
+set(gcc_version 7.3.0)
+# set(CMAKE_CROSSCOMPILING 1)
+set(AVR_TOOLCHAIN_DIR "${PROJECT_CMAKE_DIR}/../.dependencies/gcc-avr-${gcc_version}/")
+message("ToolChain dir is ${AVR_TOOLCHAIN_DIR}")
 
 #
 # Utilities
