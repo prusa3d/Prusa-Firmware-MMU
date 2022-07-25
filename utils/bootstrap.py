@@ -29,30 +29,28 @@ dependencies_dir = project_root_dir / '.dependencies'
 # yapf: disable
 dependencies = {
     'ninja': {
-        'version': '1.9.0',
+        'version': '1.10.2',
         'url': {
-            'Linux': 'https://github.com/ninja-build/ninja/releases/download/v1.9.0/ninja-linux.zip',
-            'Windows': 'https://github.com/ninja-build/ninja/releases/download/v1.9.0/ninja-win.zip',
-            'Darwin': 'https://github.com/ninja-build/ninja/releases/download/v1.9.0/ninja-mac.zip',
+            'Linux': 'https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-linux.zip',
+            'Windows': 'https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip',
+            'Darwin': 'https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-mac.zip',
         },
     },
     'cmake': {
-        'version': '3.15.5',
+        'version': '3.21.3',
         'url': {
-            'Linux': 'https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5-Linux-x86_64.tar.gz',
-            'Windows': 'https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5-win64-x64.zip',
-            'Darwin': 'https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5-Darwin-x86_64.tar.gz',
+            'Linux': 'https://github.com/Kitware/CMake/releases/download/v3.21.3/cmake-3.21.3-linux-x86_64.tar.gz',
+            'Windows': 'https://github.com/Kitware/CMake/releases/download/v3.21.3/cmake-3.21.3-windows-x86_64.zip',
+            'Darwin': 'https://github.com/Kitware/CMake/releases/download/v3.21.3/cmake-3.21.3-macos-universal.tar.gz',
         },
     },
     'gcc-avr': {
-        # dummy placeholder (currently downloading cmake just for the sake of a valid url/zip archive)
-        # ... we truly need the binaries! :)
-        'version': '0.0.0',
+        'version': '7.3.0',
         'url': {
-            'Linux': 'https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5-Linux-x86_64.tar.gz',
-            'Windows': 'https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5-win64-x64.zip',
-            'Darwin': 'https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5-Darwin-x86_64.tar.gz',
-        }
+            'Linux': 'https://ww1.microchip.com/downloads/aemDocuments/documents/DEV/ProductDocuments/SoftwareTools/avr8-gnu-toolchain-3.7.0.1796-linux.any.x86_64.tar.gz',
+            'Windows': 'https://ww1.microchip.com/downloads/aemDocuments/documents/DEV/ProductDocuments/SoftwareTools/avr8-gnu-toolchain-3.7.0.1796-win32.any.x86_64.zip',
+            'Darwin': 'https://ww1.microchip.com/downloads/aemDocuments/documents/DEV/ProductDocuments/SoftwareTools/avr8-gnu-toolchain-osx-3.7.0.518-darwin.any.x86_64.tar.gz',
+        },
     },
     'clang-format': {
         'version': '9.0.0-noext',
