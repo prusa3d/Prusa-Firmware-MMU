@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.12)
 set(HEX_PREFIX "\; device = mm-control\n\n")
 file(READ ${WORK_DIR}/firmware.hex HEX)
 file(WRITE ${WORK_DIR}/${HEX_NAME} ${HEX_PREFIX})
