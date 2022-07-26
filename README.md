@@ -1,9 +1,7 @@
 # Prusa-Firmware-MMU-Private
 
 ## How to prepare build env and tools
-
-run `./utils/bootstrap.py`
-
+Run `./utils/bootstrap.py`
 
 `bootstrap.py` will now download all the "missing" dependencies into the `.dependencies` folder:
 - clang-format-9.0.0-noext
@@ -14,7 +12,7 @@ run `./utils/bootstrap.py`
 ## How to build the preliminary project so far:
 Now the process is the same as in the Buddy Firmware:
 ```
-utils/build.py
+./utils/build.py
 ```
 
 builds the firmware.hex in build/mmu_release
@@ -23,7 +21,7 @@ In case you'd like to build the project directly via cmake you can use an approa
 ```
 mkdir build
 cd build
-cmake .. -G Ninja -DCMAKE_TOOLCHAIN_FILE=../cmake/AnyAvrGcc.cmake
+cmake .. -G Ninja -DCMAKE_TOOLCHAIN_FILE=../cmake/AvrGcc.cmake
 ninja
 ```
 

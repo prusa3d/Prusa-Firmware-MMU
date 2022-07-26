@@ -25,6 +25,7 @@ set(TOOLCHAIN_PREFIX avr-)
 
 if(AVR_TOOLCHAIN_DIR)
   # using toolchain set by AvrGcc.cmake (locked version)
+  message("ToolChain dir is ${AVR_TOOLCHAIN_DIR}")
   set(BINUTILS_PATH "${AVR_TOOLCHAIN_DIR}/bin")
 else()
   # search for ANY avr-gcc toolchain
