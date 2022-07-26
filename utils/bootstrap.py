@@ -43,7 +43,7 @@ dependencies = {
             'Darwin': 'https://github.com/Kitware/CMake/releases/download/v3.22.5/cmake-3.22.5-macos-universal.tar.gz',
         },
     },
-    'gcc-avr': {
+    'avr-gcc': {
         'version': '7.3.0',
         'url': {
             'Linux': 'https://ww1.microchip.com/downloads/aemDocuments/documents/DEV/ProductDocuments/SoftwareTools/avr8-gnu-toolchain-3.7.0.1796-linux.any.x86_64.tar.gz',
