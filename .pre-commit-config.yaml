@@ -28,13 +28,6 @@ repos:
     - id: mixed-line-ending
 exclude: |
   (?x)(
-    ^tests/unit/lang/translator/(keys|cs|es|fr|de|pl|it)\.txt$|
-    ^lib/inih/|
-    ^lib/Marlin/|
-    ^lib/Prusa-Error-Codes/|
-    ^lib/TMCStepper/|
-    ^lib/Middlewares/Third_Party/LwIP/|
-    ^lib/jsmn/|
     ^lib/lufa/|
     ^lib/Catch2/
   )
