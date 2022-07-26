@@ -7,7 +7,7 @@ Run `./utils/bootstrap.py`
 - clang-format-9.0.0-noext
 - cmake-3.22.5
 - ninja-1.10.2
-- gcc-avr-7.3.0
+- avr-gcc-7.3.0
 
 ## How to build the preliminary project so far:
 Now the process is the same as in the Buddy Firmware:

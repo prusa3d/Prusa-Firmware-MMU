@@ -69,7 +69,6 @@ class BuildType(Enum):
 
 
 class BuildConfiguration(ABC):
-
     @abstractmethod
     def get_cmake_cache_entries(self):
         """Convert the build configuration to CMake cache entries."""
@@ -87,7 +86,6 @@ class BuildConfiguration(ABC):
 
 
 class FirmwareBuildConfiguration(BuildConfiguration):
-
     def __init__(self,
                  build_type: BuildType,
                  toolchain: Path = None,
@@ -115,7 +113,7 @@ class FirmwareBuildConfiguration(BuildConfiguration):
         entries.extend([
             ('CMAKE_MAKE_PROGRAM', 'FILEPATH', str(get_dependency('ninja'))),
             ('CMAKE_TOOLCHAIN_FILE', 'FILEPATH', str(self.toolchain)),
-            ('AVR_TOOLCHAIN_DIR', 'DIRPATH', str(get_dependency('gcc-avr'))),
+            ('AVR_TOOLCHAIN_DIR', 'DIRPATH', str(get_dependency('avr-gcc'))),
             ('CMAKE_BUILD_TYPE', 'STRING', self.build_type.value.title()),
             ('PROJECT_VERSION_SUFFIX', 'STRING', self.version_suffix or ''),
             ('PROJECT_VERSION_SUFFIX_SHORT', 'STRING',
