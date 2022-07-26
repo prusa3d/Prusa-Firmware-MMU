@@ -69,6 +69,7 @@ class BuildType(Enum):
 
 
 class BuildConfiguration(ABC):
+
     @abstractmethod
     def get_cmake_cache_entries(self):
         """Convert the build configuration to CMake cache entries."""
@@ -86,6 +87,7 @@ class BuildConfiguration(ABC):
 
 
 class FirmwareBuildConfiguration(BuildConfiguration):
+
     def __init__(self,
                  build_type: BuildType,
                  toolchain: Path = None,
@@ -103,7 +105,7 @@ class FirmwareBuildConfiguration(BuildConfiguration):
 
     @staticmethod
     def default_toolchain() -> Path:
-        return Path(__file__).resolve().parent.parent / 'cmake/AnyAvrGcc.cmake'
+        return Path(__file__).resolve().parent.parent / 'cmake/AvrGcc.cmake'
 
     def get_cmake_cache_entries(self):
         entries = []
