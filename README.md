@@ -25,4 +25,4 @@ cmake .. -G Ninja -DCMAKE_TOOLCHAIN_FILE=../cmake/AvrGcc.cmake
 ninja
 ```
 
-Should produce a MM-control-01.hex file as well.
+It will produce a `MMU2SR_<version>.hex` file.
