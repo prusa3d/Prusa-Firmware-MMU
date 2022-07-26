@@ -165,8 +165,10 @@ if(CMAKE_CROSSCOMPILING)
   # Put Prusa Magic™ at the beginning of the hex
   add_custom_command(
     TARGET firmware POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -D WORK_DIR=${CMAKE_BINARY_DIR} -P
-            ${CMAKE_SOURCE_DIR}/cmake/HexConcat.cmake
+    COMMAND
+      ${CMAKE_COMMAND} -D WORK_DIR=${CMAKE_BINARY_DIR} -D
+      HEX_NAME="MMU2SR_${PROJECT_VERSION}${PROJECT_VERSION_SUFFIX_SHORT}.hex" -P
+      ${CMAKE_SOURCE_DIR}/cmake/HexConcat.cmake
     DEPENDS firmware.hex
     )
 
