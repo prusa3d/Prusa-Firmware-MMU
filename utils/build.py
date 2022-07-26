@@ -42,7 +42,7 @@ def bootstrap(*args, interactive=False, check=False):
 
 
 def project_version():
-    """Return current project version (e. g. "4.0.3")"""
+    """Return current project version (e. g. "2.0.0")"""
     with open(project_root / 'version.txt', 'r') as f:
         return f.read().strip()
 
@@ -113,6 +113,7 @@ class FirmwareBuildConfiguration(BuildConfiguration):
         entries.extend([
             ('CMAKE_MAKE_PROGRAM', 'FILEPATH', str(get_dependency('ninja'))),
             ('CMAKE_TOOLCHAIN_FILE', 'FILEPATH', str(self.toolchain)),
+            ('AVR_TOOLCHAIN_DIR', 'DIRPATH', str(get_dependency('gcc-avr'))),
             ('CMAKE_BUILD_TYPE', 'STRING', self.build_type.value.title()),
             ('PROJECT_VERSION_SUFFIX', 'STRING', self.version_suffix or ''),
             ('PROJECT_VERSION_SUFFIX_SHORT', 'STRING',
@@ -139,6 +140,7 @@ class FirmwareBuildConfiguration(BuildConfiguration):
 
 class BuildResult:
     """Represents a result of an attempt to build the project."""
+
     def __init__(self, config_returncode: int, build_returncode: Optional[int],
                  stdout: Path, stderr: Path, products: List[Path]):
         self.config_returncode = config_returncode
@@ -241,6 +243,7 @@ def store_products(products: List[Path], build_config: BuildConfiguration,
 
 def list_of(EnumType):
     """Create an argument-parser for comma-separated list of values of some Enum subclass."""
+
     def convert(val):
         if val == '':
             return []
