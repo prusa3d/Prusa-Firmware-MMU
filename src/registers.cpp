@@ -5,12 +5,12 @@
 #endif
 
 #include "registers.h"
-#include "version.h"
 #include "application.h"
+#include "version.h"
 
-#include "modules/globals.h"
 #include "modules/finda.h"
 #include "modules/fsensor.h"
+#include "modules/globals.h"
 
 struct RegisterFlags {
     uint8_t writable : 1;
@@ -34,7 +34,7 @@ struct RegisterRec {
     union U1 {
         void *addr;
         TReadFunc readFunc;
-        constexpr explicit U1(TReadFunc r)
+        constexpr explicit U1(const TReadFunc &r)
             : readFunc(r) {}
         constexpr explicit U1(void *a)
             : addr(a) {}
@@ -43,7 +43,7 @@ struct RegisterRec {
     union U2 {
         void *addr;
         TWriteFunc writeFunc;
-        constexpr explicit U2(TWriteFunc w)
+        constexpr explicit U2(const TWriteFunc &w)
             : writeFunc(w) {}
         constexpr explicit U2(void *a)
             : addr(a) {}
@@ -54,12 +54,12 @@ struct RegisterRec {
         : flags(RegisterFlags(writable, sizeof(T)))
         , A1((void *)address)
         , A2((void *)nullptr) {}
-    constexpr RegisterRec(TReadFunc readFunc, uint8_t bytes)
+    constexpr RegisterRec(const TReadFunc &readFunc, uint8_t bytes)
         : flags(RegisterFlags(false, true, bytes))
         , A1(readFunc)
         , A2((void *)nullptr) {}
 
-    constexpr RegisterRec(TReadFunc readFunc, TWriteFunc writeFunc, uint8_t bytes)
+    constexpr RegisterRec(const TReadFunc &readFunc, const TWriteFunc &writeFunc, uint8_t bytes)
         : flags(RegisterFlags(true, true, bytes))
         , A1(readFunc)
         , A2(writeFunc) {}
@@ -68,6 +68,9 @@ struct RegisterRec {
 // @@TODO it is nice to see all the supported registers at one spot,
 // however it requires including all bunch of dependencies
 // which makes unit testing and separation of modules much harder.
+// @@TODO clang complains that we are initializing this array with an uninitialized referenced variables (e.g. mg::globals)
+// Imo that should be safe as long as we don't call anything from this array before the FW init is completed (which we don't).
+// Otherwise all the addresses of global variables should be known at compile time and the registers array should be consistent.
 static const RegisterRec registers[] PROGMEM = {
     RegisterRec(false, &project_major),
 
@@ -86,19 +89,19 @@ static const RegisterRec registers[] PROGMEM = {
 
     RegisterRec( // filamentState
         []() -> uint16_t { return mg::globals.FilamentLoaded(); },
-        [](uint16_t v) { return mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), (mg::FilamentLoadState)v); },
+        [](uint16_t v) { return mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), static_cast<mg::FilamentLoadState>(v)); },
         1),
 
     RegisterRec( // FINDA
-        []() -> uint16_t { return mf::finda.Pressed(); },
+        []() -> uint16_t { return static_cast<uint16_t>(mf::finda.Pressed()); },
         1),
 
     RegisterRec( // fsensor
-        []() -> uint16_t { return mfs::fsensor.Pressed(); },
-        [](uint16_t v) { return mfs::fsensor.ProcessMessage(v); },
+        []() -> uint16_t { return static_cast<uint16_t>(mfs::fsensor.Pressed()); },
+        [](uint16_t v) { return mfs::fsensor.ProcessMessage(v != 0); },
         1),
 
-    RegisterRec([]() -> uint16_t { return mg::globals.MotorsStealth(); }, 1), // mode (stealth = 1/normal = 0)
+    RegisterRec([]() -> uint16_t { return static_cast<uint16_t>(mg::globals.MotorsStealth()); }, 1), // mode (stealth = 1/normal = 0)
 
     RegisterRec( // extra load distance after fsensor triggered (30mm default)
         []() -> uint16_t { return mg::globals.FSensorToNozzleMM(); },
@@ -127,10 +130,10 @@ bool ReadRegister(uint8_t address, uint16_t &value) {
         switch (registers[address].flags.size) {
         case 0:
         case 1:
-            value = *(uint8_t *)registers[address].A1.addr;
+            value = *static_cast<uint8_t *>(registers[address].A1.addr);
             break;
         case 2:
-            value = *(uint16_t *)registers[address].A1.addr;
+            value = *static_cast<uint16_t *>(registers[address].A1.addr);
             break;
         default:
             return false;
@@ -161,10 +164,10 @@ bool WriteRegister(uint8_t address, uint16_t value) {
         switch (registers[address].flags.size) {
         case 0:
         case 1:
-            *(uint8_t *)registers[address].A1.addr = value;
+            *static_cast<uint8_t *>(registers[address].A1.addr) = value;
             break;
         case 2:
-            *(uint16_t *)registers[address].A1.addr = value;
+            *static_cast<uint16_t *>(registers[address].A1.addr) = value;
             break;
         default:
             return false;
