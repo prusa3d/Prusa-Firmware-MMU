@@ -15,9 +15,9 @@ void MovableBase::PlanHome() {
     mm::motion.StallGuardReset(axis);
 
     // plan move at least as long as the axis can go from one side to the other
-    PlanHomingMoveForward();
-    state = HomeForward;
+    state = HomeForward; // beware - the derived class may change the state if necessary
     currentSlot = -1; // important - other state machines may be waiting for a valid Slot() which is not yet correct while homing in progress
+    PlanHomingMoveForward();
 }
 
 MovableBase::OperationResult MovableBase::InitMovement() {
