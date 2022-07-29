@@ -7,6 +7,7 @@
 #include "permanent_storage.h"
 #include "../debug.h"
 #include "globals.h"
+#include "idler.h" // @@TODO this is not nice - introduces dependency between the idler and selector - presumably electrical reasons :(
 
 namespace modules {
 namespace selector {
@@ -19,7 +20,7 @@ void Selector::PrepareMoveToPlannedSlot() {
 }
 
 void Selector::PlanHomingMoveForward() {
-    mm::motion.PlanMove<mm::Selector>(mm::unitToAxisUnit<mm::S_pos_t>(-config::selectorLimits.lenght * 2), mm::unitToAxisUnit<mm::S_speed_t>(config::selectorFeedrate));
+    state = PlannedHome;
     dbg_logic_P(PSTR("Plan Homing Selector Forward"));
 }
 
@@ -92,6 +93,16 @@ bool Selector::Step() {
     case Moving:
         PerformMove();
         //dbg_logic_P(PSTR("Moving Selector"));
+        return false;
+    case PlannedHome:
+        // A testing workaround for presumed electrical reasons why the Idler and Selector cannot perform reliable homing together.
+        // Let's wait for the Idler to finish homing before homing the selector.
+        // This will surely break the unit tests, but that's not the point at this stage.
+        if (mi::idler.HomingValid()) {
+            // idler is ok, we can start homing the selector
+            state = HomeForward;
+            mm::motion.PlanMove<mm::Selector>(mm::unitToAxisUnit<mm::S_pos_t>(-config::selectorLimits.lenght * 2), mm::unitToAxisUnit<mm::S_speed_t>(config::selectorFeedrate));
+        }
         return false;
     case HomeForward:
         dbg_logic_P(PSTR("Homing Selector Forward"));

@@ -14,6 +14,7 @@ public:
     enum {
         Ready = 0, // intentionally set as zero in order to allow zeroing the Idler structure upon startup -> avoid explicit initialization code
         Moving,
+        PlannedHome,
         HomeForward,
         HomeBack,
         TMCFailed,
