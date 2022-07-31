@@ -13,13 +13,9 @@
 #
 # ~~~
 
-# PROJECT_VERSION
-file(READ "${CMAKE_SOURCE_DIR}/version.txt" content)
-string(REGEX MATCH "([0-9]+)\.([0-9]+)\.([0-9]+)" result "${content}")
-if(NOT result)
-  message(FATAL_ERROR "Failed to read version info from ${version_file}")
-endif()
-set(PROJECT_VERSION ${CMAKE_MATCH_0})
+include(${CMAKE_SOURCE_DIR}/version.cmake)
+
+set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_REV}")
 
 function(resolve_version_variables)
   # BUILD_NUMBER
