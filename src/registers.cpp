@@ -11,6 +11,8 @@
 #include "modules/finda.h"
 #include "modules/fsensor.h"
 #include "modules/globals.h"
+#include "modules/idler.h"
+#include "modules/selector.h"
 
 struct RegisterFlags {
     uint8_t writable : 1;
@@ -28,6 +30,9 @@ struct RegisterFlags {
 
 using TReadFunc = uint16_t (*)();
 using TWriteFunc = void (*)(uint16_t);
+
+// dummy zero register common to all empty registers
+static constexpr uint16_t dummyZero = 0;
 
 struct RegisterRec {
     RegisterFlags flags;
@@ -63,6 +68,11 @@ struct RegisterRec {
         : flags(RegisterFlags(true, true, bytes))
         , A1(readFunc)
         , A2(writeFunc) {}
+
+    constexpr RegisterRec()
+        : flags(RegisterFlags(false, false, 1))
+        , A1((void *)&dummyZero)
+        , A2((void *)nullptr) {}
 };
 
 // @@TODO it is nice to see all the supported registers at one spot,
@@ -71,51 +81,140 @@ struct RegisterRec {
 // @@TODO clang complains that we are initializing this array with an uninitialized referenced variables (e.g. mg::globals)
 // Imo that should be safe as long as we don't call anything from this array before the FW init is completed (which we don't).
 // Otherwise all the addresses of global variables should be known at compile time and the registers array should be consistent.
+//
+// Note:
+// The lambas seem to be pretty cheap:
+//    void SetFSensorToNozzleFeedrate(uint8_t fs2NozzleFeedrate) { fsensorToNozzleFeedrate = fs2NozzleFeedrate; }
+// compiles to:
+// sts <modules::globals::globals+0x4>, r24
+// ret
 static const RegisterRec registers[] PROGMEM = {
+    // 0x00
     RegisterRec(false, &project_major),
-
+    // 0x01
     RegisterRec(false, &project_minor),
-
+    // 0x02
+    RegisterRec(false, &project_revision),
+    // 0x03
     RegisterRec(false, &project_build_number),
-
+    // 0x04
     RegisterRec( // MMU errors
         []() -> uint16_t { return mg::globals.DriveErrors(); },
         [](uint16_t) {}, // @@TODO think about setting/clearing the error counter from the outside
         2),
-
+    // 0x05
     RegisterRec([]() -> uint16_t { return application.CurrentProgressCode(); }, 1),
-
+    // 0x06
     RegisterRec([]() -> uint16_t { return application.CurrentErrorCode(); }, 2),
-
-    RegisterRec( // filamentState
+    // 0x07 filamentState
+    RegisterRec(
         []() -> uint16_t { return mg::globals.FilamentLoaded(); },
         [](uint16_t v) { return mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), static_cast<mg::FilamentLoadState>(v)); },
         1),
-
-    RegisterRec( // FINDA
+    // 0x08 FINDA
+    RegisterRec(
         []() -> uint16_t { return static_cast<uint16_t>(mf::finda.Pressed()); },
         1),
-
-    RegisterRec( // fsensor
+    // 09 fsensor
+    RegisterRec(
         []() -> uint16_t { return static_cast<uint16_t>(mfs::fsensor.Pressed()); },
         [](uint16_t v) { return mfs::fsensor.ProcessMessage(v != 0); },
         1),
+    // 0xa motor mode (stealth = 1/normal = 0)
+    RegisterRec([]() -> uint16_t { return static_cast<uint16_t>(mg::globals.MotorsStealth()); }, 1),
+    // 0xb extra load distance after fsensor triggered (30mm default)
+    RegisterRec(
+        []() -> uint16_t { return mg::globals.FSensorToNozzle_mm().v; },
+        [](uint16_t d) { mg::globals.SetFSensorToNozzle_mm(d); },
+        1),
+    // 0x0c fsensor unload check distance (40mm default)
+    RegisterRec(
+        []() -> uint16_t { return mg::globals.FSensorUnloadCheck_mm().v; },
+        [](uint16_t d) { mg::globals.SetFSensorUnloadCheck_mm(d); },
+        1),
+    // 0xd empty register - one empty register takes 5 bytes of code
+    RegisterRec(),
+    // 0xe
+    RegisterRec(),
+    // 0xf
+    RegisterRec(),
 
-    RegisterRec([]() -> uint16_t { return static_cast<uint16_t>(mg::globals.MotorsStealth()); }, 1), // mode (stealth = 1/normal = 0)
+    // Pulley
+    // 0x10 Pulley acceleration RW
+    RegisterRec(
+        []() -> uint16_t { return config::pulleyLimits.accel.v; },
+        //@@TODO
+        1),
+    // 0x11 2 Pulley fast load feedrate RW
+    RegisterRec(
+        []() -> uint16_t { return mg::globals.PulleyLoadFeedrate_mm_s().v; },
+        [](uint16_t d) { mg::globals.SetPulleyLoadFeedrate_mm_s(d); },
+        2),
+    // 0x12 2 Pulley slow load to fsensor feedrate RW
+    RegisterRec(
+        []() -> uint16_t { return mg::globals.PulleySlowFeedrate_mm_s().v; },
+        [](uint16_t d) { mg::globals.SetPulleySlowFeedrate_mm_s(d); },
+        2),
+    // 0x13 2 Pulley unload feedrate RW
+    RegisterRec(
+        []() -> uint16_t { return mg::globals.PulleyUnloadFeedrate_mm_s().v; },
+        [](uint16_t d) { mg::globals.SetPulleyUnloadFeedrate_mm_s(d); },
+        2),
+    RegisterRec(), // 14
+    RegisterRec(), // 15
+    RegisterRec(), // 16
+    RegisterRec(), // 17
+    RegisterRec(), // 18
+    RegisterRec(), // 19
+    RegisterRec(), // 1a
+    RegisterRec(), // 1b
+    RegisterRec(), // 1c
+    RegisterRec(), // 1d
+    RegisterRec(), // 1e
+    RegisterRec(), // 1f
 
-    RegisterRec( // extra load distance after fsensor triggered (30mm default)
-        []() -> uint16_t { return mg::globals.FSensorToNozzleMM(); },
-        [](uint16_t d) { mg::globals.SetFSensorToNozzleMM(d); },
+    // Selector
+    //20 2 Selector acceleration  RW
+    RegisterRec(
+        []() -> uint16_t { return config::selectorLimits.accel.v; },
+        //@@TODO
+        1),
+    //21 2 Selector nominal speed  RW
+    RegisterRec(
+        []() -> uint16_t { return mg::globals.SelectorFeedrate_mm_s().v; },
+        [](uint16_t d) { mg::globals.SetSelectorFeedrate_mm_s(d); },
+        2),
+    //22 2 Selector sg_thrs  RW
+    RegisterRec(
+        []() -> uint16_t { return config::selector.sg_thrs; },
+        //@@TODO
+        1),
+    //23 1 Set/Get Selector slot RW
+    RegisterRec(
+        []() -> uint16_t { return ms::selector.Slot(); },
+        [](uint16_t d) { ms::selector.MoveToSlot(d); },
         1),
 
-    // The lambas seem to be pretty cheap:
-    //    void SetFSensorToNozzleFeedrate(uint8_t fs2NozzleFeedrate) { fsensorToNozzleFeedrate = fs2NozzleFeedrate; }
-    // compiles to:
-    // sts <modules::globals::globals+0x4>, r24
-    // ret
-    RegisterRec( // extra load distance after fsensor triggered - feedrate (20mm/s default)
-        []() -> uint16_t { return mg::globals.FSensorToNozzleFeedrate(); },
-        [](uint16_t d) { mg::globals.SetFSensorToNozzleFeedrate(d); },
+    // Idler
+    //30 2 Idler acceleration  RW
+    RegisterRec(
+        []() -> uint16_t { return config::idlerLimits.accel.v; },
+        //@@TODO
+        1),
+    //31 2 Idler nominal speed  RW
+    RegisterRec(
+        []() -> uint16_t { return mg::globals.IdlerFeedrate_deg_s().v; },
+        [](uint16_t d) { mg::globals.SetIdlerFeedrate_deg_s(d); },
+        1),
+    //32 2 Idler sg_thrs  RW
+    RegisterRec(
+        []() -> uint16_t { return config::idler.sg_thrs; },
+        //@@TODO
+        1),
+    //33 1 Set/Get Idler slot  RW
+    RegisterRec(
+        []() -> uint16_t { return mi::idler.Slot(); },
+        // [](uint16_t d) { mi::idler.MoveToSlot(d); }, // @@TODO can be theoretically done as well
         1),
 };
 
