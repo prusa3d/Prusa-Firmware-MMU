@@ -168,6 +168,7 @@ static constexpr U_mm selectorSlotPositions[toolCount + 1] = {
 };
 
 static constexpr U_mm_s selectorFeedrate = 45._mm_s;
+static constexpr U_mm_s selectorHomingFeedrate = 30._mm_s;
 /// End: Selector configuration
 
 /// Begin: Idler configuration
@@ -179,7 +180,7 @@ static constexpr AxisConfig idler = {
     .iHold = 23, /// 398mA
     .stealth = false,
     .stepsPerUnit = (200 * 16 / 360.),
-    .sg_thrs = 7,
+    .sg_thrs = 5,
 };
 
 /// Idler motion limits
@@ -206,6 +207,7 @@ static constexpr U_deg idlerSlotPositions[toolCount + 1] = {
 static constexpr U_deg idlerParkPositionDelta = -IdlerSlotDistance + 5.0_deg / 2; ///@TODO verify
 
 static constexpr U_deg_s idlerFeedrate = 300._deg_s;
+static constexpr U_deg_s idlerHomingFeedrate = 265._deg_s;
 /// End: Idler configuration
 
 // TMC2130 setup
