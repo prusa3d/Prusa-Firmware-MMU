@@ -20,7 +20,7 @@
 #include "logic/tool_change.h"
 #include "logic/unload_filament.h"
 
-#include "version.h"
+#include "version.hpp"
 
 #include "panic.h"
 

@@ -6,7 +6,7 @@
 
 #include "registers.h"
 #include "application.h"
-#include "version.h"
+#include "version.hpp"
 
 #include "modules/finda.h"
 #include "modules/fsensor.h"
