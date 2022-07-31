@@ -8,7 +8,8 @@ namespace hal {
 namespace tmc2130 {
 
 bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, MotorMode mode) {
-    sg_filter_threshold = (1 << (8 - params.mRes));
+    // sg_filter_threshold = (1 << (8 - params.mRes));
+    sg_filter_threshold = 2;
 
     gpio::Init(params.csPin, gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::high));
     gpio::Init(params.sgPin, gpio::GPIO_InitTypeDef(gpio::Mode::input, gpio::Pull::up));
