@@ -24,9 +24,7 @@ void logic::FeedToBondtech::GoToPushToNozzle() {
     mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InFSensor);
     // plan a slow move to help push filament into the nozzle
     //@@TODO the speed in mm/s must correspond to printer's feeding speed!
-    mpu::pulley.PlanMove(
-        config::U_mm({ (long double)mg::globals.FSensorToNozzleMM() }),
-        config::U_mm_s({ (long double)mg::globals.FSensorToNozzleFeedrate() }));
+    mpu::pulley.PlanMove(mg::globals.FSensorToNozzle_mm(), mg::globals.PulleySlowFeedrate_mm_s());
     state = PushingFilamentIntoNozzle;
 }
 
@@ -39,9 +37,13 @@ bool FeedToBondtech::Step() {
             state = PushingFilamentFast;
             mpu::pulley.InitAxis();
             // plan a fast move while in the safe minimal length
-            mpu::pulley.PlanMove(config::minimumBowdenLength, config::pulleyLoadFeedrate, config::pulleySlowFeedrate);
+            mpu::pulley.PlanMove(config::minimumBowdenLength,
+                mg::globals.PulleyLoadFeedrate_mm_s(),
+                mg::globals.PulleySlowFeedrate_mm_s());
             // plan additional slow move while waiting for fsensor to trigger
-            mpu::pulley.PlanMove(config::maximumBowdenLength - config::minimumBowdenLength, config::pulleySlowFeedrate, config::pulleySlowFeedrate);
+            mpu::pulley.PlanMove(config::maximumBowdenLength - config::minimumBowdenLength,
+                mg::globals.PulleySlowFeedrate_mm_s(),
+                mg::globals.PulleySlowFeedrate_mm_s());
         }
         return false;
     case PushingFilamentFast:

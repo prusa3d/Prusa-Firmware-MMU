@@ -1,6 +1,7 @@
 /// @file globals.h
 #pragma once
 #include <stdint.h>
+#include "../config/config.h"
 
 namespace modules {
 
@@ -61,13 +62,33 @@ public:
     /// @returns true if the motors are to be operated in stealth mode
     bool MotorsStealth() const { return stealthMode; }
 
-    uint8_t FSensorToNozzleMM() const { return fsensorToNozzleMM; }
-    void ResetFSensorToNozzleMM();
-    void SetFSensorToNozzleMM(uint8_t fss2NozzleMM) { fsensorToNozzleMM = fss2NozzleMM; }
+    config::U_mm FSensorToNozzle_mm() const { return config::U_mm({ (long double)fsensorToNozzle_mm }); }
+    void ResetFSensorToNozzle() { fsensorToNozzle_mm = config::fsensorToNozzle.v; }
+    void SetFSensorToNozzle_mm(uint8_t fss2Nozzle_mm) { fsensorToNozzle_mm = fss2Nozzle_mm; }
 
-    uint8_t FSensorToNozzleFeedrate() const { return fsensorToNozzleFeedrate; }
-    void ResetFSensorToNozzleFeedrate();
-    void SetFSensorToNozzleFeedrate(uint8_t fs2NozzleFeedrate) { fsensorToNozzleFeedrate = fs2NozzleFeedrate; }
+    config::U_mm FSensorUnloadCheck_mm() const { return config::U_mm({ (long double)fsensorUnloadCheck_mm }); }
+    void ResetFSensorUnloadCheck() { fsensorUnloadCheck_mm = config::fsensorUnloadCheckDistance.v; }
+    void SetFSensorUnloadCheck_mm(uint8_t fs2UnlCheck_mm) { fsensorUnloadCheck_mm = fs2UnlCheck_mm; }
+
+    config::U_mm_s PulleyLoadFeedrate_mm_s() const { return config::U_mm_s({ (long double)pulleyLoadFeedrate_mm_s }); }
+    void ResetPulleyLoadFeedrate() { pulleyLoadFeedrate_mm_s = config::pulleyLoadFeedrate.v; }
+    void SetPulleyLoadFeedrate_mm_s(uint16_t pulleyLoadFR_mm_s) { pulleyLoadFeedrate_mm_s = pulleyLoadFR_mm_s; }
+
+    config::U_mm_s PulleySlowFeedrate_mm_s() const { return config::U_mm_s({ (long double)pulleySlowFeedrate_mm_s }); }
+    void ResetPulleySlowFeedrate() { pulleySlowFeedrate_mm_s = config::pulleySlowFeedrate.v; }
+    void SetPulleySlowFeedrate_mm_s(uint16_t pulleySlowFR_mm_s) { pulleySlowFeedrate_mm_s = pulleySlowFR_mm_s; }
+
+    config::U_mm_s PulleyUnloadFeedrate_mm_s() const { return config::U_mm_s({ (long double)pulleyUnloadFeedrate_mm_s }); }
+    void ResetPulleyUnloadFeedrate() { pulleyUnloadFeedrate_mm_s = config::pulleyUnloadFeedrate.v; }
+    void SetPulleyUnloadFeedrate_mm_s(uint16_t pulleyUnloadFR_mm_s) { pulleyUnloadFeedrate_mm_s = pulleyUnloadFR_mm_s; }
+
+    config::U_mm_s SelectorFeedrate_mm_s() const { return config::U_mm_s({ (long double)selectorFeedrate_mm_s }); }
+    void ResetSelectorFeedrate() { selectorFeedrate_mm_s = config::selectorFeedrate.v; }
+    void SetSelectorFeedrate_mm_s(uint16_t selectorFR_mm_s) { selectorFeedrate_mm_s = selectorFR_mm_s; }
+
+    config::U_deg_s IdlerFeedrate_deg_s() const { return config::U_deg_s({ (long double)idlerFeedrate_deg_s }); }
+    void ResetIdlerFeedrate() { idlerFeedrate_deg_s = config::idlerFeedrate.v; }
+    void SetIdlerFeedrate_deg_s(uint16_t idlerFR_deg_s) { idlerFeedrate_deg_s = idlerFR_deg_s; }
 
 private:
     /// Sets the active slot, usually after some command/operation.
@@ -78,8 +99,16 @@ private:
     uint8_t activeSlot;
     FilamentLoadState filamentLoaded;
     bool stealthMode;
-    uint8_t fsensorToNozzleMM;
-    uint8_t fsensorToNozzleFeedrate;
+    uint8_t fsensorToNozzle_mm;
+    uint8_t fsensorUnloadCheck_mm;
+
+    uint16_t pulleyLoadFeedrate_mm_s;
+    uint16_t pulleySlowFeedrate_mm_s;
+    uint16_t pulleyUnloadFeedrate_mm_s;
+
+    uint16_t selectorFeedrate_mm_s;
+
+    uint16_t idlerFeedrate_deg_s;
 };
 
 /// The one and only instance of global state variables

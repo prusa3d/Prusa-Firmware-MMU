@@ -39,12 +39,12 @@ bool UnloadToFinda::Step() {
             state = WaitingForFINDA;
             mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InSelector);
             unloadStart_mm = mpu::pulley.CurrentPosition_mm();
-            mpu::pulley.PlanMove(-config::defaultBowdenLength - config::feedToFinda - config::filamentMinLoadedToMMU, config::pulleyUnloadFeedrate);
+            mpu::pulley.PlanMove(-config::defaultBowdenLength - config::feedToFinda - config::filamentMinLoadedToMMU, mg::globals.PulleyUnloadFeedrate_mm_s());
         }
         return false;
     case WaitingForFINDA: {
         int32_t currentPulley_mm = mpu::pulley.CurrentPosition_mm();
-        if ((abs(unloadStart_mm - currentPulley_mm) > mm::truncatedUnit(config::fsensorUnloadCheckDistance)) && mfs::fsensor.Pressed()) {
+        if ((abs(unloadStart_mm - currentPulley_mm) > mm::truncatedUnit(mg::globals.FSensorUnloadCheck_mm())) && mfs::fsensor.Pressed()) {
             // fsensor didn't trigger within the first fsensorUnloadCheckDistance mm -> stop pulling, something failed, report an error
             // This scenario should not be tried again - repeating it may cause more damage to filament + potentially more collateral damage
             state = FailedFSensor;

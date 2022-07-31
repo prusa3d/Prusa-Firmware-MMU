@@ -15,7 +15,7 @@ namespace selector {
 Selector selector;
 
 void Selector::PrepareMoveToPlannedSlot() {
-    mm::motion.PlanMoveTo<mm::Selector>(SlotPosition(plannedSlot), mm::unitToAxisUnit<mm::S_speed_t>(config::selectorFeedrate));
+    mm::motion.PlanMoveTo<mm::Selector>(SlotPosition(plannedSlot), mm::unitToAxisUnit<mm::S_speed_t>(mg::globals.SelectorFeedrate_mm_s()));
     dbg_logic_fP(PSTR("Prepare Move Selector slot %d"), plannedSlot);
 }
 
@@ -28,7 +28,8 @@ void Selector::PlanHomingMoveBack() {
     // we expect that we are at the front end of the axis, set the expected axis' position
     mm::motion.SetPosition(mm::Selector, 0);
     axisStart = mm::axisUnitToTruncatedUnit<config::U_mm>(mm::motion.CurPosition<mm::Selector>());
-    mm::motion.PlanMove<mm::Selector>(mm::unitToAxisUnit<mm::S_pos_t>(config::selectorLimits.lenght * 2), mm::unitToAxisUnit<mm::S_speed_t>(config::selectorHomingFeedrate));
+    mm::motion.PlanMove<mm::Selector>(mm::unitToAxisUnit<mm::S_pos_t>(config::selectorLimits.lenght * 2),
+        mm::unitToAxisUnit<mm::S_speed_t>(mg::globals.SelectorFeedrate_mm_s()));
     dbg_logic_P(PSTR("Plan Homing Selector Back"));
 }
 
@@ -101,7 +102,8 @@ bool Selector::Step() {
         if (mi::idler.HomingValid()) {
             // idler is ok, we can start homing the selector
             state = HomeForward;
-            mm::motion.PlanMove<mm::Selector>(mm::unitToAxisUnit<mm::S_pos_t>(-config::selectorLimits.lenght * 2), mm::unitToAxisUnit<mm::S_speed_t>(config::selectorHomingFeedrate));
+            mm::motion.PlanMove<mm::Selector>(mm::unitToAxisUnit<mm::S_pos_t>(-config::selectorLimits.lenght * 2),
+                mm::unitToAxisUnit<mm::S_speed_t>(mg::globals.SelectorFeedrate_mm_s()));
         }
         return false;
     case HomeForward:

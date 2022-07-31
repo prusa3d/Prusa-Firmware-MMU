@@ -9,6 +9,7 @@ extern "C" {
 #define project_version_major 2
 #define project_version_minor 0
 #define project_version_revision 19
+#define project_version_build 634
 #define FW_BUILD_NUMBER 0
 
 /// Project's version (2.0.0)
@@ -28,6 +29,9 @@ extern const uint8_t project_major;
 
 /// Project's minor version
 extern const uint8_t project_minor;
+
+/// Project's revision number
+extern const uint16_t project_revision;
 
 /// Project's build number (number of commits in a branch)
 extern const uint16_t project_build_number;

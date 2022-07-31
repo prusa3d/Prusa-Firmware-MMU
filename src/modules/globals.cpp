@@ -21,8 +21,16 @@ void Globals::Init() {
         filamentLoaded = FilamentLoadState::AtPulley;
     }
 
-    ResetFSensorToNozzleMM();
-    ResetFSensorToNozzleFeedrate();
+    ResetFSensorToNozzle();
+    ResetFSensorUnloadCheck();
+
+    ResetPulleyLoadFeedrate();
+    ResetPulleySlowFeedrate();
+    ResetPulleyUnloadFeedrate();
+
+    ResetSelectorFeedrate();
+
+    ResetIdlerFeedrate();
 }
 
 uint8_t Globals::ActiveSlot() const {
@@ -66,14 +74,6 @@ void Globals::IncDriveErrors() {
 void Globals::SetMotorsMode(bool stealth) {
     stealthMode = stealth;
     // @@TODO store into EEPROM
-}
-
-void Globals::ResetFSensorToNozzleMM() {
-    fsensorToNozzleMM = config::fsensorToNozzle.v;
-}
-
-void Globals::ResetFSensorToNozzleFeedrate() {
-    fsensorToNozzleFeedrate = config::pulleySlowFeedrate.v;
 }
 
 } // namespace globals
