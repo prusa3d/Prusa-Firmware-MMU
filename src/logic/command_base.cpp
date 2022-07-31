@@ -187,7 +187,7 @@ bool CommandBase::CheckToolIndex(uint8_t index) {
 }
 
 void CommandBase::ErrDisengagingIdler() {
-    if (!mi::idler.Engaged()) {
+    if (mi::idler.Disengaged()) {
         state = ProgressCode::ERRWaitingForUser;
         error = deferredErrorCode;
         deferredErrorCode = ErrorCode::OK; // and clear the deferredEC just for safety

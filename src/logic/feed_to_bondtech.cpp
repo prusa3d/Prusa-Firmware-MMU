@@ -69,18 +69,25 @@ bool FeedToBondtech::Step() {
     case PushingFilamentIntoNozzle:
         if (mm::motion.QueueEmpty()) {
             mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InNozzle);
-            mi::idler.Disengage();
+            mi::idler.PartiallyDisengage(mg::globals.ActiveSlot());
             // while disengaging the idler, keep on moving with the pulley to avoid grinding while the printer is trying to grab the filament itself
             mpu::pulley.PlanMove(config::fsensorToNozzleAvoidGrind, config::pulleySlowFeedrate);
+            state = PartiallyDisengagingIdler;
+        }
+        return false;
+    case PartiallyDisengagingIdler:
+        if (mi::idler.PartiallyDisengaged()) {
+            mm::motion.AbortPlannedMoves(mm::Pulley);
+            mpu::pulley.Disable();
+            mi::idler.Disengage(); // disengage fully while Pulley is already stopped
             state = DisengagingIdler;
         }
         return false;
     case DisengagingIdler:
-        if (!mi::idler.Engaged()) {
+        if (mi::idler.Disengaged()) {
             dbg_logic_P(PSTR("Feed to Bondtech --> Idler disengaged"));
             dbg_logic_fP(PSTR("Pulley end steps %u"), mpu::pulley.CurrentPosition_mm());
             state = OK;
-            mpu::pulley.Disable();
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
         }
         return false;

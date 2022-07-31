@@ -24,8 +24,10 @@ namespace ha = hal::adc;
 TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
     using namespace logic;
 
+    uint8_t slot = 0;
+
     ForceReinitAllAutomata();
-    REQUIRE(EnsureActiveSlotIndex(0, mg::FilamentLoadState::AtPulley));
+    REQUIRE(EnsureActiveSlotIndex(slot, mg::FilamentLoadState::AtPulley));
 
     FeedToBondtech fb;
     main_loop();
@@ -35,10 +37,10 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
 
     REQUIRE(fb.State() == FeedToBondtech::EngagingIdler);
 
-    // it should have instructed the selector and idler to move to slot 0
+    // it should have instructed the selector and idler to move to a slot
     // check if the idler and selector have the right command
-    CHECK(mm::AxisNearestTargetPos(mm::Idler) == mi::Idler::SlotPosition(0).v);
-    CHECK(mm::AxisNearestTargetPos(mm::Selector) == ms::Selector::SlotPosition(0).v);
+    CHECK(mm::AxisNearestTargetPos(mm::Idler) == mi::Idler::SlotPosition(slot).v);
+    CHECK(mm::AxisNearestTargetPos(mm::Selector) == ms::Selector::SlotPosition(slot).v);
     CHECK(mm::axes[mm::Idler].enabled == true);
 
     // engaging idler
@@ -47,8 +49,8 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
         [&](uint32_t) { return !mi::idler.Engaged(); },
         5000));
 
-    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(0).v);
-    CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(0).v);
+    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(slot).v);
+    CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(slot).v);
     CHECK(mm::axes[mm::Pulley].enabled);
 
     // idler engaged, selector in position, we'll start pushing filament
@@ -81,15 +83,26 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
         [&](uint32_t) { return fb.State() == FeedToBondtech::PushingFilamentIntoNozzle; },
         5000));
 
-    // disengaging idler
+    // partially disengaging idler
+    REQUIRE(fb.State() == FeedToBondtech::PartiallyDisengagingIdler);
+    REQUIRE(WhileCondition(
+        fb,
+        [&](uint32_t) { return fb.State() == FeedToBondtech::PartiallyDisengagingIdler; },
+        5000));
+
+    CHECK(mm::axes[mm::Idler].pos == mi::Idler::IntermediateSlotPosition(slot).v);
+    CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(slot).v);
+    CHECK_FALSE(mm::axes[mm::Pulley].enabled);
+
+    // fully disengaging idler
     REQUIRE(fb.State() == FeedToBondtech::DisengagingIdler);
     REQUIRE(WhileCondition(
         fb,
         [&](uint32_t) { return fb.State() == FeedToBondtech::DisengagingIdler; },
         5000));
 
-    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(5).v);
-    CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(0).v);
+    CHECK(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(mi::idler.IdleSlotIndex()).v);
+    CHECK(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(slot).v);
     CHECK_FALSE(mm::axes[mm::Pulley].enabled);
 
     // state machine finished ok, the green LED should be on

@@ -100,8 +100,8 @@ bool LoadFilament::StepInner() {
     case ProgressCode::DisengagingIdler:
         // beware - this state is being reused for error recovery
         // and if the selector decided to re-home, we have to wait for it as well
-        // therefore: 'if (!mi::idler.Engaged())' : alone is not enough
-        if (!mi::idler.Engaged() && ms::selector.Slot() == mg::globals.ActiveSlot()) {
+        // therefore: 'if (mi::idler.Disengaged())' : alone is not enough
+        if (mi::idler.Disengaged() && ms::selector.Slot() == mg::globals.ActiveSlot()) {
             LoadFinishedCorrectly();
         }
         break;
