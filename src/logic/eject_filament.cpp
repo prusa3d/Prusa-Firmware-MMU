@@ -66,7 +66,7 @@ bool EjectFilament::StepInner() {
         }
         break;
     case ProgressCode::DisengagingIdler:
-        if (!mi::idler.Engaged()) { // idler disengaged
+        if (mi::idler.Disengaged()) { // idler disengaged
             mpu::pulley.Disable();
             mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::NotLoaded);
             FinishedOK();

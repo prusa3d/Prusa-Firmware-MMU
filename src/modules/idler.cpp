@@ -13,7 +13,9 @@ namespace idler {
 Idler idler;
 
 void Idler::PrepareMoveToPlannedSlot() {
-    mm::motion.PlanMoveTo<mm::Idler>(SlotPosition(plannedSlot), mm::unitToAxisUnit<mm::I_speed_t>(config::idlerFeedrate));
+    mm::motion.PlanMoveTo<mm::Idler>(
+        plannedMove == Operation::engage ? SlotPosition(plannedSlot) : IntermediateSlotPosition(plannedSlot),
+        mm::unitToAxisUnit<mm::I_speed_t>(config::idlerFeedrate));
     dbg_logic_fP(PSTR("Prepare Move Idler slot %d"), plannedSlot);
 }
 
@@ -40,7 +42,7 @@ bool Idler::FinishHomingAndPlanMoveToParkPos() {
     mm::motion.SetPosition(mm::Idler, 0);
 
     // finish whatever has been planned before homing
-    if (!plannedEngage) {
+    if (plannedMove == Operation::disengage) {
         plannedSlot = IdleSlotIndex();
     }
     InitMovement();
@@ -48,8 +50,8 @@ bool Idler::FinishHomingAndPlanMoveToParkPos() {
 }
 
 void Idler::FinishMove() {
-    currentlyEngaged = plannedEngage;
-    if (!Engaged()) // turn off power into the Idler motor when disengaged (no force necessary)
+    currentlyEngaged = plannedMove;
+    if (Disengaged()) // turn off power into the Idler motor when disengaged (no force necessary)
         mm::motion.Disable(mm::Idler);
 }
 
@@ -59,7 +61,7 @@ Idler::OperationResult Idler::Disengage() {
         return OperationResult::Refused;
     }
     plannedSlot = IdleSlotIndex();
-    plannedEngage = false;
+    plannedMove = Operation::disengage;
 
     // coordinates invalid, first home, then disengage
     if (!homingValid) {
@@ -68,7 +70,7 @@ Idler::OperationResult Idler::Disengage() {
     }
 
     // already disengaged
-    if (!Engaged()) {
+    if (Disengaged()) {
         dbg_logic_P(PSTR("Idler Disengaged"));
         return OperationResult::Accepted;
     }
@@ -77,14 +79,22 @@ Idler::OperationResult Idler::Disengage() {
     return InitMovement();
 }
 
+Idler::OperationResult Idler::PartiallyDisengage(uint8_t slot) {
+    return PlanMoveInner(slot, Operation::intermediate);
+}
+
 Idler::OperationResult Idler::Engage(uint8_t slot) {
+    return PlanMoveInner(slot, Operation::engage);
+}
+
+Idler::OperationResult Idler::PlanMoveInner(uint8_t slot, Operation plannedOp) {
     if (state == Moving) {
         dbg_logic_P(PSTR("Moving --> Engage refused"));
         return OperationResult::Refused;
     }
 
     plannedSlot = slot;
-    plannedEngage = true;
+    plannedMove = plannedOp;
 
     // if we are homing right now, just record the desired planned slot and return Accepted
     if (state == HomeBack) {
@@ -101,12 +111,10 @@ Idler::OperationResult Idler::Engage(uint8_t slot) {
     }
 
     // already engaged
-    if (Engaged()) {
-        dbg_logic_P(PSTR("Idler Engaged"));
+    if (currentlyEngaged == plannedMove) {
         return OperationResult::Accepted;
     }
 
-    // engaging
     return InitMovement();
 }
 

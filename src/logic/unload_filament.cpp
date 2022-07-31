@@ -79,7 +79,7 @@ bool UnloadFilament::StepInner() {
         }
         return false;
     case ProgressCode::DisengagingIdler:
-        if (!mi::idler.Engaged() && ms::selector.State() == ms::Selector::Ready) {
+        if (mi::idler.Disengaged() && ms::selector.State() == ms::Selector::Ready) {
             UnloadFinishedCorrectly();
         }
         return false;

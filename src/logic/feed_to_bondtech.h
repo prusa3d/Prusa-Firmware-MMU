@@ -17,6 +17,7 @@ struct FeedToBondtech {
         PushingFilamentFast,
         PushingFilamentToFSensor,
         PushingFilamentIntoNozzle,
+        PartiallyDisengagingIdler,
         DisengagingIdler,
         OK,
         Failed,

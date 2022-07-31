@@ -16,8 +16,8 @@ class Idler : public motion::MovableBase {
 public:
     inline constexpr Idler()
         : MovableBase(mm::Idler)
-        , plannedEngage(false)
-        , currentlyEngaged(false) {}
+        , plannedMove(Operation::disengage)
+        , currentlyEngaged(Operation::disengage) {}
 
     /// Plan engaging of the idler to a specific filament slot
     /// @param slot index to be activated
@@ -28,18 +28,29 @@ public:
     /// @returns #OperationResult
     OperationResult Disengage();
 
+    /// Plan partial disengaging of the idler
+    /// @returns #OperationResult
+    OperationResult PartiallyDisengage(uint8_t slot);
+
     /// Performs one step of the state machine according to currently planned operation
     /// @returns true if the idler is ready to accept new commands (i.e. it has finished the last operation)
     bool Step();
 
-    /// @returns the current state of idler - engaged / disengaged
+    /// @returns the current state of idler - engaged / disengaged / partially disengaged
     /// this state is updated only when a planned move is successfully finished, so it is safe for higher-level
     /// state machines to use this call as a waiting condition for the desired state of the idler
-    inline bool Engaged() const { return currentlyEngaged; }
+    inline bool Engaged() const { return currentlyEngaged == Operation::engage; }
+    inline bool Disengaged() const { return currentlyEngaged == Operation::disengage; }
+    inline bool PartiallyDisengaged() const { return currentlyEngaged == Operation::intermediate; }
 
     /// @returns predefined positions of individual slots
     static constexpr mm::I_pos_t SlotPosition(uint8_t slot) {
         return mm::unitToAxisUnit<mm::I_pos_t>(config::idlerSlotPositions[slot]);
+    }
+
+    /// @returns predefined intermediate positions between individual slots
+    static constexpr mm::I_pos_t IntermediateSlotPosition(uint8_t slot) {
+        return mm::unitToAxisUnit<mm::I_pos_t>(config::idlerIntermediateSlotPositions[slot]);
     }
 
     /// @returns the index of idle position of the idler, usually 5 in case of 0-4 valid indices of filament slots
@@ -59,11 +70,19 @@ protected:
     virtual void FinishMove() override;
 
 private:
-    /// direction of travel - engage/disengage
-    bool plannedEngage;
+    enum class Operation : uint8_t {
+        disengage = 0,
+        engage = 1,
+        intermediate = 2 ///< planned movement will be to an intermediate position between slots (different array of positions)
+    };
+
+    OperationResult PlanMoveInner(uint8_t slot, Operation plannedOp);
+
+    /// direction of travel - engage/disengage/disengageIntermediate
+    Operation plannedMove;
 
     /// current state
-    bool currentlyEngaged;
+    Operation currentlyEngaged;
 };
 
 /// The one and only instance of Idler in the FW
