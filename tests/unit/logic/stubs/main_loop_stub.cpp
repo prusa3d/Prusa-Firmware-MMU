@@ -80,10 +80,11 @@ void ForceReinitAllAutomata() {
 }
 
 void HomeIdlerAndSelector() {
-    ms::selector.InvalidateHoming();
     mi::idler.InvalidateHoming();
+    ms::selector.InvalidateHoming();
     logic::NoCommand nc; // just a dummy instance which has an empty Step()
-    SimulateIdlerAndSelectorHoming(nc);
+    SimulateIdlerHoming(nc);
+    SimulateSelectorHoming(nc);
 }
 
 bool EnsureActiveSlotIndex(uint8_t slot, mg::FilamentLoadState loadState) {
