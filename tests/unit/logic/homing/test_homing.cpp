@@ -134,6 +134,8 @@ bool RefusedHome(uint8_t slot) {
     mg::globals.SetFilamentLoaded(slot, mg::FilamentLoadState::AtPulley);
 
     // selector should start the homing sequence
+    main_loop(); // plans the homing move
+    // since the Idler is ok, the Selector should start homing immediately
     main_loop();
     REQUIRE(ms::selector.State() == ms::Selector::HomeForward);
     return true;

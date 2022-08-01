@@ -9,6 +9,7 @@
 #include "../stubs/stub_motion.h"
 
 void SimulateIdlerAndSelectorHoming(logic::CommandBase &cb) {
+#if 0
     // do 5 steps until we trigger the simulated stallguard
     for (uint8_t i = 0; i < 5; ++i) {
         main_loop();
@@ -48,6 +49,11 @@ void SimulateIdlerAndSelectorHoming(logic::CommandBase &cb) {
         main_loop();
         cb.Step();
     }
+#else
+    // sadly, it looks like we need to separate homing of idler and selector due to electrical reasons
+    SimulateIdlerHoming(cb);
+    SimulateSelectorHoming(cb);
+#endif
 }
 
 void SimulateIdlerHoming(logic::CommandBase &cb) {
