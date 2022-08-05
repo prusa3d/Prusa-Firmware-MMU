@@ -310,18 +310,13 @@ TEST_CASE("protocol::EncodeResponseQueryOperation", "[protocol]") {
     CHECK(txbuff[2] == ' ');
     CHECK(txbuff[3] == (uint8_t)responseStatus);
 
-    if (responseStatus == mp::ResponseMsgParamCodes::Finished) {
-        CHECK(txbuff[4] == '\n');
-        CHECK(msglen == 5);
-    } else {
-        char chk[6];
-        int chars = snprintf(chk, 6, "%x\n", encodedParamValue);
-        REQUIRE(chars < 6);
-        std::string chks(chk, chk + chars);
-        std::string txs((const char *)(&txbuff[4]), (const char *)(&txbuff[msglen]));
-        REQUIRE(chk == txs);
-        CHECK(txbuff[msglen - 1] == '\n');
-    }
+    char chk[6];
+    int chars = snprintf(chk, 6, "%x\n", encodedParamValue);
+    REQUIRE(chars < 6);
+    std::string chks(chk, chk + chars);
+    std::string txs((const char *)(&txbuff[4]), (const char *)(&txbuff[msglen]));
+    REQUIRE(chk == txs);
+    CHECK(txbuff[msglen - 1] == '\n');
 }
 
 TEST_CASE("protocol::DecodeRequest", "[protocol]") {
@@ -427,9 +422,7 @@ TEST_CASE("protocol::DecodeResponseQueryOperation", "[protocol][.]") {
     CHECK((uint8_t)rsp.request.code == rxbuff[0]);
     CHECK(rsp.request.value == rxbuff[1] - '0');
     CHECK((uint8_t)rsp.paramCode == rxbuff[3]);
-    if ((uint8_t)rsp.paramCode != (uint8_t)mp::ResponseMsgParamCodes::Finished) {
-        CHECK((uint8_t)rsp.paramValue == rxbuff[4] - '0');
-    }
+    CHECK((uint8_t)rsp.paramValue == rxbuff[4] - '0');
 }
 
 TEST_CASE("protocol::DecodeRequestErrors", "[protocol]") {
