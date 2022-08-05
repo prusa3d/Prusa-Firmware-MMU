@@ -257,9 +257,7 @@ uint8_t Protocol::EncodeResponseQueryOperation(const RequestMsg &msg, ResponseCo
     txbuff[2] = ' ';
     txbuff[3] = (uint8_t)rcs.code;
     uint8_t *dst = txbuff + 4;
-    if (rcs.code != ResponseMsgParamCodes::Finished) {
-        dst += Value2Hex(rcs.value, dst);
-    }
+    dst += Value2Hex(rcs.value, dst);
     *dst = '\n';
     return dst - txbuff + 1;
 }

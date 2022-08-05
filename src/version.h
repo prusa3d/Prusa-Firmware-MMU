@@ -7,8 +7,8 @@ extern "C" {
 #endif //__cplusplus
 
 #define project_version_major 2
-#define project_version_minor 0
-#define project_version_revision 19
+#define project_version_minor 1
+#define project_version_revision 1
 #define project_version_build 634
 #define FW_BUILD_NUMBER 0
 

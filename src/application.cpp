@@ -89,7 +89,7 @@ mp::ResponseCommandStatus Application::RunningCommandStatus() const {
     case ErrorCode::RUNNING:
         return mp::ResponseCommandStatus(mp::ResponseMsgParamCodes::Processing, (uint16_t)currentCommand->State());
     case ErrorCode::OK:
-        return mp::ResponseCommandStatus(mp::ResponseMsgParamCodes::Finished, 0);
+        return mp::ResponseCommandStatus(mp::ResponseMsgParamCodes::Finished, (uint16_t)currentCommand->Result());
     default:
         return mp::ResponseCommandStatus(mp::ResponseMsgParamCodes::Error, (uint16_t)currentCommand->Error());
     }

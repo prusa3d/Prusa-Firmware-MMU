@@ -16,6 +16,8 @@ namespace logic {
 LoadFilament loadFilament;
 
 bool LoadFilament::Reset(uint8_t param) {
+    result = ResultCode::OK;
+
     if (!CheckToolIndex(param)) {
         return false;
     }
@@ -72,6 +74,7 @@ bool LoadFilament::StepInner() {
                 break;
             case FeedToFinda::Stopped:
                 // as requested in MMU-116 - stopping an unsuccessful feed should retract as well but not check the filament
+                result = ResultCode::Cancelled;
                 verifyLoadedFilament = 0;
                 // [[fallthrough]]
             case FeedToFinda::OK:

@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "error_codes.h"
 #include "progress_codes.h"
+#include "result_codes.h"
 
 namespace modules {
 namespace motion {
@@ -72,6 +73,12 @@ public:
     /// Beware - the same rule about composite operations as with State() applies to Error() as well.
     /// Please see ErrorCode for more details
     virtual ErrorCode Error() const { return error; }
+
+    /// @returns result of a command - only valid after the command finished its work.
+    /// Default returned value is OK for all commands.
+    /// So far there is only one example usage: LoadFilament can be terminated with a button -> Result will be Cancelled.
+    /// The printer then can display "Loading cancelled"
+    virtual ResultCode Result() const { return ResultCode::OK; }
 
     /// Switches the state machine into an error state of code ec.
     /// It shall be used to halt the firmware while retaining the capability of reporting the error state to the printer

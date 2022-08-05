@@ -25,6 +25,8 @@ public:
     /// @returns true if the state machine finished its job, false otherwise
     bool StepInner() override;
 
+    virtual ResultCode Result() const override { return result; }
+
 private:
     void GoToRetractingFromFinda();
     void Reset2(bool feedPhaseLimited);
@@ -40,6 +42,9 @@ private:
     /// That ensures the filament can be loaded into the selector later when needed.
     /// verifyLoadedFilament holds the number of re-checks to be performed (we expect >1 re-checks will be requested one day ;) )
     uint8_t verifyLoadedFilament;
+
+    /// Result of the LoadFilament command
+    ResultCode result;
 };
 
 /// The one and only instance of LoadFilament state machine in the FW
