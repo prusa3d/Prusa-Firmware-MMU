@@ -1,6 +1,7 @@
 /// @file protocol.h
 #pragma once
 #include <stdint.h>
+#include "crc.h"
 
 namespace modules {
 
@@ -48,12 +49,40 @@ struct RequestMsg {
     uint8_t value; ///< value of the request message or address of variable to read/write
     uint16_t value2; ///< in case or write messages - value to be written into the register
 
+    /// CRC8 check - please note we abuse this byte for CRC of ResponseMsgs as well.
+    /// The crc8 byte itself is not added into the CRC computation (obviously ;) )
+    /// Beware - adding any members of this data structure may need changing the way CRC is being computed!
+    uint8_t crc8;
+
+    constexpr uint8_t ComputeCRC8() const {
+        uint8_t crc = 0;
+        crc = modules::crc::CRC8::CCITT_updateCX(0, (uint8_t)code);
+        crc = modules::crc::CRC8::CCITT_updateCX(crc, value);
+        crc = modules::crc::CRC8::CCITT_updateCX(crc, value2);
+        return crc;
+    }
+
     /// @param code of the request message
     /// @param value of the request message
     inline constexpr RequestMsg(RequestMsgCodes code, uint8_t value)
         : code(code)
         , value(value)
-        , value2(0) {}
+        , value2(0)
+        , crc8(ComputeCRC8()) {
+    }
+
+    /// Intended for write requests
+    /// @param code of the request message ('W')
+    /// @param address of the register
+    /// @param value to write into the register
+    inline constexpr RequestMsg(RequestMsgCodes code, uint8_t address, uint16_t value)
+        : code(code)
+        , value(address)
+        , value2(value)
+        , crc8(ComputeCRC8()) {
+    }
+
+    constexpr uint8_t CRC() const { return crc8; }
 };
 
 /// A response message - responses are being sent from the MMU into the printer as a response to a request message.
@@ -62,13 +91,24 @@ struct ResponseMsg {
     ResponseMsgParamCodes paramCode; ///< code of the parameter
     uint16_t paramValue; ///< value of the parameter
 
+    constexpr uint8_t ComputeCRC8() const {
+        uint8_t crc = request.ComputeCRC8();
+        crc = modules::crc::CRC8::CCITT_updateCX(crc, (uint8_t)paramCode);
+        crc = modules::crc::CRC8::CCITT_updateW(crc, paramValue);
+        return crc;
+    }
+
     /// @param request the source request message this response is a reply to
     /// @param paramCode code of the parameter
     /// @param paramValue value of the parameter
     inline constexpr ResponseMsg(RequestMsg request, ResponseMsgParamCodes paramCode, uint16_t paramValue)
         : request(request)
         , paramCode(paramCode)
-        , paramValue(paramValue) {}
+        , paramValue(paramValue) {
+        this->request.crc8 = ComputeCRC8();
+    }
+
+    constexpr uint8_t CRC() const { return request.crc8; }
 };
 
 /// Combined commandStatus and its value into one data structure (optimization purposes)
@@ -116,11 +156,15 @@ public:
     /// Encodes Write request message msg into txbuff memory
     /// It is expected the txbuff is large enough to fit the message
     /// @returns number of bytes written into txbuff
-    static uint8_t EncodeWriteRequest(const RequestMsg &msg, uint16_t value2, uint8_t *txbuff);
+    static uint8_t EncodeWriteRequest(uint8_t address, uint16_t value, uint8_t *txbuff);
 
     /// @returns the maximum byte length necessary to encode a request message
     /// Beneficial in case of pre-allocating a buffer for enconding a RequestMsg.
-    static constexpr uint8_t MaxRequestSize() { return 4; }
+    static constexpr uint8_t MaxRequestSize() { return 13; }
+
+    /// @returns the maximum byte length necessary to encode a response message
+    /// Beneficial in case of pre-allocating a buffer for enconding a ResponseMsg.
+    static constexpr uint8_t MaxResponseSize() { return 14; }
 
     /// Encode generic response Command Accepted or Rejected
     /// @param msg source request message for this response
@@ -183,6 +227,7 @@ private:
         Value, ///< expecting code value
         Address, ///< expecting address for Write command
         WriteValue, ///< value to be written (Write command)
+        CRC, ///< CRC
         Error ///< automaton in error state
     };
 
@@ -194,6 +239,7 @@ private:
         RequestValue, ///< expecting code value
         ParamCode, ///< expecting param code
         ParamValue, ///< expecting param value
+        CRC, ///< expecting CRC value
         Error ///< automaton in error state
     };
 
@@ -205,6 +251,9 @@ private:
     }
     static constexpr bool IsDigit(uint8_t c) {
         return c >= '0' && c <= '9';
+    }
+    static constexpr bool IsCRCSeparator(uint8_t c) {
+        return c == '*';
     }
     static constexpr bool IsHexDigit(uint8_t c) {
         return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f');
@@ -260,9 +309,14 @@ private:
     }
 
     /// @returns number of characters written
-    static uint8_t Value2Hex(uint16_t value, uint8_t *dst);
+    static uint8_t UInt8ToHex(uint8_t value, uint8_t *dst);
 
-    static uint8_t BeginEncodeRequest(const RequestMsg &msg, uint8_t *txbuff);
+    /// @returns number of characters written
+    static uint8_t UInt16ToHex(uint16_t value, uint8_t *dst);
+
+    static uint8_t BeginEncodeRequest(const RequestMsg &msg, uint8_t *dst);
+
+    static uint8_t AppendCRC(uint8_t crc, uint8_t *dst);
 };
 
 } // namespace protocol
