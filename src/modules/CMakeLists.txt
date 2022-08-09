@@ -1,6 +1,6 @@
 target_sources(
   firmware
-  PRIVATE protocol.cpp
+  PRIVATE crc.cpp
           buttons.cpp
           debouncer.cpp
           finda.cpp
@@ -11,6 +11,7 @@ target_sources(
           motion.cpp
           movable_base.cpp
           permanent_storage.cpp
+          protocol.cpp
           pulley.cpp
           pulse_gen.cpp
           selector.cpp
