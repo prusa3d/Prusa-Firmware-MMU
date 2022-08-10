@@ -3,7 +3,6 @@ add_executable(
   eject_filament_tests
   ${CMAKE_SOURCE_DIR}/src/application.cpp
   ${CMAKE_SOURCE_DIR}/src/registers.cpp
-  ${CMAKE_SOURCE_DIR}/src/version.c
   ${CMAKE_SOURCE_DIR}/src/logic/command_base.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/cut_filament.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/eject_filament.cpp
