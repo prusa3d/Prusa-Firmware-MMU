@@ -273,10 +273,6 @@ uint8_t Protocol::EncodeResponseReadFINDA(const RequestMsg &msg, uint8_t findaVa
     return EncodeResponseRead(msg, true, findaValue, txbuff);
 }
 
-uint8_t Protocol::EncodeResponseVersion(const RequestMsg &msg, uint16_t value, uint8_t *txbuff) {
-    return EncodeResponseRead(msg, true, value, txbuff);
-}
-
 uint8_t Protocol::EncodeResponseQueryOperation(const RequestMsg &msg, ResponseCommandStatus rcs, uint8_t *txbuff) {
     const ResponseMsg rsp(msg, rcs.code, rcs.value);
     uint8_t i = BeginEncodeRequest(msg, txbuff);

@@ -26,7 +26,9 @@ public:
     uint8_t CurrentProgressCode();
     uint16_t CurrentErrorCode();
 
+#ifndef UNITTEST
 private:
+#endif
     /// Checks if the MMU can enter manual mode (user can move the selector with buttons)
     /// The MMU enters idle mode after 5s from the last command finished and there must be no filament present in the selector.
     void CheckManualOperation();
@@ -40,7 +42,6 @@ private:
     mp::ResponseCommandStatus RunningCommandStatus() const;
     void ReportCommandAccepted(const mp::RequestMsg &rq, mp::ResponseMsgParamCodes status);
     void ReportFINDA(const mp::RequestMsg &rq);
-    void ReportVersion(const mp::RequestMsg &rq);
     void ReportRunningCommand();
     void ReportReadRegister(const mp::RequestMsg &rq);
     void ReportWriteRegister(const mp::RequestMsg &rq);
