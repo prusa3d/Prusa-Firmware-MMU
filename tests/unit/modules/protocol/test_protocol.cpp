@@ -246,7 +246,7 @@ TEST_CASE("protocol::EncodeResponseVersion", "[protocol]") {
     for (uint32_t version = 0; version < 0xffff; ++version) {
         TXBuff txbuff;
         mp::ResponseMsg rsp(requestMsg, mp::ResponseMsgParamCodes::Accepted, (uint16_t)version);
-        uint8_t msglen = mp::Protocol::EncodeResponseVersion(requestMsg, (uint16_t)version, txbuff.data());
+        uint8_t msglen = mp::Protocol::EncodeResponseRead(requestMsg, true, (uint16_t)version, txbuff.data());
         REQUIRE(msglen < mp::Protocol::MaxResponseSize());
         std::string crc = MakeCRC(rsp.CRC());
 

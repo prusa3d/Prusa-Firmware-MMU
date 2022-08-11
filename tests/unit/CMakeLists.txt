@@ -26,3 +26,5 @@ set(LOGIC_STUBS_DIR ${CMAKE_SOURCE_DIR}/tests/unit/logic/stubs)
 add_subdirectory(hal)
 add_subdirectory(logic)
 add_subdirectory(modules)
+
+add_subdirectory(application)
