@@ -12,6 +12,7 @@
 #include "modules/fsensor.h"
 #include "modules/globals.h"
 #include "modules/idler.h"
+#include "modules/pulley.h"
 #include "modules/selector.h"
 
 struct RegisterFlags {
@@ -95,14 +96,6 @@ struct RegisterRec {
 // But it would be nice to fix that in the future - might be hard to push the compiler to such a construct
 static const RegisterRec registers[] /*PROGMEM*/ = {
     // 0x00
-    //    RegisterRec([]()->uint16_t { return PROJECT_VERSION_MAJOR; }, 1),
-    //    // 0x01
-    //    RegisterRec([]()->uint16_t { return PROJECT_VERSION_MINOR; }, 1),
-    //    // 0x02
-    //    RegisterRec([]()->uint16_t { return PROJECT_VERSION_REV; }, 2),
-    //    // 0x03
-    //    RegisterRec([]()->uint16_t { return PROJECT_BUILD_NUMBER; }, 2),
-    // 0x00
     RegisterRec(false, &project_major),
     // 0x01
     RegisterRec(false, &project_minor),
@@ -113,7 +106,7 @@ static const RegisterRec registers[] /*PROGMEM*/ = {
     // 0x04
     RegisterRec( // MMU errors
         []() -> uint16_t { return mg::globals.DriveErrors(); },
-        [](uint16_t) {}, // @@TODO think about setting/clearing the error counter from the outside
+        // [](uint16_t) {}, // @@TODO think about setting/clearing the error counter from the outside
         2),
     // 0x05
     RegisterRec([]() -> uint16_t { return application.CurrentProgressCode(); }, 1),
@@ -135,100 +128,102 @@ static const RegisterRec registers[] /*PROGMEM*/ = {
         1),
     // 0xa motor mode (stealth = 1/normal = 0)
     RegisterRec([]() -> uint16_t { return static_cast<uint16_t>(mg::globals.MotorsStealth()); }, 1),
-    // 0xb extra load distance after fsensor triggered (30mm default)
+    // 0xb extra load distance after fsensor triggered (30mm default) [mm] RW
     RegisterRec(
         []() -> uint16_t { return mg::globals.FSensorToNozzle_mm().v; },
         [](uint16_t d) { mg::globals.SetFSensorToNozzle_mm(d); },
         1),
-    // 0x0c fsensor unload check distance (40mm default)
+    // 0x0c fsensor unload check distance (40mm default) [mm] RW
     RegisterRec(
         []() -> uint16_t { return mg::globals.FSensorUnloadCheck_mm().v; },
         [](uint16_t d) { mg::globals.SetFSensorUnloadCheck_mm(d); },
         1),
-    // 0xd empty register - one empty register takes 5 bytes of code
-    RegisterRec(),
-    // 0xe
-    RegisterRec(),
-    // 0xf
-    RegisterRec(),
 
-    // Pulley
-    // 0x10 Pulley acceleration RW
-    RegisterRec(
-        []() -> uint16_t { return config::pulleyLimits.accel.v; },
-        //@@TODO
-        1),
-    // 0x11 2 Pulley fast load feedrate RW
-    RegisterRec(
-        []() -> uint16_t { return mg::globals.PulleyLoadFeedrate_mm_s().v; },
-        [](uint16_t d) { mg::globals.SetPulleyLoadFeedrate_mm_s(d); },
-        2),
-    // 0x12 2 Pulley slow load to fsensor feedrate RW
-    RegisterRec(
-        []() -> uint16_t { return mg::globals.PulleySlowFeedrate_mm_s().v; },
-        [](uint16_t d) { mg::globals.SetPulleySlowFeedrate_mm_s(d); },
-        2),
-    // 0x13 2 Pulley unload feedrate RW
+    // 0xd 2 Pulley unload feedrate [mm/s] RW
     RegisterRec(
         []() -> uint16_t { return mg::globals.PulleyUnloadFeedrate_mm_s().v; },
         [](uint16_t d) { mg::globals.SetPulleyUnloadFeedrate_mm_s(d); },
         2),
-    RegisterRec(), // 14
-    RegisterRec(), // 15
-    RegisterRec(), // 16
-    RegisterRec(), // 17
-    RegisterRec(), // 18
-    RegisterRec(), // 19
-    RegisterRec(), // 1a
-    RegisterRec(), // 1b
-    RegisterRec(), // 1c
-    RegisterRec(), // 1d
-    RegisterRec(), // 1e
-    RegisterRec(), // 1f
 
-    // Selector
-    //20 2 Selector acceleration  RW
+    // 0xe Pulley acceleration [mm/s2] RW
+    RegisterRec(
+        []() -> uint16_t { return config::pulleyLimits.accel.v; },
+        //@@TODO
+        2),
+    // 0xf Selector acceleration [mm/s2] RW
     RegisterRec(
         []() -> uint16_t { return config::selectorLimits.accel.v; },
         //@@TODO
-        1),
-    //21 2 Selector nominal speed  RW
+        2),
+    // 0x10 Idler acceleration [deg/s2] RW
+    RegisterRec(
+        []() -> uint16_t { return config::idlerLimits.accel.v; },
+        //@@TODO
+        2),
+
+    // 0x11 Pulley load feedrate [mm/s] RW
+    RegisterRec(
+        []() -> uint16_t { return mg::globals.PulleyLoadFeedrate_mm_s().v; },
+        [](uint16_t d) { mg::globals.SetPulleyLoadFeedrate_mm_s(d); },
+        2),
+    // 0x12 Selector nominal feedrate [mm/s] RW
     RegisterRec(
         []() -> uint16_t { return mg::globals.SelectorFeedrate_mm_s().v; },
         [](uint16_t d) { mg::globals.SetSelectorFeedrate_mm_s(d); },
         2),
-    //22 2 Selector sg_thrs  RW
+    // 0x13 Idler nominal feedrate [deg/s] RW
+    RegisterRec(
+        []() -> uint16_t { return mg::globals.IdlerFeedrate_deg_s().v; },
+        [](uint16_t d) { mg::globals.SetIdlerFeedrate_deg_s(d); },
+        2),
+
+    // 0x14 Pulley slow load to fsensor feedrate [mm/s] RW
+    RegisterRec(
+        []() -> uint16_t { return mg::globals.PulleySlowFeedrate_mm_s().v; },
+        [](uint16_t d) { mg::globals.SetPulleySlowFeedrate_mm_s(d); },
+        2),
+    // 0x15 Selector homing feedrate [mm/s] RW
+    RegisterRec(
+        []() -> uint16_t { return config::selectorHomingFeedrate.v; },
+        //@@TODO
+        2),
+    // 0x16 Idler homing feedrate [deg/s] RW
+    RegisterRec(
+        []() -> uint16_t { return config::idlerHomingFeedrate.v; },
+        //@@TODO
+        2),
+
+    // 0x17 Pulley sg_thrs threshold R
+    RegisterRec(
+        []() -> uint16_t { return config::pulley.sg_thrs; },
+        //@@TODO
+        2),
+    // 0x18 Selector sg_thrs R
     RegisterRec(
         []() -> uint16_t { return config::selector.sg_thrs; },
         //@@TODO
-        1),
-    //23 1 Set/Get Selector slot RW
+        2),
+    // 0x19 Idler sg_thrs R
+    RegisterRec(
+        []() -> uint16_t { return config::idler.sg_thrs; },
+        //@@TODO
+        2),
+
+    // 0x1a Get Pulley position [mm] R
+    RegisterRec(
+        []() -> uint16_t { return mpu::pulley.CurrentPosition_mm(); },
+        2),
+    // 0x1b Set/Get Selector slot RW
     RegisterRec(
         []() -> uint16_t { return ms::selector.Slot(); },
         [](uint16_t d) { ms::selector.MoveToSlot(d); },
         1),
-
-    // Idler
-    //30 2 Idler acceleration  RW
-    RegisterRec(
-        []() -> uint16_t { return config::idlerLimits.accel.v; },
-        //@@TODO
-        1),
-    //31 2 Idler nominal speed  RW
-    RegisterRec(
-        []() -> uint16_t { return mg::globals.IdlerFeedrate_deg_s().v; },
-        [](uint16_t d) { mg::globals.SetIdlerFeedrate_deg_s(d); },
-        1),
-    //32 2 Idler sg_thrs  RW
-    RegisterRec(
-        []() -> uint16_t { return config::idler.sg_thrs; },
-        //@@TODO
-        1),
-    //33 1 Set/Get Idler slot  RW
+    // 0x1c Set/Get Idler slot RW
     RegisterRec(
         []() -> uint16_t { return mi::idler.Slot(); },
         // [](uint16_t d) { mi::idler.MoveToSlot(d); }, // @@TODO can be theoretically done as well
         1),
+
 };
 
 static constexpr uint8_t registersSize = sizeof(registers) / sizeof(RegisterRec);
