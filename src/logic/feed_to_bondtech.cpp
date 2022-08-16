@@ -63,14 +63,14 @@ bool FeedToBondtech::Step() {
             state = PushingFilamentFast;
             mpu::pulley.InitAxis();
             // plan a fast move while in the safe minimal length
-            feedStart_mm = mm::stepsToUnit<mm::P_pos_t>(mm::P_pos_t({ mm::motion.CurPosition(mm::Pulley) }));
+            feedStart_mm = mm::motion.CurPosition(mm::Pulley);
             // fast feed in millimeters - if the EEPROM value is incorrect, we'll get the default length
             unit::U_mm fastFeedDistance = { (long double)mps::BowdenLength::Get(mg::globals.ActiveSlot()) };
-             mpu::pulley.PlanMove(config::minimumBowdenLength,
+             mpu::pulley.PlanMove(fastFeedDistance,
                 mg::globals.PulleyLoadFeedrate_mm_s(),
                 mg::globals.PulleySlowFeedrate_mm_s());
             // plan additional slow move while waiting for fsensor to trigger
-            mpu::pulley.PlanMove(config::maximumBowdenLength - config::minimumBowdenLength,
+            mpu::pulley.PlanMove(config::maximumBowdenLength - fastFeedDistance,
                 mg::globals.PulleySlowFeedrate_mm_s(),
                 mg::globals.PulleySlowFeedrate_mm_s());
         }
@@ -122,7 +122,7 @@ bool FeedToBondtech::Step() {
             dbg_logic_fP(PSTR("Pulley end steps %u"), mpu::pulley.CurrentPosition_mm());
             state = OK;
             mpu::pulley.Disable();
-            UpdateBowdenLength(mm::stepsToUnit<mm::P_pos_t>(mm::P_pos_t({ mm::motion.CurPosition(mm::Pulley) })));
+            UpdateBowdenLength(mm::motion.CurPosition(mm::Pulley));
             mm::motion.Disable(mm::Pulley);
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
         }
