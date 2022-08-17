@@ -13,6 +13,7 @@
 #include "modules/globals.h"
 #include "modules/idler.h"
 #include "modules/pulley.h"
+#include "modules/permanent_storage.h"
 #include "modules/selector.h"
 
 /** @defgroup register_table Register Table
@@ -362,6 +363,31 @@ static const RegisterRec registers[] /*PROGMEM*/ = {
         [](uint16_t d) { d >= config::toolCount ? mi::idler.Disengage() : mi::idler.Engage(d); },
         1),
 
+    // 0x1d Detected bowden length slot 0 RW
+    RegisterRec(
+        []() -> uint16_t { return mps::BowdenLength::Get(0); },
+        [](uint16_t d) { mps::BowdenLength::Set(0, d); },
+        2),
+    // 0x1e Detected bowden length slot 1 RW
+    RegisterRec(
+        []() -> uint16_t { return mps::BowdenLength::Get(1); },
+        [](uint16_t d) { mps::BowdenLength::Set(1, d); },
+        2),
+    // 0x1f Detected bowden length slot 2 RW
+    RegisterRec(
+        []() -> uint16_t { return mps::BowdenLength::Get(2); },
+        [](uint16_t d) { mps::BowdenLength::Set(2, d); },
+        2),
+    // 0x20 Detected bowden length slot 3 RW
+    RegisterRec(
+        []() -> uint16_t { return mps::BowdenLength::Get(3); },
+        [](uint16_t d) { mps::BowdenLength::Set(3, d); },
+        2),
+    // 0x21 Detected bowden length slot 4 RW
+    RegisterRec(
+        []() -> uint16_t { return mps::BowdenLength::Get(4); },
+        [](uint16_t d) { mps::BowdenLength::Set(4, d); },
+        2),
 };
 
 static constexpr uint8_t registersSize = sizeof(registers) / sizeof(RegisterRec);

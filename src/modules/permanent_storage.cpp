@@ -51,8 +51,6 @@ constexpr const uint16_t eepromBowdenLenDefault = config::defaultBowdenLength.v;
 constexpr const uint16_t eepromBowdenLenMinimum = config::minimumBowdenLength.v; ///< Minimum bowden length (~341 mm)
 constexpr const uint16_t eepromBowdenLenMaximum = config::maximumBowdenLength.v; ///< Maximum bowden length (~792 mm)
 
-// static_assert (mm::unitToSteps<mm::P_pos_t>(config::maximumBowdenLength) < 65535U, "");
-
 namespace ee = hal::eeprom;
 
 #define EEOFFSET(x) reinterpret_cast<size_t>(&(x))
