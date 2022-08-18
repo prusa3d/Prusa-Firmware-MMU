@@ -29,7 +29,7 @@ void Selector::PlanHomingMoveBack() {
     mm::motion.SetPosition(mm::Selector, 0);
     axisStart = mm::axisUnitToTruncatedUnit<config::U_mm>(mm::motion.CurPosition<mm::Selector>());
     mm::motion.PlanMove<mm::Selector>(mm::unitToAxisUnit<mm::S_pos_t>(config::selectorLimits.lenght * 2),
-        mm::unitToAxisUnit<mm::S_speed_t>(mg::globals.SelectorFeedrate_mm_s()));
+        mm::unitToAxisUnit<mm::S_speed_t>(config::selectorHomingFeedrate));
     dbg_logic_P(PSTR("Plan Homing Selector Back"));
 }
 
@@ -103,7 +103,7 @@ bool Selector::Step() {
             // idler is ok, we can start homing the selector
             state = HomeForward;
             mm::motion.PlanMove<mm::Selector>(mm::unitToAxisUnit<mm::S_pos_t>(-config::selectorLimits.lenght * 2),
-                mm::unitToAxisUnit<mm::S_speed_t>(mg::globals.SelectorFeedrate_mm_s()));
+                mm::unitToAxisUnit<mm::S_speed_t>(config::selectorHomingFeedrate));
         }
         return false;
     case HomeForward:
