@@ -244,7 +244,7 @@ static const RegisterRec registers[] /*PROGMEM*/ = {
     RegisterRec(false, &project_build_number),
     // 0x04
     RegisterRec( // MMU errors
-        []() -> uint16_t { return mg::globals.DriveErrors(); },
+        []() -> uint16_t { return mg::globals.DriveErrors(); }, // compiles to: <{lambda()#1}::_FUN()>: jmp <modules::permanent_storage::DriveError::get()>
         // [](uint16_t) {}, // @@TODO think about setting/clearing the error counter from the outside
         2),
     // 0x05
@@ -269,18 +269,18 @@ static const RegisterRec registers[] /*PROGMEM*/ = {
     RegisterRec([]() -> uint16_t { return static_cast<uint16_t>(mg::globals.MotorsStealth()); }, 1),
     // 0xb extra load distance after fsensor triggered (30mm default) [mm] RW
     RegisterRec(
-        []() -> uint16_t { return mg::globals.FSensorToNozzle_mm().v; },
+        []() -> uint16_t { return mm::truncatedUnit(mg::globals.FSensorToNozzle_mm()); },
         [](uint16_t d) { mg::globals.SetFSensorToNozzle_mm(d); },
         1),
     // 0x0c fsensor unload check distance (40mm default) [mm] RW
     RegisterRec(
-        []() -> uint16_t { return mg::globals.FSensorUnloadCheck_mm().v; },
+        []() -> uint16_t { return mm::truncatedUnit(mg::globals.FSensorUnloadCheck_mm()); },
         [](uint16_t d) { mg::globals.SetFSensorUnloadCheck_mm(d); },
         1),
 
     // 0xd 2 Pulley unload feedrate [mm/s] RW
     RegisterRec(
-        []() -> uint16_t { return mg::globals.PulleyUnloadFeedrate_mm_s().v; },
+        []() -> uint16_t { return mm::truncatedUnit(mg::globals.PulleyUnloadFeedrate_mm_s()); },
         [](uint16_t d) { mg::globals.SetPulleyUnloadFeedrate_mm_s(d); },
         2),
 
@@ -302,23 +302,23 @@ static const RegisterRec registers[] /*PROGMEM*/ = {
 
     // 0x11 Pulley load feedrate [mm/s] RW
     RegisterRec(
-        []() -> uint16_t { return mg::globals.PulleyLoadFeedrate_mm_s().v; },
+        []() -> uint16_t { return mm::truncatedUnit(mg::globals.PulleyLoadFeedrate_mm_s()); },
         [](uint16_t d) { mg::globals.SetPulleyLoadFeedrate_mm_s(d); },
         2),
     // 0x12 Selector nominal feedrate [mm/s] RW
     RegisterRec(
-        []() -> uint16_t { return mg::globals.SelectorFeedrate_mm_s().v; },
+        []() -> uint16_t { return mm::truncatedUnit(mg::globals.SelectorFeedrate_mm_s()); },
         [](uint16_t d) { mg::globals.SetSelectorFeedrate_mm_s(d); },
         2),
     // 0x13 Idler nominal feedrate [deg/s] RW
     RegisterRec(
-        []() -> uint16_t { return mg::globals.IdlerFeedrate_deg_s().v; },
+        []() -> uint16_t { return mm::truncatedUnit(mg::globals.IdlerFeedrate_deg_s()); },
         [](uint16_t d) { mg::globals.SetIdlerFeedrate_deg_s(d); },
         2),
 
     // 0x14 Pulley slow load to fsensor feedrate [mm/s] RW
     RegisterRec(
-        []() -> uint16_t { return mg::globals.PulleySlowFeedrate_mm_s().v; },
+        []() -> uint16_t { return mm::truncatedUnit(mg::globals.PulleySlowFeedrate_mm_s()); },
         [](uint16_t d) { mg::globals.SetPulleySlowFeedrate_mm_s(d); },
         2),
     // 0x15 Selector homing feedrate [mm/s] RW

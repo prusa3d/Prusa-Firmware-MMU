@@ -29,8 +29,7 @@ void logic::FeedToBondtech::GoToPushToNozzle() {
     state = PushingFilamentIntoNozzle;
 }
 
-void FeedToBondtech::UpdateBowdenLength(int32_t feedEnd_mm) {
-    int32_t measuredBowdenLength = abs(feedEnd_mm - feedStart_mm);
+void FeedToBondtech::UpdateBowdenLength(int32_t measuredBowdenLength) {
     if (measuredBowdenLength < config::maximumBowdenLength.v) { // is the measured length any valid/acceptable?
         static_assert(config::maximumBowdenLength.v <= 65535, "Max bowden length too long");
         int16_t mbl = (int16_t)measuredBowdenLength;
@@ -121,7 +120,7 @@ bool FeedToBondtech::Step() {
             dbg_logic_P(PSTR("Feed to Bondtech --> Idler disengaged"));
             dbg_logic_fP(PSTR("Pulley end steps %u"), mpu::pulley.CurrentPosition_mm());
             state = OK;
-            UpdateBowdenLength(mpu::pulley.CurrentPosition_mm());
+            UpdateBowdenLength(abs(mpu::pulley.CurrentPosition_mm() - feedStart_mm));
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
         }
         return false;

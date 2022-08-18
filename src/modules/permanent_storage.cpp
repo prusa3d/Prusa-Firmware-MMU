@@ -53,7 +53,7 @@ constexpr const uint16_t eepromBowdenLenMaximum = config::maximumBowdenLength.v;
 
 namespace ee = hal::eeprom;
 
-#define EEOFFSET(x) reinterpret_cast<size_t>(&(x))
+#define EEOFFSET(x) reinterpret_cast<ee::EEPROM::addr_t>(&(x))
 
 void Init() {
     if (ee::EEPROM::ReadByte(ee::EEPROM::End()) != layoutVersion) {
@@ -93,11 +93,10 @@ static bool validBowdenLen(const uint16_t BowdenLength) {
 /// @return stored bowden length
 uint16_t BowdenLength::Get(uint8_t slot) {
     if (validFilament(slot)) {
-        // @@TODO these reinterpret_cast expressions look horrible but I'm keeping them almost intact to respect the original code from MM_control_01
-        uint16_t bowdenLength = ee::EEPROM::ReadWord(reinterpret_cast<size_t>(&(eepromBase->eepromBowdenLen[slot])));
+        uint16_t bowdenLength = ee::EEPROM::ReadWord(EEOFFSET(eepromBase->eepromBowdenLen[slot]));
 
         if (eepromEmpty == bowdenLength) {
-            const uint8_t LengthCorrectionLegacy = ee::EEPROM::ReadByte(reinterpret_cast<size_t>(&(eepromBase->eepromLengthCorrection)));
+            const uint8_t LengthCorrectionLegacy = ee::EEPROM::ReadByte(EEOFFSET(eepromBase->eepromLengthCorrection));
             if (LengthCorrectionLegacy <= 200) {
                 bowdenLength = eepromLengthCorrectionBase + LengthCorrectionLegacy * 10;
             }

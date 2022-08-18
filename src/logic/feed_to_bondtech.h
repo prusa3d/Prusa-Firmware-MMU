@@ -52,7 +52,7 @@ struct FeedToBondtech {
 
 private:
     /// Update bowden length if changed significantly
-    void UpdateBowdenLength(int32_t feedEnd_mm);
+    void UpdateBowdenLength(int32_t measuredBowdenLength);
 
     /// Common processing of pushing filament into fsensor (reused by multiple states)
     //    bool PushingFilament();
