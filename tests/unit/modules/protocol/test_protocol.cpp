@@ -65,8 +65,9 @@ std::string MakeCRC(const std::string_view src) {
     // code
     uint8_t crc = modules::crc::CRC8::CCITT_updateCX(0, src[0]);
     // scan hex value
-    uint16_t rqValue = std::stoul(src.data() + 1, nullptr, 16);
-    crc = modules::crc::CRC8::CCITT_updateW(crc, rqValue);
+    uint8_t rqValue = std::stoul(src.data() + 1, nullptr, 16);
+    crc = modules::crc::CRC8::CCITT_updateCX(crc, rqValue);
+    crc = modules::crc::CRC8::CCITT_updateW(crc, 0);
     if (!src[2])
         return MakeCRC(crc); // eof
     // [2] is a space
