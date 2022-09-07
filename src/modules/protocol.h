@@ -8,7 +8,7 @@ namespace modules {
 /// @brief The MMU communication protocol implementation and related stuff.
 ///
 /// See description of the new protocol in the MMU 2021 doc
-/// @@TODO possibly add some checksum to verify the correctness of messages
+
 namespace protocol {
 
 /// Definition of request message codes
@@ -58,7 +58,7 @@ struct RequestMsg {
         uint8_t crc = 0;
         crc = modules::crc::CRC8::CCITT_updateCX(0, (uint8_t)code);
         crc = modules::crc::CRC8::CCITT_updateCX(crc, value);
-        crc = modules::crc::CRC8::CCITT_updateCX(crc, value2);
+        crc = modules::crc::CRC8::CCITT_updateW(crc, value2);
         return crc;
     }
 
