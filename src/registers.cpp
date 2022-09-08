@@ -221,7 +221,7 @@ static const RegisterRec registers[] /*PROGMEM*/ = {
     // 0x1c Set/Get Idler slot RW
     RegisterRec(
         []() -> uint16_t { return mi::idler.Slot(); },
-        // [](uint16_t d) { mi::idler.MoveToSlot(d); }, // @@TODO can be theoretically done as well
+        [](uint16_t d) { d >= config::toolCount ? mi::idler.Disengage() : mi::idler.Engage(d); },
         1),
 
 };
