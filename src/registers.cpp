@@ -133,24 +133,24 @@
 | ^        | ^        | ^                          | 01h 1        | ^           | triggered                                | ^            | ^
 | 0x0ah 10 | uint8    | Motor_Mode                 | 00h 0        | 00h 0       | normal                                   | Read only    | M707 A0x0a
 | ^        | ^        | ^                          | 01h 1        | ^           | stealth                                  | ^            | ^
-| 0x0bh 11 | uint8    | extra_load_distance        | 00h 0        | 1eh 30      |                                          | Read / Write | M707 A0x0b
-| 0x0ch 12 | uint8    | FSensor_unload_check_dist. | 00h 0        | 28h 30      |                                          | Read / Write | M707 A0x0c
-| 0x0dh 13 | uint16   | Pulley_unload_feedrate     | 0000h 0      | 0078h 120   |                                          | Read / Write | M707 A0x0d
-| 0x0eh 14 | uint16   | Pulley_acceleration        | 0000h 0      | 320h 800.0  |                                          | Read / Write | M707 A0x0e
-| 0x0fh 15 | uint16   | Selector_acceleration      | 0000h 0      | 00c8h 200.0 |                                          | Read / Write | M707 A0x0f
-| 0x10h 16 | uint16   | Idler_acceleration         | 0000h 0      | 01f4h 500.0 |                                          | Read / Write | M707 A0x10
-| 0x11h 17 | uint16   | Pulley_load_feedrate       | 0000h 0      | 0050h 80    |                                          | Read / Write | M707 A0x11
-| 0x12h 18 | uint16   | Selector_nominal_feedrate  | 0000h 0      | 002dh 45    |                                          | Read / Write | M707 A0x12
-| 0x13h 19 | uint16   | Idler_nominal_feedrate     | 0000h 0      | 012ch 300   |                                          | Read / Write | M707 A0x13
-| 0x14h 20 | uint16   | Pulley_slow_feedrate       | 0000h 0      | 0014h 20    |                                          | Read / Write | M707 A0x14
-| 0x15h 21 | uint16   | Selector_homing_feedrate   | 0000h 0      | 001eh 30    |                                          | Read / Write | M707 A0x15
-| 0x16h 22 | uint16   | Idler_homing_feedrate      | 0000h 0      | 0109h 265   |                                          | Read / Write | M707 A0x16
-| 0x17h 23 | uint16   | Pulley_sg_thrs__R          | 0000h 0      | 0008h 8     |                                          | Read / Write | M707 A0x17
-| 0x18h 24 | uint16   | Selector_sg_thrs_R         | 0000h 0      | 0003h 3     |                                          | Read / Write | M707 A0x18
-| 0x19h 25 | uint16   | Idler_sg_thrs_R            | 0000h 0      | 0005h 5     |                                          | Read / Write | M707 A0x19
-| 0x1ah 26 | uint16   | Get Pulley position        | 0000h 0      | ffffh 65535 |                                          | Read only    | M707 A0x1a
-| 0x1bh 27 | uint16   | Set/Get_Selector_slot      | 0000h 0      | ffffh 65535 |                                          | Read / Write | M707 A0x1b
-| 0x1ch 18 | uint16   | Set/Get_Idler_slot         | 0000h 0      | ffffh 65535 |                                          | Read / Write | M707 A0x1c
+| 0x0bh 11 | uint8    | extra_load_distance        | 00h 0        | 1eh 30      | unit mm                                  | Read / Write | M707 A0x0b
+| 0x0ch 12 | uint8    | FSensor_unload_check_dist. | 00h 0        | 28h 30      | unit mm                                  | Read / Write | M707 A0x0c
+| 0x0dh 13 | uint16   | Pulley_unload_feedrate     | 0000h 0      | 0078h 120   | unit mm/s                                | Read / Write | M707 A0x0d
+| 0x0eh 14 | uint16   | Pulley_acceleration        | 0000h 0      | 320h 800.0  | unit mm/s²                               | Read (Write) | M707 A0x0e
+| 0x0fh 15 | uint16   | Selector_acceleration      | 0000h 0      | 00c8h 200.0 | unit mm/s²                               | Read (Write) | M707 A0x0f
+| 0x10h 16 | uint16   | Idler_acceleration         | 0000h 0      | 01f4h 500.0 | unit deg/s²                              | Read (Write) | M707 A0x10
+| 0x11h 17 | uint16   | Pulley_load_feedrate       | 0000h 0      | 0050h 80    | unit mm/s                                | Read / Write | M707 A0x11
+| 0x12h 18 | uint16   | Selector_nominal_feedrate  | 0000h 0      | 002dh 45    | unit mm/s                                | Read / Write | M707 A0x12
+| 0x13h 19 | uint16   | Idler_nominal_feedrate     | 0000h 0      | 012ch 300   | unit deg/s                               | Read / Write | M707 A0x13
+| 0x14h 20 | uint16   | Pulley_slow_feedrate       | 0000h 0      | 0014h 20    | unit mm/s                                | Read / Write | M707 A0x14
+| 0x15h 21 | uint16   | Selector_homing_feedrate   | 0000h 0      | 001eh 30    | unit mm/s                                | Read (Write) | M707 A0x15
+| 0x16h 22 | uint16   | Idler_homing_feedrate      | 0000h 0      | 0109h 265   | unit deg/s                               | Read (Write) | M707 A0x16
+| 0x17h 23 | uint16   | Pulley_sg_thrs__R          | 0000h 0      | 0008h 8     |                                          | Read (Write) | M707 A0x17
+| 0x18h 24 | uint16   | Selector_sg_thrs_R         | 0000h 0      | 0003h 3     |                                          | Read (Write) | M707 A0x18
+| 0x19h 25 | uint16   | Idler_sg_thrs_R            | 0000h 0      | 0005h 5     |                                          | Read (Write) | M707 A0x19
+| 0x1ah 26 | uint16   | Get Pulley position        | 0000h 0      | ffffh 65535 | unit mm                                  | Read only    | M707 A0x1a
+| 0x1bh 27 | uint16   | Set/Get_Selector_slot      | 0000h 0      | ffffh 65535 | unit slot [0-4|5] 5=park pos             | Read / Write | M707 A0x1b
+| 0x1ch 28 | uint16   | Set/Get_Idler_slot         | 0000h 0      | ffffh 65535 | unit slot [0-4|5] 5=disengaged           | Read / Write | M707 A0x1c
 */
 
 struct RegisterFlags {
@@ -286,17 +286,17 @@ static const RegisterRec registers[] /*PROGMEM*/ = {
     // 0xe Pulley acceleration [mm/s2] RW
     RegisterRec(
         []() -> uint16_t { return config::pulleyLimits.accel.v; },
-        //@@TODO
+        //@@TODO please update documentation as well
         2),
     // 0xf Selector acceleration [mm/s2] RW
     RegisterRec(
         []() -> uint16_t { return config::selectorLimits.accel.v; },
-        //@@TODO
+        //@@TODO please update documentation as well
         2),
     // 0x10 Idler acceleration [deg/s2] RW
     RegisterRec(
         []() -> uint16_t { return config::idlerLimits.accel.v; },
-        //@@TODO
+        //@@TODO please update documentation as well
         2),
 
     // 0x11 Pulley load feedrate [mm/s] RW
@@ -323,28 +323,28 @@ static const RegisterRec registers[] /*PROGMEM*/ = {
     // 0x15 Selector homing feedrate [mm/s] RW
     RegisterRec(
         []() -> uint16_t { return config::selectorHomingFeedrate.v; },
-        //@@TODO
+        //@@TODO please update documentation as well
         2),
     // 0x16 Idler homing feedrate [deg/s] RW
     RegisterRec(
         []() -> uint16_t { return config::idlerHomingFeedrate.v; },
-        //@@TODO
+        //@@TODO please update documentation as well
         2),
 
-    // 0x17 Pulley sg_thrs threshold R
+    // 0x17 Pulley sg_thrs threshold RW
     RegisterRec(
         []() -> uint16_t { return config::pulley.sg_thrs; },
-        //@@TODO
+        //@@TODO please update documentation as well
         2),
-    // 0x18 Selector sg_thrs R
+    // 0x18 Selector sg_thrs RW
     RegisterRec(
         []() -> uint16_t { return config::selector.sg_thrs; },
-        //@@TODO
+        //@@TODO please update documentation as well
         2),
-    // 0x19 Idler sg_thrs R
+    // 0x19 Idler sg_thrs RW
     RegisterRec(
         []() -> uint16_t { return config::idler.sg_thrs; },
-        //@@TODO
+        //@@TODO please update documentation as well
         2),
 
     // 0x1a Get Pulley position [mm] R
