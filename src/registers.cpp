@@ -15,6 +15,144 @@
 #include "modules/pulley.h"
 #include "modules/selector.h"
 
+/** @defgroup register_table Register Table
+ *
+
+  ---------------------------------------------------------------------------------
+  Register 8-bit Empty value = 0xFFh 255
+
+  Register 16-bit Empty value = 0xFFFFh 65535
+
+  _Italic = unused or default_
+
+  __Bold = Status__
+
+  ---------------------------------------------------------------------------------
+  How can you use the M707/M708 gcodes?
+  - Serial terminal like Putty.
+
+  ### !!! Gcodes are case sensitive so please don't use upper case A or X in the address you want to read !!!
+
+  #### Useful tools/links:
+  To convert hex to ascii https://www.rapidtables.com/convert/number/hex-to-ascii.html
+
+  To convert hex to dec   https://www.rapidtables.com/convert/number/hex-to-decimal.html
+
+  Version: 0.0.1
+
+  ---------------------------------------------------------------------------------
+
+
+| Address  | Bit/Type | Name                       | Valid values | Default     | Description                              | Read / Write | Gcode
+| :--      | :--      | :--                        | :--:         | :--:        | :--                                      | :--:         | :--:
+| 0x00h 00 | uint8    | project_major              | 00h 0        | ffh 255     | Project Major Version                    | Read only    | M707 A0x00
+| 0x01h 01 | uint8    | project_minor              | 00h 0        | ffh 255     | Project Minor Version                    | Read only    | M707 A0x01
+| 0x02h 02 | uint8    | project_revision           | 00h 0        | ffh 255     | Project Revision                         | Read only    | M707 A0x02
+| 0x03h 03 | uint8    | project_build_number       | 00h 0        | ffh 255     | Project Build Number                     | Read only    | M707 A0x03
+| 0x04h 04 | uint16   | MMU_errors                 | 0000h 0      | ffffh 65535 | MMU Errors                               | Read / Write | M707 A0x04
+| 0x05h 05 | uint8    | Current_Progress_Code      | ffh 255      | ffh 255     | Emtpy                                    | Read only    | M707 A0x05
+| ^        | ^        | ^                          | 00h 0        | ^           | OK                                       | ^            | ^
+| ^        | ^        | ^                          | 01h 1        | ^           | EngagingIdler                            | ^            | ^
+| ^        | ^        | ^                          | 02h 2        | ^           | DisengagingIdler                         | ^            | ^
+| ^        | ^        | ^                          | 03h 3        | ^           | UnloadingToFinda                         | ^            | ^
+| ^        | ^        | ^                          | 04h 4        | ^           | UnloadingToPulley                        | ^            | ^
+| ^        | ^        | ^                          | 05h 5        | ^           | FeedingToFinda                           | ^            | ^
+| ^        | ^        | ^                          | 06h 6        | ^           | FeedingToBondtech                        | ^            | ^
+| ^        | ^        | ^                          | 07h 7        | ^           | FeedingToNozzle                          | ^            | ^
+| ^        | ^        | ^                          | 08h 8        | ^           | AvoidingGrind                            | ^            | ^
+| ^        | ^        | ^                          | 09h 9        | ^           | FinishingMoves                           | ^            | ^
+| ^        | ^        | ^                          | 0ah 10       | ^           | ERRDisengagingIdler                      | ^            | ^
+| ^        | ^        | ^                          | 0bh 11       | ^           | ERREngagingIdler                         | ^            | ^
+| ^        | ^        | ^                          | 0ch 12       | ^           | ERRWaitingForUser                        | ^            | ^
+| ^        | ^        | ^                          | 0dh 13       | ^           | ERRInternal                              | ^            | ^
+| ^        | ^        | ^                          | 0eh 14       | ^           | ERRHelpingFilament                       | ^            | ^
+| ^        | ^        | ^                          | 0fh 15       | ^           | ERRTMCFailed                             | ^            | ^
+| ^        | ^        | ^                          | 10h 16       | ^           | UnloadingFilament                        | ^            | ^
+| ^        | ^        | ^                          | 11h 17       | ^           | LoadingFilament                          | ^            | ^
+| ^        | ^        | ^                          | 11h 18       | ^           | SelectingFilamentSlot                    | ^            | ^
+| ^        | ^        | ^                          | 12h 19       | ^           | PreparingBlade                           | ^            | ^
+| ^        | ^        | ^                          | 13h 20       | ^           | PushingFilament                          | ^            | ^
+| ^        | ^        | ^                          | 14h 21       | ^           | PerformingCut                            | ^            | ^
+| ^        | ^        | ^                          | 15h 22       | ^           | ReturningSelector                        | ^            | ^
+| ^        | ^        | ^                          | 16h 23       | ^           | ParkingSelector                          | ^            | ^
+| ^        | ^        | ^                          | 17h 24       | ^           | EjectingFilament                         | ^            | ^
+| ^        | ^        | ^                          | 18h 25       | ^           | RetractingFromFinda                      | ^            | ^
+| ^        | ^        | ^                          | 19h 26       | ^           | Homing                                   | ^            | ^
+| ^        | ^        | ^                          | 1ah 27       | ^           | MovingSelector                           | ^            | ^
+| ^        | ^        | ^                          | 1bh 28       | ^           | FeedingToFSensor                         | ^            | ^
+| 0x06h 06 | uint16   | Current_Error_Code         | 0000h 0      | ffffh 65535 | RUNNING                                  | Read only    | M707 A0x06
+| ^        | ^        | ^                          | 0001h 1      | ^           | OK                                       | ^            | ^
+| ^        | ^        | ^                          | 8001h 32769  | ^           | FSENSOR_DIDNT_SWITCH_ON                  | ^            | ^
+| ^        | ^        | ^                          | 8002h 32770  | ^           | FINDA_DIDNT_SWITCH_OFF                   | ^            | ^
+| ^        | ^        | ^                          | 8003h 32771  | ^           | FSENSOR_DIDNT_SWITCH_ON                  | ^            | ^
+| ^        | ^        | ^                          | 8004h 32772  | ^           | FSENSOR_DIDNT_SWITCH_OFF                 | ^            | ^
+| ^        | ^        | ^                          | 8005h 32773  | ^           | FILAMENT_ALREADY_LOADED                  | ^            | ^
+| ^        | ^        | ^                          | 8006h 32774  | ^           | INVALID_TOOL                             | ^            | ^
+| ^        | ^        | ^                          | 8007h 32775  | ^           | Homing_FAILED                            | ^            | ^
+| ^        | ^        | ^                          | 8008h 32776  | ^           | FINDA_VS_EEPROM_DISREPANCY               | ^            | ^
+| ^        | ^        | ^                          | 8009h 32777  | ^           | FSENSOR_TOO_EARLY                        | ^            | ^
+| ^        | ^        | ^                          | 802bh 32811  | ^           | QUEUE_FULL                               | ^            | ^
+| ^        | ^        | ^                          | 802ch 32812  | ^           | VERSION_MISMATCH                         | ^            | ^
+| ^        | ^        | ^                          | 802dh 32813  | ^           | PROTOCOL_ERROR                           | ^            | ^
+| ^        | ^        | ^                          | 802eh 32814  | ^           | MMU_NOT_RESPONDING                       | ^            | ^
+| ^        | ^        | ^                          | 802fh 32815  | ^           | INTERNAL                                 | ^            | ^
+| ^        | ^        | ^                          | 8200h 33280  | ^           | TMC_IOIN_MISMATCH                        | ^            | ^
+| ^        | ^        | ^                          | 8240h 33344  | ^           | TMC_IOIN_MISMATCH PULLEY                 | ^            | ^
+| ^        | ^        | ^                          | 8280h 33408  | ^           | TMC_IOIN_MISMATCH SELECTOR               | ^            | ^
+| ^        | ^        | ^                          | 8300h 33536  | ^           | TMC_IOIN_MISMATCH IDLER                  | ^            | ^
+| ^        | ^        | ^                          | 83C0h 33728  | ^           | TMC_IOIN_MISMATCH All 3                  | ^            | ^
+| ^        | ^        | ^                          | 8400h 33792  | ^           | TMC_RESET                                | ^            | ^
+| ^        | ^        | ^                          | 8440h 33856  | ^           | TMC_RESET PULLEY                         | ^            | ^
+| ^        | ^        | ^                          | 8480h 33920  | ^           | TMC_RESET SELECTOR                       | ^            | ^
+| ^        | ^        | ^                          | 8500h 34048  | ^           | TMC_RESET IDLER                          | ^            | ^
+| ^        | ^        | ^                          | 85C0h 34240  | ^           | TMC_RESET All 3                          | ^            | ^
+| ^        | ^        | ^                          | 8800h 34816  | ^           | TMC_UNDERVOLTAGE_ON_CHARGE_PUMP          | ^            | ^
+| ^        | ^        | ^                          | 8840h 34880  | ^           | TMC_UNDERVOLTAGE_ON_CHARGE_PUMP PULLEY   | ^            | ^
+| ^        | ^        | ^                          | 8880h 34944  | ^           | TMC_UNDERVOLTAGE_ON_CHARGE_PUMP SELECTOR | ^            | ^
+| ^        | ^        | ^                          | 8900h 35072  | ^           | TMC_UNDERVOLTAGE_ON_CHARGE_PUMP IDLER    | ^            | ^
+| ^        | ^        | ^                          | 89C0h 35264  | ^           | TMC_UNDERVOLTAGE_ON_CHARGE_PUMP All 3    | ^            | ^
+| ^        | ^        | ^                          | 9000h 36864  | ^           | TMC_SHORT_TO_GROUND                      | ^            | ^
+| ^        | ^        | ^                          | 9040h 36928  | ^           | TMC_SHORT_TO_GROUND PULLEY               | ^            | ^
+| ^        | ^        | ^                          | 9080h 36992  | ^           | TMC_SHORT_TO_GROUND SELECTOR             | ^            | ^
+| ^        | ^        | ^                          | 9100h 37120  | ^           | TMC_SHORT_TO_GROUND IDLER                | ^            | ^
+| ^        | ^        | ^                          | 91C0h 37312  | ^           | TMC_SHORT_TO_GROUND All 3                | ^            | ^
+| ^        | ^        | ^                          | A000h 40960  | ^           | TMC_OVER_TEMPERATURE_WARN                | ^            | ^
+| ^        | ^        | ^                          | A040h 41024  | ^           | TMC_OVER_TEMPERATURE_WARN PULLEY         | ^            | ^
+| ^        | ^        | ^                          | A080h 41088  | ^           | TMC_OVER_TEMPERATURE_WARN SELECTOR       | ^            | ^
+| ^        | ^        | ^                          | A100h 41216  | ^           | TMC_OVER_TEMPERATURE_WARN IDLER          | ^            | ^
+| ^        | ^        | ^                          | A1C0h 41408  | ^           | TMC_OVER_TEMPERATURE_WARN All 3          | ^            | ^
+| ^        | ^        | ^                          | C000h 49152  | ^           | TMC_OVER_TEMPERATURE_ERROR               | ^            | ^
+| ^        | ^        | ^                          | C040h 49216  | ^           | TMC_OVER_TEMPERATURE_ERROR PULLEY        | ^            | ^
+| ^        | ^        | ^                          | C080h 49280  | ^           | TMC_OVER_TEMPERATURE_ERROR SELECTOR      | ^            | ^
+| ^        | ^        | ^                          | C100h 49408  | ^           | TMC_OVER_TEMPERATURE_ERROR IDLER         | ^            | ^
+| ^        | ^        | ^                          | C1C0h 49600  | ^           | TMC_OVER_TEMPERATURE_ERROR All 3         | ^            | ^
+| 0x07h 07 | uint8    | Filament_State             | 00h 0        | ffh 255     | Filament State                           | Read / Write | M707 A0x07
+| 0x08h 08 | uint8    | FINDA_State                | 00h 0        | ffh 255     | not triggered                            | Read only    | M707 A0x08
+| ^        | ^        | ^                          | 01h 1        | ^           | triggered                                | ^            | ^
+| 0x09h 09 | uint8    | FSensor_State              | 00h 0        | ffh 255     | not triggered                            | Read / Write | M707 A0x09
+| ^        | ^        | ^                          | 01h 1        | ^           | triggered                                | ^            | ^
+| 0x0ah 10 | uint8    | Motor_Mode                 | 00h 0        | 00h 0       | normal                                   | Read only    | M707 A0x0a
+| ^        | ^        | ^                          | 01h 1        | ^           | stealth                                  | ^            | ^
+| 0x0bh 11 | uint8    | extra_load_distance        | 00h 0        | 1eh 30      |                                          | Read / Write | M707 A0x0b
+| 0x0ch 12 | uint8    | FSensor_unload_check_dist. | 00h 0        | 28h 30      |                                          | Read / Write | M707 A0x0c
+| 0x0dh 13 | uint16   | Pulley_unload_feedrate     | 0000h 0      | 0078h 120   |                                          | Read / Write | M707 A0x0d
+| 0x0eh 14 | uint16   | Pulley_acceleration        | 0000h 0      | 320h 800.0  |                                          | Read / Write | M707 A0x0e
+| 0x0fh 15 | uint16   | Selector_acceleration      | 0000h 0      | 00c8h 200.0 |                                          | Read / Write | M707 A0x0f
+| 0x10h 16 | uint16   | Idler_acceleration         | 0000h 0      | 01f4h 500.0 |                                          | Read / Write | M707 A0x10
+| 0x11h 17 | uint16   | Pulley_load_feedrate       | 0000h 0      | 0050h 80    |                                          | Read / Write | M707 A0x11
+| 0x12h 18 | uint16   | Selector_nominal_feedrate  | 0000h 0      | 002dh 45    |                                          | Read / Write | M707 A0x12
+| 0x13h 19 | uint16   | Idler_nominal_feedrate     | 0000h 0      | 012ch 300   |                                          | Read / Write | M707 A0x13
+| 0x14h 20 | uint16   | Pulley_slow_feedrate       | 0000h 0      | 0014h 20    |                                          | Read / Write | M707 A0x14
+| 0x15h 21 | uint16   | Selector_homing_feedrate   | 0000h 0      | 001eh 30    |                                          | Read / Write | M707 A0x15
+| 0x16h 22 | uint16   | Idler_homing_feedrate      | 0000h 0      | 0109h 265   |                                          | Read / Write | M707 A0x16
+| 0x17h 23 | uint16   | Pulley_sg_thrs__R          | 0000h 0      | 0008h 8     |                                          | Read / Write | M707 A0x17
+| 0x18h 24 | uint16   | Selector_sg_thrs_R         | 0000h 0      | 0003h 3     |                                          | Read / Write | M707 A0x18
+| 0x19h 25 | uint16   | Idler_sg_thrs_R            | 0000h 0      | 0005h 5     |                                          | Read / Write | M707 A0x19
+| 0x1ah 26 | uint16   | Get Pulley position        | 0000h 0      | ffffh 65535 |                                          | Read only    | M707 A0x1a
+| 0x1bh 27 | uint16   | Set/Get_Selector_slot      | 0000h 0      | ffffh 65535 |                                          | Read / Write | M707 A0x1b
+| 0x1ch 18 | uint16   | Set/Get_Idler_slot         | 0000h 0      | ffffh 65535 |                                          | Read / Write | M707 A0x1c
+*/
+
 struct RegisterFlags {
     uint8_t writable : 1;
     uint8_t rwfuncs : 1; // 1: register needs special read and write functions

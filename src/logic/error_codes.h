@@ -55,7 +55,7 @@ enum class ErrorCode : uint_fast16_t {
 
     /// TMC driver init error - TMC dead or bad communication
     /// - E33344 Pulley TMC driver
-    /// - E33404 Selector TMC driver
+    /// - E33408 Selector TMC driver
     /// - E33536 Idler TMC driver
     /// - E33728 All 3 TMC driver
     TMC_IOIN_MISMATCH = 0x8200,
