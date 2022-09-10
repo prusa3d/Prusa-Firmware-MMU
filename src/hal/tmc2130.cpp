@@ -1,7 +1,7 @@
 /// @file tmc2130.cpp
 #include "tmc2130.h"
 #include "../config/config.h"
-
+#include "../modules/permanent_storage.h"
 #include "../debug.h"
 
 namespace hal {
@@ -44,8 +44,7 @@ bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, Mot
     WriteRegister(params, Registers::TPOWERDOWN, 0);
 
     ///Stallguard parameters
-    uint32_t tmc2130_coolConf = (((uint32_t)params.sg_thrs) << 16U);
-    WriteRegister(params, Registers::COOLCONF, tmc2130_coolConf);
+    SetSGTHRS(params, mps::AxisSGTHRS::get((mm::Axis)params.axis));
     WriteRegister(params, Registers::TCOOLTHRS, config::tmc2130_coolStepThreshold);
 
     ///Write stealth mode config and setup diag0 output
@@ -78,6 +77,11 @@ void TMC2130::SetCurrents(const MotorParams &params, const MotorCurrents &curren
         | (uint32_t)(currents.iRun & 0x1F) << 8 //irun
         | (uint32_t)(15 & 0x0F) << 16; //IHOLDDELAY
     WriteRegister(params, Registers::IHOLD_IRUN, ihold_irun);
+}
+
+void TMC2130::SetSGTHRS(const MotorParams &params, uint8_t sgthrs) {
+    uint32_t tmc2130_coolConf = (((uint32_t)sgthrs) << 16U);
+    WriteRegister(params, Registers::COOLCONF, tmc2130_coolConf);
 }
 
 void TMC2130::SetEnabled(const MotorParams &params, bool enabled) {

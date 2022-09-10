@@ -1,6 +1,7 @@
 /// @file permanent_storage.h
 #pragma once
 #include "../hal/eeprom.h"
+#include "motion.h"
 
 namespace modules {
 
@@ -97,6 +98,16 @@ private:
     static uint8_t getH();
     static void setH(uint8_t highByte);
 };
+
+/// @brief Read and increment drive errors
+///
+/// (Motor power rail voltage loss)
+class AxisSGTHRS {
+public:
+    static uint8_t get(mm::Axis axis);
+    static void set(mm::Axis axis, uint8_t val);
+};
+
 
 } // namespace permanent_storage
 } // namespace modules

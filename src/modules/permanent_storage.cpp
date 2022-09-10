@@ -25,6 +25,7 @@ struct eeprom_t {
     uint8_t eepromFilament[800]; ///< Top nibble status, bottom nibble last filament loaded
     uint8_t eepromDriveErrorCountH;
     uint8_t eepromDriveErrorCountL[2];
+    uint8_t sg_thrs[3];
 } __attribute__((packed));
 
 static_assert(sizeof(eeprom_t) - 2 <= hal::eeprom::EEPROM::End(), "eeprom_t doesn't fit into EEPROM available.");
@@ -357,6 +358,17 @@ uint8_t DriveError::getH() {
 
 void DriveError::setH(uint8_t highByte) {
     ee::EEPROM::UpdateByte(EEOFFSET(eepromBase->eepromDriveErrorCountH), highByte - 1);
+}
+
+uint8_t AxisSGTHRS::get(mm::Axis axis) {
+    uint8_t sg_thrs = ee::EEPROM::ReadByte(EEOFFSET(eepromBase->sg_thrs[axis]));
+    if (sg_thrs & 0x80)
+        sg_thrs = mm::axisParams[axis].params.sg_thrs;
+    return sg_thrs;
+}
+
+void AxisSGTHRS::set(mm::Axis axis, uint8_t val) {
+    ee::EEPROM::UpdateByte(EEOFFSET(eepromBase->sg_thrs[axis]), val);
 }
 
 } // namespace permanent_storage

@@ -26,6 +26,7 @@ struct MotorParams {
     gpio::GPIO_pin sgPin; ///< stallguard pin
     config::MRes mRes; ///< microstep resolution
     int8_t sg_thrs;
+    uint8_t axis;
 };
 
 struct MotorCurrents {
@@ -90,6 +91,9 @@ public:
 
     /// Set the current motor currents
     void SetCurrents(const MotorParams &params, const MotorCurrents &currents);
+
+    /// Set stallguard threshold
+    void SetSGTHRS(const MotorParams &params, uint8_t sgthrs);
 
     /// Return enabled state
     const bool Enabled() const {
