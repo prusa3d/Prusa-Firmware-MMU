@@ -14,6 +14,7 @@
 #include "modules/idler.h"
 #include "modules/pulley.h"
 #include "modules/selector.h"
+#include "modules/permanent_storage.h"
 
 /** @defgroup register_table Register Table
  *
@@ -145,9 +146,9 @@
 | 0x14h 20 | uint16   | Pulley_slow_feedrate       | 0000h 0      | 0014h 20    | unit mm/s                                | Read / Write | M707 A0x14 | M708 A0x14 Xnnnn
 | 0x15h 21 | uint16   | Selector_homing_feedrate   | 0000h 0      | 001eh 30    | unit mm/s                                | Read (Write) | M707 A0x15 | (M708 A0x15 Xnnnn)
 | 0x16h 22 | uint16   | Idler_homing_feedrate      | 0000h 0      | 0109h 265   | unit deg/s                               | Read (Write) | M707 A0x16 | (M708 A0x16 Xnnnn)
-| 0x17h 23 | uint16   | Pulley_sg_thrs__R          | 0000h 0      | 0008h 8     |                                          | Read (Write) | M707 A0x17 | (M708 A0x17 Xnnnn)
-| 0x18h 24 | uint16   | Selector_sg_thrs_R         | 0000h 0      | 0003h 3     |                                          | Read (Write) | M707 A0x18 | (M708 A0x18 Xnnnn)
-| 0x19h 25 | uint16   | Idler_sg_thrs_R            | 0000h 0      | 0005h 5     |                                          | Read (Write) | M707 A0x19 | (M708 A0x19 Xnnnn)
+| 0x17h 23 | uint8    | Pulley_sg_thrs__R          | 00h 0        | 08h 8       |                                          | Read (Write) | M707 A0x17 | M708 A0x17 Xnn
+| 0x18h 24 | uint8    | Selector_sg_thrs_R         | 00h 0        | 03h 3       |                                          | Read (Write) | M707 A0x18 | M708 A0x18 Xnn
+| 0x19h 25 | uint8    | Idler_sg_thrs_R            | 00h 0        | 05h 6       |                                          | Read (Write) | M707 A0x19 | M708 A0x19 Xnn
 | 0x1ah 26 | uint16   | Get Pulley position        | 0000h 0      | ffffh 65535 | unit mm                                  | Read only    | M707 A0x1a | N/A
 | 0x1bh 27 | uint16   | Set/Get_Selector_slot      | 0000h 0      | ffffh 65535 | unit slot [0-4/5] 5=park pos             | Read / Write | M707 A0x1b | M708 A0x1b Xn
 | 0x1ch 28 | uint16   | Set/Get_Idler_slot         | 0000h 0      | ffffh 65535 | unit slot [0-4/5] 5=disengaged           | Read / Write | M707 A0x1c | M708 A0x1c Xn
@@ -333,19 +334,19 @@ static const RegisterRec registers[] /*PROGMEM*/ = {
 
     // 0x17 Pulley sg_thrs threshold RW
     RegisterRec(
-        []() -> uint16_t { return config::pulley.sg_thrs; },
-        //@@TODO please update documentation as well
-        2),
+        []() -> uint16_t { return mps::AxisSGTHRS::get(mm::Axis::Pulley); },
+        [](uint16_t d) { mm::motion.DriverForAxis(mm::Axis::Pulley).SetSGTHRS(mm::axisParams[mm::Axis::Pulley].params, d); mps::AxisSGTHRS::set(mm::Axis::Pulley, d); },
+        1),
     // 0x18 Selector sg_thrs RW
     RegisterRec(
-        []() -> uint16_t { return config::selector.sg_thrs; },
-        //@@TODO please update documentation as well
-        2),
+        []() -> uint16_t { return mps::AxisSGTHRS::get(mm::Axis::Selector); },
+        [](uint16_t d) { mm::motion.DriverForAxis(mm::Axis::Selector).SetSGTHRS(mm::axisParams[mm::Axis::Selector].params, d); mps::AxisSGTHRS::set(mm::Axis::Selector, d); },
+        1),
     // 0x19 Idler sg_thrs RW
     RegisterRec(
-        []() -> uint16_t { return config::idler.sg_thrs; },
-        //@@TODO please update documentation as well
-        2),
+        []() -> uint16_t { return mps::AxisSGTHRS::get(mm::Axis::Idler); },
+        [](uint16_t d) { mm::motion.DriverForAxis(mm::Axis::Idler).SetSGTHRS(mm::axisParams[mm::Axis::Idler].params, d); mps::AxisSGTHRS::set(mm::Axis::Idler, d); },
+        1),
 
     // 0x1a Get Pulley position [mm] R
     RegisterRec(
