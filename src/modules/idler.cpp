@@ -37,7 +37,7 @@ void Idler::PlanHomingMoveBack() {
 bool Idler::FinishHomingAndPlanMoveToParkPos() {
     // check the axis' length
     int32_t axisEnd = mm::axisUnitToTruncatedUnit<config::U_deg>(mm::motion.CurPosition<mm::Idler>());
-    if (abs(axisEnd - axisStart) < (config::idlerLimits.lenght.v - 10)) { //@@TODO is 10 degrees ok?
+    if (abs(axisEnd - axisStart) < (int32_t)(config::idlerLimits.lenght.v - 10)) { //@@TODO is 10 degrees ok?
         return false; // we couldn't home correctly, we cannot set the Idler's position
     }
 

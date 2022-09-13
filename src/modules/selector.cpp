@@ -36,7 +36,7 @@ void Selector::PlanHomingMoveBack() {
 bool Selector::FinishHomingAndPlanMoveToParkPos() {
     // check the axis' length
     int32_t axisEnd = mm::axisUnitToTruncatedUnit<config::U_mm>(mm::motion.CurPosition<mm::Selector>());
-    if (abs(axisEnd - axisStart) < (config::selectorLimits.lenght.v - 3)) { //@@TODO is 3mm ok?
+    if (abs(axisEnd - axisStart) < (int32_t)(config::selectorLimits.lenght.v - 3)) { //@@TODO is 3mm ok?
         return false; // we couldn't home correctly, we cannot set the Selector's position
     }
 

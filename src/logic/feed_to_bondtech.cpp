@@ -30,7 +30,7 @@ void logic::FeedToBondtech::GoToPushToNozzle() {
 }
 
 void FeedToBondtech::UpdateBowdenLength(int32_t measuredBowdenLength) {
-    if (measuredBowdenLength < config::maximumBowdenLength.v) { // is the measured length any valid/acceptable?
+    if (measuredBowdenLength < (int32_t)config::maximumBowdenLength.v) { // is the measured length any valid/acceptable?
         static_assert(config::maximumBowdenLength.v <= 65535, "Max bowden length too long");
         int16_t mbl = (int16_t)measuredBowdenLength;
         int16_t difference = abs(mbl - mps::BowdenLength::Get(mg::globals.ActiveSlot()));
