@@ -152,6 +152,11 @@
 | 0x1ah 26 | uint16   | Get Pulley position        | 0000h 0      | ffffh 65535 | unit mm                                  | Read only    | M707 A0x1a | N/A
 | 0x1bh 27 | uint16   | Set/Get_Selector_slot      | 0000h 0      | ffffh 65535 | unit slot [0-4/5] 5=park pos             | Read / Write | M707 A0x1b | M708 A0x1b Xn
 | 0x1ch 28 | uint16   | Set/Get_Idler_slot         | 0000h 0      | ffffh 65535 | unit slot [0-4/5] 5=disengaged           | Read / Write | M707 A0x1c | M708 A0x1c Xn
+| 0x1dh 29 | uint16   | Bowden length slot 0       | 0000h 0      | ffffh 65535 | unit mm                                  | Read / Write | M707 A0x1d | M708 A0x1d Xn
+| 0x1eh 30 | uint16   | Bowden length slot 1       | 0000h 0      | ffffh 65535 | unit mm                                  | Read / Write | M707 A0x1e | M708 A0x1e Xn
+| 0x1fh 31 | uint16   | Bowden length slot 2       | 0000h 0      | ffffh 65535 | unit mm                                  | Read / Write | M707 A0x1f | M708 A0x1f Xn
+| 0x20h 32 | uint16   | Bowden length slot 3       | 0000h 0      | ffffh 65535 | unit mm                                  | Read / Write | M707 A0x20 | M708 A0x20 Xn
+| 0x21h 33 | uint16   | Bowden length slot 4       | 0000h 0      | ffffh 65535 | unit mm                                  | Read / Write | M707 A0x21 | M708 A0x21 Xn
 */
 
 struct RegisterFlags {
