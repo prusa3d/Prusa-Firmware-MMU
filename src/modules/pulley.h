@@ -27,9 +27,7 @@ public:
     void PlanMove(mm::P_pos_t delta, mm::P_speed_t feed_rate, mm::P_speed_t end_rate = { 0 });
 
     // NOTE: always_inline is required here to force gcc <= 7.x to evaluate each call at compile time
-    // But it increases the code size with gcc 7.x by ~200B when PlanMove is called with non-constant feed rates
-    // -> so we don't know yet how to avoid those stupid to/from float conversions (due to C++ unit system), but we'll find a way around ;)
-    void /*__attribute__((always_inline))*/ PlanMove(unit::U_mm delta, unit::U_mm_s feed_rate, unit::U_mm_s end_rate = { 0 }) {
+    void __attribute__((always_inline)) PlanMove(unit::U_mm delta, unit::U_mm_s feed_rate, unit::U_mm_s end_rate = { 0 }) {
         PlanMove(mm::unitToAxisUnit<mm::P_pos_t>(delta),
             mm::unitToAxisUnit<mm::P_speed_t>(feed_rate),
             mm::unitToAxisUnit<mm::P_speed_t>(end_rate));
