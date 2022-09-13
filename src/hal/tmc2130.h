@@ -109,6 +109,11 @@ public:
         gpio::TogglePin(params.stepPin); // assumes DEDGE
     }
 
+    /// Set step to an explicit state
+    static inline void SetStep(const MotorParams &params, bool state) {
+        gpio::WritePin(params.stepPin, (state ? gpio::Level::high : gpio::Level::low));
+    }
+
     /// Return SG state
     static inline bool SampleDiag(const MotorParams &params) {
         return gpio::ReadPin(params.sgPin) == gpio::Level::low;

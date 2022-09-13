@@ -70,6 +70,13 @@ enum class ErrorCode : uint_fast16_t {
     /// - E34240 All 3 TMC driver
     TMC_RESET = 0x8400,
 
+    /// TMC driver - IO pins are unreliable. While in theory it's recoverable, in practice it most likely
+    /// means your hardware is borked (we can't command the drivers reliably via STEP/EN/DIR due to electrical
+    /// issues or hardware fault. Possible "fixable" cause is undervoltage on the 5v logic line.
+    /// Unfixable possible cause: bad or cracked solder joints on the PCB, failed shift register, failed driver.
+    /// TODO: DRRacer - Separate codes per channel.
+    TMC_PINS_UNRELIABLE = 0x8600,
+
     /// not enough current for the TMC, NOT RECOVERABLE
     /// - E34880 Pulley TMC driver
     /// - E34944 Selector TMC driver
