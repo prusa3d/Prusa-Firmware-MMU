@@ -67,8 +67,13 @@ Selector::OperationResult Selector::MoveToSlot(uint8_t slot) {
         return OperationResult::Accepted;
     }
 
-    if (mf::finda.Pressed()) {
-        // @@TODO not sure why (if) this happens, but anyway - we must not move the selector if FINDA is pressed
+    // This seems to cause all kinds of strange issues like errorneously ejected filaments from the wrong slot (because selector refused to move).
+    // Moreover, FINDA looks very unreliable over time and occasionally causes spurious triggers.
+    // But relying on a higher-level status (filament load state) could solve the issue,
+    // because it is only updated at specific spots sometimes also according to FINDA status.
+    //if (mf::finda.Pressed()) {
+    if( mg::globals.FilamentLoaded() > mg::FilamentLoadState::AtPulley ){
+        // @@TODO not sure why (if) this happens, but anyway - we must not move the selector if we think that we have filament in the selector.
         // That includes the CutFilament operation as well
         return OperationResult::Refused;
     }

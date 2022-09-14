@@ -20,7 +20,7 @@ void FeedToFinda::Reset(bool feedPhaseLimited, bool haltAtEnd) {
     ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
     mi::idler.Engage(mg::globals.ActiveSlot());
     // We can't get any FINDA readings if the selector is at the wrong spot - move it accordingly if necessary
-    ms::selector.MoveToSlot(mg::globals.ActiveSlot());
+    ms::selector.MoveToSlot(mg::globals.ActiveSlot()); // @@TODO move to slot can return "refused", what shall we do in such a state? Report an error?
 }
 
 bool FeedToFinda::Step() {
