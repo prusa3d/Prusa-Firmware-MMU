@@ -32,7 +32,7 @@ Application application;
 
 Application::Application()
     : lastCommandProcessedMs(0)
-    , currentCommand(&logic::hwSanity)
+    , currentCommand(&logic::noCommand)
     , currentCommandRq(mp::RequestMsgCodes::Reset, 0) {}
 
 void Application::CheckManualOperation() {

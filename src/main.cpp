@@ -27,6 +27,7 @@
 
 #include "application.h"
 
+#include "logic/hw_sanity.h"
 #include "logic/no_command.h"
 
 /// One-time setup of HW and SW components
@@ -112,6 +113,19 @@ static void setup2() {
     }
     ml::leds.Step();
 
+    // Prep hardware sanity:
+    logic::hwSanity.Reset(0);
+
+    while (!logic::hwSanity.StepInner()) {
+        ml::leds.Step();
+    }
+
+    if (logic::hwSanity.Error() != ErrorCode::OK) {
+        // forward the issue to the logic startup handler.
+        logic::noCommand.SetInitError(logic::hwSanity.Error());
+        return;
+    }
+
     // Idler and Selector decide whether homing is possible/safe
     mi::idler.Init();
     ms::selector.Init();
@@ -141,14 +155,17 @@ void Panic(ErrorCode ec) {
 /// The idea behind the Step* routines is to keep each automaton non-blocking allowing for some “concurrency”.
 /// Some FW components will leverage ISR to do their stuff (UART, motor stepping?, etc.)
 void loop() {
+
     mb::buttons.Step();
     ml::leds.Step();
-    mf::finda.Step();
-    mfs::fsensor.Step();
-    mi::idler.Step();
-    ms::selector.Step();
-    mpu::pulley.Step();
-    mui::userInput.Step();
+    if (logic::hwSanity.Error() == ErrorCode::OK) {
+        mf::finda.Step();
+        mfs::fsensor.Step();
+        mi::idler.Step();
+        ms::selector.Step();
+        mpu::pulley.Step();
+        mui::userInput.Step();
+    }
     hal::cpu::Step();
     mu::cdc.Step();
 

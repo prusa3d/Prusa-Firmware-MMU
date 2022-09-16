@@ -2,7 +2,8 @@
 #pragma once
 #include <stdint.h>
 #include "command_base.h"
-#include "config/axis.h"
+#include "../config/axis.h"
+#include "../modules/leds.h"
 
 namespace logic {
 
@@ -38,13 +39,18 @@ public:
     bool StepInner() override;
 
 private:
+    // Shared code fault display setup for each axis/slot
     static void SetFaultDisplay(uint8_t slot, uint8_t mask);
 
-    static uint8_t test_step;
-    static config::Axis axis;
-    static uint8_t fault_masks[3];
-    static ProgressCode next_state;
-    static uint16_t wait_start;
+    // Prepares an axis for testing by initializing it and turning off the output.
+    static void PrepareAxis(config::Axis axis);
+
+    uint8_t test_step = 0;
+    config::Axis axis;
+    uint8_t fault_masks[3] = { 0 };
+    ProgressCode next_state = ProgressCode::HWTestBegin;
+    uint16_t wait_start = 0;
+    ml::Mode das_blinken_state = ml::off;
 };
 
 /// The one and only instance of hwSanity state machine in the FW

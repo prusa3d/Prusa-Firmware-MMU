@@ -4,7 +4,6 @@
 #include "../modules/motion.h"
 #include "../modules/leds.h"
 #include "../modules/timebase.h"
-#include "config/axis.h"
 
 namespace logic {
 
@@ -22,13 +21,6 @@ static constexpr uint8_t TEST_PASSES = 3U;
 static_assert(TEST_PASSES < 32); // Would overflow counters
 
 HWSanity hwSanity;
-
-uint8_t HWSanity::test_step = 0;
-uint8_t HWSanity::fault_masks[] = { 0 };
-uint16_t HWSanity::wait_start = 0;
-ml::Mode das_blinken_state = ml::off;
-Axis HWSanity::axis;
-ProgressCode HWSanity::next_state = ProgressCode::HWTestBegin;
 
 bool HWSanity::Reset(uint8_t param) {
     state = ProgressCode::HWTestBegin;
@@ -62,12 +54,18 @@ void HWSanity::SetFaultDisplay(uint8_t slot, uint8_t mask) {
     ml::leds.SetMode(slot, ml::red, red_mode);
 }
 
+void HWSanity::PrepareAxis(config::Axis axis) {
+    mm::motion.InitAxis(axis);
+    mm::motion.SetMode(axis, mm::Normal);
+    // Clear TOFF so the motors don't actually step during the test.
+    mm::motion.MMU_NEEDS_ATTENTION_DriverForAxis(axis).SetBridgeOutput(mm::axisParams[axis].params, false);
+}
+
 bool HWSanity::StepInner() {
     switch (state) {
     case ProgressCode::HWTestBegin:
         //auto& driver = mm::motion.DriverForAxis(config::Axis::Pulley);
         test_step = 0;
-        // Todo - set TOFF so the output bridge is disabled.
         state = ProgressCode::HWTestIdler;
         break;
     case ProgressCode::HWTestIdler:
@@ -75,18 +73,21 @@ bool HWSanity::StepInner() {
         ml::leds.SetPairButOffOthers(3, ml::on, ml::off);
         state = ProgressCode::HWTestExec;
         next_state = ProgressCode::HWTestSelector;
+        PrepareAxis(axis);
         break;
     case ProgressCode::HWTestSelector:
         axis = config::Axis::Selector;
         ml::leds.SetPairButOffOthers(3, ml::off, ml::on);
         state = ProgressCode::HWTestExec;
         next_state = ProgressCode::HWTestPulley;
+        PrepareAxis(axis);
         break;
     case ProgressCode::HWTestPulley:
         axis = config::Axis::Pulley;
         ml::leds.SetPairButOffOthers(3, ml::on, ml::on);
         state = ProgressCode::HWTestExec;
         next_state = ProgressCode::HWTestCleanup;
+        PrepareAxis(axis);
         break;
     // The main test loop for a given axis.
     case ProgressCode::HWTestDisplay:
@@ -103,16 +104,15 @@ bool HWSanity::StepInner() {
         /* FALLTHRU */
     case ProgressCode::HWTestExec: {
         auto params = mm::axisParams[axis].params;
+        auto &driver = mm::motion.MMU_NEEDS_ATTENTION_DriverForAxis(axis);
         if (test_step < (TEST_PASSES * 8)) // 8 combos per axis
         {
             uint8_t set_state = test_step % 8;
-            //auto* driver = &mm::motion.DriverForAxis(axis);
             // The order of the bits here is roughly the same as that of IOIN.
-            mm::motion.DriverForAxis(axis).SetDir(params, set_state & BIT_DIR);
-            mm::motion.DriverForAxis(axis).SetStep(params, set_state & BIT_STEP);
-            ml::leds.SetPairButOffOthers(3, ml::on, ml::off);
-            //mm::motion.DriverForAxis(axis).SetEnabled(params, set_state & BIT_ENA);
-            uint32_t drv_ioin = const_cast<hal::tmc2130::TMC2130 &>(mm::motion.DriverForAxis(axis)).ReadRegister(params, hal::tmc2130::TMC2130::Registers::IOIN);
+            driver.SetDir(params, set_state & BIT_DIR);
+            driver.SetStep(params, set_state & BIT_STEP);
+            driver.SetEnabled(params, set_state & BIT_ENA);
+            uint32_t drv_ioin = driver.ReadRegister(params, hal::tmc2130::TMC2130::Registers::IOIN);
             // Compose IOIN to look like set_state.
             drv_ioin = (drv_ioin & 0b11) | ((drv_ioin & 0b10000) ? 0 : 4); // Note the logic inversion for ENA readback!
             uint8_t bit_errs = (drv_ioin ^ set_state);
@@ -131,6 +131,7 @@ bool HWSanity::StepInner() {
             test_step++;
         } else {
             // This pass is complete. Move on to the next motor or cleanup.
+            driver.SetBridgeOutput(params, true);
             test_step = 0;
             state = next_state;
         }
@@ -139,20 +140,17 @@ bool HWSanity::StepInner() {
         if (fault_masks[0] || fault_masks[1] || fault_masks[2]) {
             // error, display it and return the code.
             state = ProgressCode::ErrHwTestFailed;
-            error = ErrorCode::TMC_PINS_UNRELIABLE;
+            error = ErrorCode::MMU_SOLDERING_NEEDS_ATTENTION;
             uint8_t mask = fault_masks[Axis::Idler];
             if (mask) {
-                error |= ErrorCode::TMC_IDLER_BIT;
                 SetFaultDisplay(0, mask);
             }
             mask = fault_masks[Axis::Pulley];
             if (mask) {
-                error |= ErrorCode::TMC_PULLEY_BIT;
                 SetFaultDisplay(2, mask);
             }
             mask = fault_masks[Axis::Selector];
             if (mask) {
-                error |= ErrorCode::TMC_SELECTOR_BIT;
                 SetFaultDisplay(1, mask);
             }
             ml::leds.SetMode(3, ml::red, ml::off);
@@ -161,7 +159,7 @@ bool HWSanity::StepInner() {
             ml::leds.SetMode(4, ml::green, ml::off);
             return true;
         } else {
-            //TODO: Re-enable TOFF here
+            ml::leds.SetPairButOffOthers(0, ml::off, ml::off);
             FinishedOK();
         }
     case ProgressCode::OK:

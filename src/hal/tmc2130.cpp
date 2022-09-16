@@ -7,6 +7,8 @@
 namespace hal {
 namespace tmc2130 {
 
+static constexpr uint8_t TOFF_DEFAULT = 3U, TOFF_MASK = 0xFU;
+
 bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, MotorMode mode) {
     // sg_filter_threshold = (1 << (8 - params.mRes));
     sg_filter_threshold = 2;
@@ -27,7 +29,7 @@ bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, Mot
     errorFlags.reset_flag = false;
 
     ///apply chopper parameters
-    const uint32_t chopconf = (uint32_t)(3U & 0x0FU) << 0U //toff
+    const uint32_t chopconf = (uint32_t)(TOFF_DEFAULT & TOFF_MASK) << 0U //toff
         | (uint32_t)(5U & 0x07U) << 4U //hstrt
         | (uint32_t)(1U & 0x0FU) << 7U //hend
         | (uint32_t)(2U & 0x03U) << 15U //tbl
@@ -71,6 +73,15 @@ bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, Mot
 void TMC2130::SetMode(const MotorParams &params, MotorMode mode) {
     ///0xFFFF0 is used as a "Normal" mode threshold since stealthchop will be used at standstill.
     WriteRegister(params, Registers::TPWMTHRS, (mode == Stealth) ? 70 : 0xFFFF0); // @@TODO should be configurable
+}
+
+void TMC2130::SetBridgeOutput(const MotorParams &params, bool bOn) {
+    uint32_t chopconf = ReadRegister(params, Registers::CHOPCONF);
+    chopconf &= ~((uint32_t)TOFF_MASK);
+    if (bOn) {
+        chopconf |= TOFF_DEFAULT;
+    }
+    WriteRegister(params, Registers::CHOPCONF, chopconf);
 }
 
 void TMC2130::SetCurrents(const MotorParams &params, const MotorCurrents &currents) {
