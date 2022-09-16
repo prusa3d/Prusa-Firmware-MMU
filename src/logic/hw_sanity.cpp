@@ -109,7 +109,7 @@ bool HWSanity::StepInner() {
         {
             uint8_t set_state = test_step % 8;
             // The order of the bits here is roughly the same as that of IOIN.
-            driver.SetDir(params, set_state & BIT_DIR);
+            driver.SetRawDir(params, set_state & BIT_DIR);
             driver.SetStep(params, set_state & BIT_STEP);
             driver.SetEnabled(params, set_state & BIT_ENA);
             uint32_t drv_ioin = driver.ReadRegister(params, hal::tmc2130::TMC2130::Registers::IOIN);
