@@ -83,7 +83,7 @@ uint8_t Globals::StallGuardThreshold(config::Axis axis) const {
     return mps::AxisTMCSetup::get(axis, hal::progmem::read_byte(defaultAxisSGTHRs + axis));
 }
 
-void Globals::SetStallGuardThreshold(config::Axis axis, uint8_t sgthrs){
+void Globals::SetStallGuardThreshold(config::Axis axis, uint8_t sgthrs) {
     mps::AxisTMCSetup::set(axis, sgthrs); // store the value in EEPROM
 }
 

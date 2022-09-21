@@ -94,6 +94,7 @@ public:
     uint8_t StallGuardThreshold(config::Axis axis) const;
     /// Stores the new StallGuard threshold for an axis into EEPROM (does not affect the current state of TMC drivers at all)
     void SetStallGuardThreshold(config::Axis axis, uint8_t sgthrs);
+
 private:
     /// Sets the active slot, usually after some command/operation.
     /// Also updates the EEPROM records accordingly
