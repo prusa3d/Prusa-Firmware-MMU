@@ -15,9 +15,7 @@ namespace logic {
 class HWSanity : public CommandBase {
 public:
     inline HWSanity()
-        : CommandBase() {
-        Reset(0);
-    }
+        : CommandBase() {}
 
     /// Restart the automaton
     bool Reset(uint8_t param) override;

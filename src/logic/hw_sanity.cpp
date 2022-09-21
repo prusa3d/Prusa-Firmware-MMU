@@ -64,7 +64,7 @@ void HWSanity::PrepareAxis(config::Axis axis) {
 bool HWSanity::StepInner() {
     switch (state) {
     case ProgressCode::HWTestBegin:
-        //auto& driver = mm::motion.DriverForAxis(config::Axis::Pulley);
+        error = ErrorCode::RUNNING;
         test_step = 0;
         state = ProgressCode::HWTestIdler;
         break;
@@ -101,7 +101,7 @@ bool HWSanity::StepInner() {
                 ml::leds.SetMode(i, ml::off);
             }
         }
-        /* FALLTHRU */
+        [[fallthrough]];
     case ProgressCode::HWTestExec: {
         auto params = mm::axisParams[axis].params;
         auto &driver = mm::motion.MMU_NEEDS_ATTENTION_DriverForAxis(axis);
