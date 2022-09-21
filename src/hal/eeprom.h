@@ -15,6 +15,11 @@ public:
     static void UpdateByte(addr_t addr, uint8_t value);
     static uint8_t ReadByte(addr_t addr);
 
+    /// Convenience function to read a 1-byte value from EEPROM and check for unitialized EEPROM cells.
+    /// @returns 1-byte value read from the EEPROM.
+    /// In case the EEPROM has a default value at @addr, this function returns @defaultValue
+    static uint8_t ReadByte(addr_t addr, uint8_t defaultValue);
+
     static void WriteWord(addr_t addr, uint16_t value);
     static void UpdateWord(addr_t addr, uint16_t value);
     static uint16_t ReadWord(addr_t addr);

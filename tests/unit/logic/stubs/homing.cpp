@@ -10,7 +10,7 @@
 
 void SimulateIdlerAndSelectorHoming(logic::CommandBase &cb) {
 #if 0
-    // do 5 steps until we trigger the simulated stallguard
+    // do 5 steps until we trigger the simulated StallGuard
     for (uint8_t i = 0; i < 5; ++i) {
         main_loop();
         cb.Step();
@@ -57,7 +57,7 @@ void SimulateIdlerAndSelectorHoming(logic::CommandBase &cb) {
 }
 
 void SimulateIdlerHoming(logic::CommandBase &cb) {
-    // do 5 steps until we trigger the simulated stallguard
+    // do 5 steps until we trigger the simulated StallGuard
     for (uint8_t i = 0; i < 5; ++i) {
         main_loop();
         cb.Step();
@@ -91,7 +91,7 @@ void SimulateIdlerHoming(logic::CommandBase &cb) {
 }
 
 void SimulateSelectorHoming(logic::CommandBase &cb) {
-    // do 5 steps until we trigger the simulated stallguard
+    // do 5 steps until we trigger the simulated StallGuard
     for (uint8_t i = 0; i < 5; ++i) {
         main_loop();
         cb.Step();
@@ -164,7 +164,7 @@ bool SimulateFailedHomeFirstTime(logic::CommandBase &cb) {
         return false;
 
     {
-        // do 5 steps until we trigger the simulated stallguard
+        // do 5 steps until we trigger the simulated StallGuard
         for (uint8_t i = 0; i < 5; ++i) {
             main_loop();
             cb.Step();
@@ -221,7 +221,7 @@ bool SimulateFailedHomeSelectorRepeated(logic::CommandBase &cb) {
         return false;
 
     {
-        // do 5 steps until we trigger the simulated stallguard
+        // do 5 steps until we trigger the simulated StallGuard
         for (uint8_t i = 0; i < 5; ++i) {
             main_loop();
             cb.Step();

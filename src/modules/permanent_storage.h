@@ -1,7 +1,7 @@
 /// @file permanent_storage.h
 #pragma once
 #include "../hal/eeprom.h"
-#include "motion.h"
+#include "../config/axis.h"
 
 namespace modules {
 
@@ -99,15 +99,12 @@ private:
     static void setH(uint8_t highByte);
 };
 
-/// @brief Read and increment drive errors
-///
-/// (Motor power rail voltage loss)
-class AxisSGTHRS {
+/// Axis TMC persistent setup
+class AxisTMCSetup {
 public:
-    static uint8_t get(mm::Axis axis);
-    static void set(mm::Axis axis, uint8_t val);
+    static uint8_t get(config::Axis axis, uint8_t defaultValue);
+    static void set(config::Axis axis, uint8_t val);
 };
-
 
 } // namespace permanent_storage
 } // namespace modules

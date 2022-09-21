@@ -195,7 +195,7 @@ void FailedLoadToFindaResolveManual(uint8_t slot, logic::LoadFilament &lf) {
     // its moves (which is correct), but we don't have enough cycles to home the selector afterwards
     // - basically it will just start homing
     // Moreover, the Idler is to disengage meanwhile, which makes the simulation even harder.
-    // Therefore we just tick the stallguard of the Selector and hope for the best
+    // Therefore we just tick the StallGuard of the Selector and hope for the best
     //
     // With the introduction of dual-side homing, the simulation gets even harder,
     // so let's assume the MMU does its job -> prefer simulating selector homing properly and check the machine's state afterwards

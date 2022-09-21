@@ -22,5 +22,14 @@ static inline uint16_t read_word(const uint16_t *addr) {
 #endif
 }
 
+/// read a 8bit byte from PROGMEM
+static inline uint8_t read_byte(const uint8_t *addr) {
+#ifndef __AVR__
+    return *addr;
+#else
+    return (uint8_t)pgm_read_byte(addr);
+#endif
+}
+
 } // namespace progmem
 } // namespace hal

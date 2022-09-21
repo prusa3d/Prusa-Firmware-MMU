@@ -2,6 +2,7 @@
 #include "motion.h"
 #include "../panic.h"
 #include "../debug.h"
+#include "permanent_storage.h"
 
 // TODO: use proper timer abstraction
 #ifdef __AVR__
@@ -56,6 +57,8 @@ bool Motion::InitAxis(Axis axis) {
     // disable the axis and re-init the driver: this will clear the internal
     // StallGuard data as a result without special handling
     Disable(axis);
+
+    // Init also applies the currently pre-set StallGuard threshold into the TMC driver
     return axisData[axis].drv.Init(axisParams[axis].params, axisParams[axis].currents, axisParams[axis].mode);
 }
 
@@ -81,6 +84,10 @@ bool Motion::StallGuard(Axis axis) {
 
 void Motion::StallGuardReset(Axis axis) {
     axisData[axis].drv.ClearStallguard();
+}
+
+void Motion::PlanStallGuardThreshold(config::Axis axis, uint8_t sg_thrs) {
+    axisParams[axis].params.sg_thrs = sg_thrs;
 }
 
 void Motion::PlanMoveTo(Axis axis, pos_t pos, steps_t feed_rate, steps_t end_rate) {

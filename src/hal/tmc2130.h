@@ -23,7 +23,7 @@ struct MotorParams {
     bool dirOn; ///< forward direction
     gpio::GPIO_pin csPin; ///< CS pin
     gpio::GPIO_pin stepPin; ///< step pin
-    gpio::GPIO_pin sgPin; ///< stallguard pin
+    gpio::GPIO_pin sgPin; ///< StallGuard pin
     config::MRes mRes; ///< microstep resolution
     int8_t sg_thrs;
     uint8_t axis;
@@ -92,8 +92,11 @@ public:
     /// Set the current motor currents
     void SetCurrents(const MotorParams &params, const MotorCurrents &currents);
 
-    /// Set stallguard threshold
-    void SetSGTHRS(const MotorParams &params, uint8_t sgthrs);
+    /// Set StallGuard threshold
+    /// New SGTHRS must be already set in @params
+    /// Beware - there are no checks, new value is written into the TMC register immediately.
+    /// It is advised to prefer setting the SGTHRS via the Init() method.
+    void SetSGTHRS(const MotorParams &params);
 
     /// Return enabled state
     const bool Enabled() const {
