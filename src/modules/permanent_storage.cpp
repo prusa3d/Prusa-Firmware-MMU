@@ -360,14 +360,11 @@ void DriveError::setH(uint8_t highByte) {
     ee::EEPROM::UpdateByte(EEOFFSET(eepromBase->eepromDriveErrorCountH), highByte - 1);
 }
 
-uint8_t AxisSGTHRS::get(mm::Axis axis) {
-    uint8_t sg_thrs = ee::EEPROM::ReadByte(EEOFFSET(eepromBase->sg_thrs[axis]));
-    if (sg_thrs & 0x80)
-        sg_thrs = mm::axisParams[axis].params.sg_thrs;
-    return sg_thrs;
+uint8_t AxisTMCSetup::get(config::Axis axis, uint8_t defaultValue) {
+    return ee::EEPROM::ReadByte(EEOFFSET(eepromBase->sg_thrs[axis]), defaultValue);
 }
 
-void AxisSGTHRS::set(mm::Axis axis, uint8_t val) {
+void AxisTMCSetup::set(config::Axis axis, uint8_t val) {
     ee::EEPROM::UpdateByte(EEOFFSET(eepromBase->sg_thrs[axis]), val);
 }
 

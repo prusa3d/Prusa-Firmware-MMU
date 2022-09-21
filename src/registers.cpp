@@ -29,6 +29,12 @@
   __Bold = Status__
 
   ---------------------------------------------------------------------------------
+  Access type:
+  - Read: the register can be only read
+  - Write: the register can be read and written to. The written change is not persistent (applies only until reset of the MMU)
+  - Write Persistent: the register can be read and written to and the written values is stored in EEPROM (persistent across restarts)
+
+  ---------------------------------------------------------------------------------
   How can you use the M707/M708 gcodes?
   - Serial terminal like Putty.
 
@@ -50,7 +56,7 @@
 | 0x01h 01 | uint8    | project_minor              | 00h 0        | ffh 255     | Project Minor Version                    | Read only    | M707 A0x01 | N/A
 | 0x02h 02 | uint8    | project_revision           | 00h 0        | ffh 255     | Project Revision                         | Read only    | M707 A0x02 | N/A
 | 0x03h 03 | uint8    | project_build_number       | 00h 0        | ffh 255     | Project Build Number                     | Read only    | M707 A0x03 | N/A
-| 0x04h 04 | uint16   | MMU_errors                 | 0000h 0      | ffffh 65535 | MMU Errors                               | Read / Write | M707 A0x04 | M708 A0x04 Xnnnn
+| 0x04h 04 | uint16   | MMU_errors                 | 0000h 0      | ffffh 65535 | MMU Errors                               | Read / Write Persistent | M707 A0x04 | M708 A0x04 Xnnnn
 | 0x05h 05 | uint8    | Current_Progress_Code      | ffh 255      | ffh 255     | Emtpy                                    | Read only    | M707 A0x05 | N/A
 | ^        | ^        | ^                          | 00h 0        | ^           | OK                                       | ^            | ^          | ^
 | ^        | ^        | ^                          | 01h 1        | ^           | EngagingIdler                            | ^            | ^          | ^
@@ -146,9 +152,9 @@
 | 0x14h 20 | uint16   | Pulley_slow_feedrate       | 0000h 0      | 0014h 20    | unit mm/s                                | Read / Write | M707 A0x14 | M708 A0x14 Xnnnn
 | 0x15h 21 | uint16   | Selector_homing_feedrate   | 0000h 0      | 001eh 30    | unit mm/s                                | Read (Write) | M707 A0x15 | (M708 A0x15 Xnnnn)
 | 0x16h 22 | uint16   | Idler_homing_feedrate      | 0000h 0      | 0109h 265   | unit deg/s                               | Read (Write) | M707 A0x16 | (M708 A0x16 Xnnnn)
-| 0x17h 23 | uint8    | Pulley_sg_thrs__R          | 00h 0        | 08h 8       |                                          | Read (Write) | M707 A0x17 | M708 A0x17 Xnn
-| 0x18h 24 | uint8    | Selector_sg_thrs_R         | 00h 0        | 03h 3       |                                          | Read (Write) | M707 A0x18 | M708 A0x18 Xnn
-| 0x19h 25 | uint8    | Idler_sg_thrs_R            | 00h 0        | 05h 6       |                                          | Read (Write) | M707 A0x19 | M708 A0x19 Xnn
+| 0x17h 23 | uint8    | Pulley_sg_thrs__R          | 00h 0        | 08h 8       |                                          | Read / Write Persistent | M707 A0x17 | M708 A0x17 Xnn
+| 0x18h 24 | uint8    | Selector_sg_thrs_R         | 00h 0        | 03h 3       |                                          | Read / Write Persistent | M707 A0x18 | M708 A0x18 Xnn
+| 0x19h 25 | uint8    | Idler_sg_thrs_R            | 00h 0        | 05h 6       |                                          | Read / Write Persistent | M707 A0x19 | M708 A0x19 Xnn
 | 0x1ah 26 | uint16   | Get Pulley position        | 0000h 0      | ffffh 65535 | unit mm                                  | Read only    | M707 A0x1a | N/A
 | 0x1bh 27 | uint16   | Set/Get_Selector_slot      | 0000h 0      | ffffh 65535 | unit slot [0-4/5] 5=park pos             | Read / Write | M707 A0x1b | M708 A0x1b Xn
 | 0x1ch 28 | uint16   | Set/Get_Idler_slot         | 0000h 0      | ffffh 65535 | unit slot [0-4/5] 5=disengaged           | Read / Write | M707 A0x1c | M708 A0x1c Xn
@@ -334,18 +340,18 @@ static const RegisterRec registers[] /*PROGMEM*/ = {
 
     // 0x17 Pulley sg_thrs threshold RW
     RegisterRec(
-        []() -> uint16_t { return mps::AxisSGTHRS::get(mm::Axis::Pulley); },
-        [](uint16_t d) { mm::motion.DriverForAxis(mm::Axis::Pulley).SetSGTHRS(mm::axisParams[mm::Axis::Pulley].params, d); mps::AxisSGTHRS::set(mm::Axis::Pulley, d); },
+        []() -> uint16_t { return mg::globals.StallGuardThreshold(config::Pulley); },
+        [](uint16_t d) { mg::globals.SetStallGuardThreshold(config::Pulley, d); },
         1),
     // 0x18 Selector sg_thrs RW
     RegisterRec(
-        []() -> uint16_t { return mps::AxisSGTHRS::get(mm::Axis::Selector); },
-        [](uint16_t d) { mm::motion.DriverForAxis(mm::Axis::Selector).SetSGTHRS(mm::axisParams[mm::Axis::Selector].params, d); mps::AxisSGTHRS::set(mm::Axis::Selector, d); },
+        []() -> uint16_t { return mg::globals.StallGuardThreshold(mm::Axis::Selector); },
+        [](uint16_t d) { mg::globals.SetStallGuardThreshold(mm::Axis::Selector, d); },
         1),
     // 0x19 Idler sg_thrs RW
     RegisterRec(
-        []() -> uint16_t { return mps::AxisSGTHRS::get(mm::Axis::Idler); },
-        [](uint16_t d) { mm::motion.DriverForAxis(mm::Axis::Idler).SetSGTHRS(mm::axisParams[mm::Axis::Idler].params, d); mps::AxisSGTHRS::set(mm::Axis::Idler, d); },
+        []() -> uint16_t { return mg::globals.StallGuardThreshold(mm::Axis::Idler); },
+        [](uint16_t d) { mg::globals.SetStallGuardThreshold(mm::Axis::Idler, d); },
         1),
 
     // 0x1a Get Pulley position [mm] R

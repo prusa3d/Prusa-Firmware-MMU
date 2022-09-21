@@ -34,6 +34,11 @@ uint8_t EEPROM::ReadByte(EEPROM::addr_t offset) {
     return EE[offset];
 }
 
+uint8_t EEPROM::ReadByte(EEPROM::addr_t offset, uint8_t defaultValue) {
+    REQUIRE(offset < EE.size());
+    return EE[offset] == 0xff ? defaultValue : EE[offset];
+}
+
 void EEPROM::WriteWord(EEPROM::addr_t offset, uint16_t value) {
     REQUIRE(offset < EE.size() - 1);
     *reinterpret_cast<uint16_t *>(&EE[offset]) = value;

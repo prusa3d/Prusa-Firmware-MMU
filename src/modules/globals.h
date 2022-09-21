@@ -90,6 +90,10 @@ public:
     void ResetIdlerFeedrate() { idlerFeedrate_deg_s = config::idlerFeedrate.v; }
     void SetIdlerFeedrate_deg_s(uint16_t idlerFR_deg_s) { idlerFeedrate_deg_s = idlerFR_deg_s; }
 
+    /// @returns current StallGuard threshold for an axis
+    uint8_t StallGuardThreshold(config::Axis axis) const;
+    /// Stores the new StallGuard threshold for an axis into EEPROM (does not affect the current state of TMC drivers at all)
+    void SetStallGuardThreshold(config::Axis axis, uint8_t sgthrs);
 private:
     /// Sets the active slot, usually after some command/operation.
     /// Also updates the EEPROM records accordingly

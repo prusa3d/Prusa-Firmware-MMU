@@ -96,11 +96,15 @@ public:
     /// Set the same mode of TMC/motors operation for all axes. @see SetMode
     void SetMode(MotorMode mode);
 
-    /// @returns true if a stall guard event occurred recently on the axis
+    /// @returns true if a StallGuard event occurred recently on the axis
     bool StallGuard(Axis axis);
 
-    /// clear stall guard flag reported on an axis
+    /// clear StallGuard flag reported on an axis
     void StallGuardReset(Axis axis);
+
+    /// Sets (plans) StallGuard threshold for an axis (basically the higher number the lower sensitivity)
+    /// The new SGTHRS value gets applied in Init(), it is _NOT_ written into the TMC immediately in this method.
+    void PlanStallGuardThreshold(Axis axis, uint8_t sg_thrs);
 
     /// Enqueue a single axis move in steps starting and ending at zero speed with maximum
     /// feedrate. Moves can only be enqueued if the axis is not Full().

@@ -10,6 +10,9 @@ void MovableBase::PlanHome() {
     InvalidateHoming();
 
     // switch to normal mode on this axis
+
+    // Update StallGuard threshold
+    mm::motion.PlanStallGuardThreshold(axis, mg::globals.StallGuardThreshold(axis));
     mm::motion.InitAxis(axis);
     mm::motion.SetMode(axis, mm::Normal);
     mm::motion.StallGuardReset(axis);
@@ -21,6 +24,7 @@ void MovableBase::PlanHome() {
 }
 
 MovableBase::OperationResult MovableBase::InitMovement() {
+    mm::motion.PlanStallGuardThreshold(axis, mg::globals.StallGuardThreshold(axis));
     if (motion.InitAxis(axis)) {
         PrepareMoveToPlannedSlot();
         state = Moving;

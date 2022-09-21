@@ -64,7 +64,7 @@ bool FeedToBondtech::Step() {
             mm::motion.AbortPlannedMoves(); // stop pushing filament
             GoToPushToNozzle();
             //        } else if (mm::motion.StallGuard(mm::Pulley)) {
-            //            // stall guard occurred during movement - the filament got stuck
+            //            // StallGuard occurred during movement - the filament got stuck
             //            state = PulleyStalled;
         } else if (mm::motion.QueueEmpty()) { // all moves have been finished and the fsensor didn't switch on
             state = Failed;

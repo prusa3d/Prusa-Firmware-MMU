@@ -36,6 +36,10 @@ void TriggerStallGuard(Axis axis) {
     axes[axis].stallGuard = true;
 }
 
+void Motion::PlanStallGuardThreshold(Axis axis, uint8_t sg_thrs){
+    // do nothing for now
+}
+
 void Motion::PlanMoveTo(Axis axis, pos_t pos, steps_t feed_rate, steps_t end_rate) {
     axes[axis].plannedMoves.push_back(pos);
     if (!axisData[axis].enabled)

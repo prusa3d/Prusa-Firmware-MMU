@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "../config/config.h"
 #include "permanent_storage.h"
+#include "../hal/progmem.h"
 
 namespace modules {
 namespace globals {
@@ -74,6 +75,16 @@ void Globals::IncDriveErrors() {
 void Globals::SetMotorsMode(bool stealth) {
     stealthMode = stealth;
     // @@TODO store into EEPROM
+}
+
+uint8_t Globals::StallGuardThreshold(config::Axis axis) const {
+    // @@TODO this is not nice but we need some simple way of indexing the default SGTHRs
+    static constexpr uint8_t defaultAxisSGTHRs[3] PROGMEM = { config::pulley.sg_thrs, config::selector.sg_thrs, config::idler.sg_thrs };
+    return mps::AxisTMCSetup::get(axis, hal::progmem::read_byte(defaultAxisSGTHRs + axis));
+}
+
+void Globals::SetStallGuardThreshold(config::Axis axis, uint8_t sgthrs){
+    mps::AxisTMCSetup::set(axis, sgthrs); // store the value in EEPROM
 }
 
 } // namespace globals
