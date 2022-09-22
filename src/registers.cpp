@@ -154,7 +154,7 @@
 | 0x16h 22 | uint16   | Idler_homing_feedrate      | 0000h 0      | 0109h 265   | unit deg/s                               | Read (Write) | M707 A0x16 | (M708 A0x16 Xnnnn)
 | 0x17h 23 | uint8    | Pulley_sg_thrs__R          | 00h 0        | 08h 8       |                                          | Read / Write Persistent | M707 A0x17 | M708 A0x17 Xnn
 | 0x18h 24 | uint8    | Selector_sg_thrs_R         | 00h 0        | 03h 3       |                                          | Read / Write Persistent | M707 A0x18 | M708 A0x18 Xnn
-| 0x19h 25 | uint8    | Idler_sg_thrs_R            | 00h 0        | 05h 6       |                                          | Read / Write Persistent | M707 A0x19 | M708 A0x19 Xnn
+| 0x19h 25 | uint8    | Idler_sg_thrs_R            | 00h 0        | 06h 6       |                                          | Read / Write Persistent | M707 A0x19 | M708 A0x19 Xnn
 | 0x1ah 26 | uint16   | Get Pulley position        | 0000h 0      | ffffh 65535 | unit mm                                  | Read only    | M707 A0x1a | N/A
 | 0x1bh 27 | uint16   | Set/Get_Selector_slot      | 0000h 0      | ffffh 65535 | unit slot [0-4/5] 5=park pos             | Read / Write | M707 A0x1b | M708 A0x1b Xn
 | 0x1ch 28 | uint16   | Set/Get_Idler_slot         | 0000h 0      | ffffh 65535 | unit slot [0-4/5] 5=disengaged           | Read / Write | M707 A0x1c | M708 A0x1c Xn
