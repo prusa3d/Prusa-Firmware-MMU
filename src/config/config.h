@@ -206,11 +206,11 @@ static constexpr U_deg idlerSlotPositions[toolCount + 1] = {
 
 /// Intermediate positions for Idler's slots: 0-4 are the real ones, the 5th index is the idle position
 static constexpr U_deg idlerIntermediateSlotPositions[toolCount + 1] = {
-    IdlerOffsetFromHome + 4.5F * IdlerSlotDistance,
-    IdlerOffsetFromHome + 3.5F * IdlerSlotDistance,
-    IdlerOffsetFromHome + 2.5F * IdlerSlotDistance,
-    IdlerOffsetFromHome + 1.5F * IdlerSlotDistance,
-    IdlerOffsetFromHome + 0.5F * IdlerSlotDistance,
+    IdlerOffsetFromHome + 4.75F * IdlerSlotDistance,
+    IdlerOffsetFromHome + 3.75F * IdlerSlotDistance,
+    IdlerOffsetFromHome + 2.75F * IdlerSlotDistance,
+    IdlerOffsetFromHome + 1.75F * IdlerSlotDistance,
+    IdlerOffsetFromHome + 0.75F * IdlerSlotDistance,
     IdlerOffsetFromHome ///18.0_deg Fully disengaged all slots
 };
 
