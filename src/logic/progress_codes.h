@@ -41,5 +41,14 @@ enum class ProgressCode : uint_fast8_t {
 
     FeedingToFSensor, // P28
 
+    HWTestBegin, // P29
+    HWTestIdler, // P30
+    HWTestSelector, // P31
+    HWTestPulley, // P32
+    HWTestCleanup, // P33
+    HWTestExec, // P34
+    HWTestDisplay, // P35
+    ErrHwTestFailed, // P36
+
     Empty = 0xff // dummy empty state
 };

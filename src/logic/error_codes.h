@@ -100,5 +100,12 @@ enum class ErrorCode : uint_fast16_t {
     /// - E49280 Selector TMC driver
     /// - E49408 Idler TMC driver
     /// - E49600 All 3 TMC driver
-    TMC_OVER_TEMPERATURE_ERROR = 0xC000
+    TMC_OVER_TEMPERATURE_ERROR = 0xC000,
+
+    /// TMC driver - IO pins are unreliable. While in theory it's recoverable, in practice it most likely
+    /// means your hardware is borked (we can't command the drivers reliably via STEP/EN/DIR due to electrical
+    /// issues or hardware fault. Possible "fixable" cause is undervoltage on the 5v logic line.
+    /// Unfixable possible cause: bad or cracked solder joints on the PCB, failed shift register, failed driver.
+    MMU_SOLDERING_NEEDS_ATTENTION = 0xC200,
+
 };

@@ -89,6 +89,9 @@ public:
     /// Set the current motor mode
     void SetMode(const MotorParams &params, MotorMode mode);
 
+    /// Disables the output by setting or clearing CHOPCONF's TOFF.
+    void SetBridgeOutput(const MotorParams &params, bool on);
+
     /// Set the current motor currents
     void SetCurrents(const MotorParams &params, const MotorCurrents &currents);
 
@@ -111,9 +114,20 @@ public:
         hal::shr16::shr16.SetTMCDir(params.idx, dir ^ params.dirOn);
     }
 
+    /// Set direction, raw value (i.e. ignore Params).
+    static inline void SetRawDir(const MotorParams &params, bool dir) {
+        // Also cancels the inversion in SetTMCDir
+        hal::shr16::shr16.SetTMCDir(params.idx, !dir);
+    }
+
     /// Step the motor
     static inline void Step(const MotorParams &params) {
         gpio::TogglePin(params.stepPin); // assumes DEDGE
+    }
+
+    /// Set step to an explicit state
+    static inline void SetStep(const MotorParams &params, bool state) {
+        gpio::WritePin(params.stepPin, (state ? gpio::Level::high : gpio::Level::low));
     }
 
     /// Return SG state

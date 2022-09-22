@@ -13,6 +13,7 @@
 #include "logic/cut_filament.h"
 #include "logic/eject_filament.h"
 #include "logic/home.h"
+#include "logic/hw_sanity.h"
 #include "logic/load_filament.h"
 #include "logic/move_selector.h"
 #include "logic/no_command.h"

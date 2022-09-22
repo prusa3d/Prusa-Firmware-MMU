@@ -344,6 +344,13 @@ public:
         return axisData[axis].drv;
     }
 
+    /// @returns the (non-const) TMC2130 driver associated with the particular axis.
+    /// Do not use unless you know exactly what you're doing, (i.e., nothing else can possibly be using
+    /// the axis. Currently the only valid usage is in the hw sanity module.
+    inline hal::tmc2130::TMC2130 &MMU_NEEDS_ATTENTION_DriverForAxis(Axis axis) {
+        return axisData[axis].drv;
+    }
+
     /// @returns the controller associated with the particular axis
     inline const pulse_gen::PulseGen &CtrlForAxis(Axis axis) const {
         return axisData[axis].ctrl;
