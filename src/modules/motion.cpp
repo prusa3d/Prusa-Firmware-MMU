@@ -20,10 +20,12 @@ Motion motion;
 /// ISR state manipulation
 static inline void IsrSetEnabled(bool state) {
 #ifdef __AVR__
+    // NOTE: ATOMIC_BLOCK is split across branches to split the function into two optimal calls at
+    // compile-time
     if (state)
-        TIMSK1 |= (1 << OCIE1A);
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { TIMSK1 |= (1 << OCIE1A); }
     else
-        TIMSK1 &= ~(1 << OCIE1A);
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { TIMSK1 &= ~(1 << OCIE1A); }
 #endif
 }
 
