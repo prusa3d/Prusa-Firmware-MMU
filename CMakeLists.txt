@@ -171,7 +171,9 @@ if(CMAKE_CROSSCOMPILING)
 
   # produce ASM listing
   add_custom_command(
-    TARGET firmware POST_BUILD COMMAND ${CMAKE_OBJDUMP} -CSd firmware > firmware.asm
+    TARGET firmware POST_BUILD
+    COMMAND
+      ${CMAKE_OBJDUMP} --prefix ${CMAKE_SOURCE_DIR} -CSd firmware > firmware.asm
     )
 
   # inform about the firmware's size in terminal
