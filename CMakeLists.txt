@@ -95,11 +95,12 @@ add_compile_options(-g)
 
 # optimizations
 if(CMAKE_CROSSCOMPILING)
-  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_compile_options(-Og)
-  else()
-    add_compile_options(-Os)
-  endif()
+
+  # default optimization flags
+  set(CMAKE_CXX_FLAGS_DEBUG "-Og -g")
+  set(CMAKE_CXX_FLAGS_RELEASE "-Os -g -DNDEBUG")
+  set(CMAKE_C_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
+  set(CMAKE_C_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
 
   # mcu related settings
   set(MCU_FLAGS -mmcu=atmega32u4 -DF_CPU=16000000L)
