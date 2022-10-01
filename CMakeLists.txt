@@ -95,6 +95,12 @@ add_compile_options(-g)
 
 # optimizations
 if(CMAKE_CROSSCOMPILING)
+  # Reproducible build support
+  add_link_options(-fdebug-prefix-map=${CMAKE_SOURCE_DIR}=)
+  add_link_options(-fdebug-prefix-map=${CMAKE_BINARY_DIR}=)
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "8")
+    add_compile_options(-ffile-prefix-map=${CMAKE_SOURCE_DIR}=)
+  endif()
 
   # default optimization flags
   set(CMAKE_CXX_FLAGS_DEBUG "-Og -g")
