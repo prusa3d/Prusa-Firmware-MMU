@@ -113,14 +113,17 @@ if(CMAKE_CROSSCOMPILING)
   add_compile_options(${MCU_FLAGS})
   add_link_options(${MCU_FLAGS})
 
+  # disable some C++ language features
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-threadsafe-statics>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
+
+  # disable exceptions
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-unwind-tables>)
+
   # split and gc sections
   add_compile_options(-ffunction-sections -fdata-sections)
-  add_link_options(-Wl,--gc-sections)
-
-  # disable exceptions and related metadata
-  add_compile_options(-fno-exceptions -fno-unwind-tables)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
-  add_link_options(-Wl,--defsym,__exidx_start=0,--defsym,__exidx_end=0)
+  add_link_options(-ffunction-sections -fdata-sections -Wl,--gc-sections)
 else()
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_options(-O0)
