@@ -44,6 +44,9 @@ public:
     /// @returns current character from the UART and extracts it from the read buffer
     uint8_t Read();
 
+    /// Discard all pending data from the receiver
+    void ResetReceiver();
+
     /// @param c character to be pushed into the TX buffer (to be sent)
     void Write(uint8_t c);
     /// @param str pointer to a string in RAM to be pushed byte-by-byte into the TX buffer (to be sent)

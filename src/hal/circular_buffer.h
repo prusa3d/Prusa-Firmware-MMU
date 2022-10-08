@@ -31,6 +31,11 @@ public:
         return ((index_t)(head - tail) % (size * 2)) == size;
     }
 
+    /// Reset the circular buffer to empty
+    inline void reset() {
+        head = tail;
+    }
+
     /// Advance the head index of the buffer.
     /// No checks are performed. full() needs to be queried beforehand.
     inline void push() {
@@ -99,6 +104,11 @@ public:
 
     bool full() const {
         return index.full();
+    }
+
+    /// Reset the circular buffer to empty
+    inline void reset() {
+        index.reset();
     }
 
     /// Insert an element into the buffer.

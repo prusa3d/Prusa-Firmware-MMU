@@ -227,6 +227,8 @@ bool Application::CheckMsgs() {
     while (modules::serial::Available()) {
         switch (protocol.DecodeRequest(modules::serial::ConsumeByte())) {
         case mpd::MessageCompleted:
+            // Discard any unread data
+            modules::serial::Reset();
             // process the input message
             return true;
             break;

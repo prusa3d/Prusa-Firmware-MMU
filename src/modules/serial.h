@@ -12,6 +12,8 @@ bool Available();
 
 uint8_t ConsumeByte();
 
+void Reset();
+
 } // namespace serial
 
 } // namespace modules

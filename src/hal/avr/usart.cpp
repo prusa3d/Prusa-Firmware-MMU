@@ -14,6 +14,16 @@ uint8_t USART::Read() {
     return c;
 }
 
+void USART::ResetReceiver()
+{
+    // Disable/Enable Receiver to discard pending bytes
+    husart->UCSRxB &= ~(1 << 4);
+    husart->UCSRxB |= (1 << 4);
+
+    // Reset circular buffer, head = tail
+    rx_buf.reset();
+}
+
 void USART::Write(uint8_t c) {
     _written = true;
     // If the buffer and the data register is empty, just write the byte

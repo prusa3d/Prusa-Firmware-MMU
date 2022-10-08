@@ -32,6 +32,10 @@ uint8_t ConsumeByte() {
     return hu::usart1.Read();
 }
 
+void Reset() {
+    hu::usart1.ResetReceiver();
+}
+
 } // namespace serial
 
 } // namespace modules
