@@ -14,8 +14,7 @@ uint8_t USART::Read() {
     return c;
 }
 
-void USART::ResetReceiver()
-{
+void USART::ResetReceiver() {
     // Disable/Enable Receiver to discard pending bytes
     husart->UCSRxB &= ~(1 << 4);
     husart->UCSRxB |= (1 << 4);
