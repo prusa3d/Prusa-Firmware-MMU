@@ -1,6 +1,7 @@
 /// @file gpio.h
 #pragma once
 #include <inttypes.h>
+#include <util/atomic.h>
 
 #ifdef __AVR__
 #include <avr/io.h>
@@ -53,10 +54,12 @@ struct GPIO_pin {
 };
 
 __attribute__((always_inline)) inline void WritePin(const GPIO_pin portPin, Level level) {
-    if (level == Level::high)
-        portPin.port->PORTx |= (1 << portPin.pin);
-    else
-        portPin.port->PORTx &= ~(1 << portPin.pin);
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+        if (level == Level::high)
+            portPin.port->PORTx |= (1 << portPin.pin);
+        else
+            portPin.port->PORTx &= ~(1 << portPin.pin);
+    }
 }
 
 __attribute__((always_inline)) inline Level ReadPin(const GPIO_pin portPin) {
