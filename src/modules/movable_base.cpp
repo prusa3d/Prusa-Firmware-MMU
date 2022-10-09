@@ -39,6 +39,7 @@ void MovableBase::PerformMove() {
     if (mm::motion.DriverForAxis(axis).CheckForErrors(axisParams[axis].params)) {
         // TMC2130 entered some error state, the planned move couldn't have been finished - result of operation is Failed
         tmcErrorFlags = mm::motion.DriverForAxis(axis).GetErrorFlags(); // save the failed state
+        mm::motion.AbortPlannedMoves(axis, true);
         state = TMCFailed;
     } else if (mm::motion.QueueEmpty(axis)) {
         // move finished
@@ -91,6 +92,7 @@ void MovableBase::IdleChecks() {
     if (mm::motion.DriverForAxis(axis).CheckForErrors(axisParams[axis].params)) {
         // TMC2130 entered some error state, the planned move couldn't have been finished - result of operation is Failed
         tmcErrorFlags = mm::motion.DriverForAxis(axis).GetErrorFlags(); // save the failed state
+        mm::motion.AbortPlannedMoves(axis, true);
         state = TMCFailed;
     }
 }
