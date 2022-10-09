@@ -9,6 +9,8 @@ namespace tmc2130 {
 static constexpr uint8_t TOFF_DEFAULT = 3U, TOFF_MASK = 0xFU;
 
 bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, MotorMode mode) {
+    initialized = false;
+
     // sg_filter_threshold = (1 << (8 - params.mRes));
     sg_filter_threshold = 2;
 
@@ -65,6 +67,8 @@ bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, Mot
     /// Stallguard is also disabled if the velocity falls below this.
     /// Should be set as high as possible when homing.
     SetMode(params, mode);
+
+    initialized = true;
     return true;
 }
 
@@ -102,6 +106,9 @@ void TMC2130::SetEnabled(const MotorParams &params, bool enabled) {
 }
 
 bool TMC2130::CheckForErrors(const MotorParams &params) {
+    if (!initialized)
+        return false;
+    
     uint32_t GSTAT = ReadRegister(params, Registers::GSTAT);
     uint32_t DRV_STATUS = ReadRegister(params, Registers::DRV_STATUS);
     errorFlags.reset_flag |= !!(GSTAT & (1U << 0U));

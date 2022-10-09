@@ -172,6 +172,7 @@ private:
     void _handle_spi_status(const MotorParams &params, uint8_t status);
 
     ErrorFlags errorFlags;
+    bool initialized = false;
     bool enabled = false;
     uint8_t sg_filter_threshold;
     uint8_t sg_filter_counter = 0;
