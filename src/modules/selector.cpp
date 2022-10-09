@@ -122,7 +122,9 @@ bool Selector::Step() {
         return true;
     case TMCFailed:
         dbg_logic_P(PSTR("Selector Failed"));
+        return true;
     default:
+        IdleChecks();
         return true;
     }
 }

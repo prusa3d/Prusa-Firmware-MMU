@@ -28,7 +28,9 @@ bool Pulley::Step() {
     case Ready:
         return true;
     case TMCFailed:
+        return true;
     default:
+        IdleChecks();
         return true;
     }
 }

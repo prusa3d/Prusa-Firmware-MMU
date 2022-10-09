@@ -103,6 +103,8 @@ protected:
     void PerformHomeBack();
 
     void HomeFailed();
+
+    void IdleChecks();
 };
 
 } // namespace motion
