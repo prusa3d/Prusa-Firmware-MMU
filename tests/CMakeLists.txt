@@ -19,7 +19,7 @@ if (GCOV_ENABLE)
 	# build result is a pass or fail. 
 	add_custom_target(test_run_all
 		COMMAND cd ${PROJECT_BINARY_DIR} 
-		COMMAND ${CMAKE_COMMAND} -E env CTEST_OUTPUT_ON_FAILURE=1 ${CMAKE_CTEST_COMMAND} --timeout 30 && ${CMAKE_COMMAND} -E touch .ctest-finished || exit 0
+		COMMAND ${CMAKE_COMMAND} -E env CTEST_OUTPUT_ON_FAILURE=1 ${CMAKE_CTEST_COMMAND} --timeout 30 --repeat <after-timeout>:<3> && ${CMAKE_COMMAND} -E touch .ctest-finished || exit 0
 		DEPENDS tests_clean tests
 	)
 
