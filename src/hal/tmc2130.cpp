@@ -104,11 +104,11 @@ void TMC2130::SetEnabled(const MotorParams &params, bool enabled) {
 bool TMC2130::CheckForErrors(const MotorParams &params) {
     uint32_t GSTAT = ReadRegister(params, Registers::GSTAT);
     uint32_t DRV_STATUS = ReadRegister(params, Registers::DRV_STATUS);
-    errorFlags.reset_flag |= GSTAT & (1U << 0U);
-    errorFlags.uv_cp = GSTAT & (1U << 2U);
-    errorFlags.s2g = DRV_STATUS & (3UL << 27U);
-    errorFlags.otpw = DRV_STATUS & (1UL << 26U);
-    errorFlags.ot = DRV_STATUS & (1UL << 25U);
+    errorFlags.reset_flag |= !!(GSTAT & (1U << 0U));
+    errorFlags.uv_cp = !!(GSTAT & (1U << 2U));
+    errorFlags.s2g = !!(DRV_STATUS & (3UL << 27U));
+    errorFlags.otpw = !!(DRV_STATUS & (1UL << 26U));
+    errorFlags.ot = !!(DRV_STATUS & (1UL << 25U));
 
     return GSTAT || errorFlags.reset_flag; //any bit in gstat is an error
 }
