@@ -18,7 +18,7 @@ if (GCOV_ENABLE)
 	# pass, .ctest-finished is created and we can check for its existance after generating the report to determine if the overall
 	# build result is a pass or fail. 
 	add_custom_target(test_run_all
-		COMMAND cd ${PROJECT_BINARY_DIR}
+		COMMAND cd ${PROJECT_BINARY_DIR} 
 		COMMAND env CTEST_OUTPUT_ON_FAILURE=1 ctest --timeout 120 && ${CMAKE_COMMAND} -E touch .ctest-finished || exit 0
 		DEPENDS tests_clean tests
 	)
