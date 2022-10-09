@@ -24,7 +24,7 @@ add_test(NAME motion::rampgen COMMAND rampgen ramp_data.txt)
 add_dependencies(tests rampgen)
 
 execute_process(
-  COMMAND python3 -c "import pandas"
+  COMMAND "${Python3_EXECUTABLE}" -c "import pandas"
   RESULT_VARIABLE PANDAS_INSTALLED
   OUTPUT_QUIET ERROR_QUIET
   )
