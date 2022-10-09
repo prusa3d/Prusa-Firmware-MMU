@@ -36,7 +36,7 @@ MovableBase::OperationResult MovableBase::InitMovement() {
 }
 
 void MovableBase::PerformMove() {
-    if (!mm::motion.DriverForAxis(axis).GetErrorFlags().Good()) { // @@TODO check occasionally, i.e. not every time?
+    if (mm::motion.DriverForAxis(axis).CheckForErrors(axisParams[axis].params)) {
         // TMC2130 entered some error state, the planned move couldn't have been finished - result of operation is Failed
         tmcErrorFlags = mm::motion.DriverForAxis(axis).GetErrorFlags(); // save the failed state
         state = TMCFailed;
@@ -84,6 +84,15 @@ void MovableBase::HomeFailed() {
     homingValid = false;
     mm::motion.Disable(axis); // disable power to the axis - allows the user to do something with the device manually
     state = HomingFailed;
+}
+
+void MovableBase::IdleChecks() {
+    // perform maintenance tasks while no motion is happening
+    if (mm::motion.DriverForAxis(axis).CheckForErrors(axisParams[axis].params)) {
+        // TMC2130 entered some error state, the planned move couldn't have been finished - result of operation is Failed
+        tmcErrorFlags = mm::motion.DriverForAxis(axis).GetErrorFlags(); // save the failed state
+        state = TMCFailed;
+    }
 }
 
 } // namespace motion

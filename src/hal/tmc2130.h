@@ -143,7 +143,7 @@ public:
         sg_filter_counter = sg_filter_threshold;
     }
 
-    /// Should be called periodically from main loop. Maybe not all the time. Once every 10 ms is probably enough
+    /// Should be called periodically. Maybe not all the time. Once every 10 ms is probably enough
     bool CheckForErrors(const MotorParams &params);
 
     inline ErrorFlags GetErrorFlags() const {

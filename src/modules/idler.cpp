@@ -142,7 +142,9 @@ bool Idler::Step() {
         return true;
     case TMCFailed:
         dbg_logic_P(PSTR("Idler Failed"));
+        return true;
     default:
+        IdleChecks();
         return true;
     }
 }
