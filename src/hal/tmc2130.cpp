@@ -29,6 +29,9 @@ bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, Mot
     ///clear reset_flag as we are (re)initializing
     errorFlags.reset_flag = false;
 
+    // clear all error flags if possible ny reading GSTAT
+    ReadRegister(params, Registers::GSTAT);
+
     ///apply chopper parameters
     const uint32_t chopconf = (uint32_t)(TOFF_DEFAULT & TOFF_MASK) << 0U //toff
         | (uint32_t)(5U & 0x07U) << 4U //hstrt
