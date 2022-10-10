@@ -28,7 +28,7 @@ if(GCOV_ENABLE)
 
   add_custom_target(
     test_coverage_report
-    COMMAND cd ${PROJECT_BINARY_DIR}
+    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
     COMMAND
       ${LCOV_BINARY} --capture --gcov-tool="${GCOV_BINARY}" --directory ${PROJECT_BINARY_DIR}
       --output-file ${PROJECT_BINARY_DIR}/coverage.info
