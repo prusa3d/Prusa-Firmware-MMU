@@ -1,10 +1,12 @@
 /// @file gpio.h
 #pragma once
 #include <inttypes.h>
-#include <util/atomic.h>
 
 #ifdef __AVR__
 #include <avr/io.h>
+#include <util/atomic.h>
+#else
+#define ATOMIC_BLOCK(x)
 #endif
 
 namespace hal {
