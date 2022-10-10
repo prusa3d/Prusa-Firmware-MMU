@@ -168,14 +168,16 @@ if(CMAKE_CROSSCOMPILING)
 
   # produce ASM listing
   add_custom_command(
-    TARGET firmware POST_BUILD
-    COMMAND
-      ${CMAKE_OBJDUMP} --prefix ${CMAKE_SOURCE_DIR} -CSd firmware > firmware.asm
+    TARGET firmware
+    POST_BUILD
+    COMMAND ${CMAKE_OBJDUMP} --prefix ${CMAKE_SOURCE_DIR} -CSd firmware > firmware.asm
     )
 
   # inform about the firmware's size in terminal
   add_custom_command(
-    TARGET firmware POST_BUILD COMMAND ${CMAKE_SIZE_UTIL} -C --mcu=atmega32u4 firmware
+    TARGET firmware
+    POST_BUILD
+    COMMAND ${CMAKE_SIZE_UTIL} -C --mcu=atmega32u4 firmware
     )
   report_size(firmware)
 
@@ -184,12 +186,12 @@ if(CMAKE_CROSSCOMPILING)
 
   # Put Prusa Magic™ at the beginning of the hex
   add_custom_command(
-    TARGET firmware POST_BUILD
+    TARGET firmware
+    POST_BUILD
     COMMAND
       ${CMAKE_COMMAND} -D WORK_DIR=${CMAKE_BINARY_DIR} -D
       HEX_NAME="MMU2SR_${PROJECT_VERSION}${PROJECT_VERSION_SUFFIX_SHORT}.hex" -P
-      ${CMAKE_SOURCE_DIR}/cmake/HexConcat.cmake
-    DEPENDS firmware.hex
+      ${CMAKE_SOURCE_DIR}/cmake/HexConcat.cmake DEPENDS firmware.hex
     )
 
 endif()
