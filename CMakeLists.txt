@@ -1,7 +1,8 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.19)
 include(cmake/Utilities.cmake)
 include(cmake/GetGitRevisionDescription.cmake)
 include(cmake/ProjectVersion.cmake)
+include(cmake/ReproducibleBuild.cmake)
 
 project(
   MMU
@@ -95,25 +96,31 @@ add_compile_options(-g)
 
 # optimizations
 if(CMAKE_CROSSCOMPILING)
-  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_compile_options(-Og)
-  else()
-    add_compile_options(-Os)
-  endif()
+  # TODO: get date from the last git commit to set as epoch
+  set_source_epoch(0)
+
+  # default optimization flags
+  set(CMAKE_CXX_FLAGS_DEBUG "-Og -g")
+  set(CMAKE_CXX_FLAGS_RELEASE "-Os -g -DNDEBUG")
+  set(CMAKE_C_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
+  set(CMAKE_C_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
 
   # mcu related settings
   set(MCU_FLAGS -mmcu=atmega32u4 -DF_CPU=16000000L)
   add_compile_options(${MCU_FLAGS})
   add_link_options(${MCU_FLAGS})
 
+  # disable some C++ language features
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-threadsafe-statics>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
+
+  # disable exceptions
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-unwind-tables>)
+
   # split and gc sections
   add_compile_options(-ffunction-sections -fdata-sections)
-  add_link_options(-Wl,--gc-sections)
-
-  # disable exceptions and related metadata
-  add_compile_options(-fno-exceptions -fno-unwind-tables)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
-  add_link_options(-Wl,--defsym,__exidx_start=0,--defsym,__exidx_end=0)
+  add_link_options(-ffunction-sections -fdata-sections -Wl,--gc-sections)
 else()
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_options(-O0)
@@ -161,12 +168,16 @@ if(CMAKE_CROSSCOMPILING)
 
   # produce ASM listing
   add_custom_command(
-    TARGET firmware POST_BUILD COMMAND ${CMAKE_OBJDUMP} -CSd firmware > firmware.asm
+    TARGET firmware
+    POST_BUILD
+    COMMAND ${CMAKE_OBJDUMP} --prefix ${CMAKE_SOURCE_DIR} -CSd firmware > firmware.asm
     )
 
   # inform about the firmware's size in terminal
   add_custom_command(
-    TARGET firmware POST_BUILD COMMAND ${CMAKE_SIZE_UTIL} -C --mcu=atmega32u4 firmware
+    TARGET firmware
+    POST_BUILD
+    COMMAND ${CMAKE_SIZE_UTIL} -C --mcu=atmega32u4 firmware
     )
   report_size(firmware)
 
@@ -175,12 +186,12 @@ if(CMAKE_CROSSCOMPILING)
 
   # Put Prusa Magic™ at the beginning of the hex
   add_custom_command(
-    TARGET firmware POST_BUILD
+    TARGET firmware
+    POST_BUILD
     COMMAND
       ${CMAKE_COMMAND} -D WORK_DIR=${CMAKE_BINARY_DIR} -D
       HEX_NAME="MMU2SR_${PROJECT_VERSION}${PROJECT_VERSION_SUFFIX_SHORT}.hex" -P
-      ${CMAKE_SOURCE_DIR}/cmake/HexConcat.cmake
-    DEPENDS firmware.hex
+      ${CMAKE_SOURCE_DIR}/cmake/HexConcat.cmake DEPENDS firmware.hex
     )
 
 endif()
@@ -191,7 +202,9 @@ target_compile_options(firmware PRIVATE -Wdouble-promotion)
 
 add_subdirectory(src)
 
-if(NOT CMAKE_CROSSCOMPILING)
+if(CMAKE_CROSSCOMPILING)
+  set_all_targets_reproducible()
+else()
   # do not build the firmware by default (tests are the focus if not crosscompiling)
   set_target_properties(firmware PROPERTIES EXCLUDE_FROM_ALL YES)
 
