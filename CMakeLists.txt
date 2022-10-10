@@ -1,7 +1,8 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.19)
 include(cmake/Utilities.cmake)
 include(cmake/GetGitRevisionDescription.cmake)
 include(cmake/ProjectVersion.cmake)
+include(cmake/ReproducibleBuild.cmake)
 
 project(
   MMU
@@ -95,12 +96,8 @@ add_compile_options(-g)
 
 # optimizations
 if(CMAKE_CROSSCOMPILING)
-  # Reproducible build support
-  add_link_options(-fdebug-prefix-map=${CMAKE_SOURCE_DIR}=)
-  add_link_options(-fdebug-prefix-map=${CMAKE_BINARY_DIR}=)
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "8")
-    add_compile_options(-ffile-prefix-map=${CMAKE_SOURCE_DIR}=)
-  endif()
+  # TODO: get date from the last git commit to set as epoch
+  set_source_epoch(0)
 
   # default optimization flags
   set(CMAKE_CXX_FLAGS_DEBUG "-Og -g")
@@ -203,7 +200,9 @@ target_compile_options(firmware PRIVATE -Wdouble-promotion)
 
 add_subdirectory(src)
 
-if(NOT CMAKE_CROSSCOMPILING)
+if(CMAKE_CROSSCOMPILING)
+  set_all_targets_reproducible()
+else()
   # do not build the firmware by default (tests are the focus if not crosscompiling)
   set_target_properties(firmware PROPERTIES EXCLUDE_FROM_ALL YES)
 
