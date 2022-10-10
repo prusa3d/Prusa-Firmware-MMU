@@ -143,14 +143,17 @@ bool HWSanity::StepInner() {
             error = ErrorCode::MMU_SOLDERING_NEEDS_ATTENTION;
             uint8_t mask = fault_masks[Axis::Idler];
             if (mask) {
+                error |= ErrorCode::TMC_IDLER_BIT;
                 SetFaultDisplay(0, mask);
             }
             mask = fault_masks[Axis::Pulley];
             if (mask) {
+                error |= ErrorCode::TMC_PULLEY_BIT;
                 SetFaultDisplay(2, mask);
             }
             mask = fault_masks[Axis::Selector];
             if (mask) {
+                error |= ErrorCode::TMC_SELECTOR_BIT;
                 SetFaultDisplay(1, mask);
             }
             ml::leds.SetMode(3, ml::red, ml::off);
