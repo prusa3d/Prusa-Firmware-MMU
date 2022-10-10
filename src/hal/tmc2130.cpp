@@ -18,7 +18,7 @@ bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, Mot
     gpio::Init(params.sgPin, gpio::GPIO_InitTypeDef(gpio::Mode::input, gpio::Pull::up));
     gpio::Init(params.stepPin, gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::low));
 
-    ///check for compatible tmc driver (IOIN version field)
+    /// check for compatible tmc driver (IOIN version field)
     uint32_t IOIN = ReadRegister(params, Registers::IOIN);
 
     // if the version is incorrect or a bit always set to 1 is suddenly 0
@@ -26,44 +26,44 @@ bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, Mot
     if (((IOIN >> 24U) != 0x11) | !(IOIN & (1U << 6U)))
         return false; // @@TODO return some kind of failure
 
-    ///clear reset_flag as we are (re)initializing
+    /// clear reset_flag as we are (re)initializing
     errorFlags.reset_flag = false;
 
     // clear all error flags if possible ny reading GSTAT
     ReadRegister(params, Registers::GSTAT);
 
-    ///apply chopper parameters
-    const uint32_t chopconf = (uint32_t)(TOFF_DEFAULT & TOFF_MASK) << 0U //toff
-        | (uint32_t)(5U & 0x07U) << 4U //hstrt
-        | (uint32_t)(1U & 0x0FU) << 7U //hend
-        | (uint32_t)(2U & 0x03U) << 15U //tbl
-        | (uint32_t)(currents.vSense & 0x01U) << 17U //vsense
-        | (uint32_t)(params.mRes & 0x0FU) << 24U //mres
-        | (uint32_t)(1U & 0x01) << 28U //intpol (always true)
-        | (uint32_t)(1U & 0x01) << 29U; //dedge (always true)
+    /// apply chopper parameters
+    const uint32_t chopconf = (uint32_t)(TOFF_DEFAULT & TOFF_MASK) << 0U // toff
+        | (uint32_t)(5U & 0x07U) << 4U // hstrt
+        | (uint32_t)(1U & 0x0FU) << 7U // hend
+        | (uint32_t)(2U & 0x03U) << 15U // tbl
+        | (uint32_t)(currents.vSense & 0x01U) << 17U // vsense
+        | (uint32_t)(params.mRes & 0x0FU) << 24U // mres
+        | (uint32_t)(1U & 0x01) << 28U // intpol (always true)
+        | (uint32_t)(1U & 0x01) << 29U; // dedge (always true)
     WriteRegister(params, Registers::CHOPCONF, chopconf);
 
-    ///apply currents
+    /// apply currents
     SetCurrents(params, currents);
 
-    ///instant powerdown ramp
+    /// instant powerdown ramp
     WriteRegister(params, Registers::TPOWERDOWN, 0);
 
-    ///Stallguard parameters
+    /// Stallguard parameters
     SetSGTHRS(params);
     WriteRegister(params, Registers::TCOOLTHRS, config::tmc2130_coolStepThreshold);
 
-    ///Write stealth mode config and setup diag0 output
-    constexpr uint32_t gconf = (uint32_t)(1U & 0x01U) << 2U //en_pwm_mode - always enabled since we can control it's effect with TPWMTHRS (0=only stealthchop, 0xFFFFF=only spreadcycle)
-        | (uint32_t)(1U & 0x01U) << 7U; //diag0_stall - diag0 is open collector => active low with external pullups
+    /// Write stealth mode config and setup diag0 output
+    constexpr uint32_t gconf = (uint32_t)(1U & 0x01U) << 2U // en_pwm_mode - always enabled since we can control it's effect with TPWMTHRS (0=only stealthchop, 0xFFFFF=only spreadcycle)
+        | (uint32_t)(1U & 0x01U) << 7U; // diag0_stall - diag0 is open collector => active low with external pullups
     WriteRegister(params, Registers::GCONF, gconf);
 
-    ///stealthChop parameters
+    /// stealthChop parameters
     constexpr uint32_t pwmconf = ((uint32_t)(config::tmc2130_PWM_AMPL) << 0U)
         | ((uint32_t)(config::tmc2130_PWM_GRAD) << 8U)
         | ((uint32_t)(config::tmc2130_PWM_FREQ) << 16U)
         | ((uint32_t)(config::tmc2130_PWM_AUTOSCALE & 0x01U) << 18U)
-        | ((uint32_t)(config::tmc2130_freewheel & 0x03U) << 20U); //special freewheeling mode only active in stealthchop when IHOLD=0 and CS=0 (actual current)
+        | ((uint32_t)(config::tmc2130_freewheel & 0x03U) << 20U); // special freewheeling mode only active in stealthchop when IHOLD=0 and CS=0 (actual current)
     WriteRegister(params, Registers::PWMCONF, pwmconf);
 
     /// TPWMTHRS: switching velocity between stealthChop and spreadCycle.
@@ -76,7 +76,7 @@ bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, Mot
 }
 
 void TMC2130::SetMode(const MotorParams &params, MotorMode mode) {
-    ///0xFFFF0 is used as a "Normal" mode threshold since stealthchop will be used at standstill.
+    /// 0xFFFF0 is used as a "Normal" mode threshold since stealthchop will be used at standstill.
     WriteRegister(params, Registers::TPWMTHRS, (mode == Stealth) ? 70 : 0xFFFF0); // @@TODO should be configurable
 }
 
@@ -90,9 +90,9 @@ void TMC2130::SetBridgeOutput(const MotorParams &params, bool bOn) {
 }
 
 void TMC2130::SetCurrents(const MotorParams &params, const MotorCurrents &currents) {
-    uint32_t ihold_irun = (uint32_t)(currents.iHold & 0x1F) << 0 //ihold
-        | (uint32_t)(currents.iRun & 0x1F) << 8 //irun
-        | (uint32_t)(15 & 0x0F) << 16; //IHOLDDELAY
+    uint32_t ihold_irun = (uint32_t)(currents.iHold & 0x1F) << 0 // ihold
+        | (uint32_t)(currents.iRun & 0x1F) << 8 // irun
+        | (uint32_t)(15 & 0x0F) << 16; // IHOLDDELAY
     WriteRegister(params, Registers::IHOLD_IRUN, ihold_irun);
 }
 
@@ -111,7 +111,7 @@ void TMC2130::SetEnabled(const MotorParams &params, bool enabled) {
 bool TMC2130::CheckForErrors(const MotorParams &params) {
     if (!initialized)
         return false;
-    
+
     uint32_t GSTAT = ReadRegister(params, Registers::GSTAT);
     uint32_t DRV_STATUS = ReadRegister(params, Registers::DRV_STATUS);
     errorFlags.reset_flag |= !!(GSTAT & (1U << 0U));
@@ -120,7 +120,7 @@ bool TMC2130::CheckForErrors(const MotorParams &params) {
     errorFlags.otpw = !!(DRV_STATUS & (1UL << 26U));
     errorFlags.ot = !!(DRV_STATUS & (1UL << 25U));
 
-    return GSTAT || errorFlags.reset_flag; //any bit in gstat is an error
+    return GSTAT || errorFlags.reset_flag; // any bit in gstat is an error
 }
 
 uint32_t TMC2130::ReadRegister(const MotorParams &params, Registers reg) {
