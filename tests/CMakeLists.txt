@@ -22,6 +22,7 @@ if(GCOV_ENABLE)
     test_run_all
     COMMAND ${CMAKE_COMMAND} -E env CTEST_OUTPUT_ON_FAILURE=1 ${CMAKE_CTEST_COMMAND} --timeout 30
     COMMAND ${CMAKE_COMMAND} -E touch .ctest-finished || exit 0
+    BYPRODUCTS ${PROJECT_BINARY_DIR}/.ctest-finished
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
     DEPENDS tests_clean tests
     )
@@ -44,6 +45,10 @@ if(GCOV_ENABLE)
     COMMAND ../../utils/gcovr.py -r . -e '../../tests' -e '../../lib/Catch2' | tee Summary.txt
     COMMAND ${CMAKE_COMMAND} -E compare_files ${PROJECT_BINARY_DIR}/.ctest-finished
             ${PROJECT_BINARY_DIR}/.ctest-finished
+    BYPRODUCTS ${PROJECT_BINARY_DIR}/Summary.txt
+               ${PROJECT_BINARY_DIR}/Coverage.tar.gz
+               ${PROJECT_BINARY_DIR}Coverage
+               ${PROJECT_BINARY_DIR}/coverage.info
     DEPENDS test_run_all
     )
 else()
