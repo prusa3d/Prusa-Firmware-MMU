@@ -104,7 +104,7 @@ protected:
 
     void HomeFailed();
 
-    void IdleChecks();
+    void CheckTMC();
 };
 
 } // namespace motion

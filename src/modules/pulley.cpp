@@ -17,6 +17,10 @@ bool Pulley::FinishHomingAndPlanMoveToParkPos() {
 }
 
 bool Pulley::Step() {
+    if (state != TMCFailed) {
+        CheckTMC();
+    }
+
     switch (state) {
     case Moving:
         PerformMove();
@@ -28,9 +32,7 @@ bool Pulley::Step() {
     case Ready:
         return true;
     case TMCFailed:
-        return true;
     default:
-        IdleChecks();
         return true;
     }
 }
