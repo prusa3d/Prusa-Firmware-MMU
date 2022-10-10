@@ -121,6 +121,10 @@ Idler::OperationResult Idler::PlanMoveInner(uint8_t slot, Operation plannedOp) {
 }
 
 bool Idler::Step() {
+    if (state != TMCFailed) {
+        CheckTMC();
+    }
+
     switch (state) {
     case Moving:
         // dbg_logic_P(PSTR("Moving Idler"));
@@ -142,9 +146,7 @@ bool Idler::Step() {
         return true;
     case TMCFailed:
         dbg_logic_P(PSTR("Idler Failed"));
-        return true;
     default:
-        IdleChecks();
         return true;
     }
 }
