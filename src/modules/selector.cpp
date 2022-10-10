@@ -93,11 +93,11 @@ bool Selector::Step() {
     if (state != TMCFailed) {
         CheckTMC();
     }
-    
+
     switch (state) {
     case Moving:
         PerformMove();
-        //dbg_logic_P(PSTR("Moving Selector"));
+        // dbg_logic_P(PSTR("Moving Selector"));
         return false;
     case PlannedHome:
         // A testing workaround for presumed electrical reasons why the Idler and Selector cannot perform reliable homing together.
