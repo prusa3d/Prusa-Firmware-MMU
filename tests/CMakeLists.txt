@@ -45,10 +45,8 @@ if(GCOV_ENABLE)
     COMMAND ../../utils/gcovr.py -r . -e '../../tests' -e '../../lib/Catch2' | tee Summary.txt
     COMMAND ${CMAKE_COMMAND} -E compare_files ${PROJECT_BINARY_DIR}/.ctest-finished
             ${PROJECT_BINARY_DIR}/.ctest-finished
-    BYPRODUCTS ${PROJECT_BINARY_DIR}/Summary.txt
-               ${PROJECT_BINARY_DIR}/Coverage.tar.gz
-               ${PROJECT_BINARY_DIR}Coverage
-               ${PROJECT_BINARY_DIR}/coverage.info
+    BYPRODUCTS ${PROJECT_BINARY_DIR}/Summary.txt ${PROJECT_BINARY_DIR}/Coverage.tar.gz
+               ${PROJECT_BINARY_DIR}Coverage ${PROJECT_BINARY_DIR}/coverage.info
     DEPENDS test_run_all
     )
 else()
