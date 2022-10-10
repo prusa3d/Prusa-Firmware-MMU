@@ -21,5 +21,9 @@ void TMC2130::SetEnabled(const MotorParams &params, bool enabled) {
 void TMC2130::Isr(const MotorParams &params) {
 }
 
+bool TMC2130::CheckForErrors(const MotorParams &params) {
+    return !errorFlags.Good();
+}
+
 } // namespace tmc2130
 } // namespace hal
