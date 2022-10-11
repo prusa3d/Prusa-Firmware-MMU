@@ -30,8 +30,9 @@ execute_process(
   )
 if(${PANDAS_INSTALLED} EQUAL 0)
   # only run test_motion_ramp if pandas is installed
-  add_test(NAME motion::test_motion_ramp COMMAND "${Python3_EXECUTABLE}" ${CMAKE_CURRENT_SOURCE_DIR}/test_motion_ramp.py
-                                                 ramp_data.txt
+  add_test(NAME motion::test_motion_ramp
+           COMMAND "${Python3_EXECUTABLE}" ${CMAKE_CURRENT_SOURCE_DIR}/test_motion_ramp.py
+                   ramp_data.txt
            )
 
   # define the ramp_data fixture to chain tests
