@@ -24,13 +24,13 @@ add_test(NAME motion::rampgen COMMAND rampgen ramp_data.txt)
 add_dependencies(tests rampgen)
 
 execute_process(
-  COMMAND python3 -c "import pandas"
+  COMMAND "${Python3_EXECUTABLE}" -c "import pandas"
   RESULT_VARIABLE PANDAS_INSTALLED
   OUTPUT_QUIET ERROR_QUIET
   )
 if(${PANDAS_INSTALLED} EQUAL 0)
   # only run test_motion_ramp if pandas is installed
-  add_test(NAME motion::test_motion_ramp COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test_motion_ramp.py
+  add_test(NAME motion::test_motion_ramp COMMAND "${Python3_EXECUTABLE}" ${CMAKE_CURRENT_SOURCE_DIR}/test_motion_ramp.py
                                                  ramp_data.txt
            )
 
