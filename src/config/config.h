@@ -234,7 +234,7 @@ static_assert(tmc2130_PWM_AMPL <= 255, "tmc2130_PWM_AMPL out of range");
 static constexpr uint32_t tmc2130_PWM_GRAD = 4;
 static_assert(tmc2130_PWM_GRAD <= 255, "tmc2130_PWM_GRAD out of range");
 
-static constexpr uint32_t tmc2130_PWM_FREQ = 2;
+static constexpr uint32_t tmc2130_PWM_FREQ = 0;
 static_assert(tmc2130_PWM_FREQ <= 3, "tmc2130_PWM_GRAD out of range");
 
 static constexpr uint32_t tmc2130_PWM_AUTOSCALE = 1;
