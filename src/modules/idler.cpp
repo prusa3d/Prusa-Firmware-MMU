@@ -53,8 +53,13 @@ bool Idler::FinishHomingAndPlanMoveToParkPos() {
 
 void Idler::FinishMove() {
     currentlyEngaged = plannedMove;
-    if (Disengaged()) // turn off power into the Idler motor when disengaged (no force necessary)
-        mm::motion.Disable(mm::Idler);
+    if (Disengaged()) // reduce power into the Idler motor when disengaged (less force necessary)
+        mm::motion.DriverForAxis(axis).SetCurrents(mm::axisParams[axis].params, mm::axisParams[axis].currents);
+    else if (Engaged()) { // maximum motor power when the idler is engaged
+        hal::tmc2130::MotorCurrents tempCurrent = mm::axisParams[axis].currents;
+        tempCurrent.iHold = tempCurrent.iRun;
+        mm::motion.DriverForAxis(axis).SetCurrents(mm::axisParams[axis].params, tempCurrent);
+    }
 }
 
 Idler::OperationResult Idler::Disengage() {
