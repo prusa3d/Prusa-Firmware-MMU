@@ -18,6 +18,9 @@ void TMC2130::SetEnabled(const MotorParams &params, bool enabled) {
     this->enabled = enabled;
 }
 
+void TMC2130::SetCurrents(const MotorParams &params, const MotorCurrents &currents) {
+}
+
 void TMC2130::Isr(const MotorParams &params) {
 }
 
