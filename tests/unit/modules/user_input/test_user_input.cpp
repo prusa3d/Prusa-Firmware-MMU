@@ -5,6 +5,13 @@
 #include "../hal/adc.h"
 #include "user_input.h"
 
+CATCH_REGISTER_ENUM(mui::Event,
+    mui::Event::NoEvent,
+    mui::Event::Left,
+    mui::Event::Middle,
+    mui::Event::Right,
+    mui::Event::FromPrinter)
+
 void PressButtonAndDebounce(uint8_t btnIndex) {
     hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCLimits[btnIndex][0] + 1);
     while (!mb::buttons.ButtonPressed(btnIndex)) {
