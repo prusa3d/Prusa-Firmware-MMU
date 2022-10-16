@@ -4,14 +4,14 @@ add_custom_target(tests)
 add_compile_definitions(UNITTEST)
 
 # include catch_discover_tests function from Catch2
-include(${Catch2_SOURCE_DIR}/contrib/Catch.cmake)
+include(${Catch2_SOURCE_DIR}/extras/Catch.cmake)
 
 add_library(catch_main ${CMAKE_CURRENT_SOURCE_DIR}/test_main.cpp)
-target_link_libraries(catch_main Catch2::Catch2)
+target_link_libraries(catch_main Catch2::Catch2WithMain)
 
 # registers given target as a catch test
 function(add_catch_test target)
-  target_link_libraries(${target} catch_main Catch2::Catch2)
+  target_link_libraries(${target} catch_main Catch2::Catch2WithMain)
   catch_discover_tests(${target})
   add_dependencies(tests ${target})
 endfunction()

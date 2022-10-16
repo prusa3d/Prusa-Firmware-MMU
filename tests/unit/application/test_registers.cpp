@@ -1,4 +1,4 @@
-#include "catch2/catch.hpp"
+#include "catch2/catch_all.hpp"
 #include "registers.h"
 #include "modules/globals.h"
 #include "../modules/stubs/stub_eeprom.h"

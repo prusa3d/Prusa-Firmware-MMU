@@ -1,4 +1,4 @@
-#include "catch2/catch.hpp"
+#include "catch2/catch_all.hpp"
 #include "pulse_gen.h"
 #include "../pins.h"
 #include <stdio.h>
