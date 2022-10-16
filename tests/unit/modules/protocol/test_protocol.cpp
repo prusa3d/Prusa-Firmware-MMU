@@ -1,4 +1,4 @@
-#include "catch2/catch.hpp"
+#include "catch2/catch_all.hpp"
 #include "../logic/error_codes.h"
 #include "../logic/progress_codes.h"
 #include "protocol.h"

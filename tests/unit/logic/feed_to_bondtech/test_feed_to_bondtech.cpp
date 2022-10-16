@@ -1,4 +1,4 @@
-#include "catch2/catch.hpp"
+#include "catch2/catch_all.hpp"
 
 #include "../../../../src/modules/buttons.h"
 #include "../../../../src/modules/finda.h"
