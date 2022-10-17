@@ -1,3 +1,5 @@
+#define CHECKED_ELSE if
+
 bool VerifyEnvironmentState(mg::FilamentLoadState fls, uint8_t idlerSlotIndex, uint8_t selectorSlotIndex,
     bool findaPressed, bool pulleyEnabled, ml::Mode greenLEDMode, ml::Mode redLEDMode) {
     CHECKED_ELSE(mg::globals.FilamentLoaded() & fls) { // beware - abusing the values as bit masks to detect multiple situations at once

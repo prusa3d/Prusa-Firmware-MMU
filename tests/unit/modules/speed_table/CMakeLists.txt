@@ -7,4 +7,4 @@ add_executable(
 target_include_directories(speed_table_tests PUBLIC ${CMAKE_SOURCE_DIR}/src/modules)
 
 # tell build system about the test case
-add_catch_test(speed_table_tests)
+add_doctest_test(speed_table_tests)

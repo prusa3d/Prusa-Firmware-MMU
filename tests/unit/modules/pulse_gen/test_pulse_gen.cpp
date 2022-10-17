@@ -1,9 +1,9 @@
-#include "catch2/catch.hpp"
+#include "doctest/doctest.h"
 #include "pulse_gen.h"
 #include "../pins.h"
 #include <stdio.h>
 
-using Catch::Matchers::Equals;
+//using Catch::Matchers::Equals;
 using namespace modules::pulse_gen;
 using hal::gpio::Level;
 using hal::gpio::ReadPin;

@@ -12,4 +12,4 @@ target_include_directories(
   )
 
 # tell build system about the test case
-add_catch_test(user_input_tests)
+add_doctest_test(user_input_tests)

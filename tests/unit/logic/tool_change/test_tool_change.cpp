@@ -1,4 +1,4 @@
-#include "catch2/catch.hpp"
+#include "doctest/doctest.h"
 
 #include "../../../../src/modules/buttons.h"
 #include "../../../../src/modules/finda.h"
@@ -21,7 +21,7 @@
 
 #include <functional>
 
-using Catch::Matchers::Equals;
+//using Catch::Matchers::Equals;
 using namespace std::placeholders;
 
 #include "../helpers/helpers.ipp"

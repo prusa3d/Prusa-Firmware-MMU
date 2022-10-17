@@ -1,8 +1,9 @@
-#include "catch2/catch.hpp"
+#include "doctest/doctest.h"
 #include "speed_table.h"
 #include <stdio.h>
+#include <stdlib.h>
 
-using Catch::Matchers::Equals;
+//using Catch::Matchers::Equals;
 using namespace modules::speed_table;
 
 // The following reference values are calculated for 2MHz timer

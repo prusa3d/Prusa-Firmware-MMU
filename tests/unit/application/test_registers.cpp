@@ -1,4 +1,4 @@
-#include "catch2/catch.hpp"
+#include "doctest/doctest.h"
 #include "registers.h"
 #include "modules/globals.h"
 #include "../modules/stubs/stub_eeprom.h"

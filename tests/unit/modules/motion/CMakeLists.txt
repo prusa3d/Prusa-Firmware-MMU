@@ -15,7 +15,7 @@ set(source_common
 # general motion tests
 add_executable(motion_tests ${source_common} test_motion.cpp)
 target_include_directories(motion_tests PUBLIC ${include_common})
-add_catch_test(motion_tests)
+add_doctest_test(motion_tests)
 
 # ramp generation tests
 add_executable(rampgen ${source_common} rampgen.cpp)

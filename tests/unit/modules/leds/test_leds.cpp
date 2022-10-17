@@ -1,10 +1,12 @@
-#include "catch2/catch.hpp"
+#include "doctest/doctest.h"
+#include <tuple>
+
 #include "leds.h"
 #include "shr16.h"
 #include "../stubs/stub_timebase.h"
 #include "../../../../src/modules/timebase.h"
 
-using Catch::Matchers::Equals;
+//using Catch::Matchers::Equals;
 
 uint16_t millis = 0;
 

@@ -53,4 +53,4 @@ target_include_directories(
   )
 
 # tell build system about the test case
-add_catch_test(tool_change_tests)
+add_doctest_test(tool_change_tests)

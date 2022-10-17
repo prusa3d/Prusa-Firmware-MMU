@@ -2,7 +2,7 @@
 // As a base for this test, unload_filament was chosen.
 // Moreover, I didn't want to spoil the unit tests of the state machines themself with this.
 
-#include "catch2/catch.hpp"
+#include "doctest/doctest.h"
 
 #include "../../../../src/modules/buttons.h"
 #include "../../../../src/modules/finda.h"
@@ -22,7 +22,7 @@
 #include "../stubs/main_loop_stub.h"
 #include "../stubs/stub_motion.h"
 
-using Catch::Matchers::Equals;
+//using Catch::Matchers::Equals;
 
 #include "../helpers/helpers.ipp"
 

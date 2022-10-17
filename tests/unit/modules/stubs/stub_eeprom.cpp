@@ -1,4 +1,4 @@
-#include "catch2/catch.hpp"
+#include "doctest/doctest.h"
 
 #include "../../../../src/hal/eeprom.h"
 #include "stub_eeprom.h"

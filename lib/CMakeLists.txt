@@ -1,5 +1,5 @@
 if(NOT CMAKE_CROSSCOMPILING)
-  add_subdirectory(Catch2)
+  add_subdirectory(doctest)
 else()
   include(AddLufa.cmake)
 endif()

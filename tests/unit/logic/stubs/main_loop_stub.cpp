@@ -1,4 +1,4 @@
-#include "catch2/catch.hpp"
+#include "doctest/doctest.h"
 #include "main_loop_stub.h"
 #include "homing.h"
 

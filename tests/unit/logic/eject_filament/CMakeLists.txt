@@ -52,4 +52,4 @@ target_include_directories(
   )
 
 # tell build system about the test case
-add_catch_test(eject_filament_tests)
+add_doctest_test(eject_filament_tests)

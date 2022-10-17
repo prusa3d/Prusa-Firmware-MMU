@@ -1,7 +1,9 @@
-#include "catch2/catch.hpp"
+#include "doctest/doctest.h"
+#include <stdint.h>
+
 #include "circular_buffer.h"
 
-using Catch::Matchers::Equals;
+//using doctest::Matchers::Equals;
 
 TEST_CASE("circular_buffer::basic", "[circular_buffer]") {
 
@@ -85,7 +87,7 @@ TEST_CASE("circular_buffer::wrap_around", "[circular_buffer]") {
     // loop to test the internal cursor wrap-around logic
     // the number of loops needs to be equal or greater than the index type
     for (auto loop = 0; loop != 256; ++loop) {
-        INFO("loop " << loop)
+        INFO("loop " << loop);
 
         // ensure we can fill the buffer
         for (auto i = 0; i != size; ++i) {

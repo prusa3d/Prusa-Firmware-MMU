@@ -52,4 +52,4 @@ target_include_directories(
   )
 
 # tell build system about the test case
-add_catch_test(feed_to_bondtech_tests)
+add_doctest_test(feed_to_bondtech_tests)

@@ -10,4 +10,4 @@ target_include_directories(
   )
 
 # tell build system about the test case
-add_catch_test(leds_tests)
+add_doctest_test(leds_tests)

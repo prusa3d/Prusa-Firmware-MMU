@@ -5,4 +5,4 @@ add_executable(protocol_tests ${CMAKE_SOURCE_DIR}/src/modules/protocol.cpp test_
 target_include_directories(protocol_tests PUBLIC ${CMAKE_SOURCE_DIR}/src/modules)
 
 # tell build system about the test case
-add_catch_test(protocol_tests)
+add_doctest_test(protocol_tests)

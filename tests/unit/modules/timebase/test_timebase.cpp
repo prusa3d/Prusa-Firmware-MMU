@@ -1,8 +1,8 @@
-#include "catch2/catch.hpp"
+#include "doctest/doctest.h"
 #include "timebase.h"
 #include "../stubs/stub_timebase.h"
 
-using Catch::Matchers::Equals;
+//using Catch::Matchers::Equals;
 
 // this is not a pure test of the real implementation (it would require splitting the timebase.cpp into 2 parts)
 // but serves the sole purpose of debugging the Elapsed() impl.

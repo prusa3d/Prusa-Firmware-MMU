@@ -1,9 +1,10 @@
-#include "catch2/catch.hpp"
+#include "doctest/doctest.h"
 #include "../stubs/stub_adc.h"
 #include "../stubs/stub_timebase.h"
 #include "buttons.h"
 #include "../hal/adc.h"
 #include "user_input.h"
+#include <tuple>
 
 void PressButtonAndDebounce(uint8_t btnIndex) {
     hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCLimits[btnIndex][0] + 1);

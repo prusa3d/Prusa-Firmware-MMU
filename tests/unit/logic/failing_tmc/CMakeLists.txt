@@ -52,4 +52,4 @@ target_include_directories(
   )
 
 # tell build system about the test case
-add_catch_test(failing_tmc_tests)
+add_doctest_test(failing_tmc_tests)

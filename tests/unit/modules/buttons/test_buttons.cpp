@@ -1,4 +1,4 @@
-#include "catch2/catch.hpp"
+#include "doctest/doctest.h"
 #include "../stubs/stub_adc.h"
 #include "../stubs/stub_timebase.h"
 #include "buttons.h"

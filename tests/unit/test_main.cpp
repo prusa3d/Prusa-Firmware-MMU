@@ -1,3 +1,3 @@
-#define CATCH_CONFIG_MAIN
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 //#define CATCH_CONFIG_ENABLE_BENCHMARKING
-#include "catch2/catch.hpp"
+#include "doctest/doctest.h"

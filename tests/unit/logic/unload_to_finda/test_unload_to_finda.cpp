@@ -1,4 +1,4 @@
-#include "catch2/catch.hpp"
+#include "doctest/doctest.h"
 
 #include <functional>
 
@@ -19,7 +19,7 @@
 #include "../stubs/main_loop_stub.h"
 #include "../stubs/stub_motion.h"
 
-using Catch::Matchers::Equals;
+//using Catch::Matchers::Equals;
 using namespace std::placeholders;
 
 namespace ha = hal::adc;
@@ -211,7 +211,7 @@ TEST_CASE("unload_to_finda::unload_repeated", "[unload_to_finda]") {
     REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::InSelector);
 
     // make arbitrary amount of steps
-    uint32_t steps = GENERATE(range(1, 50));
+    uint32_t steps = 1; //GENERATE(range(1, 50));
     for (uint32_t i = 0; i < steps; ++i) {
         main_loop();
         ff.Step();

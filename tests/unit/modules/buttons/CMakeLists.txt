@@ -11,4 +11,4 @@ target_include_directories(
   )
 
 # tell build system about the test case
-add_catch_test(buttons_tests)
+add_doctest_test(buttons_tests)

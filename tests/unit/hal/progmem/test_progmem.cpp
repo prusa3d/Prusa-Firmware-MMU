@@ -1,7 +1,7 @@
-#include "catch2/catch.hpp"
+#include "doctest/doctest.h"
 #include "progmem.h"
 
-using Catch::Matchers::Equals;
+//using Catch::Matchers::Equals;
 namespace pm = hal::progmem;
 
 TEST_CASE("progmem::read_word", "[progmem]") {
