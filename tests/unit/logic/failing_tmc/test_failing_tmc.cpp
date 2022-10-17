@@ -2,7 +2,8 @@
 // As a base for this test, unload_filament was chosen.
 // Moreover, I didn't want to spoil the unit tests of the state machines themself with this.
 
-#include "catch2/catch_all.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "catch2/matchers/catch_matchers_vector.hpp"
 
 #include "../../../../src/modules/buttons.h"
 #include "../../../../src/modules/finda.h"
