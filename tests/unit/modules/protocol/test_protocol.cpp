@@ -1,8 +1,10 @@
-#include "catch2/catch_all.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "catch2/generators/catch_generators.hpp"
 #include "../logic/error_codes.h"
 #include "../logic/progress_codes.h"
 #include "protocol.h"
 #include <array>
+#include <algorithm>
 
 // some safe margin for the buffer
 using TXBuff = std::array<uint8_t, 2 * std::max(mp::Protocol::MaxRequestSize(), mp::Protocol::MaxResponseSize())>;
