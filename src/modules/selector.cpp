@@ -86,7 +86,7 @@ Selector::OperationResult Selector::MoveToSlot(uint8_t slot) {
     }
 
     // do the move
-    return InitMovement();
+    return InitMovementNoReinitAxis();
 }
 
 bool Selector::Step() {
