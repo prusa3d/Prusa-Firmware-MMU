@@ -26,13 +26,17 @@ void MovableBase::PlanHome() {
 MovableBase::OperationResult MovableBase::InitMovement() {
     mm::motion.PlanStallGuardThreshold(axis, mg::globals.StallGuardThreshold(axis));
     if (motion.InitAxis(axis)) {
-        PrepareMoveToPlannedSlot();
-        state = Moving;
-        return OperationResult::Accepted;
+        return InitMovementNoReinitAxis();
     } else {
         state = TMCFailed;
         return OperationResult::Failed;
     }
+}
+
+MovableBase::OperationResult MovableBase::InitMovementNoReinitAxis() {
+    PrepareMoveToPlannedSlot();
+    state = Moving;
+    return OperationResult::Accepted;
 }
 
 void MovableBase::PerformMove() {

@@ -95,7 +95,12 @@ protected:
     virtual bool FinishHomingAndPlanMoveToParkPos() = 0;
     virtual void FinishMove() = 0;
 
+    /// Initializes movement of a movable module.
+    /// Beware: this operation reinitializes the axis/TMC driver as well (may introduce axis creep as we have seen on the Idler)
     OperationResult InitMovement();
+
+    /// Initializes movement of a movable module without reinitializing the axis/TMC driver
+    OperationResult InitMovementNoReinitAxis();
 
     void PerformMove();
 

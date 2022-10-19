@@ -83,7 +83,7 @@ Idler::OperationResult Idler::Disengage() {
     }
 
     // disengaging
-    return InitMovement();
+    return InitMovementNoReinitAxis();
 }
 
 Idler::OperationResult Idler::PartiallyDisengage(uint8_t slot) {
@@ -122,7 +122,7 @@ Idler::OperationResult Idler::PlanMoveInner(uint8_t slot, Operation plannedOp) {
         return OperationResult::Accepted;
     }
 
-    return InitMovement();
+    return InitMovementNoReinitAxis();
 }
 
 bool Idler::Step() {
