@@ -179,7 +179,7 @@ if(CMAKE_CROSSCOMPILING)
   add_custom_command(
     TARGET firmware
     POST_BUILD
-    COMMAND avr-size ARGS -C --mcu=atmega32u4 firmware
+    COMMAND ${CMAKE_SIZE_UTIL} -C --mcu=atmega32u4 firmware
     )
   report_size(firmware)
 
