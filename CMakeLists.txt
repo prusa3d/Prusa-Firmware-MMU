@@ -106,7 +106,10 @@ if(CMAKE_CROSSCOMPILING)
   set(CMAKE_C_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
 
   # mcu related settings
-  set(MCU_FLAGS -mmcu=atmega32u4 -DF_CPU=16000000L -mrelax)
+  # Tt would be nice to add "-mrelax" but due to some avr-gcc/linker bug it breaks functionality of the FW
+  # (LoadFilament stopped working and only return Finished)
+  # The bad news is that -mrelax was saving ~450B of CPU FLASH
+  set(MCU_FLAGS -mmcu=atmega32u4 -DF_CPU=16000000L)
   add_compile_options(${MCU_FLAGS})
   add_link_options(${MCU_FLAGS})
 
