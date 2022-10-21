@@ -20,7 +20,9 @@ if(GCOV_ENABLE)
   include(ProcessorCount)
   ProcessorCount(N)
   if(N EQUAL 0)
-    message(WARNING "CTest: There was an issue reading the core count, tests won't be run in parallel")
+    message(
+      WARNING "CTest: There was an issue reading the core count, tests won't be run in parallel"
+      )
   else()
     message(STATUS "CTest: Detected ${N} CPU threads")
     set(ctest_test_args -j${N} ${ctest_test_args})
