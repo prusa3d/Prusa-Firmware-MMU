@@ -192,7 +192,6 @@ void CommandBase::ErrDisengagingIdler() {
         error = deferredErrorCode;
         deferredErrorCode = ErrorCode::OK; // and clear the deferredEC just for safety
         mg::globals.IncDriveErrors();
-        mpu::pulley.Disable();
         mui::userInput.Clear(); // remove all buffered events if any just before we wait for some input
     }
 }
@@ -201,6 +200,7 @@ void CommandBase::GoToErrDisengagingIdler(ErrorCode deferredEC) {
     state = ProgressCode::ERRDisengagingIdler;
     deferredErrorCode = deferredEC;
     ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::blink0);
+    mpu::pulley.Disable();
     mi::idler.Disengage();
 }
 
