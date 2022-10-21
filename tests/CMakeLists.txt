@@ -15,13 +15,15 @@ if(GCOV_ENABLE)
     COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/.ctest-finished
     )
 
+  set(ctest_test_args --timeout 30 --output-on-failure)
+
   include(ProcessorCount)
   ProcessorCount(N)
   if(N EQUAL 0)
     message(WARNING "CTest: There was an issue reading the core count, tests won't be run in parallel")
   else()
     message(STATUS "CTest: Detected ${N} CPU threads")
-    set(ctest_test_args ${ctest_test_args} -j${N})
+    set(ctest_test_args -j${N} ${ctest_test_args})
   endif()
 
   # This step needs to always return OK but log whether it was successful or not. The thought here
@@ -29,7 +31,7 @@ if(GCOV_ENABLE)
   # after generating the report to determine if the overall build result is a pass or fail.
   add_custom_target(
     test_run_all
-    COMMAND ${CMAKE_COMMAND} -E env CTEST_OUTPUT_ON_FAILURE=1 ${CMAKE_CTEST_COMMAND} ${ctest_test_args} --timeout 30
+    COMMAND ${CMAKE_CTEST_COMMAND} ${ctest_test_args}
     COMMAND ${CMAKE_COMMAND} -E touch .ctest-finished || exit 0
     BYPRODUCTS ${PROJECT_BINARY_DIR}/.ctest-finished
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
