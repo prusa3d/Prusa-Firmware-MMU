@@ -131,6 +131,7 @@ bool HWSanity::StepInner() {
             test_step++;
         } else {
             // This pass is complete. Move on to the next motor or cleanup.
+            driver.SetEnabled(params, false);
             driver.SetBridgeOutput(params, true);
             test_step = 0;
             state = next_state;
