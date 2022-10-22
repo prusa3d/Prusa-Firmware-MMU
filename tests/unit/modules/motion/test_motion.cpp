@@ -271,6 +271,50 @@ TEST_CASE("motion::queue_abort_1", "[motion]") {
     REQUIRE(!motion.QueueEmpty());
 }
 
+TEST_CASE("motion::queue_abort_2", "[motion]") {
+    // queue should start empty
+    ResetMotionSim();
+
+    // enqueue two moves on a single axis
+    motion.PlanMoveTo(Pulley, 10, 1);
+    motion.PlanMoveTo(Pulley, 20, 1);
+    REQUIRE(!motion.QueueEmpty(Pulley));
+
+    // abort before scheduling and check that both are gone
+    motion.AbortPlannedMoves(Pulley);
+    REQUIRE(motion.QueueEmpty(Pulley));
+}
+
+TEST_CASE("motion::queue_abort_3", "[motion]") {
+    // queue should start empty
+    ResetMotionSim();
+
+    // enqueue two moves on a single axis
+    motion.PlanMoveTo(Pulley, 10, 1);
+    motion.PlanMoveTo(Pulley, 20, 1);
+    REQUIRE(!motion.QueueEmpty(Pulley));
+
+    // step ~1/3 way through of the first move
+    REQUIRE(stepUntilDone(3) == -1);
+
+    // abort the partial and unscheduled move
+    motion.AbortPlannedMoves(Pulley);
+    REQUIRE(motion.QueueEmpty(Pulley));
+}
+
+TEST_CASE("motion::queue_abort_4", "[motion]") {
+    // queue should start empty
+    ResetMotionSim();
+
+    // enqueue a move on a single axis
+    motion.PlanMoveTo(Pulley, 10, 1);
+    REQUIRE(!motion.QueueEmpty(Pulley));
+
+    // abort the single unscheduled move
+    motion.AbortPlannedMoves(Pulley);
+    REQUIRE(motion.QueueEmpty(Pulley));
+}
+
 TEST_CASE("motion::long_pulley_move", "[motion]") {
     ResetMotionSim();
     constexpr auto mm400 = 400._mm;
