@@ -63,6 +63,31 @@ TEST_CASE("circular_buffer::fill", "[circular_buffer]") {
     REQUIRE(cb.count() == 0);
 }
 
+TEST_CASE("circular_buffer::reset", "[circular_buffer]") {
+
+    static constexpr auto size = 2;
+    using CB = CircularBuffer<uint8_t, uint8_t, size>;
+
+    // start with an empty buffer
+    CB cb;
+    REQUIRE(cb.empty());
+
+    // push four elements
+    REQUIRE(cb.push(1));
+    REQUIRE(cb.push(2));
+
+    // Check there are elements in the buffer
+    REQUIRE(cb.full());
+    REQUIRE(!cb.empty());
+
+    // Reset the buffer
+    cb.reset();
+
+    // Buffer should be empty now
+    REQUIRE(cb.empty());
+    REQUIRE(cb.count() == 0);
+}
+
 TEST_CASE("circular_buffer::wrap_around", "[circular_buffer]") {
 
     static constexpr auto size = 4;

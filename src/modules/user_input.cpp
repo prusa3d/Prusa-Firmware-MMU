@@ -55,10 +55,7 @@ Event UserInput::ConsumeEventForPrinter() {
 }
 
 void UserInput::Clear() {
-    while (!eventQueue.empty()) {
-        Event x;
-        eventQueue.pop(x);
-    }
+    eventQueue.reset();
 }
 
 } // namespace user_input
