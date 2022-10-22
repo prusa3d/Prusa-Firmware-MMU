@@ -302,6 +302,19 @@ TEST_CASE("motion::queue_abort_3", "[motion]") {
     REQUIRE(motion.QueueEmpty(Pulley));
 }
 
+TEST_CASE("motion::queue_abort_4", "[motion]") {
+    // queue should start empty
+    ResetMotionSim();
+
+    // enqueue a move on a single axis
+    motion.PlanMoveTo(Pulley, 10, 1);
+    REQUIRE(!motion.QueueEmpty(Pulley));
+
+    // abort the single unscheduled move
+    motion.AbortPlannedMoves(Pulley);
+    REQUIRE(motion.QueueEmpty(Pulley));
+}
+
 TEST_CASE("motion::long_pulley_move", "[motion]") {
     ResetMotionSim();
     constexpr auto mm400 = 400._mm;
