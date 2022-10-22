@@ -163,8 +163,7 @@ void PulseGen::AbortPlannedMoves(bool halt) {
     }
 
     // drop all remaining blocks
-    while (!block_index.empty())
-        block_index.pop();
+    block_index.reset();
 
     // truncate the last rate if halting
     if (halt)
