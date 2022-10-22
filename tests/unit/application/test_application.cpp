@@ -1,4 +1,4 @@
-#include "catch2/catch.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "application.h"
 #include <stdint.h>
 #include "../modules/stubs/stub_serial.h"
