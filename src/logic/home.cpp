@@ -28,6 +28,9 @@ bool Home::StepInner() {
         break;
     case ProgressCode::OK:
         return true;
+    case ProgressCode::ERRInternal:
+        // firmware panic triggered
+        return true;
     default: // we got into an unhandled state, better report it
         state = ProgressCode::ERRInternal;
         error = ErrorCode::INTERNAL;
