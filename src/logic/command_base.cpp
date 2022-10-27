@@ -136,7 +136,8 @@ bool CommandBase::WaitForModulesErrorRecovery() {
 }
 
 bool CommandBase::Step() {
-    if (WaitForModulesErrorRecovery()) {
+    if (WaitForModulesErrorRecovery() || state == ProgressCode::ERRInternal) {
+        // ERRInternal: firmware panic was triggered
         return true;
     }
     return StepInner();

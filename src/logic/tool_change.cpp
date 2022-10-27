@@ -179,9 +179,6 @@ bool ToolChange::StepInner() {
             GoToErrDisengagingIdler(ErrorCode::FSENSOR_DIDNT_SWITCH_ON);
         }
         return false;
-    case ProgressCode::ERRInternal:
-        // firmware panic triggered
-        return true;
     default: // we got into an unhandled state, better report it
         state = ProgressCode::ERRInternal;
         error = ErrorCode::INTERNAL;
