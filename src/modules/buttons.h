@@ -38,6 +38,8 @@ public:
     /// @param index of the button to check
     inline bool ButtonPressed(uint8_t index) const { return buttons[index].Pressed(); }
 
+    inline bool ButtonReleased(uint8_t index) const { return buttons[index].Released(); }
+
     /// @returns true if any of the button is pressed
     inline bool AnyButtonPressed() const {
         for (uint8_t i = 0; i < config::buttonCount; ++i) {

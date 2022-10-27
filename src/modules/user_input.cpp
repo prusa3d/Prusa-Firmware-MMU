@@ -8,11 +8,11 @@ namespace user_input {
 UserInput userInput;
 
 void UserInput::Step() {
-    if (buttons::buttons.ButtonPressed(mb::Left))
+    if (buttons::buttons.ButtonReleased(mb::Left))
         eventQueue.push(Event::Left);
-    if (buttons::buttons.ButtonPressed(mb::Middle))
+    if (buttons::buttons.ButtonReleased(mb::Middle))
         eventQueue.push(Event::Middle);
-    if (buttons::buttons.ButtonPressed(mb::Right))
+    if (buttons::buttons.ButtonReleased(mb::Right))
         eventQueue.push(Event::Right);
 }
 
