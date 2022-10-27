@@ -74,15 +74,18 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf, uint8_t en
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, slot, slot, false, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
 
     // Stage 2 - retracting from FINDA
-    REQUIRE(WhileTopState(uf, ProgressCode::RetractingFromFinda, idlerEngageDisengageMaxSteps));
+    REQUIRE(WhileTopState(uf, ProgressCode::RetractingFromFinda));
 
-    // Stage 3 - idler was engaged, disengage it
-    REQUIRE(WhileTopState(uf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::AtPulley, slot, slot, false, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
 
+    // Stage 3 - If selector is not homed, we must home while the idler is disengaging before we can exit ProgressCode::DisengagingIdler state
     if (selectorShallHomeAtEnd) {
         REQUIRE(ms::selector.Slot() == 0xff);
         SimulateSelectorHoming(uf);
     }
+
+    // Stage 4 - Wait application to exit DisengagingIdler state
+    REQUIRE(WhileTopState(uf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
 
     // filament unloaded
     // idler should have been disengaged
@@ -177,6 +180,7 @@ void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
     REQUIRE_FALSE(mui::userInput.AnyEvent());
     // Perform press on button 0 + debounce
     PressButtonAndDebounce(uf, mb::Left, false);
+    ClearButtons(uf);
     REQUIRE_FALSE(mui::userInput.AnyEvent()); // button processed and nothing remains
 
     // we still think we have filament loaded at this stage
@@ -260,6 +264,7 @@ void FindaDidntTriggerResolveTryAgain(uint8_t slot, logic::UnloadFilament &uf) {
 
     // In this case we check the second option
     PressButtonAndDebounce(uf, mb::Middle, false);
+    ClearButtons(uf);
 
     // we still think we have filament loaded at this stage
     // idler should have been disengaged
@@ -305,8 +310,9 @@ void FailedUnloadResolveManual(uint8_t slot, logic::UnloadFilament &uf) {
     // simulate the user fixed the issue himself
 
     // Perform press on button 2 + debounce + switch off FINDA
-    hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
+    SetFINDAStateAndDebounce(false);
     PressButtonAndDebounce(uf, mb::Right, false);
+    ClearButtons(uf);
 
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
 
@@ -331,6 +337,7 @@ void FailedUnloadResolveManualFINDAon(uint8_t slot, logic::UnloadFilament &uf) {
 
     // Perform press on button 2 + debounce + keep FINDA on
     PressButtonAndDebounce(uf, mb::Right, false);
+    ClearButtons(uf);
 
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRWaitingForUser));
 }
@@ -340,8 +347,9 @@ void FailedUnloadResolveManualFSensorOn(uint8_t slot, logic::UnloadFilament &uf)
 
     // Perform press on button 2 + debounce + keep FSensor on
     SetFSensorStateAndDebounce(true);
-    hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
+    SetFINDAStateAndDebounce(false);
     PressButtonAndDebounce(uf, mb::Right, false);
+    ClearButtons(uf);
 
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::blink0, ErrorCode::FSENSOR_DIDNT_SWITCH_OFF, ProgressCode::ERRWaitingForUser));
 }
@@ -376,8 +384,9 @@ TEST_CASE("unload_filament::unload_homing_retry", "[unload_filament][homing]") {
     FindaDidntTriggerCommonSetup(slot, uf);
 
     // simulate the user fixed the issue himself (not really important, we are after a failed homing of the selector)
-    hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
+    SetFINDAStateAndDebounce(false);
     PressButtonAndDebounce(uf, mb::Right, false);
+    ClearButtons(uf);
     SimulateIdlerHoming(uf); // make Idler happy
 
     REQUIRE(WhileCondition(uf, std::bind(SimulateFeedToFINDA, _1, 100), 5000));

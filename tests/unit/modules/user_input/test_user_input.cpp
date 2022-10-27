@@ -22,6 +22,13 @@ void PressButtonAndDebounce(uint8_t btnIndex) {
     }
 }
 
+void ReleaseButton(uint8_t btnIndex) {
+    hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCMaxValue);
+    mb::buttons.Step();
+    mui::userInput.Step();
+    mt::IncMillis();
+}
+
 TEST_CASE("user_input::printer_in_charge", "[user_input]") {
     uint8_t button;
     mui::Event event;
@@ -54,6 +61,11 @@ TEST_CASE("user_input::printer_in_charge", "[user_input]") {
     REQUIRE(mb::buttons.ButtonPressed(button));
     // we should NOT be able to extract the event with ConsumeEvent
     REQUIRE(mui::userInput.ConsumeEvent() == mui::NoEvent);
+    REQUIRE_FALSE(mui::userInput.AnyEvent());
+
+    ReleaseButton(button);
+    REQUIRE(mb::buttons.ButtonReleased(button));
+    REQUIRE(mui::userInput.ConsumeEvent() == mui::NoEvent);
     REQUIRE(mui::userInput.AnyEvent());
     // but we should be able to extract that message with ConsumeEventForPrinter
     REQUIRE(mui::userInput.ConsumeEventForPrinter() == event);
@@ -78,7 +90,11 @@ TEST_CASE("user_input::button_pressed_MMU", "[user_input]") {
 
     PressButtonAndDebounce(button);
     REQUIRE(mb::buttons.ButtonPressed(button));
+    REQUIRE(mui::userInput.ConsumeEvent() == mui::NoEvent);
+    REQUIRE_FALSE(mui::userInput.AnyEvent());
     // we should be able to extract the event with ConsumeEvent
+    ReleaseButton(button);
+    REQUIRE(mb::buttons.ButtonReleased(button));
     REQUIRE(mui::userInput.AnyEvent());
     REQUIRE(mui::userInput.ConsumeEvent() == event);
     REQUIRE_FALSE(mui::userInput.AnyEvent());

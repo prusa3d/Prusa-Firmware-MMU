@@ -142,6 +142,18 @@ bool SimulateFailedHomeSelectorPostfix(logic::CommandBase &cb) {
 
     PressButtonAndDebounce(cb, mb::Middle, false);
 
+    // Holding down the button has no effect
+    if (cb.Error() == ErrorCode::RUNNING)
+        return false;
+    if (cb.State() == ProgressCode::Homing)
+        return false;
+    if (ms::selector.HomingValid())
+        return false;
+    if (mm::motion.Enabled(mm::Selector))
+        return false;
+
+    ClearButtons(cb);
+
     // it shall start homing again
     if (cb.Error() != ErrorCode::RUNNING)
         return false;
@@ -151,8 +163,6 @@ bool SimulateFailedHomeSelectorPostfix(logic::CommandBase &cb) {
         return false;
     if (!mm::motion.Enabled(mm::Selector))
         return false;
-
-    ClearButtons(cb);
 
     return true;
 }

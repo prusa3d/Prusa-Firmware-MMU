@@ -4,6 +4,13 @@
 #include "buttons.h"
 #include "../hal/adc.h"
 
+enum : uint8_t {
+    Waiting = 0,
+    Detected = 1,
+    WaitForRelease = 2,
+    Update = 3,
+};
+
 bool Step_Basic_One_Button_Test(mb::Buttons &b, uint8_t oversampleFactor, uint8_t testedButtonIndex, uint8_t otherButton1, uint8_t otherButton2) {
     for (uint8_t i = 0; i < oversampleFactor; ++i) {
         b.Step(); // should detect the press but remain in detected state - wait for debounce
@@ -97,14 +104,20 @@ TEST_CASE("buttons::Step-basic-button-one-after-other", "[buttons]") {
     CHECK(Step_Basic_One_Button_Test(b, oversampleFactor, 2, 0, 1));
 }
 
-void StepAndCheck(mb::Buttons &b, uint8_t oversampleFactor, bool rightPressed, bool middlePressed, bool leftPressed) {
+void StepAndCheck(mb::Buttons &b, uint8_t oversampleFactor, bool rightPressed, bool middlePressed, bool leftPressed, uint8_t state) {
     for (uint8_t i = 0; i < oversampleFactor; ++i) {
         b.Step(); // should detect the press but remain in detected state - wait for debounce
         mt::IncMillis();
     }
-    CHECK(b.ButtonPressed(mb::Right) == rightPressed);
-    CHECK(b.ButtonPressed(mb::Middle) == middlePressed);
-    CHECK(b.ButtonPressed(mb::Left) == leftPressed);
+    if (state == Update) {
+        CHECK(b.ButtonReleased(mb::Right) == rightPressed);
+        CHECK(b.ButtonReleased(mb::Middle) == middlePressed);
+        CHECK(b.ButtonReleased(mb::Left) == leftPressed);
+    } else {
+        CHECK(b.ButtonPressed(mb::Right) == rightPressed);
+        CHECK(b.ButtonPressed(mb::Middle) == middlePressed);
+        CHECK(b.ButtonPressed(mb::Left) == leftPressed);
+    }
 }
 
 /// This test tries to simulate a bouncing effect on data from ADC on the first button
@@ -120,31 +133,31 @@ TEST_CASE("buttons::Step-debounce-one-button", "[buttons]") {
     mb::Buttons b;
 
     // 5: should detect the press but remain in detected state - wait for debounce
-    StepAndCheck(b, oversampleFactor, false, false, false);
+    StepAndCheck(b, oversampleFactor, false, false, false, Detected);
 
     // 1023: reset to waiting
-    StepAndCheck(b, oversampleFactor, false, false, false);
+    StepAndCheck(b, oversampleFactor, false, false, false, Waiting);
 
     // 5: pressed again, still in debouncing state
-    StepAndCheck(b, oversampleFactor, false, false, false);
+    StepAndCheck(b, oversampleFactor, false, false, false, Detected);
 
     // 9: no change
-    StepAndCheck(b, oversampleFactor, false, false, false);
+    StepAndCheck(b, oversampleFactor, false, false, false, Detected);
 
     // 6: no change
-    StepAndCheck(b, oversampleFactor, false, false, false);
+    StepAndCheck(b, oversampleFactor, false, false, false, Detected);
 
     // 7: one step from "pressed"
-    StepAndCheck(b, oversampleFactor, false, false, false);
+    StepAndCheck(b, oversampleFactor, false, false, false, Detected);
 
     // 8: fifth set of samples - should report "pressed" finally
-    StepAndCheck(b, oversampleFactor, true, false, false);
+    StepAndCheck(b, oversampleFactor, true, false, false, WaitForRelease);
 
     // 1023: sixth set of samples - button released (no debouncing on release)
-    StepAndCheck(b, oversampleFactor, false, false, false);
+    StepAndCheck(b, 1, true, false, false, Update);
 
     // 1023: seventh set of samples - still released
-    StepAndCheck(b, oversampleFactor, false, false, false);
+    StepAndCheck(b, oversampleFactor, false, false, false, Waiting);
 }
 
 TEST_CASE("buttons::verify_ADC_stub", "[buttons]") {

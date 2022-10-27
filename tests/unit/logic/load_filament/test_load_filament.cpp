@@ -131,6 +131,7 @@ void FailedLoadToFindaResolveHelp(uint8_t slot, logic::LoadFilament &lf) {
 
     // In this case we check the first option
     PressButtonAndDebounce(lf, mb::Left, false);
+    ClearButtons(lf);
 
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERREngagingIdler));
 
@@ -142,8 +143,6 @@ void FailedLoadToFindaResolveHelp(uint8_t slot, logic::LoadFilament &lf) {
     REQUIRE(WhileTopState(lf, ProgressCode::ERREngagingIdler, idlerEngageDisengageMaxSteps));
 
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRHelpingFilament));
-
-    ClearButtons(lf);
 }
 
 void FailedLoadToFindaResolveHelpFindaTriggered(uint8_t slot, logic::LoadFilament &lf) {
@@ -171,16 +170,15 @@ void FailedLoadToFindaResolveManual(uint8_t slot, logic::LoadFilament &lf) {
     // simulate the user fixed the issue himself
 
     // Perform press on button 2 + debounce + switch on FINDA
-    hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
+    SetFINDAStateAndDebounce(true);
     PressButtonAndDebounce(lf, mb::Right, false);
+    ClearButtons(lf);
 
     // the Idler also engages in this call as this is planned as the next step
     SimulateIdlerHoming(lf);
 
     // pulling filament back
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
-
-    ClearButtons(lf);
 
     // Stage 3 - retracting from finda
     // we'll assume the finda is working correctly here
@@ -216,12 +214,11 @@ void FailedLoadToFindaResolveManual(uint8_t slot, logic::LoadFilament &lf) {
 }
 
 void FailedLoadToFindaResolveManualNoFINDA(uint8_t slot, logic::LoadFilament &lf) {
-    // Perform press on button 2 + debounce + keep FINDA OFF (i.e. the user didn't solve anything)
+    // Perform press and release on button 2 + debounce + keep FINDA OFF (i.e. the user didn't solve anything)
     PressButtonAndDebounce(lf, mb::Right, false);
+    ClearButtons(lf);
 
     SimulateIdlerHoming(lf);
-
-    ClearButtons(lf);
 
     // pulling filament back
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));
@@ -229,11 +226,11 @@ void FailedLoadToFindaResolveManualNoFINDA(uint8_t slot, logic::LoadFilament &lf
 
 void FailedLoadToFindaResolveTryAgain(uint8_t slot, logic::LoadFilament &lf) {
     PressButtonAndDebounce(lf, mb::Middle, false);
+    ClearButtons(lf);
 
     // the state machine should have restarted
     // Idler's position needs to be ignored as it has started homing after the button press
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, config::toolCount, slot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
-    ClearButtons(lf);
 
     SimulateIdlerHoming(lf);
 
@@ -361,6 +358,7 @@ void LoadFilamentStopped(uint8_t slot, logic::LoadFilament &lf) {
 
     // now press a button
     PressButtonAndDebounce(lf, mb::Middle, false);
+    ClearButtons(lf);
 
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, false, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
 
