@@ -66,20 +66,23 @@ public:
     /// blocks until the TX buffer was successfully transmitted
     void Flush();
 
+    /// Enable the RX receiver
+    __attribute__((always_inline)) inline void rx_enable() { husart->UCSRxB |= (1 << RXEN1); };
+
     /// Initializes USART interface
     __attribute__((always_inline)) inline void Init(USART_InitTypeDef *const conf) {
         gpio::Init(conf->rx_pin, gpio::GPIO_InitTypeDef(gpio::Mode::input, gpio::Level::low));
         gpio::Init(conf->tx_pin, gpio::GPIO_InitTypeDef(gpio::Mode::output, gpio::Level::low));
         husart->UBRRx = UART_BAUD_SELECT(conf->baudrate, F_CPU);
-        husart->UCSRxA |= (1 << 1); // Set double baudrate setting. Clear all other status bits/flags
+        husart->UCSRxA |= (1 << U2X1); // Set double baudrate setting. Clear all other status bits/flags
         // husart->UCSRxC |= (1 << 3); // 2 stop bits. Preserve data size setting
         husart->UCSRxD = 0; // disable hardware flow control. Few avr MCUs have this feature, but this register is reserved on all AVR devices with USART, so we can disable it without consequences.
-        husart->UCSRxB = (1 << 3) | (1 << 4) | (1 << 7); // Turn on the transmission and reception circuitry and enable the RX interrupt
+        husart->UCSRxB = (1 << TXEN1) | (1 << RXCIE1); // Turn on the transmission and reception circuitry and enable the RX interrupt
     }
 
     /// implementation of the receive ISR's body
     __attribute__((always_inline)) inline void ISR_RX() {
-        if (husart->UCSRxA & (1 << 4)) {
+        if (husart->UCSRxA & (1 << FE1)) {
             (void)husart->UDRx;
         } else {
             rx_buf.push((uint8_t)husart->UDRx);
@@ -94,10 +97,10 @@ public:
         // clear the TXC bit -- "can be cleared by writing a one to its bit
         // location". This makes sure flush() won't return until the bytes
         // actually got written
-        husart->UCSRxA |= (1 << 6);
+        husart->UCSRxA |= (1 << TXC1);
 
         if (tx_buf.empty())
-            husart->UCSRxB &= ~(1 << 5); // disable UDRE interrupt
+            husart->UCSRxB &= ~(1 << UDRIE1); // disable UDRE interrupt
     }
 
     USART(USART_TypeDef *husart)

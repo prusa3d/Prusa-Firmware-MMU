@@ -123,17 +123,19 @@ static void setup2() {
     if (logic::hwSanity.Error() != ErrorCode::OK) {
         // forward the issue to the logic startup handler.
         logic::noCommand.SetInitError(logic::hwSanity.Error());
-        return;
+    } else {
+        // Idler and Selector decide whether homing is possible/safe
+        mi::idler.Init();
+        ms::selector.Init();
+
+        // activate the correct LED if filament is present
+        if (mg::globals.FilamentLoaded() > mg::FilamentLoadState::AtPulley) {
+            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
+        }
     }
 
-    // Idler and Selector decide whether homing is possible/safe
-    mi::idler.Init();
-    ms::selector.Init();
-
-    // activate the correct LED if filament is present
-    if (mg::globals.FilamentLoaded() > mg::FilamentLoadState::AtPulley) {
-        ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
-    }
+    // Finally, enable RX receiver to start talking to the printer
+    hu::usart1.rx_enable();
 }
 
 void Panic(ErrorCode ec) {
