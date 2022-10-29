@@ -34,10 +34,14 @@ public:
     /// Performs one step of the state machine - reads the ADC, processes debouncing, updates states of individual buttons
     void Step();
 
-    /// @returns true if button at index is pressed
+    /// @brief Indicates whether or not a particular button was pressed
     /// @param index of the button to check
+    /// @return true if button at index is pressed, false otherwise
     inline bool ButtonPressed(uint8_t index) const { return buttons[index].Pressed(); }
 
+    /// @brief Indicates whether or not a particular button was released
+    /// @param index of the button to check
+    /// @return true if button at index is released, false otherwise
     inline bool ButtonReleased(uint8_t index) const { return buttons[index].Released(); }
 
     /// @returns true if any of the button is pressed

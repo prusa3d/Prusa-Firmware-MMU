@@ -19,6 +19,8 @@ public:
 
     /// @returns true if debounced value is currently considered as pressed
     inline bool Pressed() const { return f.state == State::WaitForRelease; }
+
+    /// @returns true if debounced value is currently considered as released
     inline bool Released() const { return f.state == State::Update; }
 
     /// State machine stepping routine
