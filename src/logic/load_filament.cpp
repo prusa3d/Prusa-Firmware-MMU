@@ -121,9 +121,6 @@ bool LoadFilament::StepInner() {
         // waiting for user buttons and/or a command from the printer
         mui::Event ev = mui::userInput.ConsumeEvent();
         switch (ev) {
-        case mui::Event::Left: // try to manually load just a tiny bit - help the filament with the pulley
-            GoToErrEngagingIdler();
-            break;
         case mui::Event::Middle: // try again the whole sequence
             // however it depends on the state of FINDA - if it is on, we must perform unload first
             if (!mf::finda.Pressed()) {
@@ -132,40 +129,11 @@ bool LoadFilament::StepInner() {
                 GoToRetractingFromFinda();
             }
             break;
-        case mui::Event::Right: // problem resolved - the user pushed the fillament by hand?
-            // we should check the state of all the sensors and either report another error or confirm the correct state
-
-            // First invalidate homing flags as the user may have moved the Idler or Selector accidentally
-            InvalidateHoming();
-            if (!mf::finda.Pressed()) {
-                // FINDA is still NOT pressed - that smells bad
-                error = ErrorCode::FINDA_DIDNT_SWITCH_ON;
-                state = ProgressCode::ERRWaitingForUser; // stand still
-            } else {
-                // all sensors are ok - pull the filament back
-                GoToRetractingFromFinda();
-            }
-            break;
         default: // no event, continue waiting for user input
             break;
         }
         return false;
     }
-    case ProgressCode::ERREngagingIdler:
-        if (mi::idler.Engaged()) {
-            state = ProgressCode::ERRHelpingFilament;
-            mpu::pulley.PlanMove(config::pulleyHelperMove, config::pulleySlowFeedrate);
-        }
-        return false;
-    case ProgressCode::ERRHelpingFilament:
-        if (mf::finda.Pressed()) {
-            // the help was enough to press the FINDA, we are ok, continue normally
-            GoToRetractingFromFinda();
-        } else if (mm::motion.QueueEmpty()) {
-            // helped a bit, but FINDA didn't trigger, return to the main error state
-            GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_ON);
-        }
-        return false;
     default: // we got into an unhandled state, better report it
         state = ProgressCode::ERRInternal;
         error = ErrorCode::INTERNAL;

@@ -164,92 +164,92 @@ void FindaDidntTriggerCommonSetup(uint8_t slot, logic::UnloadFilament &uf) {
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRWaitingForUser));
 }
 
-void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
+//void FindaDidntTriggerResolveHelp(uint8_t slot, logic::UnloadFilament &uf) {
 
-    // Stage 3 - the user has to do something
-    // there are 3 options:
-    // - help the filament a bit
-    // - try again the whole sequence
-    // - resolve the problem by hand - after pressing the button we shall check, that FINDA is off and we should do what?
+//    // Stage 3 - the user has to do something
+//    // there are 3 options:
+//    // - help the filament a bit
+//    // - try again the whole sequence
+//    // - resolve the problem by hand - after pressing the button we shall check, that FINDA is off and we should do what?
 
-    // In this case we check the first option
+//    // In this case we check the first option
 
-    REQUIRE_FALSE(mui::userInput.AnyEvent());
-    // Perform press on button 0 + debounce
-    PressButtonAndDebounce(uf, mb::Left, false);
-    REQUIRE_FALSE(mui::userInput.AnyEvent()); // button processed and nothing remains
+//    REQUIRE_FALSE(mui::userInput.AnyEvent());
+//    // Perform press on button 0 + debounce
+//    PressButtonAndDebounce(uf, mb::Left, false);
+//    REQUIRE_FALSE(mui::userInput.AnyEvent()); // button processed and nothing remains
 
-    // we still think we have filament loaded at this stage
-    // idler should have been disengaged
-    // no change in selector's position
-    // FINDA still on
-    // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, false, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERREngagingIdler));
+//    // we still think we have filament loaded at this stage
+//    // idler should have been disengaged
+//    // no change in selector's position
+//    // FINDA still on
+//    // red LED should blink, green LED should be off
+//    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, false, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERREngagingIdler));
 
-    if (!mi::idler.HomingValid()) {
-        SimulateIdlerHoming(uf);
-    }
+//    if (!mi::idler.HomingValid()) {
+//        SimulateIdlerHoming(uf);
+//    }
 
-    // Stage 4 - engage the idler
-    REQUIRE(WhileTopState(uf, ProgressCode::ERREngagingIdler, idlerEngageDisengageMaxSteps));
+//    // Stage 4 - engage the idler
+//    REQUIRE(WhileTopState(uf, ProgressCode::ERREngagingIdler, idlerEngageDisengageMaxSteps));
 
-    // we still think we have filament loaded at this stage
-    // idler should be engaged
-    // no change in selector's position
-    // FINDA still on
-    // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRHelpingFilament));
-}
+//    // we still think we have filament loaded at this stage
+//    // idler should be engaged
+//    // no change in selector's position
+//    // FINDA still on
+//    // red LED should blink, green LED should be off
+//    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRHelpingFilament));
+//}
 
-void FindaDidntTriggerResolveHelpFindaTriggered(uint8_t slot, logic::UnloadFilament &uf) {
-    // Stage 5 - move the pulley a bit - simulate FINDA depress
-    REQUIRE(WhileCondition(
-        uf,
-        [&](uint32_t step) -> bool {
-        if(step == 100){ // on 100th step make FINDA trigger
-            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
-        }
-        return uf.TopLevelState() == ProgressCode::ERRHelpingFilament; },
-        5000));
+//void FindaDidntTriggerResolveHelpFindaTriggered(uint8_t slot, logic::UnloadFilament &uf) {
+//    // Stage 5 - move the pulley a bit - simulate FINDA depress
+//    REQUIRE(WhileCondition(
+//        uf,
+//        [&](uint32_t step) -> bool {
+//        if(step == 100){ // on 100th step make FINDA trigger
+//            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
+//        }
+//        return uf.TopLevelState() == ProgressCode::ERRHelpingFilament; },
+//        5000));
 
-    // we still think we have filament loaded at this stage
-    // idler should be engaged
-    // no change in selector's position
-    // FINDA depressed
-    // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, slot, slot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
-}
+//    // we still think we have filament loaded at this stage
+//    // idler should be engaged
+//    // no change in selector's position
+//    // FINDA depressed
+//    // red LED should blink, green LED should be off
+//    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, slot, slot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
+//}
 
-void FindaDidntTriggerResolveHelpFindaDidntTrigger(uint8_t slot, logic::UnloadFilament &uf) {
-    // Stage 5 - move the pulley a bit - no FINDA change
-    REQUIRE(WhileTopState(uf, ProgressCode::ERRHelpingFilament, 5000));
+//void FindaDidntTriggerResolveHelpFindaDidntTrigger(uint8_t slot, logic::UnloadFilament &uf) {
+//    // Stage 5 - move the pulley a bit - no FINDA change
+//    REQUIRE(WhileTopState(uf, ProgressCode::ERRHelpingFilament, 5000));
 
-    // we still think we have filament loaded at this stage
-    // idler should be engaged
-    // no change in selector's position
-    // FINDA still pressed
-    // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
-}
+//    // we still think we have filament loaded at this stage
+//    // idler should be engaged
+//    // no change in selector's position
+//    // FINDA still pressed
+//    // red LED should blink, green LED should be off
+//    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
+//}
 
-TEST_CASE("unload_filament::finda_didnt_trigger_resolve_help_second_ok", "[unload_filament]") {
-    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
-        logic::UnloadFilament uf;
-        FindaDidntTriggerCommonSetup(slot, uf);
-        FindaDidntTriggerResolveHelp(slot, uf);
-        FindaDidntTriggerResolveHelpFindaTriggered(slot, uf);
-    }
-}
+//TEST_CASE("unload_filament::finda_didnt_trigger_resolve_help_second_ok", "[unload_filament]") {
+//    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
+//        logic::UnloadFilament uf;
+//        FindaDidntTriggerCommonSetup(slot, uf);
+//        FindaDidntTriggerResolveHelp(slot, uf);
+//        FindaDidntTriggerResolveHelpFindaTriggered(slot, uf);
+//    }
+//}
 
-TEST_CASE("unload_filament::finda_didnt_trigger_resolve_help_second_fail", "[unload_filament]") {
-    // the same with different end scenario
-    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
-        logic::UnloadFilament uf;
-        FindaDidntTriggerCommonSetup(slot, uf);
-        FindaDidntTriggerResolveHelp(slot, uf);
-        FindaDidntTriggerResolveHelpFindaDidntTrigger(slot, uf);
-    }
-}
+//TEST_CASE("unload_filament::finda_didnt_trigger_resolve_help_second_fail", "[unload_filament]") {
+//    // the same with different end scenario
+//    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
+//        logic::UnloadFilament uf;
+//        FindaDidntTriggerCommonSetup(slot, uf);
+//        FindaDidntTriggerResolveHelp(slot, uf);
+//        FindaDidntTriggerResolveHelpFindaDidntTrigger(slot, uf);
+//    }
+//}
 
 void FindaDidntTriggerResolveTryAgain(uint8_t slot, logic::UnloadFilament &uf) {
     // Stage 3 - the user has to do something
@@ -348,13 +348,13 @@ void FailedUnloadResolveManualFSensorOn(uint8_t slot, logic::UnloadFilament &uf)
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::blink0, ErrorCode::FSENSOR_DIDNT_SWITCH_OFF, ProgressCode::ERRWaitingForUser));
 }
 
-TEST_CASE("unload_filament::failed_unload_to_finda_0-4_resolve_manual", "[unload_filament]") {
-    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
-        logic::UnloadFilament uf;
-        FindaDidntTriggerCommonSetup(slot, uf);
-        FailedUnloadResolveManual(slot, uf);
-    }
-}
+//TEST_CASE("unload_filament::failed_unload_to_finda_0-4_resolve_manual", "[unload_filament]") {
+//    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
+//        logic::UnloadFilament uf;
+//        FindaDidntTriggerCommonSetup(slot, uf);
+//        FailedUnloadResolveManual(slot, uf);
+//    }
+//}
 
 TEST_CASE("unload_filament::failed_unload_to_finda_0-4_resolve_manual_FINDA_on", "[unload_filament]") {
     for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
@@ -364,43 +364,43 @@ TEST_CASE("unload_filament::failed_unload_to_finda_0-4_resolve_manual_FINDA_on",
     }
 }
 
-TEST_CASE("unload_filament::failed_unload_to_finda_0-4_resolve_manual_FSensor_on", "[unload_filament]") {
-    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
-        logic::UnloadFilament uf;
-        FindaDidntTriggerCommonSetup(slot, uf);
-        FailedUnloadResolveManualFSensorOn(slot, uf);
-    }
-}
+//TEST_CASE("unload_filament::failed_unload_to_finda_0-4_resolve_manual_FSensor_on", "[unload_filament]") {
+//    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
+//        logic::UnloadFilament uf;
+//        FindaDidntTriggerCommonSetup(slot, uf);
+//        FailedUnloadResolveManualFSensorOn(slot, uf);
+//    }
+//}
 
-TEST_CASE("unload_filament::unload_homing_retry", "[unload_filament][homing]") {
-    uint8_t slot = 0;
-    logic::UnloadFilament uf;
-    FindaDidntTriggerCommonSetup(slot, uf);
+//TEST_CASE("unload_filament::unload_homing_retry", "[unload_filament][homing]") {
+//    uint8_t slot = 0;
+//    logic::UnloadFilament uf;
+//    FindaDidntTriggerCommonSetup(slot, uf);
 
-    // simulate the user fixed the issue himself (not really important, we are after a failed homing of the selector)
-    hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
-    PressButtonAndDebounce(uf, mb::Right, false);
-    SimulateIdlerHoming(uf); // make Idler happy
+//    // simulate the user fixed the issue himself (not really important, we are after a failed homing of the selector)
+//    hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
+//    PressButtonAndDebounce(uf, mb::Right, false);
+//    SimulateIdlerHoming(uf); // make Idler happy
 
-    REQUIRE(WhileCondition(uf, std::bind(SimulateFeedToFINDA, _1, 100), 5000));
+//    REQUIRE(WhileCondition(uf, std::bind(SimulateFeedToFINDA, _1, 100), 5000));
 
-    REQUIRE(WhileCondition(uf, std::bind(SimulateRetractFromFINDA, _1, 100), 5000));
-    REQUIRE(WhileCondition(
-        uf, [&](uint32_t) { return uf.State() == ProgressCode::RetractingFromFinda; }, 50000));
+//    REQUIRE(WhileCondition(uf, std::bind(SimulateRetractFromFINDA, _1, 100), 5000));
+//    REQUIRE(WhileCondition(
+//        uf, [&](uint32_t) { return uf.State() == ProgressCode::RetractingFromFinda; }, 50000));
 
-    REQUIRE(WhileTopState(uf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
+//    REQUIRE(WhileTopState(uf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
 
-    // now fail homing of the Selector
-    REQUIRE(SimulateFailedHomeSelectorRepeated(uf));
+//    // now fail homing of the Selector
+//    REQUIRE(SimulateFailedHomeSelectorRepeated(uf));
 
-    //    REQUIRE(VerifyState(uf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::OK));
-    REQUIRE(uf.State() == ProgressCode::Homing);
-    REQUIRE(uf.Error() == ErrorCode::RUNNING);
+//    //    REQUIRE(VerifyState(uf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::OK));
+//    REQUIRE(uf.State() == ProgressCode::Homing);
+//    REQUIRE(uf.Error() == ErrorCode::RUNNING);
 
-    // one retry
-    REQUIRE(SimulateFailedHomeSelectorRepeated(uf));
+//    // one retry
+//    REQUIRE(SimulateFailedHomeSelectorRepeated(uf));
 
-    // success
-    SimulateSelectorHoming(uf);
-    REQUIRE(VerifyState(uf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
-}
+//    // success
+//    SimulateSelectorHoming(uf);
+//    REQUIRE(VerifyState(uf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
+//}

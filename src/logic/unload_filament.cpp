@@ -93,9 +93,6 @@ bool UnloadFilament::StepInner() {
         // waiting for user buttons and/or a command from the printer
         mui::Event ev = mui::userInput.ConsumeEvent();
         switch (ev) {
-        case mui::Event::Left: // try to manually unload just a tiny bit - help the filament with the pulley
-            GoToErrEngagingIdler();
-            break;
         case mui::Event::Middle: // try again the whole sequence
             // First invalidate homing flags as the user may have moved the Idler or Selector accidentally
             InvalidateHoming();
@@ -110,45 +107,11 @@ bool UnloadFilament::StepInner() {
                 GoToRecheckFilamentAgainstFINDA();
             }
             break;
-        case mui::Event::Right: // problem resolved - the user pulled the fillament by hand
-            // we should check the state of all the sensors and either report another error or confirm the correct state
-
-            // First invalidate homing flags as the user may have moved the Idler or Selector accidentally
-            InvalidateHoming();
-            if (mfs::fsensor.Pressed()) {
-                // printer's filament sensor is still pressed - that smells bad
-                error = ErrorCode::FSENSOR_DIDNT_SWITCH_OFF;
-                state = ProgressCode::ERRWaitingForUser; // stand still
-            } else if (mf::finda.Pressed()) {
-                // FINDA is still pressed - that smells bad
-                error = ErrorCode::FINDA_DIDNT_SWITCH_OFF;
-                state = ProgressCode::ERRWaitingForUser; // stand still
-            } else {
-                // all sensors are ok, but re-check the position of the filament against FINDA
-                GoToRecheckFilamentAgainstFINDA();
-            }
-            break;
         default:
             break;
         }
         return false;
     }
-    case ProgressCode::ERREngagingIdler:
-        if (mi::idler.Engaged()) {
-            state = ProgressCode::ERRHelpingFilament;
-            mpu::pulley.PlanMove(-config::pulleyHelperMove, config::pulleySlowFeedrate);
-        }
-        return false;
-    case ProgressCode::ERRHelpingFilament:
-        if (!mf::finda.Pressed()) {
-            // the help was enough to depress the FINDA, we are ok, continue normally
-            state = ProgressCode::DisengagingIdler;
-            error = ErrorCode::RUNNING;
-        } else if (mm::motion.QueueEmpty()) {
-            // helped a bit, but FINDA didn't trigger, return to the main error state
-            GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_OFF);
-        }
-        return false;
     case ProgressCode::FeedingToFinda:
         // recovery mode - we assume the filament is somewhere between the idle position and FINDA - thus blocking the selector
         if (feed.Step()) {
