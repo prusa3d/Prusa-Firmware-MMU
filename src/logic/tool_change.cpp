@@ -121,9 +121,6 @@ bool ToolChange::StepInner() {
         // waiting for user buttons and/or a command from the printer
         mui::Event ev = mui::userInput.ConsumeEvent();
         switch (ev) {
-        case mui::Event::Left: // try to manually load just a tiny bit - help the filament with the pulley
-            GoToErrEngagingIdler();
-            break;
         case mui::Event::Middle: // try again the whole sequence
             // It looks like we don't have to reset the whole state machine but jump straight into the feeding phase.
             // The reasons are multiple:
@@ -165,53 +162,11 @@ bool ToolChange::StepInner() {
                 }
             }
             break;
-        case mui::Event::Right: // problem resolved - the user pushed the fillament by hand?
-            // we should check the state of all the sensors and either report another error or confirm the correct state
-
-            // First invalidate homing flags as the user may have moved the Idler or Selector accidentally
-            InvalidateHoming();
-            if (!mf::finda.Pressed()) {
-                // FINDA is still NOT pressed - that smells bad
-                error = ErrorCode::FINDA_DIDNT_SWITCH_ON;
-                state = ProgressCode::ERRWaitingForUser; // stand still
-            } else if (!mfs::fsensor.Pressed()) {
-                // printer's filament sensor is still NOT pressed - that smells bad
-                mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::InSelector); // only assume the filament is in selector
-                error = ErrorCode::FSENSOR_DIDNT_SWITCH_ON;
-                state = ProgressCode::ERRWaitingForUser; // stand still - we may even try loading the filament into the nozzle
-            } else {
-                // all sensors are ok, we assume the user pushed the filament into the nozzle
-                mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::InNozzle);
-                ToolChangeFinishedCorrectly();
-            }
-            break;
         default: // no event, continue waiting for user input
             break;
         }
         return false;
     }
-    case ProgressCode::ERREngagingIdler:
-        if (mi::idler.Engaged()) {
-            state = ProgressCode::ERRHelpingFilament;
-            mpu::pulley.PlanMove(config::pulleyHelperMove, config::pulleySlowFeedrate);
-        }
-        return false;
-    case ProgressCode::ERRHelpingFilament:
-        // @@TODO helping filament needs improvement - the filament should try to move forward as long as the button is pressed
-        if (mf::finda.Pressed()) {
-            // the help was enough to press the FINDA, we are ok, continue normally
-            GoToFeedingToBondtech();
-        } else if (mfs::fsensor.Pressed()) {
-            // the help was enough to press the filament sensor, we are ok, continue normally
-            GoToFeedingToBondtech();
-            // Beware, when the fsensor triggers, we still need to push the filament into the nozzle/gears
-            // which requires restarting James from its last stage
-            james.GoToPushToNozzle();
-        } else if (mm::motion.QueueEmpty()) {
-            // helped a bit, but FINDA/Fsensor didn't trigger, return to the main error state
-            GoToErrDisengagingIdler(ErrorCode::FSENSOR_DIDNT_SWITCH_ON);
-        }
-        return false;
     default: // we got into an unhandled state, better report it
         state = ProgressCode::ERRInternal;
         error = ErrorCode::INTERNAL;

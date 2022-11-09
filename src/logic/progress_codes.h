@@ -19,10 +19,10 @@ enum class ProgressCode : uint_fast8_t {
     FinishingMoves, // P9
 
     ERRDisengagingIdler, // P10
-    ERREngagingIdler, // P11
+    ERREngagingIdler, // P11 - unused: intended for SlowLoad which is removed now
     ERRWaitingForUser, // P12
     ERRInternal, // P13
-    ERRHelpingFilament, // P14
+    ERRHelpingFilament, // P14 - unused: intended for SlowLoad which is removed now
     ERRTMCFailed, // P15
 
     UnloadingFilament, // P16
