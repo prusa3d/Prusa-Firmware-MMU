@@ -126,6 +126,14 @@ bool ToolChange::StepInner() {
             // However - if we run into "FSensor didn't trigger", the situation is exactly opposite - it is beneficial
             // to unload the filament and try the whole sequence again
             // Therefore we only switch to FeedingToFinda if FINDA is not pressed (we suppose the filament is unloaded completely)
+            //
+            // MMU-191: if FSENSOR_DIDNT_SWITCH_ON was caused by misaligned Idler,
+            // rehoming it may fix the issue when auto retrying -> no user intervention
+            // So first invalidate homing flags as the user may have moved the Idler or Selector accidentally.
+            //
+            // Beware: we may run into issues when FINDA or FSensor do not work correctly. Selector may rely on the presumed filament position and actually cut it accidentally when trying to rehome.
+            // It is yet to be seen if something like this can actually happen.
+            InvalidateHoming();
             if (mf::finda.Pressed()) {
                 Reset(mg::globals.ActiveSlot());
             } else {
@@ -201,7 +209,7 @@ ProgressCode ToolChange::State() const {
         case FeedToBondtech::DisengagingIdler:
             return ProgressCode::DisengagingIdler;
         }
-        // [[fallthrough]] // everything else is reported as FeedingToBondtech
+        [[fallthrough]]; // everything else is reported as is
     default:
         return state;
     }

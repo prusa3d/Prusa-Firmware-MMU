@@ -230,23 +230,19 @@ void ToolChangeFailLoadToFindaMiddleBtn(logic::ToolChange &tc, uint8_t toSlot) {
     REQUIRE_FALSE(mui::userInput.AnyEvent());
     PressButtonAndDebounce(tc, mb::Middle, true);
 
-    REQUIRE(WhileCondition(
-        tc,
-        [&](uint32_t step) -> bool {
-        if(step == 2000){ // on 2000th step make FINDA trigger
-            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
-        }
-        return tc.TopLevelState() == ProgressCode::UnloadingFilament; },
-        200000UL));
+    REQUIRE_FALSE(mi::idler.HomingValid());
+    REQUIRE_FALSE(ms::selector.HomingValid());
+    SimulateIdlerAndSelectorHoming(tc); // failed load to FINDA = nothing blocking the selector - it can rehome
+
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), toSlot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
 
     ClearButtons(tc);
 
     // retry the whole operation
     // beware - the FeedToFinda state machine will leverage the already engaged Idler,
-    // so the necessary number of steps to reach the FINDA is quite low (~200 was lowest once tested)
+    // so the necessary number of steps to reach the FINDA is quite low (~250 was lowest once tested)
     // without running short of max distance of Pulley to travel
-    FeedingToFinda(tc, toSlot, 200);
+    FeedingToFinda(tc, toSlot, 250);
 
     FeedingToBondtech(tc, toSlot);
 
