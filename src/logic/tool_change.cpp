@@ -41,11 +41,15 @@ bool ToolChange::Reset(uint8_t param) {
         state = ProgressCode::UnloadingFilament;
         unl.Reset(mg::globals.ActiveSlot());
     } else {
-        state = ProgressCode::FeedingToFinda;
-        error = ErrorCode::RUNNING;
-        dbg_logic_P(PSTR("Filament is not loaded --> load"));
-        mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::InSelector);
-        feed.Reset(true, false);
+        if (feed.Reset(true, false)) {
+            state = ProgressCode::FeedingToFinda;
+            error = ErrorCode::RUNNING;
+            //        mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::InSelector); // this is set in feed @@TODO
+            dbg_logic_P(PSTR("Filament is not loaded --> load"));
+        } else {
+            // selector refused to move - FINDA problem suspected
+            GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_OFF);
+        }
     }
     return true;
 }

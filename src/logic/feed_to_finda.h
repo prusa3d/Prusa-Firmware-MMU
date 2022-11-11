@@ -33,7 +33,10 @@ struct FeedToFinda {
     ///  * false feed phase is unlimited, can be interrupted by any button press after blanking time
     ///  Beware: the function returns immediately without actually doing anything if the FINDA is "pressed", i.e. the filament is already at the FINDA
     /// @param haltAtEnd true if the Pulley's motion shall be brought into a halt (which is what LoadFilament wants, but not ToolChange)
-    void Reset(bool feedPhaseLimited, bool haltAtEnd);
+    /// @returns
+    ///  * true if the operation has been successfully started.
+    ///  * false if the selector refused to move to the desired spot (which can be caused by pressed FINDA)
+    bool Reset(bool feedPhaseLimited, bool haltAtEnd);
 
     /// @returns true if the state machine finished its job, false otherwise
     bool Step();
