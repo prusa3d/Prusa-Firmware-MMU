@@ -59,6 +59,10 @@ dependencies = {
             'Darwin': 'https://prusa-buddy-firmware-dependencies.s3.eu-central-1.amazonaws.com/clang-format-9.0.0-darwin.zip',
         }
     },
+    'prusa3dboards': {
+        'version': '1.0.5-2',
+        'url':'https://raw.githubusercontent.com/prusa3d/Arduino_Boards/devel/IDE_Board_Manager/prusa3dboards-1.0.5-2.tar.bz2',
+    },
 }
 pip_dependencies = []
 # yapf: enable

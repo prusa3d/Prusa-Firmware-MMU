@@ -165,14 +165,30 @@ if(CMAKE_CROSSCOMPILING)
   # limit the text section to 28K (32K - 4k reserved for the bootloader)
   target_link_options(firmware PUBLIC -Wl,--defsym=__TEXT_REGION_LENGTH__=28K)
 
-  # generate firmware.bin file
+  # generate firmware .hex file
   objcopy(firmware "ihex" ".hex")
+
+  get_dependency_directory(prusa3dboards PRUSA_BOARDS_DIR)
+
+  add_custom_command(
+    TARGET firmware
+    POST_BUILD
+    COMMAND
+      ${CMAKE_OBJCOPY} -I ihex -O binary
+      ${PRUSA_BOARDS_DIR}/bootloaders/prusa_mm_control/Caterina-prusa_mm_control.hex bootloader.bin
+    COMMAND ${CMAKE_OBJCOPY} firmware -O binary firmware.bin
+    COMMAND ${CMAKE_COMMAND} -E cat bootloader.bin firmware.bin > fw_bootloader.bin
+    COMMAND ${CMAKE_OBJCOPY} -I binary -O ihex fw_bootloader.bin
+            "MMU2SR_${PROJECT_VERSION}${PROJECT_VERSION_SUFFIX_SHORT}_bootloader.hex"
+    BYPRODUCTS bootloader.bin firmware.bin fw_bootloader.bin
+    )
 
   # produce ASM listing
   add_custom_command(
     TARGET firmware
     POST_BUILD
     COMMAND ${CMAKE_OBJDUMP} --prefix ${CMAKE_SOURCE_DIR} -CSd firmware > firmware.asm
+    BYPRODUCTS firmware.asm
     )
 
   # inform about the firmware's size in terminal
