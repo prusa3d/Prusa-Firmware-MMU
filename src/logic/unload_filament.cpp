@@ -46,9 +46,12 @@ void UnloadFilament::GoToRetractingFromFinda() {
 }
 
 void UnloadFilament::GoToRecheckFilamentAgainstFINDA() {
-    state = ProgressCode::FeedingToFinda;
-    error = ErrorCode::RUNNING;
-    feed.Reset(true, true);
+    if (feed.Reset(true, true)) {
+        state = ProgressCode::FeedingToFinda;
+        error = ErrorCode::RUNNING;
+    } else {
+        GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_OFF);
+    }
 }
 
 bool UnloadFilament::StepInner() {

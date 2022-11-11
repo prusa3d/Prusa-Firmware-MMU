@@ -12,7 +12,7 @@
 #include "../debug.h"
 namespace logic {
 
-void FeedToFinda::Reset(bool feedPhaseLimited, bool haltAtEnd) {
+bool FeedToFinda::Reset(bool feedPhaseLimited, bool haltAtEnd) {
     dbg_logic_P(PSTR("\nFeed to FINDA\n\n"));
     state = EngagingIdler;
     this->feedPhaseLimited = feedPhaseLimited;
@@ -20,12 +20,15 @@ void FeedToFinda::Reset(bool feedPhaseLimited, bool haltAtEnd) {
     ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
     mi::idler.Engage(mg::globals.ActiveSlot());
     // We can't get any FINDA readings if the selector is at the wrong spot - move it accordingly if necessary
-    ms::selector.MoveToSlot(mg::globals.ActiveSlot());
+    return ms::selector.MoveToSlot(mg::globals.ActiveSlot()) == ms::Selector::OperationResult::Accepted;
 }
 
 bool FeedToFinda::Step() {
     switch (state) {
     case EngagingIdler:
+        // A serious deadlock may occur at this spot in case of flickering FINDA.
+        // Therefore FeedToFinda::Reset returns false in case of Selector refusing to move.
+        // We don't have to check the FINDA state while the move is in progress.
         if (mi::idler.Engaged() && ms::selector.Slot() == mg::globals.ActiveSlot()) {
             dbg_logic_P(PSTR("Feed to Finda --> Idler engaged"));
             dbg_logic_fP(PSTR("Pulley start steps %u"), mpu::pulley.CurrentPosition_mm());
