@@ -76,13 +76,13 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf, uint8_t en
     // Stage 2 - retracting from FINDA
     REQUIRE(WhileTopState(uf, ProgressCode::RetractingFromFinda, idlerEngageDisengageMaxSteps));
 
-    // Stage 3 - idler was engaged, disengage it
-    REQUIRE(WhileTopState(uf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
-
     if (selectorShallHomeAtEnd) {
         REQUIRE(ms::selector.Slot() == 0xff);
         SimulateSelectorHoming(uf);
     }
+
+    // Stage 3 - idler was engaged, disengage it
+    REQUIRE(WhileTopState(uf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
 
     // filament unloaded
     // idler should have been disengaged
@@ -267,6 +267,8 @@ void FindaDidntTriggerResolveTryAgain(uint8_t slot, logic::UnloadFilament &uf) {
     // FINDA still on
     // red LED should blink, green LED should be off
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
+
+    ClearButtons(uf);
 
     // Assume, the Idler homed (homing is invalidated after pressing the recovery button)
     SimulateIdlerHoming(uf);
