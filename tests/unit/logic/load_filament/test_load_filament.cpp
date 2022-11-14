@@ -171,14 +171,14 @@ void FailedLoadToFindaResolveManual(uint8_t slot, logic::LoadFilament &lf) {
     // simulate the user fixed the issue himself
 
     // Perform press on button 2 + debounce + switch on FINDA
-    hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
+    SetFINDAStateAndDebounce(true);
     PressButtonAndDebounce(lf, mb::Right, false);
 
     // the Idler also engages in this call as this is planned as the next step
     SimulateIdlerHoming(lf);
 
     // pulling filament back
-    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
 
     ClearButtons(lf);
 

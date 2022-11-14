@@ -7,13 +7,28 @@ namespace user_input {
 
 UserInput userInput;
 
+static_assert(config::buttonCount <= 8, "To use >8 buttons the lastButtonStates variable needs to occupy more bytes");
+static_assert((uint8_t)mb::Left == (uint8_t)Event::Left, "Indices of buttons and events must match for optimization purposes");
+static_assert((uint8_t)mb::Middle == (uint8_t)Event::Middle, "Indices of buttons and events must match for optimization purposes");
+static_assert((uint8_t)mb::Right == (uint8_t)Event::Right, "Indices of buttons and events must match for optimization purposes");
+
+void UserInput::StepOneButton(uint8_t button) {
+    bool press = mb::buttons.ButtonPressed(button);
+    if (press != LastButtonState(button)) {
+        if (press) { // emit an event only if the previous button state was "not pressed"
+            eventQueue.push(static_cast<Event>(button));
+        }
+        // flipping lastState is a bit speculative, but should be safe, because we are in the "press != lastState" branch
+        FlipLastButtonState(button);
+    }
+}
+
 void UserInput::Step() {
-    if (buttons::buttons.ButtonPressed(mb::Left))
-        eventQueue.push(Event::Left);
-    if (buttons::buttons.ButtonPressed(mb::Middle))
-        eventQueue.push(Event::Middle);
-    if (buttons::buttons.ButtonPressed(mb::Right))
-        eventQueue.push(Event::Right);
+    // for(uint8_t button = 0; button < config::buttonCount; ++button)...
+    // The usual style of iterating can be rewritten into a more cryptic but shorter one (saves 4B):
+    for (uint8_t button = config::buttonCount; button; /* nothing */) {
+        StepOneButton(--button);
+    }
 }
 
 void UserInput::ProcessMessage(uint8_t ev) {

@@ -56,9 +56,20 @@ public:
         return printerInCharge;
     }
 
+#ifndef UNITTEST
 private:
+#endif
     CircularBuffer<Event, uint_fast8_t, 4> eventQueue;
     bool printerInCharge = false;
+    uint8_t lastButtonStates = 0; ///< one bit per button, 1 means pressed
+
+    constexpr bool LastButtonState(uint8_t button) const {
+        return (lastButtonStates & (1 << button)) != 0;
+    }
+    void FlipLastButtonState(uint8_t button) {
+        lastButtonStates ^= (1 << button);
+    }
+    void StepOneButton(uint8_t button);
 
     static Event StripFromPrinterBit(uint8_t e);
 };
