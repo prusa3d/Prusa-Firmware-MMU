@@ -176,8 +176,8 @@ if(CMAKE_CROSSCOMPILING)
     COMMAND
       ${CMAKE_OBJCOPY} -I ihex -O binary
       ${PRUSA_BOARDS_DIR}/bootloaders/prusa_mm_control/Caterina-prusa_mm_control.hex bootloader.bin
-    COMMAND ${CMAKE_OBJCOPY} firmware -O binary firmware.bin
-    COMMAND ${CMAKE_COMMAND} -E cat bootloader.bin firmware.bin > fw_bootloader.bin
+    COMMAND ${CMAKE_OBJCOPY} firmware -O binary --gap-fill 0xFF --pad-to 0x00007000 firmware.bin
+    COMMAND ${CMAKE_COMMAND} -E cat firmware.bin bootloader.bin > fw_bootloader.bin
     COMMAND ${CMAKE_OBJCOPY} -I binary -O ihex fw_bootloader.bin
             "MMU2SR_${PROJECT_VERSION}${PROJECT_VERSION_SUFFIX_SHORT}_bootloader.hex"
     BYPRODUCTS bootloader.bin firmware.bin fw_bootloader.bin
