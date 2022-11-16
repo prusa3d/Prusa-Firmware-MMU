@@ -50,7 +50,7 @@ void UnloadFilament::GoToRecheckFilamentAgainstFINDA() {
         state = ProgressCode::FeedingToFinda;
         error = ErrorCode::RUNNING;
     } else {
-        GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_OFF);
+        GoToErrDisengagingIdler(ErrorCode::FINDA_FLICKERS);
     }
 }
 

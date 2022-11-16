@@ -442,7 +442,7 @@ void ToolChangeWithFlickeringFINDA(logic::ToolChange &tc, uint8_t fromSlot, uint
     tc.Step();
 
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
-    SimulateErrDisengagingIdler(tc, ErrorCode::FINDA_DIDNT_SWITCH_OFF); // this should be a single step, Idler should remain disengaged due to previous error
+    SimulateErrDisengagingIdler(tc, ErrorCode::FINDA_FLICKERS); // this should be a single step, Idler should remain disengaged due to previous error
 
     // now we have 2 options what can happen:
     // FINDA is still pressed - the user didn't manage to fix the issue
@@ -450,14 +450,14 @@ void ToolChangeWithFlickeringFINDA(logic::ToolChange &tc, uint8_t fromSlot, uint
     if (keepFindaPressed) {
         // now waiting for user input
         REQUIRE_FALSE(mui::userInput.AnyEvent());
-        REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRWaitingForUser));
+        REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::FINDA_FLICKERS, ProgressCode::ERRWaitingForUser));
         PressButtonAndDebounce(tc, mb::Middle, true);
         // we should remain in the same error state
         REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
 
         // Idler will try to rehome, allow it
         SimulateIdlerHoming(tc);
-        REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRWaitingForUser));
+        REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::FINDA_FLICKERS, ProgressCode::ERRWaitingForUser));
 
         // now "fix" FINDA and the command shall finish correctly
         SetFINDAStateAndDebounce(false);
