@@ -72,7 +72,7 @@ Idler::OperationResult Idler::Disengage() {
 
     // coordinates invalid, first home, then disengage
     if (!homingValid) {
-        PerformHomeForward();
+        PlanHome();
         return OperationResult::Accepted;
     }
 

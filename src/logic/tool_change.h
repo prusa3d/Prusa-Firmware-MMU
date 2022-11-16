@@ -38,6 +38,10 @@ private:
     FeedToFinda feed;
     FeedToBondtech james; // bond ;)
     uint8_t plannedSlot;
+
+    /// true if the unload phase was either not necessary or finished correctly.
+    /// Part of the flickering FINDA issue
+    bool unloadAlreadyFinished;
 };
 
 /// The one and only instance of ToolChange state machine in the FW

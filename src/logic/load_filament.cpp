@@ -47,8 +47,12 @@ void LoadFilament::ResetLimited(uint8_t param) {
 void logic::LoadFilament::Reset2(bool feedPhaseLimited) {
     state = ProgressCode::FeedingToFinda;
     error = ErrorCode::RUNNING;
-    feed.Reset(feedPhaseLimited, true);
-    ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
+    if (!feed.Reset(feedPhaseLimited, true)) {
+        // selector refused to move
+        GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_OFF);
+    } else {
+        ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
+    }
 }
 
 void logic::LoadFilament::GoToRetractingFromFinda() {
