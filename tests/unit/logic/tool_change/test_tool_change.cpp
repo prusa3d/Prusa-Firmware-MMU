@@ -15,6 +15,7 @@
 #include "../../../../src/logic/tool_change.h"
 
 #include "../../modules/stubs/stub_adc.h"
+#include "../../modules/stubs/stub_timebase.h"
 
 #include "../stubs/homing.h"
 #include "../stubs/main_loop_stub.h"
@@ -403,6 +404,87 @@ TEST_CASE("tool_change::load_fail_FSensor_resolve_btnM", "[tool_change]") {
             if (fromSlot != toSlot) {
                 ToolChangeFailFSensor(tc, fromSlot, toSlot);
                 ToolChangeFailFSensorMiddleBtn(tc, fromSlot, toSlot);
+            }
+        }
+    }
+}
+
+void ToolChangeWithFlickeringFINDA(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot, bool keepFindaPressed) {
+    ForceReinitAllAutomata();
+
+    REQUIRE(EnsureActiveSlotIndex(fromSlot, mg::FilamentLoadState::InNozzle));
+    SetFINDAStateAndDebounce(true);
+    SetFSensorStateAndDebounce(true);
+
+    // restart the automaton
+    tc.Reset(toSlot);
+
+    REQUIRE(WhileCondition(tc, std::bind(SimulateUnloadToFINDA, _1, 100, 2'000), 200'000));
+
+    // This is something else than WhileTopState()==UnloadingFilament
+    // We need to catch the very moment, when the unload finished and a move to another slot is being planned
+    REQUIRE(WhileCondition(
+        tc, [&](uint32_t) -> bool { return tc.unl.State() != ProgressCode::OK; }, 5000));
+
+    // now press FINDA again, but prevent stepping other state machines
+    REQUIRE_FALSE(mf::finda.Pressed());
+    hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
+    while (!mf::finda.Pressed()) {
+        mf::finda.Step();
+        mt::IncMillis();
+    }
+    REQUIRE(mf::finda.Pressed());
+    REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::AtPulley);
+
+    // now what ;) - Selector cannot move, because FINDA is pressed
+    // ToolChange should emit "FINDA_DIDNT_SWITCH_OFF" and we should be able to resolve the error by Retrying
+    main_loop();
+    tc.Step();
+
+    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
+    SimulateErrDisengagingIdler(tc, ErrorCode::FINDA_DIDNT_SWITCH_OFF); // this should be a single step, Idler should remain disengaged due to previous error
+
+    // now we have 2 options what can happen:
+    // FINDA is still pressed - the user didn't manage to fix the issue
+    // FINDA is not pressed - the print should continue
+    if (keepFindaPressed) {
+        // now waiting for user input
+        REQUIRE_FALSE(mui::userInput.AnyEvent());
+        REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRWaitingForUser));
+        PressButtonAndDebounce(tc, mb::Middle, true);
+        // we should remain in the same error state
+        REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
+
+        // Idler will try to rehome, allow it
+        SimulateIdlerHoming(tc);
+        REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRWaitingForUser));
+
+        // now "fix" FINDA and the command shall finish correctly
+        SetFINDAStateAndDebounce(false);
+        ToolChangeFailLoadToFindaMiddleBtn(tc, toSlot);
+    } else {
+        SetFINDAStateAndDebounce(false);
+        ToolChangeFailLoadToFindaMiddleBtn(tc, toSlot);
+    }
+}
+
+TEST_CASE("tool_change::test_flickering_FINDA", "[tool_change]") {
+    for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
+        for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
+            logic::ToolChange tc;
+            if (fromSlot != toSlot) {
+                ToolChangeWithFlickeringFINDA(tc, fromSlot, toSlot, false);
+            }
+        }
+    }
+}
+
+TEST_CASE("tool_change::test_flickering_FINDA_keepPressed", "[tool_change]") {
+    for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
+        for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
+            logic::ToolChange tc;
+            if (fromSlot != toSlot) {
+                ToolChangeWithFlickeringFINDA(tc, fromSlot, toSlot, true);
             }
         }
     }

@@ -18,9 +18,15 @@ bool FeedToFinda::Reset(bool feedPhaseLimited, bool haltAtEnd) {
     this->feedPhaseLimited = feedPhaseLimited;
     this->haltAtEnd = haltAtEnd;
     ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
-    mi::idler.Engage(mg::globals.ActiveSlot());
-    // We can't get any FINDA readings if the selector is at the wrong spot - move it accordingly if necessary
-    return ms::selector.MoveToSlot(mg::globals.ActiveSlot()) == ms::Selector::OperationResult::Accepted;
+    if (ms::selector.MoveToSlot(mg::globals.ActiveSlot()) != ms::Selector::OperationResult::Accepted) {
+        // We can't get any FINDA readings if the selector is at the wrong spot - move it accordingly if necessary
+        // And prevent issuing any commands to the idler in such an error state
+        return false;
+    } else {
+        // Selector accepted the command, we can plan the Idler as well
+        mi::idler.Engage(mg::globals.ActiveSlot());
+        return true;
+    }
 }
 
 bool FeedToFinda::Step() {

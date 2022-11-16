@@ -67,6 +67,12 @@ Selector::OperationResult Selector::MoveToSlot(uint8_t slot) {
         return OperationResult::Accepted;
     }
 
+    // already at the right slot - prevent invalidating moves when already at the correct spot but FINDA is pressed
+    if (currentSlot == slot && homingValid) {
+        dbg_logic_P(PSTR("Moving Selector"));
+        return OperationResult::Accepted;
+    }
+
     if (mf::finda.Pressed()) {
         // @@TODO not sure why (if) this happens, but anyway - we must not move the selector if FINDA is pressed
         // That includes the CutFilament operation as well
@@ -76,12 +82,6 @@ Selector::OperationResult Selector::MoveToSlot(uint8_t slot) {
     // coordinates invalid, first home, then engage
     if (!homingValid && mg::globals.FilamentLoaded() < mg::FilamentLoadState::InSelector) {
         PlanHome();
-        return OperationResult::Accepted;
-    }
-
-    // already at the right slot
-    if (currentSlot == slot) {
-        dbg_logic_P(PSTR("Moving Selector"));
         return OperationResult::Accepted;
     }
 
