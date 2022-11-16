@@ -46,6 +46,9 @@ enum class ErrorCode : uint_fast16_t {
     ///< - a piece of filament was left inside - pushed in front of the loaded filament causing the fsensor trigger too early
     ///< - fsensor is faulty producing bogus triggers
 
+    FINDA_FLICKERS = 0x800a, ///< FINDA flickers - seems to be badly calibrated and happens to be pressed at spots where it used to be not pressed before.
+    ///< The user is obliged to inspect FINDA and tune its switching
+
     QUEUE_FULL = 0x802b, ///< E32811 internal logic error - attempt to move with a full queue
 
     VERSION_MISMATCH = 0x802c, ///< E32812 internal error of the printer - incompatible version of the MMU FW

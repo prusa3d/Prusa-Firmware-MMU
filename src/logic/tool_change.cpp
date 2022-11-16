@@ -50,7 +50,7 @@ bool ToolChange::Reset(uint8_t param) {
             dbg_logic_P(PSTR("Filament is not loaded --> load"));
         } else {
             // selector refused to move - FINDA problem suspected
-            GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_OFF);
+            GoToErrDisengagingIdler(ErrorCode::FINDA_FLICKERS);
         }
     }
     return true;
@@ -74,7 +74,7 @@ void logic::ToolChange::GoToFeedingToFinda() {
     error = ErrorCode::RUNNING;
     mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::AtPulley);
     if (!feed.Reset(true, false)) {
-        GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_OFF);
+        GoToErrDisengagingIdler(ErrorCode::FINDA_FLICKERS);
     }
 }
 
