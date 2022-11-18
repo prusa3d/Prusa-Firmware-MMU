@@ -76,6 +76,7 @@ void ForceReinitAllAutomata() {
     mm::ReinitMotion();
 
     // let's assume we have the filament NOT loaded and active slot 0
+    mg::globals.Init();
     mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::AtPulley);
 }
 

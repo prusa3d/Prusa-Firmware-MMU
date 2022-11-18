@@ -64,17 +64,21 @@ bool VerifyEnvironmentState(mg::FilamentLoadState fls, uint8_t idlerSlotIndex, u
     for(uint8_t ledIndex = 0; ledIndex < config::toolCount; ++ledIndex){
         if( ledIndex != selectorSlotIndex ){
             // the other LEDs should be off
-            CHECKED_ELSE(ml::leds.Mode(ledIndex, ml::red) == ml::off) {
+            auto red = ml::leds.Mode(ledIndex, ml::red);
+            CHECKED_ELSE(red == ml::off) {
             return false;
             }
-            CHECKED_ELSE(ml::leds.Mode(ledIndex, ml::green) == ml::off) {
+            auto green = ml::leds.Mode(ledIndex, ml::green);
+            CHECKED_ELSE(green == ml::off) {
             return false;
             }
         } else {
-            CHECKED_ELSE(ml::leds.Mode(selectorSlotIndex, ml::red) == redLEDMode) {
+            auto red = ml::leds.Mode(selectorSlotIndex, ml::red);
+            CHECKED_ELSE(red == redLEDMode) {
             return false;
             }
-            CHECKED_ELSE(ml::leds.Mode(selectorSlotIndex, ml::green) == greenLEDMode) {
+            auto green = ml::leds.Mode(selectorSlotIndex, ml::green);
+            CHECKED_ELSE(green == greenLEDMode) {
             return false;
             }
         }
