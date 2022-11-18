@@ -44,7 +44,7 @@ public:
     /// Sets the filament loaded flag value, usually after some command/operation.
     /// Also updates the EEPROM records accordingly
     /// @param newFilamentLoaded new state
-    void SetFilamentLoaded(uint8_t slot, FilamentLoadState newFilamentLoaded);
+    void __attribute__((noinline)) SetFilamentLoaded(uint8_t slot, FilamentLoadState newFilamentLoaded);
 
     /// @returns the total number of MMU errors so far
     /// Errors are stored in the EEPROM
