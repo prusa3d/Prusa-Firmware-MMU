@@ -38,8 +38,7 @@ bool FeedingToFindaStep(logic::CommandBase &tc, uint32_t step, uint32_t triggerA
     return tc.TopLevelState() == ProgressCode::FeedingToFinda;
 }
 
-void FeedingToFinda(logic::ToolChange &tc, uint8_t toSlot, uint32_t triggerAt = 1000) {
-    // feeding to finda
+void FeedingToFinda(logic::ToolChange &tc, uint8_t toSlot, uint32_t triggerAt = 1000) { // feeding to finda
     REQUIRE(WhileCondition(tc, std::bind(FeedingToFindaStep, std::ref(tc), _1, triggerAt), 200'000UL));
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToBondtech));
 }
@@ -115,21 +114,26 @@ void NoToolChange(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
 }
 
 void JustLoadFilament(logic::ToolChange &tc, uint8_t slot) {
-    ForceReinitAllAutomata();
+    for (uint8_t startSelectorSlot = 0; startSelectorSlot < config::toolCount; ++startSelectorSlot) {
+        ForceReinitAllAutomata();
+        // make sure all the modules are ready
+        // MMU-196: Move selector to a "random" slot
+        REQUIRE(EnsureActiveSlotIndex(startSelectorSlot, mg::FilamentLoadState::AtPulley));
 
-    REQUIRE(EnsureActiveSlotIndex(slot, mg::FilamentLoadState::AtPulley));
+        // verify filament NOT loaded
+        REQUIRE(VerifyEnvironmentState(mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), startSelectorSlot, false, false, ml::off, ml::off));
 
-    // verify filament NOT loaded
-    REQUIRE(VerifyEnvironmentState(mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off));
+        // restart the automaton
+        tc.Reset(slot);
 
-    // restart the automaton
-    tc.Reset(slot);
+        REQUIRE(ms::selector.plannedSlot == slot); // MMU-196 - make sure the selector is about to move to the desired slot
 
-    FeedingToFinda(tc, slot);
+        FeedingToFinda(tc, slot);
 
-    FeedingToBondtech(tc, slot);
+        FeedingToBondtech(tc, slot);
 
-    CheckFinishedCorrectly(tc, slot);
+        CheckFinishedCorrectly(tc, slot);
+    }
 }
 
 TEST_CASE("tool_change::test0", "[tool_change]") {

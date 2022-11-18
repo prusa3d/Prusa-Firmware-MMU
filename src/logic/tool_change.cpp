@@ -43,10 +43,10 @@ bool ToolChange::Reset(uint8_t param) {
         unl.Reset(mg::globals.ActiveSlot());
     } else {
         unloadAlreadyFinished = true;
+        mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::InSelector); // activate the correct slot, feed uses that
         if (feed.Reset(true, false)) {
             state = ProgressCode::FeedingToFinda;
             error = ErrorCode::RUNNING;
-            //        mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::InSelector); // this is set in feed @@TODO
             dbg_logic_P(PSTR("Filament is not loaded --> load"));
         } else {
             // selector refused to move - FINDA problem suspected

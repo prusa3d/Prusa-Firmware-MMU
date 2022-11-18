@@ -68,7 +68,9 @@ public:
 
     inline config::Axis Axis() const { return axis; }
 
+#ifndef UNITTEST
 protected:
+#endif
     /// internal state of the automaton
     uint8_t state;
 
