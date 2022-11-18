@@ -39,10 +39,8 @@ bool ToolChange::Reset(uint8_t param) {
     if (mg::globals.FilamentLoaded() >= mg::FilamentLoadState::InSelector) {
         dbg_logic_P(PSTR("Filament is loaded --> unload"));
         state = ProgressCode::UnloadingFilament;
-        unloadAlreadyFinished = false;
         unl.Reset(mg::globals.ActiveSlot());
     } else {
-        unloadAlreadyFinished = true;
         mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::InSelector); // activate the correct slot, feed uses that
         if (feed.Reset(true, false)) {
             state = ProgressCode::FeedingToFinda;
@@ -85,7 +83,6 @@ bool ToolChange::StepInner() {
             // unloading sequence finished - basically, no errors can occurr here
             // as UnloadFilament should handle all the possible error states on its own
             // There is no way the UnloadFilament to finish in an error state
-            unloadAlreadyFinished = true;
             // But planning the next move can fail if Selector refuses moving to the next slot
             // - that scenario is handled inside GoToFeedingToFinda
             GoToFeedingToFinda();
@@ -145,16 +142,27 @@ bool ToolChange::StepInner() {
             // Beware: we may run into issues when FINDA or FSensor do not work correctly. Selector may rely on the presumed filament position and actually cut it accidentally when trying to rehome.
             // It is yet to be seen if something like this can actually happen.
             InvalidateHoming();
-            // This is a tricky part in case FINDA is flickering
-            // If we already managed to finish the unload, we must assume finda should be NOT pressed.
-            // If it is still pressed
-            //  -> FINDA is flickering/badly tuned
-            //  -> unreliable and the user didn't fix the issue
-            //  -> we cannot do anything else but request the user to fix FINDA
-            if (mf::finda.Pressed() && (!unloadAlreadyFinished)) {
+
+            // It looks like we need to distinguish next steps based on what happened
+            switch (error) {
+            case ErrorCode::FSENSOR_TOO_EARLY:
                 Reset(mg::globals.ActiveSlot());
-            } else {
+                break;
+            case ErrorCode::FINDA_FLICKERS:
+                // This is a tricky part in case FINDA is flickering
+                // If we already managed to finish the unload, we must assume finda should be NOT pressed.
+                // If it is still pressed
+                //  -> FINDA is flickering/badly tuned
+                //  -> unreliable and the user didn't fix the issue
+                //  -> we cannot do anything else but request the user to fix FINDA
                 GoToFeedingToFinda();
+                break;
+            default:
+                if (mf::finda.Pressed()) {
+                    Reset(mg::globals.ActiveSlot());
+                } else {
+                    GoToFeedingToFinda();
+                }
             }
             break;
         case mui::Event::Right: // problem resolved - the user pushed the fillament by hand?

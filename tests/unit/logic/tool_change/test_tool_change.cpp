@@ -64,6 +64,21 @@ void CheckFinishedCorrectly(logic::ToolChange &tc, uint8_t toSlot) {
     REQUIRE(mg::globals.ActiveSlot() == toSlot);
 }
 
+// This function exists for the sole purpose of debugging.
+// WritePin is always_inline and gdb has a hard time settinge breakpoints when FINDA should do something
+void FINDAOnOff(bool press) {
+    hal::gpio::WritePin(FINDA_PIN, press ? hal::gpio::Level::high : hal::gpio::Level::low);
+}
+
+bool SimulateUnloadFilament(uint32_t step, const logic::CommandBase *tc, uint32_t unloadLengthSteps) {
+    if (step == 20) { // on 20th step make FSensor switch off
+        mfs::fsensor.ProcessMessage(false);
+    } else if (step == unloadLengthSteps) {
+        FINDAOnOff(false);
+    }
+    return tc->TopLevelState() == ProgressCode::UnloadingFilament;
+}
+
 void ToolChange(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
     ForceReinitAllAutomata();
 
@@ -76,14 +91,8 @@ void ToolChange(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
 
     REQUIRE(WhileCondition(
         tc,
-        [&](uint32_t step) -> bool {
-        if(step == 20){ // on 20th step make FSensor switch off
-            mfs::fsensor.ProcessMessage(false);
-        } else if(step == mm::unitToSteps<mm::P_pos_t>(config::minimumBowdenLength)){ // on 2000th step make FINDA trigger
-            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
-        }
-        return tc.TopLevelState() == ProgressCode::UnloadingFilament; },
-        200000UL));
+        std::bind(SimulateUnloadFilament, _1, &tc, mm::unitToSteps<mm::P_pos_t>(config::minimumBowdenLength)),
+        200'000UL));
 
     //    REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::AtPulley);
     REQUIRE(VerifyState2(tc, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), fromSlot, false, false, toSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
@@ -491,5 +500,67 @@ TEST_CASE("tool_change::test_flickering_FINDA_keepPressed", "[tool_change]") {
                 ToolChangeWithFlickeringFINDA(tc, fromSlot, toSlot, true);
             }
         }
+    }
+}
+
+void ToolChangeFSENSOR_TOO_EARLY(logic::ToolChange &tc, uint8_t slot) {
+    ForceReinitAllAutomata();
+    REQUIRE(EnsureActiveSlotIndex(slot, mg::FilamentLoadState::AtPulley));
+
+    // verify filament NOT loaded
+    REQUIRE(VerifyEnvironmentState(mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off));
+
+    // restart the automaton
+    tc.Reset(slot);
+
+    FeedingToFinda(tc, slot);
+
+    REQUIRE_FALSE(mfs::fsensor.Pressed());
+    REQUIRE(WhileCondition(
+        tc,
+        [&](uint32_t step) -> bool {
+            if(step == mm::unitToSteps<mm::P_pos_t>(config::minimumBowdenLength) / 2){ // make FSensor trigger at the half of minimal distance
+                mfs::fsensor.ProcessMessage(true);
+            }
+            return tc.TopLevelState() == ProgressCode::FeedingToBondtech; },
+        mm::unitToSteps<mm::P_pos_t>(config::minimumBowdenLength) + 10000));
+
+    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
+    SimulateErrDisengagingIdler(tc, ErrorCode::FSENSOR_TOO_EARLY);
+    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, mi::idler.IdleSlotIndex(), slot, true, false, ml::off, ml::blink0, ErrorCode::FSENSOR_TOO_EARLY, ProgressCode::ERRWaitingForUser));
+
+    // make AutoRetry
+    PressButtonAndDebounce(tc, mb::Middle, true);
+    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, mi::idler.IdleSlotIndex(), slot, true, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingFilament));
+
+    SimulateIdlerHoming(tc);
+
+    // perform regular unload, just a little short (same length as above)
+    REQUIRE(WhileCondition(
+        tc,
+        [&](uint32_t step) -> bool {
+        if(step == 20){ // on 20th step make FSensor switch off
+            mfs::fsensor.ProcessMessage(false);
+        } else if(step == mm::unitToSteps<mm::P_pos_t>(config::minimumBowdenLength)/2){
+            FINDAOnOff(false);
+        }
+        return tc.unl.State() != ProgressCode::DisengagingIdler; },
+        200'000UL));
+
+    // still unloading, but Selector can start homing
+    SimulateSelectorHoming(tc);
+    // wait for finishing of UnloadingFilament
+    WhileTopState(tc, ProgressCode::UnloadingFilament, 5000);
+
+    REQUIRE(VerifyState2(tc, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, slot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
+    FeedingToFinda(tc, slot);
+    FeedingToBondtech(tc, slot);
+    CheckFinishedCorrectly(tc, slot);
+}
+
+TEST_CASE("tool_change::test_FSENSOR_TOO_EARLY", "[tool_change]") {
+    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
+        logic::ToolChange tc;
+        ToolChangeFSENSOR_TOO_EARLY(tc, slot);
     }
 }
