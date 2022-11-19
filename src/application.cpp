@@ -35,7 +35,7 @@ Application::Application()
     , currentCommand(&logic::noCommand)
     , currentCommandRq(mp::RequestMsgCodes::Reset, 0) {}
 
-void Application::CheckManualOperation() {
+void __attribute__((noinline)) Application::CheckManualOperation() {
     uint16_t ms = mt::timebase.Millis();
     constexpr uint16_t idleDelay = 1000U;
     if (ms - lastCommandProcessedMs < idleDelay) {
@@ -102,7 +102,7 @@ void Application::ReportCommandAccepted(const mp::RequestMsg &rq, mp::ResponseMs
     modules::serial::WriteToUSART(tmp, len);
 }
 
-void Application::PlanCommand(const modules::protocol::RequestMsg &rq) {
+void __attribute__((noinline)) Application::PlanCommand(const modules::protocol::RequestMsg &rq) {
     if (currentCommand->State() == ProgressCode::OK) {
         // We are allowed to start a new command as the previous one is in the OK finished state
         // The previous command may be in an error state, but as long as it is in ProgressCode::OK (aka finished)

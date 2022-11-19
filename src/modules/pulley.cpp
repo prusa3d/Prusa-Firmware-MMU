@@ -11,7 +11,7 @@ namespace pulley {
 
 Pulley pulley;
 
-bool Pulley::FinishHomingAndPlanMoveToParkPos() {
+bool __attribute__((noinline)) Pulley::FinishHomingAndPlanMoveToParkPos() {
     mm::motion.SetPosition(mm::Pulley, 0);
     return true;
 }
@@ -46,7 +46,7 @@ int32_t Pulley::CurrentPosition_mm() {
     return mm::axisUnitToTruncatedUnit<config::U_mm>(mm::motion.CurPosition<mm::Pulley>());
 }
 
-void Pulley::InitAxis() {
+void __attribute__((noinline)) Pulley::InitAxis() {
     mm::motion.InitAxis(mm::Pulley);
 }
 

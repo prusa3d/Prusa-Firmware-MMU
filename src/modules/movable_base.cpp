@@ -32,7 +32,7 @@ MovableBase::OperationResult MovableBase::InitMovement() {
     }
 }
 
-MovableBase::OperationResult MovableBase::InitMovementNoReinitAxis() {
+MovableBase::OperationResult __attribute__((noinline)) MovableBase::InitMovementNoReinitAxis() {
     PrepareMoveToPlannedSlot();
     state = Moving;
     return OperationResult::Accepted;
