@@ -327,7 +327,7 @@ uint8_t Protocol::UInt8ToHex(uint8_t value, uint8_t *dst) {
     return charsOut;
 }
 
-uint8_t Protocol::UInt16ToHex(uint16_t value, uint8_t *dst) {
+uint8_t __attribute__((noinline)) Protocol::UInt16ToHex(uint16_t value, uint8_t *dst) {
     constexpr uint16_t topNibbleMask = 0xf000;
     if (value == 0) {
         *dst = '0';

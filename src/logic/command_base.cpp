@@ -39,7 +39,7 @@ static ErrorCode TMC2130ToErrorCode(const hal::tmc2130::ErrorFlags &ef) {
     return e;
 }
 
-static ErrorCode AddErrorAxisBit(ErrorCode ec, uint8_t tmcIndex) {
+static ErrorCode __attribute__((noinline)) AddErrorAxisBit(ErrorCode ec, uint8_t tmcIndex) {
     switch (tmcIndex) {
     case config::Axis::Pulley:
         ec |= ErrorCode::TMC_PULLEY_BIT;
@@ -205,13 +205,13 @@ void CommandBase::GoToErrDisengagingIdler(ErrorCode deferredEC) {
     mi::idler.Disengage();
 }
 
-void CommandBase::GoToErrEngagingIdler() {
+void __attribute__((noinline)) CommandBase::GoToErrEngagingIdler() {
     state = ProgressCode::ERREngagingIdler;
     error = ErrorCode::RUNNING;
     mi::idler.Engage(mg::globals.ActiveSlot());
 }
 
-void CommandBase::FinishedOK() {
+void __attribute__((noinline)) CommandBase::FinishedOK() {
     state = ProgressCode::OK;
     error = ErrorCode::OK;
     application.CommandFinishedCorrectly();

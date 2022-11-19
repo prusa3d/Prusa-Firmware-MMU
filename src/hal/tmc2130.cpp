@@ -108,7 +108,7 @@ void TMC2130::SetEnabled(const MotorParams &params, bool enabled) {
     this->enabled = enabled;
 }
 
-bool TMC2130::CheckForErrors(const MotorParams &params) {
+bool __attribute__((noinline)) TMC2130::CheckForErrors(const MotorParams &params) {
     if (!initialized)
         return false;
 
