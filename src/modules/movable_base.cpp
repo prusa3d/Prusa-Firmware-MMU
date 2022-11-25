@@ -23,6 +23,13 @@ void MovableBase::PlanHome() {
     PlanHomingMoveForward();
 }
 
+void MovableBase::SetCurrents(uint8_t iRun, uint8_t iHold) {
+    hal::tmc2130::MotorCurrents tempCurrent = mm::axisParams[axis].currents;
+    tempCurrent.iRun = iRun;
+    tempCurrent.iHold = iHold;
+    mm::motion.DriverForAxis(axis).SetCurrents(mm::axisParams[axis].params, tempCurrent);
+}
+
 MovableBase::OperationResult MovableBase::InitMovement() {
     if (motion.InitAxis(axis)) {
         return InitMovementNoReinitAxis();

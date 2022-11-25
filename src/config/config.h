@@ -134,6 +134,8 @@ static constexpr AxisConfig selector = {
     .sg_thrs = 3,
 };
 
+static constexpr uint8_t selectorCutIRun = 40; ///< 660mA
+
 /// Selector motion limits
 static constexpr SelectorLimits selectorLimits = {
     .lenght = 75.0_mm, // @@TODO how does this relate to SelectorOffsetFromMin?

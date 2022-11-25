@@ -80,7 +80,7 @@ bool LoadFilament::StepInner() {
                 // as requested in MMU-116 - stopping an unsuccessful feed should retract as well but not check the filament
                 result = ResultCode::Cancelled;
                 verifyLoadedFilament = 0;
-                // [[fallthrough]]
+                [[fallthrough]];
             case FeedToFinda::OK:
                 GoToRetractingFromFinda();
                 break;

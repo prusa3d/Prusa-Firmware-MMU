@@ -9,6 +9,7 @@
 #include "../modules/permanent_storage.h"
 #include "../modules/pulley.h"
 #include "../modules/selector.h"
+#include "../modules/user_input.h"
 
 namespace logic {
 
@@ -34,8 +35,14 @@ bool CutFilament::Reset(uint8_t param) {
 void CutFilament::SelectFilamentSlot() {
     state = ProgressCode::SelectingFilamentSlot;
     mi::idler.Engage(cutSlot);
-    ms::selector.MoveToSlot(cutSlot);
+    MoveSelector(cutSlot);
     ml::leds.SetPairButOffOthers(cutSlot, ml::blink0, ml::off);
+}
+
+void CutFilament::MoveSelector(uint8_t slot) {
+    if (ms::selector.MoveToSlot(slot) != ms::Selector::OperationResult::Accepted) {
+        GoToErrDisengagingIdler(ErrorCode::FINDA_FLICKERS);
+    }
 }
 
 bool CutFilament::StepInner() {
@@ -51,55 +58,102 @@ bool CutFilament::StepInner() {
     case ProgressCode::SelectingFilamentSlot:
         if (mi::idler.Engaged() && ms::selector.Slot() == cutSlot) { // idler and selector finished their moves
             mg::globals.SetFilamentLoaded(cutSlot, mg::FilamentLoadState::AtPulley);
-            feed.Reset(true, true);
-            state = ProgressCode::FeedingToFinda;
-        }
-        break;
-    case ProgressCode::FeedingToFinda: // @@TODO this state will be reused for repeated cutting of filament ... probably there will be multiple attempts, not sure
-        if (feed.Step()) {
-            if (feed.State() == FeedToFinda::Failed) {
-                // @@TODO
+            if (feed.Reset(true, true)) {
+                state = ProgressCode::FeedingToFinda;
+                error = ErrorCode::RUNNING;
             } else {
-                // unload back to the pulley
-                state = ProgressCode::UnloadingToPulley;
-                mpu::pulley.PlanMove(-config::cutLength, mg::globals.PulleyUnloadFeedrate_mm_s());
+                // selector refused to move - FINDA problem suspected
+                GoToErrDisengagingIdler(ErrorCode::FINDA_FLICKERS);
             }
         }
         break;
-    case ProgressCode::UnloadingToPulley:
-        if (mm::motion.QueueEmpty()) { // idler and selector finished their moves
-            // move selector aside - prepare the blade into active position
-            state = ProgressCode::PreparingBlade;
-            mg::globals.SetFilamentLoaded(cutSlot, mg::FilamentLoadState::AtPulley);
-            ms::selector.MoveToSlot(cutSlot + 1);
+    case ProgressCode::FeedingToFinda:
+        if (feed.Step()) {
+            if (feed.State() == FeedToFinda::Failed) {
+                GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_ON); // signal loading error
+            } else {
+                // unload back to the pulley
+                state = ProgressCode::RetractingFromFinda;
+                retract.Reset();
+            }
         }
+        break;
+    case ProgressCode::RetractingFromFinda:
+        if (retract.Step()) {
+            if (retract.State() == RetractFromFinda::Failed) {
+                GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_OFF); // signal loading error
+            } else {
+                // move selector aside - prepare the blade into active position
+                state = ProgressCode::PreparingBlade;
+                mg::globals.SetFilamentLoaded(cutSlot, mg::FilamentLoadState::AtPulley);
+                ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
+                MoveSelector(cutSlot + 1);
+            }
+        }
+        break;
     case ProgressCode::PreparingBlade:
         if (ms::selector.Slot() == cutSlot + 1) {
             state = ProgressCode::PushingFilament;
-            mpu::pulley.PlanMove(config::cutLength, mg::globals.PulleyUnloadFeedrate_mm_s()); //
+            mpu::pulley.PlanMove(config::cutLength + config::cuttingEdgeRetract, config::pulleySlowFeedrate);
         }
         break;
     case ProgressCode::PushingFilament:
         if (mm::motion.QueueEmpty()) {
+            state = ProgressCode::DisengagingIdler;
+            mi::idler.Disengage(); // disengage before doing a cut because we need extra power into the Selector motor
+        }
+        break;
+    case ProgressCode::DisengagingIdler:
+        if (mi::idler.Disengaged()) {
             state = ProgressCode::PerformingCut;
-            ms::selector.MoveToSlot(0);
+            // set highest available current for the Selector
+            ms::selector.SetCurrents(mg::globals.CutIRunCurrent(), config::selector.iHold);
+            // lower move speed
+            savedSelectorFeedRate_mm_s = mg::globals.SelectorFeedrate_mm_s().v;
+            mg::globals.SetSelectorFeedrate_mm_s(config::selectorHomingFeedrate.v);
+            MoveSelector(cutSlot); // let it cut :)
         }
         break;
     case ProgressCode::PerformingCut:
-        if (ms::selector.Slot() == 0) { // this may not be necessary if we want the selector and pulley move at once
+        if (ms::selector.Slot() == cutSlot) { // this may not be necessary if we want the selector and pulley move at once
             state = ProgressCode::ReturningSelector;
-            ms::selector.MoveToSlot(5); // move selector to the other end of its axis to cleanup
+            // revert current to Selector's normal value
+            ms::selector.SetCurrents(config::selector.iRun, config::selector.iHold);
+            // revert move speed
+            mg::globals.SetSelectorFeedrate_mm_s(savedSelectorFeedRate_mm_s);
+            ms::selector.InvalidateHoming();
+            mpu::pulley.PlanMove(-config::cuttingEdgeRetract, config::pulleySlowFeedrate);
         }
         break;
     case ProgressCode::ReturningSelector:
-        if (ms::selector.Slot() == 5) { // selector returned to position, feed the filament back to FINDA
+        if (ms::selector.HomingValid()) { // selector rehomed
             FinishedOK();
             ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::on, ml::off);
-            feed.Reset(true, true);
         }
         break;
     case ProgressCode::OK:
         return true;
+    case ProgressCode::ERRDisengagingIdler:
+        ErrDisengagingIdler();
+        return false;
+    case ProgressCode::ERRWaitingForUser: {
+        // waiting for user buttons and/or a command from the printer
+        mui::Event ev = mui::userInput.ConsumeEvent();
+        switch (ev) {
+        case mui::Event::Middle: // try again the whole sequence
+            InvalidateHoming();
+            Reset(cutSlot);
+            break;
+        default: // no event, continue waiting for user input
+            break;
+        }
+        return false;
+    }
+    case ProgressCode::ERREngagingIdler:
+        if (mi::idler.Engaged()) {
+            state = ProgressCode::ERRHelpingFilament;
+        }
+        return false;
     default: // we got into an unhandled state, better report it
         state = ProgressCode::ERRInternal;
         error = ErrorCode::INTERNAL;

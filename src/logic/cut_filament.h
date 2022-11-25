@@ -4,6 +4,7 @@
 #include "command_base.h"
 #include "unload_filament.h"
 #include "feed_to_finda.h"
+#include "retract_from_finda.h"
 
 namespace logic {
 
@@ -29,9 +30,12 @@ private:
     constexpr static const uint16_t cutStepsPost = 150;
     UnloadFilament unl; ///< a high-level command/operation may be used as a building block of other operations as well
     FeedToFinda feed;
+    RetractFromFinda retract;
     uint8_t cutSlot;
+    uint16_t savedSelectorFeedRate_mm_s;
 
     void SelectFilamentSlot();
+    void MoveSelector(uint8_t slot);
 };
 
 /// The one and only instance of CutFilament state machine in the FW
