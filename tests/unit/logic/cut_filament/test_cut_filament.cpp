@@ -15,6 +15,7 @@
 
 #include "../../modules/stubs/stub_adc.h"
 
+#include "../stubs/homing.h"
 #include "../stubs/main_loop_stub.h"
 #include "../stubs/stub_motion.h"
 
@@ -22,18 +23,18 @@ using Catch::Matchers::Equals;
 
 #include "../helpers/helpers.ipp"
 
-void CutSlot(logic::CutFilament &cf, uint8_t cutSlot) {
+void CutSlot(logic::CutFilament &cf, uint8_t startSlot, uint8_t cutSlot) {
 
     ForceReinitAllAutomata();
-    REQUIRE(EnsureActiveSlotIndex(0, mg::FilamentLoadState::AtPulley));
+    REQUIRE(EnsureActiveSlotIndex(startSlot, mg::FilamentLoadState::AtPulley));
 
-    REQUIRE(VerifyEnvironmentState(mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), 0, false, false, ml::off, ml::off));
+    REQUIRE(VerifyEnvironmentState(mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), startSlot, false, false, ml::off, ml::off));
 
     // restart the automaton
     cf.Reset(cutSlot);
 
     // check initial conditions
-    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), 0, false, false, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::SelectingFilamentSlot));
+    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), startSlot, false, false, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::SelectingFilamentSlot));
 
     // now cycle at most some number of cycles (to be determined yet) and then verify, that the idler and selector reached their target positions
     // Beware - with the real positions of the selector, the number of steps needed to finish some states grows, so the ~40K steps here has a reason
@@ -52,7 +53,7 @@ void CutSlot(logic::CutFilament &cf, uint8_t cutSlot) {
         return cf.TopLevelState() == ProgressCode::FeedingToFinda; }, 5000));
 
     // filament fed to FINDA
-    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::InSelector, cutSlot, cutSlot, true, true, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToPulley));
+    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::InSelector, cutSlot, cutSlot, true, true, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
 
     // pull it back to the pulley + simulate FINDA depress
     REQUIRE(WhileCondition(
@@ -61,7 +62,7 @@ void CutSlot(logic::CutFilament &cf, uint8_t cutSlot) {
         if( step == 100 ){ // simulate FINDA trigger - will get depressed in 100 steps
             hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
         }
-        return cf.TopLevelState() == ProgressCode::UnloadingToPulley; }, 5000));
+        return cf.TopLevelState() == ProgressCode::RetractingFromFinda; }, 5000));
 
     REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, cutSlot, cutSlot, false, true, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::PreparingBlade));
 
@@ -71,21 +72,28 @@ void CutSlot(logic::CutFilament &cf, uint8_t cutSlot) {
 
     // pushing filament a bit for a cut
     REQUIRE(WhileTopState(cf, ProgressCode::PushingFilament, 5000));
-    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, cutSlot, cutSlot + 1, false, true, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::PerformingCut));
+    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, cutSlot, cutSlot + 1, false, true, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
+    // disengage idler (to save power for the selector)
+    REQUIRE(WhileTopState(cf, ProgressCode::DisengagingIdler, idlerEngageDisengageMaxSteps));
+    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, mi::idler.IdleSlotIndex(), cutSlot + 1, false, true, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::PerformingCut));
 
     // cutting
     REQUIRE(WhileTopState(cf, ProgressCode::PerformingCut, selectorMoveMaxSteps));
-    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, cutSlot, 0, false, true, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::ReturningSelector));
+    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, mi::idler.IdleSlotIndex(), cutSlot, false, true, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::ReturningSelector));
 
-    // moving selector to the other end of its axis
+    // rehoming selector
+    SimulateSelectorHoming(cf);
+
     REQUIRE(WhileTopState(cf, ProgressCode::ReturningSelector, selectorMoveMaxSteps));
-    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, cutSlot, ms::Selector::IdleSlotIndex(), false, true, cutSlot, ml::blink0, ml::off, ErrorCode::OK, ProgressCode::OK));
+    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, mi::idler.IdleSlotIndex(), ms::Selector::IdleSlotIndex(), false, true, cutSlot, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
 }
 
 TEST_CASE("cut_filament::cut0", "[cut_filament]") {
-    for (uint8_t cutSlot = 0; cutSlot < config::toolCount; ++cutSlot) {
-        logic::CutFilament cf;
-        CutSlot(cf, cutSlot);
+    for (uint8_t startSlot = 0; startSlot < config::toolCount; ++startSlot) {
+        for (uint8_t cutSlot = 0; cutSlot < config::toolCount; ++cutSlot) {
+            logic::CutFilament cf;
+            CutSlot(cf, startSlot, cutSlot);
+        }
     }
 }
 
@@ -102,12 +110,16 @@ TEST_CASE("cut_filament::state_machine_reusal", "[cut_filament]") {
         InvalidSlot<logic::CutFilament>(cf, activeSlot, config::toolCount);
     }
 
-    for (uint8_t cutSlot = 0; cutSlot < config::toolCount; ++cutSlot) {
-        CutSlot(cf, cutSlot);
+    for (uint8_t startSlot = 0; startSlot < config::toolCount; ++startSlot) {
+        for (uint8_t cutSlot = 0; cutSlot < config::toolCount; ++cutSlot) {
+            CutSlot(cf, startSlot, cutSlot);
+        }
     }
 
-    for (uint8_t cutSlot = 0; cutSlot < config::toolCount; ++cutSlot) {
-        CutSlot(cf, cutSlot);
-        InvalidSlot<logic::CutFilament>(cf, cutSlot, config::toolCount);
+    for (uint8_t startSlot = 0; startSlot < config::toolCount; ++startSlot) {
+        for (uint8_t cutSlot = 0; cutSlot < config::toolCount; ++cutSlot) {
+            CutSlot(cf, startSlot, cutSlot);
+            InvalidSlot<logic::CutFilament>(cf, cutSlot, config::toolCount);
+        }
     }
 }

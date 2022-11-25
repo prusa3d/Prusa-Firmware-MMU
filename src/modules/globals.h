@@ -95,6 +95,11 @@ public:
     /// Stores the new StallGuard threshold for an axis into EEPROM (does not affect the current state of TMC drivers at all)
     void SetStallGuardThreshold(config::Axis axis, uint8_t sgthrs);
 
+    /// @returns Cut iRun current level (value for TMC2130)
+    uint8_t CutIRunCurrent() const { return cutIRunCurrent; }
+    void ResetCutIRunCurrent() { cutIRunCurrent = config::selectorCutIRun; }
+    void SetCutIRunCurrent(uint8_t v) { cutIRunCurrent = v; }
+
 private:
     /// Sets the active slot, usually after some command/operation.
     /// Also updates the EEPROM records accordingly
@@ -114,6 +119,8 @@ private:
     uint16_t selectorFeedrate_mm_s;
 
     uint16_t idlerFeedrate_deg_s;
+
+    uint8_t cutIRunCurrent;
 };
 
 /// The one and only instance of global state variables

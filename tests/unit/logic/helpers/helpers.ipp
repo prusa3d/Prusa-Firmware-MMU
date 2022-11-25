@@ -122,7 +122,8 @@ bool VerifyState(SM &uf, mg::FilamentLoadState fls, uint8_t idlerSlotIndex, uint
     CHECKED_ELSE(uf.Error() == err) {
         return false;
     }
-    CHECKED_ELSE(uf.TopLevelState() == topLevelProgress) {
+    auto tls = uf.TopLevelState();
+    CHECKED_ELSE(tls == topLevelProgress) {
     return false;
     }
     return true;

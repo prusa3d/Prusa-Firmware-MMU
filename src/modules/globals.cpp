@@ -32,6 +32,8 @@ void Globals::Init() {
     ResetSelectorFeedrate();
 
     ResetIdlerFeedrate();
+
+    ResetCutIRunCurrent();
 }
 
 uint8_t Globals::ActiveSlot() const {

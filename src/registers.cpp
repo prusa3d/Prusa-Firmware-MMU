@@ -158,6 +158,7 @@
 | 0x1ah 26 | uint16   | Get Pulley position        | 0000h 0      | ffffh 65535 | unit mm                                  | Read only    | M707 A0x1a | N/A
 | 0x1bh 27 | uint16   | Set/Get_Selector_slot      | 0000h 0      | ffffh 65535 | unit slot [0-4/5] 5=park pos             | Read / Write | M707 A0x1b | M708 A0x1b Xn
 | 0x1ch 28 | uint16   | Set/Get_Idler_slot         | 0000h 0      | ffffh 65535 | unit slot [0-4/5] 5=disengaged           | Read / Write | M707 A0x1c | M708 A0x1c Xn
+| 0x1dh 29 | uint8    | Set/Get Selector cut iRun current | 0 to 63 (aka 0-1024mA)| 31 (530mA) |                | Read / Write | M707 A0x1d | M708 A0x1d Xn
 */
 
 struct RegisterFlags {
@@ -368,7 +369,11 @@ static const RegisterRec registers[] /*PROGMEM*/ = {
         []() -> uint16_t { return mi::idler.Slot(); },
         [](uint16_t d) { d >= config::toolCount ? mi::idler.Disengage() : mi::idler.Engage(d); },
         1),
-
+    // 0x1d Set/Get Selector cut iRun current level RW
+    RegisterRec(
+        []() -> uint16_t { return mg::globals.CutIRunCurrent(); },
+        [](uint16_t d) { mg::globals.SetCutIRunCurrent(d); },
+        1),
 };
 
 static constexpr uint8_t registersSize = sizeof(registers) / sizeof(RegisterRec);
