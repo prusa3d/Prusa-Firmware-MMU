@@ -28,8 +28,12 @@ bool NoCommand::StepInner() {
                     state = ProgressCode::OK;
                 }
                 break;
+            default:
+                break;
             }
             break; // mui::Event::Middle
+        default:
+            break;
         }
         break; // ProgressCode::ERRWaitingForUser
     }
