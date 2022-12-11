@@ -362,7 +362,7 @@ void LoadFilamentStopped(uint8_t slot, logic::LoadFilament &lf) {
     // now press a button
     PressButtonAndDebounce(lf, mb::Middle, false);
 
-    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, false, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, slot, slot, false, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
 
     // Stage 3 - retracting from finda, but no FINDA trigger since we stopped the load with a button press
     // - actually, we should be safe though as FINDA is not triggered at all
