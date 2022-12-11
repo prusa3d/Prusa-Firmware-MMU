@@ -114,12 +114,12 @@ void FailedLoadToFinda(uint8_t slot, logic::LoadFilament &lf) {
     // Stage 2 - feeding to finda
     // we'll assume the finda is defective here and does not trigger
     REQUIRE(WhileTopState(lf, ProgressCode::FeedingToFinda, 50000));
-    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, slot, slot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
 
     // Stage 3 - disengaging idler in error mode
     SimulateErrDisengagingIdler(lf, ErrorCode::FINDA_DIDNT_SWITCH_ON);
 
-    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));
 }
 
 void FailedLoadToFindaResolveHelp(uint8_t slot, logic::LoadFilament &lf) {
@@ -232,7 +232,7 @@ void FailedLoadToFindaResolveTryAgain(uint8_t slot, logic::LoadFilament &lf) {
 
     // the state machine should have restarted
     // Idler's position needs to be ignored as it has started homing after the button press
-    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, config::toolCount, slot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, config::toolCount, slot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
     ClearButtons(lf);
 
     SimulateIdlerHoming(lf);
