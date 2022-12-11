@@ -71,11 +71,13 @@ bool VerifyEnvironmentState(mg::FilamentLoadState fls, uint8_t idlerSlotIndex, u
     }
 
     CHECKED_ELSE(mf::finda.Pressed() == findaPressed) {
-        WARN("mf::finda.Pressed() != findaPressed");
+        if(mf::finda.Pressed() && !findaPressed) WARN("FINDA is expected to be 0, but its 1");
+        else WARN("FINDA is expected to be 1, but its 0");
         return false;
     }
     CHECKED_ELSE(mm::PulleyEnabled() == pulleyEnabled){
-        WARN("mm::PulleyEnabled() != pulleyEnabled");
+        if(mm::PulleyEnabled() && !pulleyEnabled) WARN("Pulley motor is expected to be disabled, but its enabled");
+        else WARN("Pulley motor is expected to be enabled, but its disabled");
         return false;
     }
 
