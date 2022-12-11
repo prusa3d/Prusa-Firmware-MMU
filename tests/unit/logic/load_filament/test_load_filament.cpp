@@ -164,7 +164,7 @@ void FailedLoadToFindaResolveHelpFindaDidntTrigger(uint8_t slot, logic::LoadFila
     // Stage 5 - move the pulley a bit - no FINDA change
     REQUIRE(WhileTopState(lf, ProgressCode::ERRHelpingFilament, 5000));
 
-    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, slot, slot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
 }
 
 void FailedLoadToFindaResolveManual(uint8_t slot, logic::LoadFilament &lf) {
