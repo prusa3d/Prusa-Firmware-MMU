@@ -215,12 +215,15 @@ void ToolChangeFailLoadToFinda(logic::ToolChange &tc, uint8_t fromSlot, uint8_t 
 void ToolChangeFailLoadToFindaLeftBtn(logic::ToolChange &tc, uint8_t toSlot) {
     // now waiting for user input
     REQUIRE_FALSE(mui::userInput.AnyEvent());
+
+    REQUIRE(VerifyState(tc, mg::FilamentLoadState::AtPulley, mi::idler.IdleSlotIndex(), toSlot, false, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));
+
     PressButtonAndDebounce(tc, mb::Left, true);
 
     REQUIRE(WhileTopState(tc, ProgressCode::ERREngagingIdler, 5000UL));
     ClearButtons(tc);
 
-    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRHelpingFilament));
+    REQUIRE(VerifyState(tc, mg::FilamentLoadState::AtPulley, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRHelpingFilament));
 
     // try push more, if FINDA triggers, continue loading
     REQUIRE(WhileCondition(

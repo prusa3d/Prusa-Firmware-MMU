@@ -200,6 +200,7 @@ bool ToolChange::StepInner() {
         // @@TODO helping filament needs improvement - the filament should try to move forward as long as the button is pressed
         if (mf::finda.Pressed()) {
             // the help was enough to press the FINDA, we are ok, continue normally
+            mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::InSelector);
             GoToFeedingToBondtech();
         } else if (mfs::fsensor.Pressed()) {
             // the help was enough to press the filament sensor, we are ok, continue normally
