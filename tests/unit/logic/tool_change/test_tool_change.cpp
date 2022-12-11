@@ -207,7 +207,7 @@ void ToolChangeFailLoadToFinda(logic::ToolChange &tc, uint8_t fromSlot, uint8_t 
     REQUIRE(WhileTopState(tc, ProgressCode::FeedingToFinda, 50000UL));
 
     // should end up in error disengage idler
-    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
+    REQUIRE(VerifyState(tc, mg::FilamentLoadState::AtPulley, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
 
     SimulateErrDisengagingIdler(tc, ErrorCode::FINDA_DIDNT_SWITCH_ON);
 }
@@ -242,13 +242,16 @@ void ToolChangeFailLoadToFindaLeftBtn(logic::ToolChange &tc, uint8_t toSlot) {
 void ToolChangeFailLoadToFindaMiddleBtn(logic::ToolChange &tc, uint8_t toSlot) {
     // now waiting for user input
     REQUIRE_FALSE(mui::userInput.AnyEvent());
+
+    REQUIRE(VerifyState(tc, mg::FilamentLoadState::AtPulley, mi::idler.IdleSlotIndex(), toSlot, false, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));
+
     PressButtonAndDebounce(tc, mb::Middle, true);
 
     REQUIRE_FALSE(mi::idler.HomingValid());
     REQUIRE_FALSE(ms::selector.HomingValid());
     SimulateIdlerAndSelectorHoming(tc); // failed load to FINDA = nothing blocking the selector - it can rehome
 
-    REQUIRE(VerifyState(tc, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), toSlot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
+    REQUIRE(VerifyState(tc, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), toSlot, false, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
 
     ClearButtons(tc);
 

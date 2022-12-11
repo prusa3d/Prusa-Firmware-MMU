@@ -53,7 +53,6 @@ bool FeedToFinda::Step() {
                 // one move has already been planned above, this is the second one
                 mpu::pulley.PlanMove(config::maximumFeedToFinda, config::pulleySlowFeedrate);
             }
-            mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InSelector);
             mui::userInput.Clear(); // remove all buffered events if any just before we wait for some input
         }
         return false;
@@ -77,7 +76,9 @@ bool FeedToFinda::Step() {
         if (mf::finda.Pressed() || mui::userInput.AnyEvent()) {
             mm::motion.AbortPlannedMoves(haltAtEnd); // stop pushing filament
             // FINDA triggered - that means it works and detected the filament tip
-            mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InSelector);
+            if (mf::finda.Pressed()) {
+                mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InSelector);
+            }
             dbg_logic_P(PSTR("Feed to Finda --> Idler disengaged"));
             dbg_logic_fP(PSTR("Pulley end steps %u"), mpu::pulley.CurrentPosition_mm());
             state = mui::userInput.AnyEvent() ? Stopped : OK;
