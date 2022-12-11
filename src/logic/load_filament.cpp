@@ -129,6 +129,9 @@ bool LoadFilament::StepInner() {
             if (!mf::finda.Pressed()) {
                 Reset2(false);
             } else {
+                // What if user fixes the issue manually? Then state must be set to InSelector
+                // But unit tests don't complain
+                // mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InSelector);
                 GoToRetractingFromFinda();
             }
             break;
@@ -143,6 +146,7 @@ bool LoadFilament::StepInner() {
                 state = ProgressCode::ERRWaitingForUser; // stand still
             } else {
                 // all sensors are ok - pull the filament back
+                mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InSelector);
                 GoToRetractingFromFinda();
             }
             break;
