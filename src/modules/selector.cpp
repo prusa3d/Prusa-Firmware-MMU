@@ -62,6 +62,12 @@ Selector::OperationResult Selector::MoveToSlot(uint8_t slot) {
     }
     plannedSlot = slot;
 
+    if (mf::finda.Pressed()) {
+        // @@TODO not sure why (if) this happens, but anyway - we must not move the selector if FINDA is pressed
+        // That includes the CutFilament operation as well
+        return OperationResult::Refused;
+    }
+
     // if we are homing right now, just record the desired planned slot and return Accepted
     if (state == HomeBack) {
         return OperationResult::Accepted;
@@ -71,12 +77,6 @@ Selector::OperationResult Selector::MoveToSlot(uint8_t slot) {
     if (currentSlot == slot && homingValid) {
         dbg_logic_P(PSTR("Moving Selector"));
         return OperationResult::Accepted;
-    }
-
-    if (mf::finda.Pressed()) {
-        // @@TODO not sure why (if) this happens, but anyway - we must not move the selector if FINDA is pressed
-        // That includes the CutFilament operation as well
-        return OperationResult::Refused;
     }
 
     // coordinates invalid, first home, then engage

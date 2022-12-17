@@ -126,6 +126,7 @@ bool LoadFilament::StepInner() {
             break;
         case mui::Event::Middle: // try again the whole sequence
             // however it depends on the state of FINDA - if it is on, we must perform unload first
+            InvalidateHoming();
             if (!mf::finda.Pressed()) {
                 Reset2(false);
             } else {

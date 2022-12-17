@@ -385,10 +385,31 @@ TEST_CASE("load_filament::unlimited_load_manual_stop", "[load_filament]") {
 
 void LoadFilamentAlreadyPresentFilament(uint8_t slot, logic::LoadFilament &lf) {
     //one of the first steps of the state machine should pick up the fact that FINDA is on and transfer into the retracting phase
+    // Note that this will also trigger a FINDA FLICKERS error
     REQUIRE(WhileTopState(lf, ProgressCode::FeedingToFinda, 5000));
-    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
-    REQUIRE(WhileCondition(lf, std::bind(SimulateRetractFromFINDA, _1, 100), 5000));
-    REQUIRE(WhileTopState(lf, ProgressCode::RetractingFromFinda, 5000));
+
+    REQUIRE(mf::finda.Pressed());
+    REQUIRE((int)mg::globals.FilamentLoaded() == (int)mg::FilamentLoadState::AtPulley);
+    REQUIRE(mm::PulleyEnabled() == false);
+    REQUIRE(ml::leds.Mode(slot, ml::green) == ml::off);
+    REQUIRE(ml::leds.Mode(slot, ml::red) == ml::blink0);
+    REQUIRE(lf.Error() == ErrorCode::RUNNING);
+    REQUIRE(lf.TopLevelState() == ProgressCode::ERRDisengagingIdler);
+
+    SimulateErrDisengagingIdler(lf, ErrorCode::FINDA_FLICKERS);
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, true, false, ml::off, ml::blink0, ErrorCode::FINDA_FLICKERS, ProgressCode::ERRWaitingForUser));
+
+    // Let's resolve the error
+    SetFINDAStateAndDebounce(false);
+
+    // Press middle button to resolve error
+    PressButtonAndDebounce(lf, mb::Middle, true);
+
+    // Re-home idler and selector
+    REQUIRE_FALSE(mi::idler.HomingValid());
+    REQUIRE_FALSE(ms::selector.HomingValid());
+    SimulateIdlerAndSelectorHoming(lf); // failed load to FINDA = nothing blocking the selector - it can rehome
+
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, slot, slot, false, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
     // make FINDA switch on again
     REQUIRE(WhileCondition(lf, std::bind(SimulateFeedToFINDA, _1, 100), 5000));
