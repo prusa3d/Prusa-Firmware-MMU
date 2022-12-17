@@ -37,8 +37,7 @@ bool FINDA::CheckFINDAvsEEPROM() {
         // FINDA is not pressed but we have a record in the EEPROM.
         // It has been decided, that we shall clear such a record from EEPROM automagically
         // and presume there is no filament at all (requires working FINDA)
-        //mg::globals.SetFilamentLoaded(config::toolCount, mg::AtPulley);
-        ret = false;
+        mg::globals.SetFilamentLoaded(config::toolCount, mg::AtPulley);
     }
     return ret;
 }
