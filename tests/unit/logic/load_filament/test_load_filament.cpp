@@ -83,25 +83,6 @@ void LoadFilamentSuccessful(uint8_t slot, logic::LoadFilament &lf) {
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
 }
 
-void LoadFilamentSuccessfulWithRehomeSelector(uint8_t slot, logic::LoadFilament &lf) {
-    // Stage 2 - feeding to finda
-    // make FINDA switch on
-    REQUIRE(WhileCondition(lf, std::bind(SimulateFeedToFINDA, _1, 100), 5000));
-    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
-
-    // Stage 3 - retracting from finda
-    // we'll assume the finda is working correctly here
-    REQUIRE(WhileCondition(lf, std::bind(SimulateRetractFromFINDA, _1, 100), 5000));
-    REQUIRE(WhileCondition(
-        lf, [&](uint32_t) { return lf.State() == ProgressCode::RetractingFromFinda; }, 50000));
-    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, slot, 0xff, false, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::DisengagingIdler));
-
-    // Stage 4 - disengaging Idler + homing Selector simultaneously
-    SimulateSelectorHoming(lf);
-
-    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
-}
-
 TEST_CASE("load_filament::regular_load_to_slot_0-4", "[load_filament]") {
     for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
         logic::LoadFilament lf;
@@ -231,14 +212,15 @@ void FailedLoadToFindaResolveManualNoFINDA(uint8_t slot, logic::LoadFilament &lf
 void FailedLoadToFindaResolveTryAgain(uint8_t slot, logic::LoadFilament &lf) {
     PressButtonAndDebounce(lf, mb::Middle, false);
 
+    // Re-home idler and selector
+    REQUIRE_FALSE(mi::idler.HomingValid());
+    REQUIRE_FALSE(ms::selector.HomingValid());
+    SimulateIdlerAndSelectorHoming(lf); // failed load to FINDA = nothing blocking the selector - it can rehome
+
     // the state machine should have restarted
     // Idler's position needs to be ignored as it has started homing after the button press
-    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, config::toolCount, slot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
+    REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, config::toolCount, slot, false, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
     ClearButtons(lf);
-
-    SimulateIdlerHoming(lf);
-
-    LoadFilamentSuccessfulWithRehomeSelector(slot, lf);
 }
 
 TEST_CASE("load_filament::failed_load_to_finda_0-4_resolve_help_second_ok", "[load_filament]") {
@@ -308,6 +290,7 @@ TEST_CASE("load_filament::failed_load_to_finda_0-4_try_again", "[load_filament]"
         LoadFilamentCommonSetup(slot, lf, true);
         FailedLoadToFinda(slot, lf);
         FailedLoadToFindaResolveTryAgain(slot, lf);
+        LoadFilamentSuccessful(slot, lf);
     }
 }
 
