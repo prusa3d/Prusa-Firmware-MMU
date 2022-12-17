@@ -41,7 +41,7 @@ bool ToolChange::Reset(uint8_t param) {
         state = ProgressCode::UnloadingFilament;
         unl.Reset(mg::globals.ActiveSlot());
     } else {
-        mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::InSelector); // activate the correct slot, feed uses that
+        mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::AtPulley); // activate the correct slot, feed uses that
         if (feed.Reset(true, false)) {
             state = ProgressCode::FeedingToFinda;
             error = ErrorCode::RUNNING;
