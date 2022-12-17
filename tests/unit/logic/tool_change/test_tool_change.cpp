@@ -210,6 +210,8 @@ void ToolChangeFailLoadToFinda(logic::ToolChange &tc, uint8_t fromSlot, uint8_t 
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::AtPulley, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
 
     SimulateErrDisengagingIdler(tc, ErrorCode::FINDA_DIDNT_SWITCH_ON);
+
+    REQUIRE(VerifyState(tc, mg::FilamentLoadState::AtPulley, mi::idler.IdleSlotIndex(), toSlot, false, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));
 }
 
 void ToolChangeFailLoadToFindaLeftBtn(logic::ToolChange &tc, uint8_t toSlot) {
@@ -245,8 +247,6 @@ void ToolChangeFailLoadToFindaLeftBtn(logic::ToolChange &tc, uint8_t toSlot) {
 void ToolChangeFailLoadToFindaMiddleBtn(logic::ToolChange &tc, uint8_t toSlot) {
     // now waiting for user input
     REQUIRE_FALSE(mui::userInput.AnyEvent());
-
-    REQUIRE(VerifyState(tc, mg::FilamentLoadState::AtPulley, mi::idler.IdleSlotIndex(), toSlot, false, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));
 
     PressButtonAndDebounce(tc, mb::Middle, true);
 
@@ -460,7 +460,14 @@ void ToolChangeWithFlickeringFINDA(logic::ToolChange &tc, uint8_t fromSlot, uint
     main_loop();
     tc.Step();
 
-    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
+    REQUIRE(mf::finda.Pressed());
+    REQUIRE((int)mg::globals.FilamentLoaded() == (int)mg::FilamentLoadState::AtPulley);
+    REQUIRE(mm::PulleyEnabled() == false);
+    REQUIRE(ml::leds.Mode(toSlot, ml::green) == ml::off);
+    REQUIRE(ml::leds.Mode(toSlot, ml::red) == ml::blink0);
+    REQUIRE(tc.Error() == ErrorCode::RUNNING);
+    REQUIRE(tc.TopLevelState() == ProgressCode::ERRDisengagingIdler);
+
     SimulateErrDisengagingIdler(tc, ErrorCode::FINDA_FLICKERS); // this should be a single step, Idler should remain disengaged due to previous error
 
     // now we have 2 options what can happen:
@@ -469,22 +476,41 @@ void ToolChangeWithFlickeringFINDA(logic::ToolChange &tc, uint8_t fromSlot, uint
     if (keepFindaPressed) {
         // now waiting for user input
         REQUIRE_FALSE(mui::userInput.AnyEvent());
-        REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::FINDA_FLICKERS, ProgressCode::ERRWaitingForUser));
+
+        REQUIRE(mf::finda.Pressed());
+        REQUIRE((int)mg::globals.FilamentLoaded() == (int)mg::FilamentLoadState::AtPulley);
+        REQUIRE(mm::PulleyEnabled() == false);
+        REQUIRE(ml::leds.Mode(toSlot, ml::green) == ml::off);
+        REQUIRE(ml::leds.Mode(toSlot, ml::red) == ml::blink0);
+        REQUIRE(tc.Error() == ErrorCode::FINDA_FLICKERS);
+        REQUIRE(tc.TopLevelState() == ProgressCode::ERRWaitingForUser);
+
         PressButtonAndDebounce(tc, mb::Middle, true);
         // we should remain in the same error state
-        REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
+        REQUIRE(mf::finda.Pressed());
+        REQUIRE((int)mg::globals.FilamentLoaded() == (int)mg::FilamentLoadState::AtPulley);
+        REQUIRE(mm::PulleyEnabled() == false);
+        REQUIRE(ml::leds.Mode(toSlot, ml::green) == ml::off);
+        REQUIRE(ml::leds.Mode(toSlot, ml::red) == ml::blink0);
+        REQUIRE(tc.Error() == ErrorCode::RUNNING);
+        REQUIRE(tc.TopLevelState() == ProgressCode::ERRDisengagingIdler);
 
         // Idler will try to rehome, allow it
         SimulateIdlerHoming(tc);
-        REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::FINDA_FLICKERS, ProgressCode::ERRWaitingForUser));
 
-        // now "fix" FINDA and the command shall finish correctly
-        SetFINDAStateAndDebounce(false);
-        ToolChangeFailLoadToFindaMiddleBtn(tc, toSlot);
-    } else {
-        SetFINDAStateAndDebounce(false);
-        ToolChangeFailLoadToFindaMiddleBtn(tc, toSlot);
+        REQUIRE(mf::finda.Pressed());
+        REQUIRE((int)mg::globals.FilamentLoaded() == (int)mg::FilamentLoadState::AtPulley);
+        REQUIRE(mm::PulleyEnabled() == false);
+        REQUIRE(ml::leds.Mode(toSlot, ml::green) == ml::off);
+        REQUIRE(ml::leds.Mode(toSlot, ml::red) == ml::blink0);
+        REQUIRE(tc.Error() == ErrorCode::FINDA_FLICKERS);
+        REQUIRE(tc.TopLevelState() == ProgressCode::ERRWaitingForUser);
     }
+
+    // now "fix" FINDA and the command shall finish correctly
+    SetFINDAStateAndDebounce(false);
+
+    ToolChangeFailLoadToFindaMiddleBtn(tc, toSlot);
 }
 
 TEST_CASE("tool_change::test_flickering_FINDA", "[tool_change]") {
