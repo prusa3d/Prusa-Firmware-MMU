@@ -28,7 +28,7 @@ void CutSlot(logic::CutFilament &cf, uint8_t startSlot, uint8_t cutSlot) {
     ForceReinitAllAutomata();
     REQUIRE(EnsureActiveSlotIndex(startSlot, mg::FilamentLoadState::AtPulley));
 
-    REQUIRE(VerifyEnvironmentState(mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), startSlot, false, false, ml::off, ml::off));
+    REQUIRE(VerifyState(cf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), startSlot, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
 
     // restart the automaton
     cf.Reset(cutSlot);
@@ -108,6 +108,11 @@ TEST_CASE("cut_filament::state_machine_reusal", "[cut_filament]") {
     logic::CutFilament cf;
     for (uint8_t activeSlot = 0; activeSlot < config::toolCount; ++activeSlot) {
         InvalidSlot<logic::CutFilament>(cf, activeSlot, config::toolCount);
+        // @@TODO if the automaton end up in an INVALID_TOOL error,
+        // we don't get out of it by any other means than calling a Reset
+        // May be that's an issue/feature of all logic layer state machines.
+        // Generally not that important, but it would be nice to handle such a scenario gracefully
+        cf.error = ErrorCode::OK;
     }
 
     for (uint8_t startSlot = 0; startSlot < config::toolCount; ++startSlot) {
@@ -120,6 +125,7 @@ TEST_CASE("cut_filament::state_machine_reusal", "[cut_filament]") {
         for (uint8_t cutSlot = 0; cutSlot < config::toolCount; ++cutSlot) {
             CutSlot(cf, startSlot, cutSlot);
             InvalidSlot<logic::CutFilament>(cf, cutSlot, config::toolCount);
+            cf.error = ErrorCode::OK;
         }
     }
 }
