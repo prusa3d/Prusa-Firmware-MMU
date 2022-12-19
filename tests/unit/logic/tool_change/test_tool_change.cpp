@@ -248,7 +248,20 @@ void ToolChangeFailLoadToFindaMiddleBtn(logic::ToolChange &tc, uint8_t toSlot) {
     REQUIRE_FALSE(ms::selector.HomingValid());
     SimulateIdlerAndSelectorHoming(tc); // failed load to FINDA = nothing blocking the selector - it can rehome
 
-    REQUIRE(VerifyState(tc, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), toSlot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
+    // @@TODO here is nasty disrepancy - FINDA is not pressed, but we pretend to have something in the Selector.
+    //
+    // 3 scenarios could have caused this:
+    // 1. MMU was really unable to pick the filament piece and really failed to push anything into the Selector/FINDA
+    // 2. MMU was able to pick a piece and managed to push it into the Selector, but not far enough to press FINDA
+    // 3. FINDA is miscalibrated/defective and we have no idea that a piece of filament occurred below FINDA
+    //
+    // Scenarios 2 and 3 will cause serious problems, because the Selector is trying to rehome after "Retry"
+    // I.e. FINDA state does not correspond to mg::globals::filamentLoaded (which is allowed and expected, but dangerous)
+    //
+    // Therefore we temporarily allow both AtPulley and InSelector.
+    REQUIRE(VerifyState(tc,
+        (mg::FilamentLoadState)(mg::FilamentLoadState::AtPulley | mg::FilamentLoadState::InSelector),
+        mi::Idler::IdleSlotIndex(), toSlot, false, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
 
     ClearButtons(tc);
 
@@ -454,7 +467,15 @@ void ToolChangeWithFlickeringFINDA(logic::ToolChange &tc, uint8_t fromSlot, uint
     main_loop();
     tc.Step();
 
-    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
+    // Here is a similar problem like in ToolChangeFailLoadToFindaMiddleBtn:
+    // FINDA state doesn't correspond to mg::globals.filamentLoaded, but in this case it is correct.
+    // The previous unload finished correctly but FINDA flickers - that means filament tip is expected
+    // to be AtPulley and not blocking the Selector.
+    //
+    // @@TODO however - red LED is probably not blinking on the correct slot. We are still standing on fromSlot
+    // while red LED will blink on toSlot.
+    // Atm this is not easy to change without some nontrivial changes to GoToErrDisengagingIdler()
+    REQUIRE(VerifyState2(tc, mg::FilamentLoadState::AtPulley, mi::idler.IdleSlotIndex(), fromSlot, true, false, toSlot, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
     SimulateErrDisengagingIdler(tc, ErrorCode::FINDA_FLICKERS); // this should be a single step, Idler should remain disengaged due to previous error
 
     // now we have 2 options what can happen:
@@ -463,14 +484,14 @@ void ToolChangeWithFlickeringFINDA(logic::ToolChange &tc, uint8_t fromSlot, uint
     if (keepFindaPressed) {
         // now waiting for user input
         REQUIRE_FALSE(mui::userInput.AnyEvent());
-        REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::FINDA_FLICKERS, ProgressCode::ERRWaitingForUser));
+        REQUIRE(VerifyState2(tc, mg::FilamentLoadState::AtPulley, mi::idler.IdleSlotIndex(), fromSlot, true, false, toSlot, ml::off, ml::blink0, ErrorCode::FINDA_FLICKERS, ProgressCode::ERRWaitingForUser));
         PressButtonAndDebounce(tc, mb::Middle, true);
         // we should remain in the same error state
-        REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
+        REQUIRE(VerifyState2(tc, mg::FilamentLoadState::AtPulley, mi::idler.IdleSlotIndex(), fromSlot, true, false, toSlot, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
 
         // Idler will try to rehome, allow it
         SimulateIdlerHoming(tc);
-        REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::FINDA_FLICKERS, ProgressCode::ERRWaitingForUser));
+        REQUIRE(VerifyState2(tc, mg::FilamentLoadState::AtPulley, mi::idler.IdleSlotIndex(), fromSlot, true, false, toSlot, ml::off, ml::blink0, ErrorCode::FINDA_FLICKERS, ProgressCode::ERRWaitingForUser));
 
         // now "fix" FINDA and the command shall finish correctly
         SetFINDAStateAndDebounce(false);
