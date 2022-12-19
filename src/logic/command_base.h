@@ -95,7 +95,9 @@ public:
     /// filament presence according to known sensors (FINDA+FSensor)
     static void InvalidateHomingAndFilamentState();
 
+#ifndef UNITTEST
 protected:
+#endif
     /// @returns true if the slot/tool index is within specified range (0 - config::toolCount)
     /// If not, it returns false and sets the error to ErrorCode::INVALID_TOOL
     bool CheckToolIndex(uint8_t index);
