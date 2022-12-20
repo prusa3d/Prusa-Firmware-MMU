@@ -15,6 +15,7 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/src/logic/no_command.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/retract_from_finda.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/set_mode.cpp
+  ${CMAKE_SOURCE_DIR}/src/logic/start_up.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/tool_change.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/unload_filament.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/unload_to_finda.cpp

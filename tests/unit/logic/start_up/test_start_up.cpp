@@ -12,7 +12,7 @@
 #include "../../../../src/modules/pulley.h"
 #include "../../../../src/modules/user_input.h"
 
-#include "../../../../src/logic/no_command.h"
+#include "../../../../src/logic/start_up.h"
 
 #include "../../modules/stubs/stub_adc.h"
 
@@ -23,30 +23,30 @@
 #include "../helpers/helpers.ipp"
 
 TEST_CASE("no_command::SetInitError", "[no_command]") {
-    logic::NoCommand nc;
+    logic::StartUp su;
 
     // Step 1 - Check there are no errors
-    REQUIRE(nc.Error() == ErrorCode::OK);
-    REQUIRE(nc.State() == ProgressCode::OK);
+    REQUIRE(su.Error() == ErrorCode::OK);
+    REQUIRE(su.State() == ProgressCode::OK);
 
     // Step 2 - Create error
-    nc.SetInitError(ErrorCode::FINDA_VS_EEPROM_DISREPANCY);
+    su.SetInitError(ErrorCode::FINDA_VS_EEPROM_DISREPANCY);
 
     // Step 3 - Check error is waiting for user input
-    REQUIRE(nc.Error() == ErrorCode::FINDA_VS_EEPROM_DISREPANCY);
-    REQUIRE(nc.State() == ProgressCode::ERRWaitingForUser);
+    REQUIRE(su.Error() == ErrorCode::FINDA_VS_EEPROM_DISREPANCY);
+    REQUIRE(su.State() == ProgressCode::ERRWaitingForUser);
 
     // Step 4 - Loop through a few iterations, error remains unchanged
     for (size_t i = 0; i < 100; ++i) {
-        nc.Step();
+        su.Step();
     }
 
-    REQUIRE(nc.Error() == ErrorCode::FINDA_VS_EEPROM_DISREPANCY);
-    REQUIRE(nc.State() == ProgressCode::ERRWaitingForUser);
+    REQUIRE(su.Error() == ErrorCode::FINDA_VS_EEPROM_DISREPANCY);
+    REQUIRE(su.State() == ProgressCode::ERRWaitingForUser);
 }
 
 TEST_CASE("no_command::FINDA_VS_EEPROM_DISREPANCY_retry", "[no_command]") {
-    logic::NoCommand nc;
+    logic::StartUp su;
 
     // Initalise the ADC
     hal::adc::SetADC(config::buttonsADCIndex, config::buttonADCMaxValue);
@@ -56,33 +56,33 @@ TEST_CASE("no_command::FINDA_VS_EEPROM_DISREPANCY_retry", "[no_command]") {
     SetFINDAStateAndDebounce(true);
 
     // Step 1 - Check there are no errors
-    REQUIRE(nc.Error() == ErrorCode::OK);
-    REQUIRE(nc.State() == ProgressCode::OK);
+    REQUIRE(su.Error() == ErrorCode::OK);
+    REQUIRE(su.State() == ProgressCode::OK);
 
     // Step 2 - Create error
-    nc.SetInitError(ErrorCode::FINDA_VS_EEPROM_DISREPANCY);
+    su.SetInitError(ErrorCode::FINDA_VS_EEPROM_DISREPANCY);
 
     // Step 3 - Check error is waiting for user input
-    REQUIRE(nc.Error() == ErrorCode::FINDA_VS_EEPROM_DISREPANCY);
-    REQUIRE(nc.State() == ProgressCode::ERRWaitingForUser);
+    REQUIRE(su.Error() == ErrorCode::FINDA_VS_EEPROM_DISREPANCY);
+    REQUIRE(su.State() == ProgressCode::ERRWaitingForUser);
 
     // Step 4 - Press and release button (from Printer)
-    PressButtonAndDebounce(nc, mb::Middle, true);
-    ClearButtons(nc);
+    PressButtonAndDebounce(su, mb::Middle, true);
+    ClearButtons(su);
 
     // Check that the error is still present
-    REQUIRE(nc.Error() == ErrorCode::FINDA_VS_EEPROM_DISREPANCY);
-    REQUIRE(nc.State() == ProgressCode::ERRWaitingForUser);
+    REQUIRE(su.Error() == ErrorCode::FINDA_VS_EEPROM_DISREPANCY);
+    REQUIRE(su.State() == ProgressCode::ERRWaitingForUser);
 
     // Untrigger FINDA and FSensor
     SetFSensorStateAndDebounce(false);
     SetFINDAStateAndDebounce(false);
 
     // Step 4 - Press and release button
-    PressButtonAndDebounce(nc, mb::Middle, true);
-    ClearButtons(nc);
+    PressButtonAndDebounce(su, mb::Middle, true);
+    ClearButtons(su);
 
     // Now the error should be gone :)
-    REQUIRE(nc.Error() == ErrorCode::OK);
-    REQUIRE(nc.State() == ProgressCode::OK);
+    REQUIRE(su.Error() == ErrorCode::OK);
+    REQUIRE(su.State() == ProgressCode::OK);
 }
