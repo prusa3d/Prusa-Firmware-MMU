@@ -12,6 +12,7 @@
 #include "modules/fsensor.h"
 #include "modules/globals.h"
 #include "modules/idler.h"
+#include "modules/motion.h"
 #include "modules/pulley.h"
 #include "modules/selector.h"
 #include "modules/permanent_storage.h"
@@ -159,6 +160,9 @@
 | 0x1bh 27 | uint16   | Set/Get_Selector_slot      | 0000h 0      | ffffh 65535 | unit slot [0-4/5] 5=park pos             | Read / Write | M707 A0x1b | M708 A0x1b Xn
 | 0x1ch 28 | uint16   | Set/Get_Idler_slot         | 0000h 0      | ffffh 65535 | unit slot [0-4/5] 5=disengaged           | Read / Write | M707 A0x1c | M708 A0x1c Xn
 | 0x1dh 29 | uint8    | Set/Get Selector cut iRun current | 0 to 63 (aka 0-1024mA)| 31 (530mA) |                | Read / Write | M707 A0x1d | M708 A0x1d Xn
+| 0x1eh 30 | uint16   | Set/Get Pulley iRun current| 0-63         | 14h 20      | 20->350mA: see TMC2130 current conversion| Read / Write | M707 A0x1e | M708 A0x1e Xn
+| 0x1fh 31 | uint16  |Set/Get Selector iRun current| 0-63         | 1fh 31      | 31->530mA: see TMC2130 current conversion| Read / Write | M707 A0x1f | M708 A0x1f Xn
+| 0x20h 32 | uint16   | Set/Get Idler iRun current | 0-63         | 1fh 31      | 31->530mA: see TMC2130 current conversion| Read / Write | M707 A0x20 | M708 A0x20 Xn
 */
 
 struct RegisterFlags {
@@ -373,6 +377,22 @@ static const RegisterRec registers[] /*PROGMEM*/ = {
     RegisterRec(
         []() -> uint16_t { return mg::globals.CutIRunCurrent(); },
         [](uint16_t d) { mg::globals.SetCutIRunCurrent(d); },
+        1),
+
+    // 0x1e Get/Set Pulley iRun current RW
+    RegisterRec(
+        []() -> uint16_t { return mm::motion.CurrentsForAxis(config::Pulley).iRun; },
+        [](uint16_t d) { mm::motion.SetIRunForAxis(config::Pulley, d); },
+        1),
+    // 0x1f Set/Get Selector iRun current RW
+    RegisterRec(
+        []() -> uint16_t { return mm::motion.CurrentsForAxis(config::Selector).iRun; },
+        [](uint16_t d) { mm::motion.SetIRunForAxis(config::Selector, d); },
+        1),
+    // 0x20 Set/Get Idler iRun current RW
+    RegisterRec(
+        []() -> uint16_t { return mm::motion.CurrentsForAxis(config::Idler).iRun; },
+        [](uint16_t d) { mm::motion.SetIRunForAxis(config::Idler, d); },
         1),
 };
 

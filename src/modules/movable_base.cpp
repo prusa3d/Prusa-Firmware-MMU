@@ -39,6 +39,7 @@ MovableBase::OperationResult MovableBase::InitMovement() {
 
 MovableBase::OperationResult __attribute__((noinline)) MovableBase::InitMovementNoReinitAxis() {
     PrepareMoveToPlannedSlot();
+    // @@TODO update axis currents at this spot?
     state = Moving;
     return OperationResult::Accepted;
 }

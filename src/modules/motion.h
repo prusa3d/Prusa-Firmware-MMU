@@ -356,11 +356,19 @@ public:
         return axisData[axis].ctrl;
     }
 
+    inline const MotorCurrents &CurrentsForAxis(Axis axis) const {
+        return axisData[axis].currents;
+    }
+    inline void SetIRunForAxis(Axis axis, uint8_t i) {
+        axisData[axis].currents.iRun = i;
+    }
+
 private:
     struct AxisData {
         TMC2130 drv; ///< Motor driver
         pulse_gen::PulseGen ctrl; ///< Motor controller
         bool enabled; ///< Axis enabled
+        MotorCurrents currents; ///< Axis related currents
         st_timer_t residual; ///< Axis timer residual
     };
 
@@ -372,7 +380,8 @@ private:
                 axisParams[axis].jerk,
                 axisParams[axis].accel,
             },
-            .enabled = false
+            .enabled = false,
+            .currents = axisParams[axis].currents
         };
     }
 
