@@ -1,64 +1,84 @@
 bool VerifyEnvironmentState(mg::FilamentLoadState fls, uint8_t idlerSlotIndex, uint8_t selectorSlotIndex,
     bool findaPressed, bool pulleyEnabled, ml::Mode greenLEDMode, ml::Mode redLEDMode) {
     CHECKED_ELSE(mg::globals.FilamentLoaded() & fls) { // beware - abusing the values as bit masks to detect multiple situations at once
-    return false;
+        WARN("FilamentLoaded mismatch");
+        WARN("mg::globals.FilamentLoaded()): " << (int)mg::globals.FilamentLoaded());
+        WARN("Expected state, fls: " << (int)fls);
+        return false;
     }
     if( mg::globals.FilamentLoaded() >= mg::FilamentLoadState::InSelector ){
         // check eeprom content - filament blocking the selector
         uint8_t eeSlot = 0xff;
         CHECKED_ELSE(mps::FilamentLoaded::get(eeSlot)){
-        return false;
+            WARN("mps::FilamentLoaded::get(eeSlot) returned false");
+            return false;
         }
         CHECKED_ELSE(eeSlot == selectorSlotIndex){
-        return false;
+            WARN("eeSlot does not match selectorSlotIndex");
+            WARN("eeSlot: " << (int)eeSlot);
+            WARN("selectorSlotIndex: " << (int)selectorSlotIndex);
+            return false;
         }
     } else {
         // check eeprom content - filament blocking the selector
         uint8_t eeSlot = 0xff;
         CHECKED_ELSE(mps::FilamentLoaded::get(eeSlot) == false){
-        return false;
+            WARN("mps::FilamentLoaded::get(eeSlot) returned true");
+            return false;
         }
     }
 
     if( idlerSlotIndex < config::toolCount ){ // abusing invalid index to skip checking of slot and position
         CHECKED_ELSE(mm::axes[mm::Idler].pos == mi::Idler::SlotPosition(idlerSlotIndex).v) {
-        return false;
+            WARN("mm::axes[mm::Idler].pos != mi::Idler::SlotPosition(idlerSlotIndex).v");
+            return false;
         }
         CHECKED_ELSE(mi::idler.Engaged() == (idlerSlotIndex < config::toolCount)) {
-        return false;
+            WARN("mi::idler.Engaged() != (idlerSlotIndex < config::toolCount)");
+            return false;
         }
     }
     if( mi::idler.State() == mi::Idler::HomeForward || mi::idler.State() == mi::Idler::HomeBack ){
         CHECKED_ELSE(mi::idler.Slot() == 0xff){
-        return false;
+            WARN("mi::idler.Slot() != 0xff");
+            return false;
         }
         CHECKED_ELSE(mi::idler.HomingValid() == false){
-        return false;
+            WARN("mi::idler.HomingValid() != false");
+            return false;
         }
     }
 
     if( selectorSlotIndex < config::toolCount ){ // abusing invalid index to skip checking of slot and position
         CHECKED_ELSE(mm::axes[mm::Selector].pos == ms::Selector::SlotPosition(selectorSlotIndex).v) {
-        return false;
+            WARN("mm::axes[mm::Selector].pos != ms::Selector::SlotPosition(selectorSlotIndex).v");
+            return false;
         }
         CHECKED_ELSE(ms::selector.Slot() == selectorSlotIndex) {
-        return false;
+            WARN("ms::selector.Slot() != selectorSlotIndex");
+            return false;
         }
     }
     if( ms::selector.State() == ms::Selector::HomeForward || ms::selector.State() == ms::Selector::HomeBack ){
         CHECKED_ELSE(ms::selector.Slot() == 0xff){
-        return false;
+            WARN("ms::selector.Slot() != 0xff");
+            return false;
         }
         CHECKED_ELSE(ms::selector.HomingValid() == false){
-        return false;
+            WARN("ms::selector.Slot() != 0xff");
+            return false;
         }
     }
 
     CHECKED_ELSE(mf::finda.Pressed() == findaPressed) {
-    return false;
+        if(mf::finda.Pressed() && !findaPressed) WARN("FINDA is expected to be 0, but its 1");
+        else WARN("FINDA is expected to be 1, but its 0");
+        return false;
     }
     CHECKED_ELSE(mm::PulleyEnabled() == pulleyEnabled){
-    return false;
+        if(mm::PulleyEnabled() && !pulleyEnabled) WARN("Pulley motor is expected to be disabled, but its enabled");
+        else WARN("Pulley motor is expected to be enabled, but its disabled");
+        return false;
     }
 
     for(uint8_t ledIndex = 0; ledIndex < config::toolCount; ++ledIndex){
@@ -66,20 +86,24 @@ bool VerifyEnvironmentState(mg::FilamentLoadState fls, uint8_t idlerSlotIndex, u
             // the other LEDs should be off
             auto red = ml::leds.Mode(ledIndex, ml::red);
             CHECKED_ELSE(red == ml::off) {
-            return false;
+                WARN("red != ml::off");
+                return false;
             }
             auto green = ml::leds.Mode(ledIndex, ml::green);
             CHECKED_ELSE(green == ml::off) {
-            return false;
+                WARN("green != ml::off");
+                return false;
             }
         } else {
             auto red = ml::leds.Mode(selectorSlotIndex, ml::red);
             CHECKED_ELSE(red == redLEDMode) {
-            return false;
+                WARN("red != redLEDMode");
+                return false;
             }
             auto green = ml::leds.Mode(selectorSlotIndex, ml::green);
             CHECKED_ELSE(green == greenLEDMode) {
-            return false;
+                WARN("green != greenLEDMode");
+                return false;
             }
         }
     }
@@ -91,9 +115,10 @@ template<typename SM>
 bool VerifyState(SM &uf, mg::FilamentLoadState fls, uint8_t idlerSlotIndex, uint8_t selectorSlotIndex,
     bool findaPressed, bool pulleyEnabled, ml::Mode greenLEDMode, ml::Mode redLEDMode, ErrorCode err, ProgressCode topLevelProgress) {
 
-    CHECKED_ELSE(VerifyEnvironmentState(fls, idlerSlotIndex, selectorSlotIndex, findaPressed, pulleyEnabled, greenLEDMode, redLEDMode)){
+    CHECKED_ELSE(VerifyEnvironmentState(fls, idlerSlotIndex, selectorSlotIndex, findaPressed, pulleyEnabled, greenLEDMode, redLEDMode)) {
         return false;
     }
+
     CHECKED_ELSE(uf.Error() == err) {
         return false;
     }
