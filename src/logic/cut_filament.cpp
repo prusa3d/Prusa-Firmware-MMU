@@ -149,11 +149,6 @@ bool CutFilament::StepInner() {
         }
         return false;
     }
-    case ProgressCode::ERREngagingIdler:
-        if (mi::idler.Engaged()) {
-            state = ProgressCode::ERRHelpingFilament;
-        }
-        return false;
     default: // we got into an unhandled state, better report it
         state = ProgressCode::ERRInternal;
         error = ErrorCode::INTERNAL;
