@@ -54,9 +54,9 @@ bool Idler::FinishHomingAndPlanMoveToParkPos() {
 void Idler::FinishMove() {
     currentlyEngaged = plannedMove;
     if (Disengaged()) // reduce power into the Idler motor when disengaged (less force necessary)
-        SetCurrents(config::idler.iRun, config::idler.iHold);
+        SetCurrents(mm::motion.CurrentsForAxis(axis).iRun, mm::motion.CurrentsForAxis(axis).iHold);
     else if (Engaged()) { // maximum motor power when the idler is engaged
-        SetCurrents(config::idler.iRun, config::idler.iRun);
+        SetCurrents(mm::motion.CurrentsForAxis(axis).iRun, mm::motion.CurrentsForAxis(axis).iRun);
     }
 }
 

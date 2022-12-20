@@ -61,7 +61,7 @@ bool Motion::InitAxis(Axis axis) {
     Disable(axis);
 
     // Init also applies the currently pre-set StallGuard threshold into the TMC driver
-    return axisData[axis].drv.Init(axisParams[axis].params, axisParams[axis].currents, axisParams[axis].mode);
+    return axisData[axis].drv.Init(axisParams[axis].params, axisData[axis].currents, axisParams[axis].mode);
 }
 
 void Motion::SetEnabled(Axis axis, bool enabled) {
