@@ -1,6 +1,6 @@
 # define the test executable
 add_executable(
-  no_command_tests
+  start_up_tests
   ${CMAKE_SOURCE_DIR}/src/application.cpp
   ${CMAKE_SOURCE_DIR}/src/registers.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/command_base.cpp
@@ -14,6 +14,7 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/src/logic/no_command.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/retract_from_finda.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/set_mode.cpp
+  ${CMAKE_SOURCE_DIR}/src/logic/start_up.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/tool_change.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/unload_filament.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/unload_to_finda.cpp
@@ -42,14 +43,14 @@ add_executable(
   ${LOGIC_STUBS_DIR}/homing.cpp
   ${LOGIC_STUBS_DIR}/main_loop_stub.cpp
   ${LOGIC_STUBS_DIR}/stub_motion.cpp
-  test_no_command.cpp
+  test_start_up.cpp
   )
 
 # define required search paths
 target_include_directories(
-  no_command_tests PUBLIC "${CMAKE_SOURCE_DIR}/src/modules" "${CMAKE_SOURCE_DIR}/src/hal"
-                          "${CMAKE_SOURCE_DIR}/src/logic"
+  start_up_tests PUBLIC "${CMAKE_SOURCE_DIR}/src/modules" "${CMAKE_SOURCE_DIR}/src/hal"
+                        "${CMAKE_SOURCE_DIR}/src/logic"
   )
 
 # tell build system about the test case
-add_catch_test(no_command_tests)
+add_catch_test(start_up_tests)

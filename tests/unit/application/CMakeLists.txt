@@ -39,6 +39,7 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/src/logic/unload_filament.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/home.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/set_mode.cpp
+  ${CMAKE_SOURCE_DIR}/src/logic/start_up.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/feed_to_finda.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/feed_to_bondtech.cpp
   ${CMAKE_SOURCE_DIR}/src/logic/retract_from_finda.cpp

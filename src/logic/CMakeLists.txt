@@ -12,6 +12,7 @@ target_sources(
           no_command.cpp
           retract_from_finda.cpp
           set_mode.cpp
+          start_up.cpp
           tool_change.cpp
           unload_filament.cpp
           unload_to_finda.cpp

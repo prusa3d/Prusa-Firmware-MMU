@@ -18,6 +18,7 @@
 #include "logic/move_selector.h"
 #include "logic/no_command.h"
 #include "logic/set_mode.h"
+#include "logic/start_up.h"
 #include "logic/tool_change.h"
 #include "logic/unload_filament.h"
 
@@ -32,7 +33,7 @@ Application application;
 
 Application::Application()
     : lastCommandProcessedMs(0)
-    , currentCommand(&logic::noCommand)
+    , currentCommand(&logic::startUp)
     , currentCommandRq(mp::RequestMsgCodes::Reset, 0) {}
 
 void __attribute__((noinline)) Application::CheckManualOperation() {

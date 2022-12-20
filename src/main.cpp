@@ -28,7 +28,7 @@
 #include "application.h"
 
 #include "logic/hw_sanity.h"
-#include "logic/no_command.h"
+#include "logic/start_up.h"
 
 /// One-time setup of HW and SW components
 /// Called before entering the loop() function
@@ -91,7 +91,7 @@ static void setup2() {
     mf::finda.BlockingInit();
 
     if (!mf::finda.CheckFINDAvsEEPROM()) {
-        logic::noCommand.SetInitError(ErrorCode::FINDA_VS_EEPROM_DISREPANCY);
+        logic::startUp.SetInitError(ErrorCode::FINDA_VS_EEPROM_DISREPANCY);
     }
 
     /// Turn off all leds
@@ -110,7 +110,7 @@ static void setup2() {
 
     if (logic::hwSanity.Error() != ErrorCode::OK) {
         // forward the issue to the logic startup handler.
-        logic::noCommand.SetInitError(logic::hwSanity.Error());
+        logic::startUp.SetInitError(logic::hwSanity.Error());
     } else {
         // Idler and Selector decide whether homing is possible/safe
         mi::idler.Init();
