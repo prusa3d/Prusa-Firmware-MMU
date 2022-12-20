@@ -22,9 +22,6 @@ public:
     /// to set correct FINDA state at startup
     void BlockingInit();
 
-    /// @returns true if there is no discrepency, false otherwise
-    bool CheckFINDAvsEEPROM();
-
     using debounce::Debouncer::Pressed;
 };
 

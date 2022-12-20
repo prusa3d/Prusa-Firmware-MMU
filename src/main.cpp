@@ -90,11 +90,7 @@ static void setup2() {
     // which is abused to let the LEDs shine for ~100ms
     mf::finda.BlockingInit();
 
-    if (!mf::finda.CheckFINDAvsEEPROM()) {
-        logic::startUp.SetInitError(ErrorCode::FINDA_VS_EEPROM_DISREPANCY);
-    }
-
-    /// Turn off all leds
+    // Turn off all leds
     for (uint8_t i = 0; i < config::toolCount; i++) {
         ml::leds.SetMode(i, ml::green, ml::off);
         ml::leds.SetMode(i, ml::red, ml::off);
@@ -103,7 +99,7 @@ static void setup2() {
 
     // Prep hardware sanity:
     logic::hwSanity.Reset(0);
-
+    // Process HW sanity checks exclusively
     while (!logic::hwSanity.StepInner()) {
         ml::leds.Step();
     }
@@ -112,6 +108,9 @@ static void setup2() {
         // forward the issue to the logic startup handler.
         logic::startUp.SetInitError(logic::hwSanity.Error());
     } else {
+        // When HW is sane, activate sequence of start up checks and let it run asynchronnously
+        logic::startUp.Reset(0);
+
         // Idler and Selector decide whether homing is possible/safe
         mi::idler.Init();
         ms::selector.Init();
