@@ -9,6 +9,7 @@
 #include "../modules/permanent_storage.h"
 #include "../modules/pulley.h"
 #include "../modules/selector.h"
+#include "../modules/user_input.h"
 #include "../debug.h"
 
 namespace logic {
@@ -23,10 +24,7 @@ bool EjectFilament::Reset(uint8_t param) {
     error = ErrorCode::RUNNING;
     slot = param;
 
-    if (mg::globals.FilamentLoaded() == mg::FilamentLoadState::NotLoaded) {
-        FinishedOK();
-        dbg_logic_P(PSTR("Already ejected"));
-    } else if (mg::globals.FilamentLoaded() >= mg::FilamentLoadState::AtPulley) {
+    if (mg::globals.FilamentLoaded() >= mg::FilamentLoadState::AtPulley) {
         state = ProgressCode::UnloadingFilament;
         unl.Reset(param); //@@TODO probably act on active extruder only
     } else {
@@ -38,8 +36,9 @@ bool EjectFilament::Reset(uint8_t param) {
 void EjectFilament::MoveSelectorAside() {
     state = ProgressCode::ParkingSelector;
     const uint8_t selectorParkedPos = (slot <= 2) ? 4 : 0;
-    mi::idler.Engage(slot);
-    ms::selector.MoveToSlot(selectorParkedPos);
+    if (ms::selector.MoveToSlot(selectorParkedPos) == ms::Selector::OperationResult::Refused) {
+        GoToErrDisengagingIdler(ErrorCode::FINDA_FLICKERS);
+    }
 }
 
 bool EjectFilament::StepInner() {
@@ -54,26 +53,46 @@ bool EjectFilament::StepInner() {
         break;
     case ProgressCode::ParkingSelector:
         if (mm::motion.QueueEmpty()) { // selector parked aside
+            state = ProgressCode::EngagingIdler;
+            mi::idler.Engage(slot);
+        }
+        break;
+    case ProgressCode::EngagingIdler:
+        if (mi::idler.Engaged()) {
             state = ProgressCode::EjectingFilament;
             mpu::pulley.InitAxis();
-            mpu::pulley.PlanMove(-config::filamentMinLoadedToMMU, config::pulleySlowFeedrate);
+            mpu::pulley.PlanMove(config::ejectFromCuttingEdge, config::pulleySlowFeedrate);
         }
         break;
     case ProgressCode::EjectingFilament:
         if (mm::motion.QueueEmpty()) { // filament ejected
-            state = ProgressCode::DisengagingIdler;
-            mi::idler.Disengage();
+            GoToErrDisengagingIdler(ErrorCode::FILAMENT_EJECTED);
         }
         break;
-    case ProgressCode::DisengagingIdler:
-        if (mi::idler.Disengaged()) { // idler disengaged
-            mpu::pulley.Disable();
-            mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::NotLoaded);
-            FinishedOK();
+    case ProgressCode::ERRDisengagingIdler:
+        ErrDisengagingIdler();
+        return false;
+    case ProgressCode::ERRWaitingForUser: {
+        // waiting for user buttons and/or a command from the printer
+        mui::Event ev = mui::userInput.ConsumeEvent();
+        switch (ev) {
+        case mui::Event::Middle:
+            switch (error) {
+            case ErrorCode::FILAMENT_EJECTED: // the user clicked "Done", we can finish the Eject operation
+                FinishedOK();
+                break;
+            case ErrorCode::FINDA_FLICKERS:
+                MoveSelectorAside();
+                break;
+            default:
+                break;
+            }
+        default:
+            break;
         }
-        break;
+        return false;
+    }
     case ProgressCode::OK:
-        dbg_logic_fP(PSTR("FilamentLoadState after Eject %d"), mg::globals.FilamentLoaded());
         return true;
     default: // we got into an unhandled state, better report it
         state = ProgressCode::ERRInternal;
