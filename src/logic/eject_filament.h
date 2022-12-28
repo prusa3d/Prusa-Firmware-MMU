@@ -19,7 +19,11 @@ static constexpr modules::motion::P_speed_t ejectSpeed = 1000.0_P_mm_s; //@@TODO
 /// - If there is still some filament detected by PINDA unload it first.
 /// - If we want to eject fil 0-2, move selector to position 4 (right).
 /// - If we want to eject fil 3-4, move selector to position 0 (left)
+/// - emit a message to the user: Filament ejected, press Continue to confirm removal and finish (or something like that)
 /// Optionally, we can also move the selector to its service position in the future.
+///
+/// Technically, the hardest part is the UI - emitting a message. But, we have the MMU error screens.
+/// The Eject message is not an error, but we'll leverage existing infrastructure of error screens + user input to model a nice UI dialog.
 class EjectFilament : public CommandBase {
 public:
     inline EjectFilament()
