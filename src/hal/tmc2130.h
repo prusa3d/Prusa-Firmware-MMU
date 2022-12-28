@@ -33,6 +33,11 @@ struct MotorCurrents {
     bool vSense; ///< VSense current scaling
     uint8_t iRun; ///< Running current
     uint8_t iHold; ///< Holding current
+
+    constexpr MotorCurrents(uint8_t ir, uint8_t ih)
+        : vSense((ir < 32) ? 1 : 0)
+        , iRun((ir < 32) ? ir : (ir >> 1))
+        , iHold((ir < 32) ? ih : (ih >> 1)) {}
 };
 
 struct __attribute__((packed)) ErrorFlags {
