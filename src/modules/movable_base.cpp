@@ -25,8 +25,15 @@ void MovableBase::PlanHome() {
 
 void MovableBase::SetCurrents(uint8_t iRun, uint8_t iHold) {
     hal::tmc2130::MotorCurrents tempCurrent = mm::axisParams[axis].currents;
-    tempCurrent.iRun = iRun;
-    tempCurrent.iHold = iHold;
+    if (iRun < 32) {
+        tempCurrent.vSense = 1;
+        tempCurrent.iRun = iRun;
+        tempCurrent.iHold = iHold;
+    } else {
+        tempCurrent.vSense = 0;
+        tempCurrent.iRun = iRun >> 1;
+        tempCurrent.iHold = iHold >> 1;
+    }
     mm::motion.DriverForAxis(axis).SetCurrents(mm::axisParams[axis].params, tempCurrent);
 }
 
