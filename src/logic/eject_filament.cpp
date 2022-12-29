@@ -90,7 +90,7 @@ bool EjectFilament::StepInner() {
         default:
             break;
         }
-        return false;
+        break;
     }
     case ProgressCode::OK:
         return true;

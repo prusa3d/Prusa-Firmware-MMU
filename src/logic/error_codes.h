@@ -49,10 +49,15 @@ enum class ErrorCode : uint_fast16_t {
     FINDA_FLICKERS = 0x800a, ///< FINDA flickers - seems to be badly calibrated and happens to be pressed at spots where it used to be not pressed before.
     ///< The user is obliged to inspect FINDA and tune its switching
 
-    FILAMENT_EJECTED = 0x800b, ///< Filament was ejected, waiting for user input - technically, this is not an error
+    MOVE_FAILED = 0x800b, ///< generic move failed error - always reported with the corresponding axis bit set (Idler or Selector) as follows:
+    MOVE_SELECTOR_FAILED = MOVE_FAILED | TMC_SELECTOR_BIT, ///< E32905 the Selector was unable to move to desired position properly - that means something is blocking its movement, e.g. a piece of filament got out of pulley body
+    MOVE_IDLER_FAILED = MOVE_FAILED | TMC_IDLER_BIT, ///< E33033 the Idler was unable to move - unused at the time of creation, but added for completeness
+    MOVE_PULLEY_FAILED = MOVE_FAILED | TMC_PULLEY_BIT, ///< E32841 the Pulley was unable to move - unused at the time of creation, but added for completeness
 
+    FILAMENT_EJECTED = 0x800c, ///< Filament was ejected, waiting for user input - technically, this is not an error
+
+    LOAD_TO_EXTRUDER_FAILED = 0x802a, ///< E32811 internal error of the printer - try-load-unload sequence detected missing filament -> failed load into the nozzle
     QUEUE_FULL = 0x802b, ///< E32811 internal logic error - attempt to move with a full queue
-
     VERSION_MISMATCH = 0x802c, ///< E32812 internal error of the printer - incompatible version of the MMU FW
     PROTOCOL_ERROR = 0x802d, ///< E32813 internal error of the printer - communication with the MMU got garbled - protocol decoder couldn't decode the incoming messages
     MMU_NOT_RESPONDING = 0x802e, ///< E32814 internal error of the printer - communication with the MMU is not working
