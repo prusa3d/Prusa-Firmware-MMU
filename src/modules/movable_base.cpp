@@ -38,8 +38,9 @@ MovableBase::OperationResult MovableBase::InitMovement() {
 }
 
 MovableBase::OperationResult __attribute__((noinline)) MovableBase::InitMovementNoReinitAxis() {
+    hal::tmc2130::MotorCurrents c = mm::motion.CurrentsForAxis(axis);
+    SetCurrents(c.iRun, c.iHold);
     PrepareMoveToPlannedSlot();
-    // @@TODO update axis currents at this spot?
     state = Moving;
     return OperationResult::Accepted;
 }
