@@ -161,10 +161,53 @@ void TMC2130::SetBridgeOutput(const MotorParams &params, bool bOn) {
 }
 
 void TMC2130::SetCurrents(const MotorParams &params, const MotorCurrents &currents) {
-    uint32_t ihold_irun = (uint32_t)(currents.iHold & 0x1F) << 0 // ihold
-        | (uint32_t)(currents.iRun & 0x1F) << 8 // irun
-        | (uint32_t)(15 & 0x0F) << 16; // IHOLDDELAY
-    WriteRegister(params, Registers::IHOLD_IRUN, ihold_irun);
+    uint8_t iHold = currents.iHold;
+    const uint8_t iRun = currents.iRun;
+
+    //    uint32_t ihold_irun = (uint32_t)(iHold & 0x1F) << 0 // ihold
+    //        | (uint32_t)(iRun & 0x1F) << 8 // irun
+    //        | (uint32_t)(15 & 0x0F) << 16; // IHOLDDELAY
+    // Rewriting the above code into a union makes it 18B shorter
+    // Obviously, those bit shifts and ORs were not understood correctly by the compiler...
+    // Now it looks nice:
+    // 15f6: push r16
+    // 15f8: push r17
+    // 15fa: movw r30, r20
+    // 15fc: ldd r16, Z+2
+    // 15fe: ldd r18, Z+1
+    // 1600: mov r17, r18
+    // 1602: andi r17, 0x1F
+    // 1604: cp r18, r16
+    // 1606: brcs .+18      ; 0x161a
+    // 1608: andi r16, 0x1F
+    // 160a: ldi r18, 0x0F
+    // 160c: ldi r19, 0x00
+    // 160e: ldi r20, 0x10
+    // 1610: call 0x1452    ; 0x1452 <hal::tmc2130::TMC2130::WriteRegister(...
+    // 1614: pop r17
+    // 1616: pop r16
+    // 1618: ret
+    // 161a: mov r16, r17
+    // 161c: rjmp .-20      ; 0x160a
+    union IHoldRun {
+        struct S {
+            uint8_t iHold;
+            uint8_t iRun;
+            uint16_t iHoldDelay;
+            constexpr S(uint8_t ih, uint8_t ir)
+                : iHold(ih)
+                , iRun(ir)
+                , iHoldDelay(15 & 0x0F) {}
+        } s;
+        uint32_t dw;
+        constexpr IHoldRun(uint8_t ih, uint8_t ir)
+            : s(ih, ir) {}
+    };
+
+    // also, make sure iHold never exceeds iRun at runtime
+    IHoldRun ihold_irun((iHold > iRun ? iRun : iHold) & 0x1f, iRun & 0x1f);
+
+    WriteRegister(params, Registers::IHOLD_IRUN, ihold_irun.dw);
 }
 
 void TMC2130::SetSGTHRS(const MotorParams &params) {
