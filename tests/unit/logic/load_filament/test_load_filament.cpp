@@ -122,51 +122,6 @@ void FailedLoadToFinda(uint8_t slot, logic::LoadFilament &lf) {
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));
 }
 
-//void FailedLoadToFindaResolveHelp(uint8_t slot, logic::LoadFilament &lf) {
-//    // Stage 3 - the user has to do something
-//    // there are 3 options:
-//    // - help the filament a bit
-//    // - try again the whole sequence
-//    // - resolve the problem by hand - after pressing the button we shall check, that FINDA is off and we should do what?
-
-//    // In this case we check the first option
-//    PressButtonAndDebounce(lf, mb::Left, false);
-
-//    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERREngagingIdler));
-
-//    if (!mi::idler.HomingValid()) {
-//        SimulateIdlerHoming(lf);
-//    }
-
-//    // Stage 4 - engage the idler
-//    REQUIRE(WhileTopState(lf, ProgressCode::ERREngagingIdler, idlerEngageDisengageMaxSteps));
-
-//    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRHelpingFilament));
-
-//    ClearButtons(lf);
-//}
-
-//void FailedLoadToFindaResolveHelpFindaTriggered(uint8_t slot, logic::LoadFilament &lf) {
-//    // Stage 5 - move the pulley a bit - simulate FINDA depress
-//    REQUIRE(WhileCondition(
-//        lf,
-//        [&](uint32_t step) -> bool {
-//        if(step == 100){ // on 100th step make FINDA trigger
-//            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
-//        }
-//        return lf.TopLevelState() == ProgressCode::ERRHelpingFilament; },
-//        5000));
-
-//    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
-//}
-
-//void FailedLoadToFindaResolveHelpFindaDidntTrigger(uint8_t slot, logic::LoadFilament &lf) {
-//    // Stage 5 - move the pulley a bit - no FINDA change
-//    REQUIRE(WhileTopState(lf, ProgressCode::ERRHelpingFilament, 5000));
-
-//    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
-//}
-
 void FailedLoadToFindaResolveManual(uint8_t slot, logic::LoadFilament &lf) {
     // simulate the user fixed the issue himself
 
@@ -240,26 +195,6 @@ void FailedLoadToFindaResolveTryAgain(uint8_t slot, logic::LoadFilament &lf) {
     LoadFilamentSuccessfulWithRehomeSelector(slot, lf);
 }
 
-//TEST_CASE("load_filament::failed_load_to_finda_0-4_resolve_help_second_ok", "[load_filament]") {
-//    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
-//        logic::LoadFilament lf;
-//        LoadFilamentCommonSetup(slot, lf, true);
-//        FailedLoadToFinda(slot, lf);
-//        FailedLoadToFindaResolveHelp(slot, lf);
-//        FailedLoadToFindaResolveHelpFindaTriggered(slot, lf);
-//    }
-//}
-
-//TEST_CASE("load_filament::failed_load_to_finda_0-4_resolve_help_second_fail", "[load_filament]") {
-//    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
-//        logic::LoadFilament lf;
-//        LoadFilamentCommonSetup(slot, lf, true);
-//        FailedLoadToFinda(slot, lf);
-//        FailedLoadToFindaResolveHelp(slot, lf);
-//        FailedLoadToFindaResolveHelpFindaDidntTrigger(slot, lf);
-//    }
-//}
-
 TEST_CASE("load_filament::invalid_slot", "[load_filament]") {
     for (uint8_t activeSlot = 0; activeSlot < config::toolCount; ++activeSlot) {
         logic::LoadFilament lf;
@@ -282,15 +217,6 @@ TEST_CASE("load_filament::state_machine_reusal", "[load_filament]") {
         }
     }
 }
-
-//TEST_CASE("load_filament::failed_load_to_finda_0-4_resolve_manual", "[load_filament]") {
-//    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
-//        logic::LoadFilament lf;
-//        LoadFilamentCommonSetup(slot, lf, true);
-//        FailedLoadToFinda(slot, lf);
-//        FailedLoadToFindaResolveManual(slot, lf);
-//    }
-//}
 
 TEST_CASE("load_filament::failed_load_to_finda_0-4_resolve_manual_no_FINDA", "[load_filament]") {
     for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
