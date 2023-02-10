@@ -212,33 +212,6 @@ void ToolChangeFailLoadToFinda(logic::ToolChange &tc, uint8_t fromSlot, uint8_t 
     SimulateErrDisengagingIdler(tc, ErrorCode::FINDA_DIDNT_SWITCH_ON);
 }
 
-//void ToolChangeFailLoadToFindaLeftBtn(logic::ToolChange &tc, uint8_t toSlot) {
-//    // now waiting for user input
-//    REQUIRE_FALSE(mui::userInput.AnyEvent());
-//    PressButtonAndDebounce(tc, mb::Left, true);
-
-//    REQUIRE(WhileTopState(tc, ProgressCode::ERREngagingIdler, 5000UL));
-//    ClearButtons(tc);
-
-//    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, false, true, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRHelpingFilament));
-
-//    // try push more, if FINDA triggers, continue loading
-//    REQUIRE(WhileCondition(
-//        tc,
-//        [&](uint32_t step) -> bool {
-//        if(step == 20){ // on 20th step make FINDA trigger
-//            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::high);
-//        }
-//        return tc.TopLevelState() == ProgressCode::ERRHelpingFilament; },
-//        2000UL));
-
-//    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, toSlot, toSlot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToBondtech));
-
-//    FeedingToBondtech(tc, toSlot);
-
-//    CheckFinishedCorrectly(tc, toSlot);
-//}
-
 void ToolChangeFailLoadToFindaMiddleBtn(logic::ToolChange &tc, uint8_t toSlot) {
     // now waiting for user input
     REQUIRE_FALSE(mui::userInput.AnyEvent());
@@ -313,18 +286,6 @@ void ToolChangeFailLoadToFindaRightBtn(logic::ToolChange &tc, uint8_t toSlot) {
     ClearButtons(tc);
 }
 
-//TEST_CASE("tool_change::load_fail_FINDA_resolve_btnL", "[tool_change]") {
-//    logic::ToolChange tc;
-//    for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
-//        for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
-//            if (fromSlot != toSlot) {
-//                ToolChangeFailLoadToFinda(tc, fromSlot, toSlot);
-//                ToolChangeFailLoadToFindaLeftBtn(tc, toSlot);
-//            }
-//        }
-//    }
-//}
-
 TEST_CASE("tool_change::load_fail_FINDA_resolve_btnM", "[tool_change]") {
     logic::ToolChange tc;
     for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
@@ -336,30 +297,6 @@ TEST_CASE("tool_change::load_fail_FINDA_resolve_btnM", "[tool_change]") {
         }
     }
 }
-
-//TEST_CASE("tool_change::load_fail_FINDA_resolve_btnR_FINDA_FSensor", "[tool_change]") {
-//    logic::ToolChange tc;
-//    for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
-//        for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
-//            if (fromSlot != toSlot) {
-//                ToolChangeFailLoadToFinda(tc, fromSlot, toSlot);
-//                ToolChangeFailLoadToFindaRightBtnFINDA_FSensor(tc, toSlot);
-//            }
-//        }
-//    }
-//}
-
-//TEST_CASE("tool_change::load_fail_FINDA_resolve_btnR_FINDA", "[tool_change]") {
-//    logic::ToolChange tc;
-//    for (uint8_t fromSlot = 0; fromSlot < config::toolCount; ++fromSlot) {
-//        for (uint8_t toSlot = 0; toSlot < config::toolCount; ++toSlot) {
-//            if (fromSlot != toSlot) {
-//                ToolChangeFailLoadToFinda(tc, fromSlot, toSlot);
-//                ToolChangeFailLoadToFindaRightBtnFINDA(tc, toSlot);
-//            }
-//        }
-//    }
-//}
 
 void ToolChangeFailFSensor(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
     using namespace std::placeholders;
