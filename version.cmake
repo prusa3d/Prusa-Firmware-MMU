@@ -10,6 +10,6 @@ set(PROJECT_VERSION_MINOR
     CACHE STRING "Project minor version" FORCE
     )
 set(PROJECT_VERSION_REV
-    6
+    7
     CACHE STRING "Project revision" FORCE
     )
