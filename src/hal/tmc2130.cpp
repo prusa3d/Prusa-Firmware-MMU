@@ -3,11 +3,13 @@
 #include "../config/config.h"
 #include "../debug.h"
 
-//! @brief Translate current to tmc2130 vsense and IHOLD or IRUN - copied from MK3 FW repo
+//! @defgroup TMC2130 current to value translation table
+//! @{
+//! @brief Translate current to tmc2130 vsense and IHOLD or IRUN - copied from MK3 FW repo.
 //! @param cur current in mA
 //! @return 0 .. 63
-//! @n most significant bit is CHOPCONF vsense bit (sense resistor voltage based current scaling)
-//! @n rest is to be used in IRUN or IHOLD register
+//! @n most significant bit is CHOPCONF vsense bit (sense resistor voltage based current scaling).
+//! @n rest is to be used in IRUN or IHOLD register.
 //!
 //! | mA   | trinamic register | note |
 //! | ---  | ---               | ---  |
@@ -74,6 +76,8 @@
 //! | 1000 | 61 | |
 //! | 1020 | 62 | |
 //! | 1029 | 63 | |
+//! @}
+
 namespace hal {
 namespace tmc2130 {
 

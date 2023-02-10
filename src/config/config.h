@@ -71,22 +71,22 @@ static constexpr uint8_t feedToBondtechMaxRetries = 2;
 static constexpr U_mm pulleyToCuttingEdge = 33.0_mm; /// 33.0_mm /// Pulley to cutting edge.
 /// Case 1: FINDA working: This should be the max retraction after FINDA un-triggers.
 /// Case 2: FINDA not working: calculate retraction from printer to this point.
-static constexpr U_mm filamentMinLoadedToMMU = 20.0_mm; /// 20.0_mm ??? /// Limit of retraction. @TODO find correct distance.
+static constexpr U_mm filamentMinLoadedToMMU = 20.0_mm; /// Limit of retraction.
 static constexpr U_mm ejectFromCuttingEdge = 40.0_mm; /// Eject should ignore FilamentMinLoadedToMMU and retract
-static constexpr U_mm cuttingEdgeRetract = 5.0_mm; /// 3.0_mm /// Cutting retraction distance (filament should be flush with outlet) @TODO find correct distance.
-static constexpr U_mm cuttingEdgeToFinda = 18.5_mm; /// 18.5_mm -1.0_mm /// Cutting edge to FINDA MMU2 side -1mm tolerance should be ~18.5. FINDA shouldn't trigger here.
-static constexpr U_mm findaTriggerDistance = 4.5_mm; /// 9.0_mm /// FINDA trigger distance +1.0_mm tolerance.
+static constexpr U_mm cuttingEdgeRetract = 5.0_mm; /// Cutting retraction distance (filament should be flush with outlet)
+static constexpr U_mm cuttingEdgeToFinda = 18.5_mm; /// Cutting edge to FINDA MMU2 side -1mm tolerance should be ~18.5. FINDA shouldn't trigger here.
+static constexpr U_mm findaTriggerDistance = 4.5_mm; /// FINDA trigger distance +1.0_mm tolerance.
 static constexpr U_mm cuttingEdgeToFindaMidpoint = 22.85_mm; /// Cutting edge to Midpoint of FINDA should be 22.85_mm.
-static constexpr U_mm findaToCoupler = 12.0_mm; /// 12.0_mm /// FINDA Coupler side to coupler screw.
-static constexpr U_mm couplerToBowden = 3.5_mm; /// 3.5_mm /// FINDA Coupler screw to bowden mmu2s side (in coupling).
+static constexpr U_mm findaToCoupler = 12.0_mm; /// FINDA Coupler side to coupler screw.
+static constexpr U_mm couplerToBowden = 3.5_mm; /// FINDA Coupler screw to bowden mmu2s side (in coupling).
 
 // @@TODO this is very tricky - the same MMU, same PTFE,
 // just another piece of PLA (probably having more resistance in the tubes)
 // and we are at least 40mm off! It looks like this really depends on the exact position
 // We'll probably need to check for StallGuard while pushing the filament to avoid ginding the filament
-static constexpr U_mm defaultBowdenLength = 427.0_mm; ///< ~427.0_mm - Default Bowden length. @TODO Should be stored in EEPROM. 392 a 784
-static constexpr U_mm minimumBowdenLength = 341.0_mm; ///< ~341.0_mm - Minimum bowden length. @TODO Should be stored in EEPROM.
-static constexpr U_mm maximumBowdenLength = 792.0_mm; ///< ~792.0_mm - Maximum bowden length. @TODO Should be stored in EEPROM.
+static constexpr U_mm defaultBowdenLength = 427.0_mm; ///< ~427.0_mm - Default Bowden length. TODO Should be stored in EEPROM. 392 a 784
+static constexpr U_mm minimumBowdenLength = 341.0_mm; ///< ~341.0_mm - Minimum bowden length. TODO Should be stored in EEPROM.
+static constexpr U_mm maximumBowdenLength = 792.0_mm; ///< ~792.0_mm - Maximum bowden length. TODO Should be stored in EEPROM.
 static constexpr U_mm feedToFinda = cuttingEdgeToFindaMidpoint + filamentMinLoadedToMMU;
 static constexpr U_mm maximumFeedToFinda = feedToFinda + 20.0_mm; ///< allow for some safety margin to load to FINDA
 static constexpr U_mm pulleyHelperMove = 10.0_mm; ///< Helper move for Load/Unload error states - when the MMU should slowly move the filament a bit
@@ -136,7 +136,7 @@ static constexpr uint8_t selectorCutIRun = 40; ///< 660mA
 
 /// Selector motion limits
 static constexpr SelectorLimits selectorLimits = {
-    .lenght = 75.0_mm, // @@TODO how does this relate to SelectorOffsetFromMin?
+    .lenght = 75.0_mm, // TODO how does this relate to SelectorOffsetFromMin?
     .jerk = 1.0_mm_s,
     .accel = 200.0_mm_s2,
 };
@@ -213,7 +213,7 @@ static constexpr U_deg idlerIntermediateSlotPositions[toolCount + 1] = {
     IdlerOffsetFromHome ///18.0_deg Fully disengaged all slots
 };
 
-static constexpr U_deg idlerParkPositionDelta = -IdlerSlotDistance + 5.0_deg / 2; ///@TODO verify
+static constexpr U_deg idlerParkPositionDelta = -IdlerSlotDistance + 5.0_deg / 2; // TODO verify
 
 static constexpr U_deg_s idlerFeedrate = 300._deg_s;
 static constexpr U_deg_s idlerHomingFeedrate = 265._deg_s;

@@ -115,9 +115,9 @@ static constexpr AU unitToAxisUnit(U v) {
 /// Convert an AxisUnit to a physical unit with a truncated integer type (normally int32_t).
 /// Inverse of unitToAxisUnit, with the additional constraint that type casts are
 /// performed earlier so that no floating point computation is required at runtime.
-/// @param U Base unit type (normally U_mm)
-/// @param AU AxisUnit type (implicit)
-/// @param T Resulting integer type
+/// @tparam U Base unit type (normally U_mm)
+/// @tparam AU AxisUnit type (implicit)
+/// @tparam T Resulting integer type
 /// @param v Value to truncate
 /// @param mul Optional pre-multiplier
 /// @returns Truncated unit (v * mul)

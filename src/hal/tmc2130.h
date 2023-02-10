@@ -101,7 +101,7 @@ public:
     void SetCurrents(const MotorParams &params, const MotorCurrents &currents);
 
     /// Set StallGuard threshold
-    /// New SGTHRS must be already set in @params
+    /// New SGTHRS must be already set in @p params
     /// Beware - there are no checks, new value is written into the TMC register immediately.
     /// It is advised to prefer setting the SGTHRS via the Init() method.
     void SetSGTHRS(const MotorParams &params);

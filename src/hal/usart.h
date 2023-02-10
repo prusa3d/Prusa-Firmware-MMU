@@ -49,14 +49,14 @@ public:
     /// @param str pointer to a string in RAM to be pushed byte-by-byte into the TX buffer (to be sent)
     /// No NL character is appended
     void WriteS(const char *str);
-    /// @param str pointer to a string in PROGMEM to be pushed byte-by-byte into the TX buffer (to be sent)
+    /// @param str_P pointer to a string in PROGMEM to be pushed byte-by-byte into the TX buffer (to be sent)
     /// No NL character is appended
     void WriteS_P(const char *str_P);
 
     /// @param str c string to be sent. NL is appended
     /// Works on RAM strings
     void puts(const char *str);
-    /// @param str c string to be sent. NL is appended
+    /// @param str_P c string to be sent. NL is appended
     /// Works on PROGMEM strings
     void puts_P(const char *str_P);
     /// @returns true if there is at least one byte free in the TX buffer (i.e. some space to add a character to be sent)
