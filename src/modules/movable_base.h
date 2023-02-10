@@ -70,7 +70,7 @@ public:
 
     /// Set TMC2130 iRun current level for this axis
     /// iRun == 0 means set the default from config
-    void __attribute__((noinline)) SetCurrents(uint8_t iRun, uint8_t iHold);
+    void SetCurrents(uint8_t iRun, uint8_t iHold);
 
 #ifndef UNITTEST
 protected:

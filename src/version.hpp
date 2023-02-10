@@ -1,4 +1,4 @@
-/// @file version.h
+/// @file
 #pragma once
 #include <stdint.h>
 

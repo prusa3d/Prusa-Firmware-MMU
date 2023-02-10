@@ -24,7 +24,6 @@ public:
         : CommandBase() {}
 
     /// Restart the automaton
-    /// @param param unused
     bool Reset(uint8_t /*param*/) override;
 
     /// @returns true if the state machine finished its job, false otherwise

@@ -182,8 +182,7 @@ public:
 
     /// Encode response to Query operation status
     /// @param msg source request message for this response
-    /// @param code status of operation (Processing, Error, Finished)
-    /// @param value related to status of operation(e.g. error code or progress)
+    /// @param rcs status of operation (Processing, Error, Finished)
     /// @param txbuff where to format the message
     /// @returns number of bytes written into txbuff
     static uint8_t EncodeResponseQueryOperation(const RequestMsg &msg, ResponseCommandStatus rcs, uint8_t *txbuff);

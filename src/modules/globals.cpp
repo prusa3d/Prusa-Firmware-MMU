@@ -48,7 +48,7 @@ FilamentLoadState Globals::FilamentLoaded() const {
     return filamentLoaded;
 }
 
-void Globals::SetFilamentLoaded(uint8_t slot, FilamentLoadState newFilamentLoaded) {
+void __attribute__((noinline)) Globals::SetFilamentLoaded(uint8_t slot, FilamentLoadState newFilamentLoaded) {
     filamentLoaded = newFilamentLoaded;
     SetActiveSlot(slot);
     switch (newFilamentLoaded) {
