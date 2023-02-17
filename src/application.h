@@ -46,6 +46,7 @@ private:
     void ReportReadRegister(const mp::RequestMsg &rq);
     void ReportWriteRegister(const mp::RequestMsg &rq);
     void ProcessRequestMsg(const mp::RequestMsg &rq);
+    void ProcessReset(uint8_t resetType);
 
     uint16_t lastCommandProcessedMs;
 
