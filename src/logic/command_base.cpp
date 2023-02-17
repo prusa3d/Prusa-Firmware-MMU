@@ -99,7 +99,16 @@ bool CommandBase::WaitForOneModuleErrorRecovery(ErrorCode ec, modules::motion::M
                 mui::Event ev = mui::userInput.ConsumeEvent();
                 if (ev == mui::Event::Middle) {
                     recoveringMovableErrorAxisMask |= axisMask;
-                    m.PlanHome(); // force initiate a new homing attempt
+
+                    // @@TODO this may be the best spot to initiate rehoming of BOTH movables - Idler AND Selector.
+                    // It is merely a workaround to allow disabling power to both axes when one of the fails to home - to allow servicing.
+
+                    //m.PlanHome(); // force initiate a new homing attempt
+                    mi::idler.InvalidateHoming();
+                    mi::idler.PlanHome();
+                    ms::selector.InvalidateHoming();
+                    ms::selector.PlanHome();
+
                     state = ProgressCode::Homing;
                     error = ErrorCode::RUNNING;
                 }
@@ -129,6 +138,7 @@ bool CommandBase::WaitForOneModuleErrorRecovery(ErrorCode ec, modules::motion::M
 }
 
 bool CommandBase::WaitForModulesErrorRecovery() {
+    // Beware, the order is important, Idler must come before Selector because of homing precedence.
     bool rv = WaitForOneModuleErrorRecovery(CheckMovable(mi::idler), mi::idler, 0x1);
     rv |= WaitForOneModuleErrorRecovery(CheckMovable(ms::selector), ms::selector, 0x2);
     rv |= WaitForOneModuleErrorRecovery(CheckMovable(mpu::pulley), mpu::pulley, 0x4);

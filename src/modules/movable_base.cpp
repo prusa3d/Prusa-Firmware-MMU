@@ -88,7 +88,13 @@ void MovableBase::HomeFailed() {
     // we ran out of planned moves but no StallGuard event has occurred
     // or the measured length of axis was not within the accepted tolerance
     homingValid = false;
-    mm::motion.Disable(axis); // disable power to the axis - allows the user to do something with the device manually
+
+    // Explicitly cut the power to all the axes, the user will probably want to move one or the other.
+    // Rehoming of all the axes will happen after the error gets resolved.
+    mm::motion.Disable(mm::Idler);
+    mm::motion.Disable(mm::Selector);
+    mm::motion.Disable(mm::Pulley);
+
     state = HomingFailed;
 }
 
