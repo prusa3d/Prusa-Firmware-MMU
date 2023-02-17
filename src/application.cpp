@@ -184,39 +184,39 @@ void Application::ReportWriteRegister(const mp::RequestMsg &rq) {
 /// Intended only for visualization of EEPROM reset, not to be used in while the MMU is running normally
 namespace EEPROMResetVis {
 
-static void Delay(){
+static void Delay() {
     uint32_t start = mt::timebase.Millis();
-    while( ! mt::timebase.Elapsed(start, 100) ){
+    while (!mt::timebase.Elapsed(start, 50)) {
         ml::leds.Step();
     }
 }
 
-static void __attribute__((noinline)) Green(uint8_t i){
+static void __attribute__((noinline)) Green(uint8_t i) {
     ml::leds.SetPairButOffOthers(i, ml::on, ml::off);
     Delay();
 }
 
-static void __attribute__((noinline)) Red(uint8_t i){
-    ml::leds.SetPairButOffOthers(i, ml::on, ml::off);
+static void __attribute__((noinline)) Red(uint8_t i) {
+    ml::leds.SetPairButOffOthers(i, ml::off, ml::on);
     Delay();
 }
 
-static void Run(){
-    for(uint8_t i = 0; i < ml::leds.LedPairsCount(); ++i){
-        Green(i);
+static void Run() {
+    for (uint8_t i = 0; i < ml::leds.LedPairsCount(); ++i) {
         Red(i);
+        Green(i);
     }
-    for(uint8_t i = ml::leds.LedPairsCount(); i != 0; --i){
-        Red(i);
+    for (uint8_t i = ml::leds.LedPairsCount(); i != 0; --i) {
         Green(i);
+        Red(i);
     }
 }
 
 } // namespace EEPROMResetVis
 
-void Application::ProcessReset(uint8_t resetType){
-    switch(resetType){
-    case 42: // perform an EEPROM reset if the resetType == The Answer to the Ultimate Question of Life, the Universe, and Everything :)
+void Application::ProcessReset(ResetTypes resetType) {
+    switch (resetType) {
+    case ResetTypes::EEPROMAndSoftware: // perform an EEPROM reset if the resetType == The Answer to the Ultimate Question of Life, the Universe, and Everything :)
         mps::EraseAll();
         EEPROMResetVis::Run();
         [[fallthrough]];
@@ -242,7 +242,7 @@ void Application::ProcessRequestMsg(const mp::RequestMsg &rq) {
         break;
     case mp::RequestMsgCodes::Reset:
         // immediately reset the board - there is no response in this case
-        ProcessReset(rq.value);
+        ProcessReset((ResetTypes)rq.value);
         break;
     case mp::RequestMsgCodes::Version:
     case mp::RequestMsgCodes::Read:

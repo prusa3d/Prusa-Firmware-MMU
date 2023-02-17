@@ -26,6 +26,16 @@ public:
     uint8_t CurrentProgressCode();
     uint16_t CurrentErrorCode();
 
+    /// Types of Reset parameters
+    enum class ResetTypes : uint8_t {
+        Software = 0,
+        EEPROMAndSoftware = 42,
+    };
+
+    /// Performs a reset of the MMU board.
+    /// @param resetType == EEPROMAndSoftware, the EEPROM is cleared before resetting the board. Otherwise the MMU board "just" resets.
+    void ProcessReset(ResetTypes resetType);
+
 #ifndef UNITTEST
 private:
 #endif
@@ -46,7 +56,6 @@ private:
     void ReportReadRegister(const mp::RequestMsg &rq);
     void ReportWriteRegister(const mp::RequestMsg &rq);
     void ProcessRequestMsg(const mp::RequestMsg &rq);
-    void ProcessReset(uint8_t resetType);
 
     uint16_t lastCommandProcessedMs;
 

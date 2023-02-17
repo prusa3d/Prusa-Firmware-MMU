@@ -82,13 +82,16 @@ static void setup() {
     ml::leds.Step();
 
     mu::cdc.Init();
+
+    mb::buttons.Step();
 }
 
 /// Second part of setup - executed with interrupts enabled
 static void setup2() {
     // waits at least finda debounce period
-    // which is abused to let the LEDs shine for ~100ms
+    // which is abused to let the LEDs shine for ~100ms and let the buttons "debounce" during that period
     mf::finda.BlockingInit();
+    mb::buttons.Step();
 
     // Turn off all leds
     for (uint8_t i = 0; i < config::toolCount; i++) {
@@ -96,6 +99,13 @@ static void setup2() {
         ml::leds.SetMode(i, ml::red, ml::off);
     }
     ml::leds.Step();
+    mb::buttons.Step();
+
+    // Check left button pressed -> EEPROM reset - we cannot reliably check for multiple buttons due to electrical design
+    if (mb::buttons.ButtonPressed(mb::Left)) {
+        application.ProcessReset(Application::ResetTypes::EEPROMAndSoftware);
+        // note: there is no need to perform anything else, ProcessReset will just reboot the board
+    }
 
     // Prep hardware sanity:
     logic::hwSanity.Reset(0);
