@@ -18,7 +18,8 @@ public:
         HomeForward,
         HomeBack,
         TMCFailed,
-        HomingFailed
+        HomingFailed,
+        OnHold,
     };
 
     /// Operation (Engage/Disengage/MoveToSlot) return values
@@ -71,6 +72,11 @@ public:
     /// Set TMC2130 iRun current level for this axis
     /// iRun == 0 means set the default from config
     void SetCurrents(uint8_t iRun, uint8_t iHold);
+
+    /// Puts the movable on-hold
+    void HoldOn() { state = OnHold; }
+    /// Allows the movable to move/home again
+    void Resume() { state = Ready; }
 
 #ifndef UNITTEST
 protected:
