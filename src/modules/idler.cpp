@@ -148,6 +148,8 @@ bool Idler::Step() {
             return false;
         }
         return true;
+    case OnHold:
+        return true; // just wait, do nothing!
     case TMCFailed:
         dbg_logic_P(PSTR("Idler Failed"));
     default:

@@ -122,6 +122,7 @@ bool LoadFilament::StepInner() {
         mui::Event ev = mui::userInput.ConsumeEvent();
         switch (ev) {
         case mui::Event::Middle: // try again the whole sequence
+            ResumeIdlerSelector();
             // however it depends on the state of FINDA - if it is on, we must perform unload first
             if (!mf::finda.Pressed()) {
                 Reset2(false);

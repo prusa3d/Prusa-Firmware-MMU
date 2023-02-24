@@ -77,6 +77,7 @@ bool EjectFilament::StepInner() {
         mui::Event ev = mui::userInput.ConsumeEvent();
         switch (ev) {
         case mui::Event::Middle:
+            ResumeIdlerSelector();
             switch (error) {
             case ErrorCode::FILAMENT_EJECTED: // the user clicked "Done", we can finish the Eject operation
                 FinishedOK();

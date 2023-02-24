@@ -95,12 +95,19 @@ public:
     /// filament presence according to known sensors (FINDA+FSensor)
     static void InvalidateHomingAndFilamentState();
 
+    /// Put Idler and Selector on-hold - they shall not move (not even home) until ResumeIdlerSelector is called
+    static void HoldIdlerSelector();
+
+    /// Allow Idler and Selector to move/home again. Any move needs to be newly planned.
+    static void ResumeIdlerSelector();
+
 #ifndef UNITTEST
 protected:
 #endif
     /// @returns true if the slot/tool index is within specified range (0 - config::toolCount)
     /// If not, it returns false and sets the error to ErrorCode::INVALID_TOOL
-    bool CheckToolIndex(uint8_t index);
+    bool
+    CheckToolIndex(uint8_t index);
 
     /// Checks for errors of modules - that includes TMC errors, Idler and Selector errors and possibly more.
     /// The idea is to check blocking errors at one spot consistently.

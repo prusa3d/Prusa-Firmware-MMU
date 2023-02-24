@@ -153,6 +153,7 @@ void CommandBase::Panic(ErrorCode ec) {
 }
 
 void CommandBase::InvalidateHoming() {
+    ResumeIdlerSelector();
     mi::idler.InvalidateHoming();
     ms::selector.InvalidateHoming();
 }
@@ -177,6 +178,18 @@ void CommandBase::InvalidateHomingAndFilamentState() {
     }
 }
 
+void CommandBase::HoldIdlerSelector() {
+    mm::motion.AbortPlannedMoves(mm::Idler);
+    mi::idler.HoldOn();
+    mm::motion.AbortPlannedMoves(mm::Selector);
+    ms::selector.HoldOn();
+}
+
+void CommandBase::ResumeIdlerSelector() {
+    mi::idler.Resume();
+    ms::selector.Resume();
+}
+
 bool CommandBase::CheckToolIndex(uint8_t index) {
     if (index >= config::toolCount) {
         error = ErrorCode::INVALID_TOOL;
@@ -195,6 +208,7 @@ void CommandBase::ErrDisengagingIdler() {
         mg::globals.IncDriveErrors();
         mpu::pulley.Disable();
         mui::userInput.Clear(); // remove all buffered events if any just before we wait for some input
+        HoldIdlerSelector(); // put all movables on hold until the error screen gets resolved
     }
 }
 

@@ -31,6 +31,8 @@ bool Pulley::Step() {
         return true;
     case Ready:
         return true;
+    case OnHold:
+        return true;
     case TMCFailed:
     default:
         return true;
