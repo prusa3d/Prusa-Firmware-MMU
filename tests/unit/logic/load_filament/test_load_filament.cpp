@@ -170,18 +170,6 @@ void FailedLoadToFindaResolveManual(uint8_t slot, logic::LoadFilament &lf) {
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
 }
 
-void FailedLoadToFindaResolveManualNoFINDA(uint8_t slot, logic::LoadFilament &lf) {
-    // Perform press on button 2 + debounce + keep FINDA OFF (i.e. the user didn't solve anything)
-    PressButtonAndDebounce(lf, mb::Right, false);
-
-    SimulateIdlerHoming(lf);
-
-    ClearButtons(lf);
-
-    // pulling filament back
-    REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_ON, ProgressCode::ERRWaitingForUser));
-}
-
 void FailedLoadToFindaResolveTryAgain(uint8_t slot, logic::LoadFilament &lf) {
     PressButtonAndDebounce(lf, mb::Middle, false);
 
@@ -215,15 +203,6 @@ TEST_CASE("load_filament::state_machine_reusal", "[load_filament]") {
                 LoadFilamentSuccessful(toSlot, lf);
             }
         }
-    }
-}
-
-TEST_CASE("load_filament::failed_load_to_finda_0-4_resolve_manual_no_FINDA", "[load_filament]") {
-    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
-        logic::LoadFilament lf;
-        LoadFilamentCommonSetup(slot, lf, true);
-        FailedLoadToFinda(slot, lf);
-        FailedLoadToFindaResolveManualNoFINDA(slot, lf);
     }
 }
 

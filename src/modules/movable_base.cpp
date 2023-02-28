@@ -6,8 +6,10 @@
 namespace modules {
 namespace motion {
 
-void MovableBase::PlanHome() {
+MovableBase::OperationResult MovableBase::PlanHome() {
     InvalidateHoming();
+    if (state == OnHold)
+        return OperationResult::Refused;
 
     // switch to normal mode on this axis
 
@@ -21,6 +23,7 @@ void MovableBase::PlanHome() {
     state = HomeForward; // beware - the derived class may change the state if necessary
     currentSlot = -1; // important - other state machines may be waiting for a valid Slot() which is not yet correct while homing in progress
     PlanHomingMoveForward();
+    return OperationResult::Accepted;
 }
 
 void __attribute__((noinline)) MovableBase::SetCurrents(uint8_t iRun, uint8_t iHold) {

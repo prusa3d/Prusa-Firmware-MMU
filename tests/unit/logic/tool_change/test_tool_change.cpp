@@ -426,8 +426,17 @@ void ToolChangeWithFlickeringFINDA(logic::ToolChange &tc, uint8_t fromSlot, uint
         // we should remain in the same error state
         REQUIRE(VerifyState2(tc, mg::FilamentLoadState::AtPulley, mi::idler.IdleSlotIndex(), fromSlot, true, false, toSlot, ml::off, ml::blink0, ErrorCode::RUNNING, ProgressCode::ERRDisengagingIdler));
 
-        // Idler will try to rehome, allow it
-        SimulateIdlerHoming(tc);
+        // Idler would like to rehome at this spot - theoretically it is free to do so and actually will have the homing move planned.
+        // In reality, one main cycle of the FW takes ~1ms so the Idler will never really move - which is exactly what we want to leverage
+
+        // perform just one step to fall into the same error again
+        main_loop();
+        tc.Step();
+
+        // now both Idler and Selector are on hold again
+        REQUIRE(mi::idler.state == mi::Idler::OnHold);
+        REQUIRE(ms::selector.state == ms::Selector::OnHold);
+
         REQUIRE(VerifyState2(tc, mg::FilamentLoadState::AtPulley, mi::idler.IdleSlotIndex(), fromSlot, true, false, toSlot, ml::off, ml::blink0, ErrorCode::FINDA_FLICKERS, ProgressCode::ERRWaitingForUser));
 
         // now "fix" FINDA and the command shall finish correctly

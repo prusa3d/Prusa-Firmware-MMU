@@ -63,7 +63,8 @@ public:
     inline void InvalidateHoming() { homingValid = false; }
 
     /// Prepare a homing move of the axis
-    void PlanHome();
+    /// @returns true if the move has been planned successfully (i.e. movable is NOT on-hold)
+    OperationResult PlanHome();
 
     inline bool HomingValid() const { return homingValid; }
 

@@ -62,7 +62,7 @@ void Idler::FinishMove() {
 }
 
 Idler::OperationResult Idler::Disengage() {
-    if (state == Moving) {
+    if (state == Moving || state == OnHold) {
         dbg_logic_P(PSTR("Moving --> Disengage refused"));
         return OperationResult::Refused;
     }
@@ -94,7 +94,7 @@ Idler::OperationResult Idler::Engage(uint8_t slot) {
 }
 
 Idler::OperationResult Idler::PlanMoveInner(uint8_t slot, Operation plannedOp) {
-    if (state == Moving) {
+    if (state == Moving || state == OnHold) {
         dbg_logic_P(PSTR("Moving --> Engage refused"));
         return OperationResult::Refused;
     }
