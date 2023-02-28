@@ -20,6 +20,7 @@ public:
     /// Plan move of the selector to a specific filament slot
     /// @param slot index to move to
     /// @returns false in case an operation is already underway
+    /// @note if(state==OnHold) all attempts to move the selector are rejected with OperationResult::Rejected
     OperationResult MoveToSlot(uint8_t slot);
 
     /// Performs one step of the state machine according to currently planned operation.

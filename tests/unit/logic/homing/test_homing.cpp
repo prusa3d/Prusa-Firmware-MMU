@@ -153,3 +153,45 @@ TEST_CASE("homing::refused_home", "[homing]") {
         REQUIRE(RefusedHome(slot));
     }
 }
+
+bool OnHold(uint8_t slot) {
+    // prepare startup conditions
+    ForceReinitAllAutomata();
+
+    // change the startup to what we need here
+    HomeIdlerAndSelector();
+
+    SetFINDAStateAndDebounce(true);
+    mg::globals.SetFilamentLoaded(slot, mg::FilamentLoadState::InSelector);
+
+    // now put movables on hold
+    logic::CommandBase::HoldIdlerSelector();
+
+    REQUIRE(mi::idler.state == mi::Idler::OnHold);
+    REQUIRE(ms::selector.state == ms::Selector::OnHold);
+
+    // both movables should ignore all attempts to perform moves
+    REQUIRE(mi::idler.PlanHome() == mi::Idler::OperationResult::Refused);
+    REQUIRE(mi::idler.state == mi::Idler::OnHold);
+    REQUIRE(mi::idler.Disengaged());
+
+    REQUIRE(ms::selector.PlanHome() == ms::Selector::OperationResult::Refused);
+    REQUIRE(ms::selector.state == ms::Selector::OnHold);
+
+    REQUIRE(mi::idler.Disengage() == mi::Idler::OperationResult::Refused);
+    REQUIRE(mi::idler.state == mi::Idler::OnHold);
+    REQUIRE(mi::idler.Engage(slot) == mi::Idler::OperationResult::Refused);
+    REQUIRE(mi::idler.state == mi::Idler::OnHold);
+    REQUIRE(mi::idler.Disengaged());
+
+    REQUIRE(ms::selector.MoveToSlot((slot + 1) % config::toolCount) == ms::Selector::OperationResult::Refused);
+    REQUIRE(ms::selector.state == ms::Selector::OnHold);
+
+    return true;
+}
+
+TEST_CASE("homing::on-hold", "[homing]") {
+    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
+        REQUIRE(OnHold(slot));
+    }
+}
