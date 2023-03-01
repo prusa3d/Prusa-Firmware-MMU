@@ -110,7 +110,7 @@ bool CutFilament::StepInner() {
             ms::selector.SetCurrents(mg::globals.CutIRunCurrent(), config::selector.iHold);
             // lower move speed
             savedSelectorFeedRate_mm_s = mg::globals.SelectorFeedrate_mm_s().v;
-            mg::globals.SetSelectorFeedrate_mm_s(config::selectorHomingFeedrate.v);
+            mg::globals.SetSelectorFeedrate_mm_s(mg::globals.SelectorHomingFeedrate_mm_s().v);
             MoveSelector(cutSlot); // let it cut :)
         }
         break;

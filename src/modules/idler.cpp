@@ -21,7 +21,7 @@ void Idler::PrepareMoveToPlannedSlot() {
 
 void Idler::PlanHomingMoveForward() {
     mm::motion.PlanMove<mm::Idler>(mm::unitToAxisUnit<mm::I_pos_t>(config::idlerLimits.lenght * 2),
-        mm::unitToAxisUnit<mm::I_speed_t>(config::idlerHomingFeedrate));
+        mm::unitToAxisUnit<mm::I_speed_t>(mg::globals.IdlerHomingFeedrate_deg_s()));
     dbg_logic_P(PSTR("Plan Homing Idler Forward"));
 }
 
@@ -30,7 +30,7 @@ void Idler::PlanHomingMoveBack() {
     mm::motion.SetPosition(mm::Idler, mm::unitToSteps<mm::I_pos_t>(config::idlerLimits.lenght));
     axisStart = mm::axisUnitToTruncatedUnit<config::U_deg>(mm::motion.CurPosition<mm::Idler>());
     mm::motion.PlanMove<mm::Idler>(mm::unitToAxisUnit<mm::I_pos_t>(-config::idlerLimits.lenght * 2),
-        mm::unitToAxisUnit<mm::I_speed_t>(config::idlerHomingFeedrate));
+        mm::unitToAxisUnit<mm::I_speed_t>(mg::globals.IdlerHomingFeedrate_deg_s()));
     dbg_logic_P(PSTR("Plan Homing Idler Back"));
 }
 

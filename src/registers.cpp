@@ -151,8 +151,8 @@
 | 0x12h 18 | uint16   | Selector_nominal_feedrate  | 0000h 0      | 002dh 45    | unit mm/s                                | Read / Write | M707 A0x12 | M708 A0x12 Xnnnn
 | 0x13h 19 | uint16   | Idler_nominal_feedrate     | 0000h 0      | 012ch 300   | unit deg/s                               | Read / Write | M707 A0x13 | M708 A0x13 Xnnnn
 | 0x14h 20 | uint16   | Pulley_slow_feedrate       | 0000h 0      | 0014h 20    | unit mm/s                                | Read / Write | M707 A0x14 | M708 A0x14 Xnnnn
-| 0x15h 21 | uint16   | Selector_homing_feedrate   | 0000h 0      | 001eh 30    | unit mm/s                                | Read (Write) | M707 A0x15 | (M708 A0x15 Xnnnn)
-| 0x16h 22 | uint16   | Idler_homing_feedrate      | 0000h 0      | 0109h 265   | unit deg/s                               | Read (Write) | M707 A0x16 | (M708 A0x16 Xnnnn)
+| 0x15h 21 | uint16   | Selector_homing_feedrate   | 0000h 0      | 001eh 30    | unit mm/s                                | Read / Write | M707 A0x15 | (M708 A0x15 Xnnnn)
+| 0x16h 22 | uint16   | Idler_homing_feedrate      | 0000h 0      | 0109h 265   | unit deg/s                               | Read / Write | M707 A0x16 | (M708 A0x16 Xnnnn)
 | 0x17h 23 | uint8    | Pulley_sg_thrs__R          | 00h 0        | 08h 8       |                                          | Read / Write Persistent | M707 A0x17 | M708 A0x17 Xnn
 | 0x18h 24 | uint8    | Selector_sg_thrs_R         | 00h 0        | 03h 3       |                                          | Read / Write Persistent | M707 A0x18 | M708 A0x18 Xnn
 | 0x19h 25 | uint8    | Idler_sg_thrs_R            | 00h 0        | 06h 6       |                                          | Read / Write Persistent | M707 A0x19 | M708 A0x19 Xnn
@@ -334,13 +334,13 @@ static const RegisterRec registers[] /*PROGMEM*/ = {
         2),
     // 0x15 Selector homing feedrate [mm/s] RW
     RegisterRec(
-        []() -> uint16_t { return config::selectorHomingFeedrate.v; },
-        //@@TODO please update documentation as well
+        []() -> uint16_t { return mg::globals.SelectorHomingFeedrate_mm_s().v; },
+        [](uint16_t d) { mg::globals.SetSelectorHomingFeedrate_mm_s(d); },
         2),
     // 0x16 Idler homing feedrate [deg/s] RW
     RegisterRec(
-        []() -> uint16_t { return config::idlerHomingFeedrate.v; },
-        //@@TODO please update documentation as well
+        []() -> uint16_t { return mg::globals.IdlerHomingFeedrate_deg_s().v; },
+        [](uint16_t d) { mg::globals.SetIdlerHomingFeedrate_deg_s(d); },
         2),
 
     // 0x17 Pulley sg_thrs threshold RW

@@ -30,8 +30,10 @@ void Globals::Init() {
     ResetPulleyUnloadFeedrate();
 
     ResetSelectorFeedrate();
+    ResetSelectorHomingFeedrate();
 
     ResetIdlerFeedrate();
+    ResetIdlerHomingFeedrate();
 
     ResetCutIRunCurrent();
 }
