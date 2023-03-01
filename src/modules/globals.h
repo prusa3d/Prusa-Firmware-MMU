@@ -91,6 +91,14 @@ public:
     void ResetIdlerFeedrate() { idlerFeedrate_deg_s = config::idlerFeedrate.v; }
     void SetIdlerFeedrate_deg_s(uint16_t idlerFR_deg_s) { idlerFeedrate_deg_s = idlerFR_deg_s; }
 
+    config::U_mm_s SelectorHomingFeedrate_mm_s() const { return config::U_mm_s({ (long double)selectorHomingFeedrate_mm_s }); }
+    void ResetSelectorHomingFeedrate() { selectorHomingFeedrate_mm_s = config::selectorHomingFeedrate.v; }
+    void SetSelectorHomingFeedrate_mm_s(uint16_t selectorFR_mm_s) { selectorHomingFeedrate_mm_s = selectorFR_mm_s; }
+
+    config::U_deg_s IdlerHomingFeedrate_deg_s() const { return config::U_deg_s({ (long double)idlerHomingFeedrate_deg_s }); }
+    void ResetIdlerHomingFeedrate() { idlerHomingFeedrate_deg_s = config::idlerHomingFeedrate.v; }
+    void SetIdlerHomingFeedrate_deg_s(uint16_t idlerFR_deg_s) { idlerHomingFeedrate_deg_s = idlerFR_deg_s; }
+
     /// @returns current StallGuard threshold for an axis
     uint8_t StallGuardThreshold(config::Axis axis) const;
     /// Stores the new StallGuard threshold for an axis into EEPROM (does not affect the current state of TMC drivers at all)
@@ -118,8 +126,10 @@ private:
     uint16_t pulleyUnloadFeedrate_mm_s;
 
     uint16_t selectorFeedrate_mm_s;
+    uint16_t selectorHomingFeedrate_mm_s;
 
     uint16_t idlerFeedrate_deg_s;
+    uint16_t idlerHomingFeedrate_deg_s;
 
     uint8_t cutIRunCurrent;
 };
