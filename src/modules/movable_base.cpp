@@ -31,6 +31,14 @@ void __attribute__((noinline)) MovableBase::SetCurrents(uint8_t iRun, uint8_t iH
     mm::motion.DriverForAxis(axis).SetCurrents(mm::axisParams[axis].params, tempCurrent);
 }
 
+void MovableBase::HoldOn() {
+    state = OnHold;
+    mm::motion.AbortPlannedMoves(axis);
+    // Force turn off motors - prevent overheating and allow servicing during an error state.
+    // And don't worry about TMC2130 creep after axis enabled - we'll rehome both axes later when needed.
+    mm::motion.Disable(axis);
+}
+
 MovableBase::OperationResult MovableBase::InitMovement() {
     if (motion.InitAxis(axis)) {
         return InitMovementNoReinitAxis();

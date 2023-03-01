@@ -75,8 +75,10 @@ public:
     void SetCurrents(uint8_t iRun, uint8_t iHold);
 
     /// Puts the movable on-hold
-    void HoldOn() { state = OnHold; }
-    /// Allows the movable to move/home again
+    /// Also, disables the axis
+    void HoldOn();
+
+    /// Allows the movable to move/home again after begin suspended by HoldOn
     void Resume() { state = Ready; }
 
 #ifndef UNITTEST

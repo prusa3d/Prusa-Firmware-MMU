@@ -179,15 +179,8 @@ void CommandBase::InvalidateHomingAndFilamentState() {
 }
 
 void CommandBase::HoldIdlerSelector() {
-    mm::motion.AbortPlannedMoves(mm::Idler);
     mi::idler.HoldOn();
-    mm::motion.AbortPlannedMoves(mm::Selector);
     ms::selector.HoldOn();
-
-    // Force turn off motors - prevent overheating and allow servicing during and error state.
-    // And don't worry about TMC2130 creep after axis enabled - we'll rehome both axes later when needed.
-    mm::motion.Disable(mm::Idler);
-    mm::motion.Disable(mm::Selector);
 }
 
 void CommandBase::ResumeIdlerSelector() {
