@@ -106,12 +106,12 @@ bool CutFilament::StepInner() {
     case ProgressCode::DisengagingIdler:
         if (mi::idler.Disengaged()) {
             state = ProgressCode::PerformingCut;
-            // set highest available current for the Selector
-            ms::selector.SetCurrents(mg::globals.CutIRunCurrent(), config::selector.iHold);
             // lower move speed
             savedSelectorFeedRate_mm_s = mg::globals.SelectorFeedrate_mm_s().v;
             mg::globals.SetSelectorFeedrate_mm_s(mg::globals.SelectorHomingFeedrate_mm_s().v);
             MoveSelector(cutSlot); // let it cut :)
+            // set highest available current for the Selector - should be placed after the planned move because the move sets the default running current
+            ms::selector.SetCurrents(mg::globals.CutIRunCurrent(), config::selector.iHold);
         }
         break;
     case ProgressCode::PerformingCut:
