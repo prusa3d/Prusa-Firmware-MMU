@@ -106,8 +106,7 @@ protected:
 #endif
     /// @returns true if the slot/tool index is within specified range (0 - config::toolCount)
     /// If not, it returns false and sets the error to ErrorCode::INVALID_TOOL
-    bool
-    CheckToolIndex(uint8_t index);
+    bool CheckToolIndex(uint8_t index);
 
     /// Checks for errors of modules - that includes TMC errors, Idler and Selector errors and possibly more.
     /// The idea is to check blocking errors at one spot consistently.
