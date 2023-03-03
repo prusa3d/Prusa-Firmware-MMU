@@ -83,7 +83,7 @@ namespace tmc2130 {
 
 static constexpr uint8_t TOFF_DEFAULT = 3U, TOFF_MASK = 0xFU;
 
-bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, MotorMode mode) {
+bool __attribute__((noinline)) TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, MotorMode mode) {
     initialized = false;
 
     // sg_filter_threshold = (1 << (8 - params.mRes));
@@ -108,15 +108,61 @@ bool TMC2130::Init(const MotorParams &params, const MotorCurrents &currents, Mot
     ReadRegister(params, Registers::GSTAT);
 
     /// apply chopper parameters
-    const uint32_t chopconf = (uint32_t)(TOFF_DEFAULT & TOFF_MASK) << 0U // toff
-        | (uint32_t)(5U & 0x07U) << 4U // hstrt
-        | (uint32_t)(1U & 0x0FU) << 7U // hend
-        | (uint32_t)(2U & 0x03U) << 15U // tbl
-        | (uint32_t)(currents.vSense & 0x01U) << 17U // vsense
-        | (uint32_t)(params.mRes & 0x0FU) << 24U // mres
-        | (uint32_t)(1U & 0x01) << 28U // intpol (always true)
-        | (uint32_t)(1U & 0x01) << 29U; // dedge (always true)
-    WriteRegister(params, Registers::CHOPCONF, chopconf);
+    //    const uint32_t chopconf = (uint32_t)(TOFF_DEFAULT & TOFF_MASK) << 0U // toff
+    //        | (uint32_t)(5U & 0x07U) << 4U // hstrt
+    //        | (uint32_t)(1U & 0x0FU) << 7U // hend
+    //        | (uint32_t)(2U & 0x03U) << 15U // tbl
+    //        | (uint32_t)(currents.vSense & 0x01U) << 17U // vsense
+    //        | (uint32_t)(params.mRes & 0x0FU) << 24U // mres
+    //        | (uint32_t)(1U & 0x01) << 28U // intpol (always true)
+    //        | (uint32_t)(1U & 0x01) << 29U; // dedge (always true)
+    // this ugly union/bit structure saves 34B over the previous implementation
+    union ChopConfU {
+        struct __attribute__((packed)) S {
+            uint8_t toff : 4;
+            uint8_t hstrt : 3;
+            uint8_t hend : 4;
+            uint8_t fd : 1;
+            uint8_t disfdcc : 1;
+            uint8_t rndtf : 1;
+            uint8_t chm : 1;
+            uint8_t tbl : 2;
+            uint8_t vsense : 1;
+            uint8_t vhighfs : 1;
+            uint8_t vhighchm : 1;
+            uint8_t sync : 4;
+            uint8_t mres : 4;
+            uint8_t intpol : 1;
+            uint8_t dedge : 1;
+            uint8_t diss2g : 1;
+            uint8_t reserved : 1;
+            constexpr S(bool vsense, uint8_t mres)
+                : toff(TOFF_DEFAULT)
+                , hstrt(5)
+                , hend(1)
+                , fd(0)
+                , disfdcc(0)
+                , rndtf(0)
+                , chm(0)
+                , tbl(2)
+                , vsense(vsense)
+                , vhighfs(0)
+                , vhighchm(0)
+                , sync(0)
+                , mres(mres)
+                , intpol(1)
+                , dedge(1)
+                , diss2g(0)
+                , reserved(0) {}
+        } s;
+        uint32_t dw;
+        constexpr ChopConfU(bool vsense, uint8_t mres)
+            : s(vsense, mres) {}
+    };
+    static_assert(sizeof(ChopConfU::S) == 4);
+    static_assert(sizeof(ChopConfU) == 4);
+
+    WriteRegister(params, Registers::CHOPCONF, ChopConfU(currents.vSense, params.mRes).dw);
 
     /// apply currents
     SetCurrents(params, currents);
