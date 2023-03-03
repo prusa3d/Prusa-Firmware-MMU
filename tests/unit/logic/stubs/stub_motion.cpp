@@ -20,6 +20,11 @@ bool Motion::InitAxis(Axis axis) {
     return true;
 }
 
+bool Motion::InitAxis(Axis axis, MotorCurrents /*mc*/) {
+    SetEnabled(axis, true);
+    return true;
+}
+
 void Motion::SetEnabled(Axis axis, bool enabled) {
     axisData[axis].enabled = axes[axis].enabled = enabled;
 }

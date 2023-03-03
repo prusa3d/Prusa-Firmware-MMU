@@ -77,6 +77,7 @@ public:
     /// state especially when the TMC may get randomly reset (deinited)
     /// @returns true if the init was successful (TMC2130 responded ok)
     bool InitAxis(Axis axis);
+    bool InitAxis(Axis axis, MotorCurrents mc);
 
     /// Return the axis power status.
     bool Enabled(Axis axis) const { return axisData[axis].enabled; }
