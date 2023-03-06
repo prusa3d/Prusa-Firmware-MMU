@@ -42,6 +42,14 @@ static constexpr const uint16_t buttonADCLimits[buttonCount][2] = { { 0, 50 }, {
 static constexpr const uint16_t buttonADCMaxValue = 1023; ///< used in unit tests
 static constexpr const uint8_t buttonsADCIndex = 5; ///< ADC index of buttons input
 
+// VCC measurement setup
+static constexpr const uint8_t VCCADCIndex = 30; ///< ADC index of scaled VCC input
+static constexpr const uint16_t VCCADCThreshold = 274; ///< ADC value for triggering the UV_VCC error
+/// We are measuring the bandgap voltage, Vb=1.1V.
+/// To compute the threshold value: `VAL = 1125.3 / AVCC`
+/// So for AVCC=4.1V, you get VAL=274.46
+static constexpr const uint8_t VCCADCReadCnt = 10; ///< Number of ADC reads to perform, only the last one being used
+
 // Motion and planning
 
 /// Do not plan moves equal or shorter than the requested steps

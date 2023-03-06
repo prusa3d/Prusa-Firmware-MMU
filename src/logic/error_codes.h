@@ -118,4 +118,6 @@ enum class ErrorCode : uint_fast16_t {
     /// Unfixable possible cause: bad or cracked solder joints on the PCB, failed shift register, failed driver.
     MMU_SOLDERING_NEEDS_ATTENTION = 0xC200,
 
+    /// MCU VCC rail undervoltage.
+    MCU_UNDERVOLTAGE_VCC = 0xC400,
 };
