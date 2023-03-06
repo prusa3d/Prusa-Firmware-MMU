@@ -24,6 +24,7 @@
 #include "modules/timebase.h"
 #include "modules/motion.h"
 #include "modules/usb_cdc.h"
+#include "modules/undervoltage_check.h"
 
 #include "application.h"
 
@@ -167,6 +168,7 @@ void loop() {
     }
     hal::cpu::Step();
     mu::cdc.Step();
+    muv::uv_vcc.Step();
 
     application.Step();
 
