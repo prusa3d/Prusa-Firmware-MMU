@@ -110,6 +110,9 @@ protected:
     virtual bool FinishHomingAndPlanMoveToParkPos() = 0;
     virtual void FinishMove() = 0;
 
+    /// default implementation is empty
+    virtual void UpdateAdaptiveSGTHRS(bool /*forward*/) {}
+
     /// Initializes movement of a movable module.
     /// Beware: this operation reinitializes the axis/TMC driver as well (may introduce axis creep as we have seen on the Idler)
     OperationResult InitMovement();
@@ -125,6 +128,8 @@ protected:
     void HomeFailed();
 
     void CheckTMC();
+
+    uint16_t AxisDistance(int32_t curPos) const;
 };
 
 } // namespace motion

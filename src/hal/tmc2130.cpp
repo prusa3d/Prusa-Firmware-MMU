@@ -261,8 +261,20 @@ void TMC2130::SetCurrents(const MotorParams &params, const MotorCurrents &curren
 }
 
 void TMC2130::SetSGTHRS(const MotorParams &params) {
-    uint32_t tmc2130_coolConf = (((uint32_t)params.sg_thrs) << 16U);
-    WriteRegister(params, Registers::COOLCONF, tmc2130_coolConf);
+    union SGTHRSU {
+        struct __attribute__((packed)) S {
+            uint16_t zero;
+            uint16_t sgthrs;
+            constexpr S(uint16_t sgthrs)
+                : zero(0)
+                , sgthrs(sgthrs) {}
+        } s;
+        uint32_t dw;
+        constexpr SGTHRSU(uint16_t sgthrs)
+            : s(sgthrs) {}
+    };
+    //uint32_t tmc2130_coolConf = (((uint32_t)params.sg_thrs) << 16U);
+    WriteRegister(params, Registers::COOLCONF, SGTHRSU(params.sg_thrs).dw);
 }
 
 void TMC2130::SetEnabled(const MotorParams &params, bool enabled) {
