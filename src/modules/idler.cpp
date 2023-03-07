@@ -74,6 +74,11 @@ void Idler::FinishMove() {
     }
 }
 
+bool Idler::SGAllowed(bool forward) const {
+    const uint8_t checkDistance = forward ? 220 : 200;
+    return AxisDistance(mm::axisUnitToTruncatedUnit<config::U_deg>(mm::motion.CurPosition<mm::Idler>())) > checkDistance;
+}
+
 void Idler::UpdateAdaptiveSGTHRS(bool forward) {
     //    return;
     const uint8_t checkDistance = forward ? 220 : 200;
