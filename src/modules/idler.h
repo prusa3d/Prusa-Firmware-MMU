@@ -17,7 +17,8 @@ public:
     inline constexpr Idler()
         : MovableBase(mm::Idler)
         , plannedMove(Operation::disengage)
-        , currentlyEngaged(Operation::disengage) {}
+        , currentlyEngaged(Operation::disengage)
+        , fwdHomeTrigger(false) {}
 
     /// Plan engaging of the idler to a specific filament slot
     /// @param slot index to be activated
@@ -70,6 +71,7 @@ protected:
     virtual void PlanHomingMoveBack() override;
     virtual bool FinishHomingAndPlanMoveToParkPos() override;
     virtual void FinishMove() override;
+    virtual void UpdateAdaptiveSGTHRS(bool forward) override;
 
 private:
     enum class Operation : uint8_t {
@@ -85,6 +87,9 @@ private:
 
     /// current state
     Operation currentlyEngaged;
+    void SetSGTHRS(int16_t sgthrs);
+
+    bool fwdHomeTrigger;
 };
 
 /// The one and only instance of Idler in the FW

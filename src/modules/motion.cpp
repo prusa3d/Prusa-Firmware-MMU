@@ -91,8 +91,8 @@ void Motion::StallGuardReset(Axis axis) {
     axisData[axis].drv.ClearStallguard();
 }
 
-void Motion::PlanStallGuardThreshold(config::Axis axis, uint8_t sg_thrs) {
-    axisParams[axis].params.sg_thrs = sg_thrs;
+void Motion::PlanStallGuardThreshold(config::Axis axis, int16_t sg_thrs) {
+    mm::axisParams[axis].params.sg_thrs = sg_thrs;
 }
 
 void Motion::PlanMoveTo(Axis axis, pos_t pos, steps_t feed_rate, steps_t end_rate) {

@@ -14,6 +14,7 @@
 #include "../../../../src/logic/home.h"
 #include "../../../../src/logic/load_filament.h"
 #include "../../../../src/logic/unload_filament.h"
+#include "../../../../src/logic/no_command.h"
 
 #include "../../modules/stubs/stub_adc.h"
 
@@ -194,4 +195,54 @@ TEST_CASE("homing::on-hold", "[homing]") {
     for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
         REQUIRE(OnHold(slot));
     }
+}
+
+void AdaptiveIdlerHoming() {
+    // prepare startup conditions
+    ForceReinitAllAutomata();
+
+    mi::idler.InvalidateHoming();
+
+    // idler should plan the homing move, position of the Idler should be 0
+    main_loop();
+    CHECK(mm::motion.CurPosition<mm::Idler>().v == mm::unitToSteps<mm::I_pos_t>(config::IdlerOffsetFromHome) + 1); // magic constant just to tune the motor steps
+    CHECK(mi::idler.axisStart == config::IdlerOffsetFromHome.v + 2);
+    CHECK(mm::axes[mm::Idler].sg_thrs == 32767);
+    // do exact number of steps before triggering SG
+    uint32_t idlerSteps = mm::unitToSteps<mm::I_pos_t>(config::idlerLimits.lenght);
+    uint32_t sgChange = mm::unitToAxisUnit<mm::I_pos_t>(config::idlerLimits.lenght - 15.0_deg).v;
+    for (uint32_t i = 0; i < sgChange; ++i) {
+        main_loop();
+    }
+    CHECK(mm::axes[mm::Idler].sg_thrs <= config::idler.sg_thrs);
+
+    // finish the forward homing move to the correct distance
+    for (uint32_t i = sgChange; i < idlerSteps; ++i) {
+        main_loop();
+    }
+
+    mm::TriggerStallGuard(mm::Idler);
+    main_loop();
+    mm::motion.StallGuardReset(mm::Idler);
+
+    // now do a correct amount of steps of each axis towards the other end
+    uint32_t maxSteps = idlerSteps + 1;
+
+    for (uint32_t i = 0; i < maxSteps; ++i) {
+        main_loop();
+        if (i == idlerSteps) {
+            mm::TriggerStallGuard(mm::Idler);
+        } else {
+            mm::motion.StallGuardReset(mm::Idler);
+        }
+    }
+
+    // now the Idler shall perform a move into their parking positions
+    while (mi::idler.State() != mm::MovableBase::Ready) {
+        main_loop();
+    }
+}
+
+TEST_CASE("homing::adaptive", "[homing]") {
+    AdaptiveIdlerHoming();
 }

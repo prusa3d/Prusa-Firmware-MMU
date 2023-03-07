@@ -20,12 +20,25 @@ void Idler::PrepareMoveToPlannedSlot() {
 }
 
 void Idler::PlanHomingMoveForward() {
+    //    ml::leds.SetMode(0, ml::red, ml::off);
+    fwdHomeTrigger = true;
+    SetSGTHRS(32767); // @@TODO debug screw the homing sensitivity - to be removed for final
+    mm::motion.SetPosition(mm::Idler, mm::unitToSteps<mm::I_pos_t>(config::IdlerOffsetFromHome));
+    axisStart = mm::axisUnitToTruncatedUnit<config::U_deg>(mm::motion.CurPosition<mm::Idler>());
     mm::motion.PlanMove<mm::Idler>(mm::unitToAxisUnit<mm::I_pos_t>(config::idlerLimits.lenght * 2),
         mm::unitToAxisUnit<mm::I_speed_t>(mg::globals.IdlerHomingFeedrate_deg_s()));
     dbg_logic_P(PSTR("Plan Homing Idler Forward"));
 }
 
+void modules::idler::Idler::SetSGTHRS(int16_t sgthrs) {
+    mm::motion.PlanStallGuardThreshold(mm::Idler, sgthrs);
+    mm::motion.DriverForAxis(mm::Idler).SetSGTHRS(mm::axisParams[mm::Idler].params);
+}
+
 void Idler::PlanHomingMoveBack() {
+    fwdHomeTrigger = true;
+    SetSGTHRS(32767); //@@TODO debug screw
+    //    ml::leds.SetMode(0, ml::red, ml::off);
     // we expect that we are at the front end of the axis, set the expected axis' position
     mm::motion.SetPosition(mm::Idler, mm::unitToSteps<mm::I_pos_t>(config::idlerLimits.lenght));
     axisStart = mm::axisUnitToTruncatedUnit<config::U_deg>(mm::motion.CurPosition<mm::Idler>());
@@ -36,8 +49,8 @@ void Idler::PlanHomingMoveBack() {
 
 bool Idler::FinishHomingAndPlanMoveToParkPos() {
     // check the axis' length
-    int32_t axisEnd = mm::axisUnitToTruncatedUnit<config::U_deg>(mm::motion.CurPosition<mm::Idler>());
-    if (abs(axisEnd - axisStart) < (config::idlerLimits.lenght.v - 10)) { //@@TODO is 10 degrees ok?
+    if (AxisDistance(mm::axisUnitToTruncatedUnit<config::U_deg>(mm::motion.CurPosition<mm::Idler>()))
+        < (config::idlerLimits.lenght.v - 10)) { //@@TODO is 10 degrees ok?
         return false; // we couldn't home correctly, we cannot set the Idler's position
     }
 
@@ -53,11 +66,25 @@ bool Idler::FinishHomingAndPlanMoveToParkPos() {
 
 void Idler::FinishMove() {
     currentlyEngaged = plannedMove;
-    hal::tmc2130::MotorCurrents c = mm::motion.CurrentsForAxis(axis);
+    hal::tmc2130::MotorCurrents c = mm::motion.CurrentsForAxis(mm::Idler);
     if (Disengaged()) // reduce power into the Idler motor when disengaged (less force necessary)
         SetCurrents(c.iRun, c.iHold);
     else if (Engaged()) { // maximum motor power when the idler is engaged
         SetCurrents(c.iRun, c.iRun);
+    }
+}
+
+void Idler::UpdateAdaptiveSGTHRS(bool forward) {
+    //    return;
+    const uint8_t checkDistance = forward ? 220 : 200;
+
+    if (AxisDistance(mm::axisUnitToTruncatedUnit<config::U_deg>(mm::motion.CurPosition<mm::Idler>()))
+            > checkDistance
+        && fwdHomeTrigger) {
+        // set higher sensitivity - i.e. lower threshold
+        //        ml::leds.SetMode(0, ml::red, ml::on);
+        SetSGTHRS(mg::globals.StallGuardThreshold(mm::Idler) - 1);
+        fwdHomeTrigger = false;
     }
 }
 

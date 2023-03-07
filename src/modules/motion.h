@@ -105,7 +105,7 @@ public:
 
     /// Sets (plans) StallGuard threshold for an axis (basically the higher number the lower sensitivity)
     /// The new SGTHRS value gets applied in Init(), it is _NOT_ written into the TMC immediately in this method.
-    void PlanStallGuardThreshold(Axis axis, uint8_t sg_thrs);
+    void PlanStallGuardThreshold(Axis axis, int16_t sg_thrs);
 
     /// Enqueue a single axis move in steps starting and ending at zero speed with maximum
     /// feedrate. Moves can only be enqueued if the axis is not Full().

@@ -74,6 +74,8 @@ void MovableBase::PerformHomeForward() {
         state = HomeBack;
     } else if (mm::motion.QueueEmpty(axis)) {
         HomeFailed();
+    } else {
+        UpdateAdaptiveSGTHRS(true);
     }
 }
 
@@ -92,6 +94,8 @@ void MovableBase::PerformHomeBack() {
         }
     } else if (mm::motion.QueueEmpty(axis)) {
         HomeFailed();
+    } else {
+        UpdateAdaptiveSGTHRS(false);
     }
 }
 
@@ -110,6 +114,10 @@ void MovableBase::CheckTMC() {
         mm::motion.AbortPlannedMoves(axis, true);
         state = TMCFailed;
     }
+}
+
+uint16_t __attribute__((noinline)) MovableBase::AxisDistance(int32_t curPos) const {
+    return abs(curPos - axisStart);
 }
 
 } // namespace motion
