@@ -112,6 +112,7 @@ protected:
 
     /// default implementation is empty
     virtual void UpdateAdaptiveSGTHRS(bool /*forward*/) {}
+    virtual bool SGAllowed(bool forward) const { return true; }
 
     /// Initializes movement of a movable module.
     /// Beware: this operation reinitializes the axis/TMC driver as well (may introduce axis creep as we have seen on the Idler)

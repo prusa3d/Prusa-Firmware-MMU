@@ -72,6 +72,7 @@ protected:
     virtual bool FinishHomingAndPlanMoveToParkPos() override;
     virtual void FinishMove() override;
     virtual void UpdateAdaptiveSGTHRS(bool forward) override;
+    virtual bool SGAllowed(bool forward) const override;
 
 private:
     enum class Operation : uint8_t {

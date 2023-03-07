@@ -69,9 +69,11 @@ void MovableBase::PerformHomeForward() {
     if (mm::motion.StallGuard(axis)) {
         // we have reached the front end of the axis - first part homed probably ok
         mm::motion.StallGuardReset(axis);
-        mm::motion.AbortPlannedMoves(axis, true);
-        PlanHomingMoveBack();
-        state = HomeBack;
+        if (SGAllowed(true)) {
+            mm::motion.AbortPlannedMoves(axis, true);
+            PlanHomingMoveBack();
+            state = HomeBack;
+        }
     } else if (mm::motion.QueueEmpty(axis)) {
         HomeFailed();
     } else {
@@ -83,14 +85,16 @@ void MovableBase::PerformHomeBack() {
     if (mm::motion.StallGuard(axis)) {
         // we have reached the back end of the axis - second part homed probably ok
         mm::motion.StallGuardReset(axis);
-        mm::motion.AbortPlannedMoves(axis, true);
-        mm::motion.SetMode(axis, mg::globals.MotorsStealth() ? mm::Stealth : mm::Normal);
-        if (!FinishHomingAndPlanMoveToParkPos()) {
-            // the measured axis' length was incorrect, something is blocking it, report an error, homing procedure terminated
-            HomeFailed();
-        } else {
-            homingValid = true;
-            // state = Ready; // not yet - we have to move to our parking or target position after homing the axis
+        if (SGAllowed(false)) {
+            mm::motion.AbortPlannedMoves(axis, true);
+            mm::motion.SetMode(axis, mg::globals.MotorsStealth() ? mm::Stealth : mm::Normal);
+            if (!FinishHomingAndPlanMoveToParkPos()) {
+                // the measured axis' length was incorrect, something is blocking it, report an error, homing procedure terminated
+                HomeFailed();
+            } else {
+                homingValid = true;
+                // state = Ready; // not yet - we have to move to our parking or target position after homing the axis
+            }
         }
     } else if (mm::motion.QueueEmpty(axis)) {
         HomeFailed();
