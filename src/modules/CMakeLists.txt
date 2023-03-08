@@ -18,7 +18,7 @@ target_sources(
           serial.cpp
           speed_table.cpp
           timebase.cpp
-          undervoltage_check.cpp
           usb_cdc.cpp
           user_input.cpp
+          voltage.cpp
   )
