@@ -142,7 +142,7 @@ void Panic(ErrorCode ec) {
 
 void RuntimeHWChecks() {
     mv::vcc.Step();
-    if (mv::vcc.CurrentVCC() > config::VCCADCThreshold) {
+    if (mv::vcc.CurrentBandgapVoltage() > config::VCCADCThreshold) {
         // stop all motors at once
         mm::motion.AbortPlannedMoves();
         // kill all TMC
