@@ -207,7 +207,7 @@ void AdaptiveIdlerHoming() {
     main_loop();
     CHECK(mm::motion.CurPosition<mm::Idler>().v == mm::unitToSteps<mm::I_pos_t>(config::IdlerOffsetFromHome) + 1); // magic constant just to tune the motor steps
     CHECK(mi::idler.axisStart == config::IdlerOffsetFromHome.v + 2);
-    CHECK(mm::axes[mm::Idler].sg_thrs == 32767); // @@TODO sg_thrs is int8_t by default
+    CHECK(mm::axes[mm::Idler].sg_thrs == 63);
     // do exact number of steps before triggering SG
     uint32_t idlerSteps = mm::unitToSteps<mm::I_pos_t>(config::idlerLimits.lenght);
     uint32_t sgChange = mm::unitToAxisUnit<mm::I_pos_t>(config::idlerLimits.lenght - 15.0_deg).v;
