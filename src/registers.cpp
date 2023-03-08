@@ -164,7 +164,7 @@
 | 0x1eh 30 | uint16   | Set/Get Pulley iRun current| 0-31         | 14h 20      | 20->350mA: see TMC2130 current conversion| Read / Write | M707 A0x1e | M708 A0x1e Xn
 | 0x1fh 31 | uint16  |Set/Get Selector iRun current| 0-31         | 1fh 31      | 31->530mA: see TMC2130 current conversion| Read / Write | M707 A0x1f | M708 A0x1f Xn
 | 0x20h 32 | uint16   | Set/Get Idler iRun current | 0-31         | 1fh 31      | 31->530mA: see TMC2130 current conversion| Read / Write | M707 A0x20 | M708 A0x20 Xn
-| 0x21h 33 | uint16   | Current VCC voltage level  | 225-281 | | 225->5V, 281->4V, higher values mean lower voltage and the board would probably die sooner than reporting anything | Read only | M707 A0x21 | N/A
+| 0x21h 33 | uint16   | Current bandgap voltage level  | 225-281 | | 225->5V, 281->4V, higher values mean lower voltage and the board would probably die sooner than reporting anything | Read only | M707 A0x21 | N/A
 */
 
 struct RegisterFlags {
@@ -398,7 +398,7 @@ static const RegisterRec registers[] /*PROGMEM*/ = {
         1),
     // 0x21 Current VCC voltage level R
     RegisterRec(
-        []() -> uint16_t { return mv::vcc.CurrentVCC(); },
+        []() -> uint16_t { return mv::vcc.CurrentBandgapVoltage(); },
         2),
 };
 
