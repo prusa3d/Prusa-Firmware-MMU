@@ -16,6 +16,7 @@
 #include "modules/pulley.h"
 #include "modules/selector.h"
 #include "modules/permanent_storage.h"
+#include "modules/voltage.h"
 
 /** @defgroup register_table Register Table
  *
@@ -159,10 +160,11 @@
 | 0x1ah 26 | uint16   | Get Pulley position        | 0000h 0      | ffffh 65535 | unit mm                                  | Read only    | M707 A0x1a | N/A
 | 0x1bh 27 | uint16   | Set/Get_Selector_slot      | 0000h 0      | ffffh 65535 | unit slot [0-4/5] 5=park pos             | Read / Write | M707 A0x1b | M708 A0x1b Xn
 | 0x1ch 28 | uint16   | Set/Get_Idler_slot         | 0000h 0      | ffffh 65535 | unit slot [0-4/5] 5=disengaged           | Read / Write | M707 A0x1c | M708 A0x1c Xn
-| 0x1dh 29 | uint8    | Set/Get Selector cut iRun current | 0 to 63 (aka 0-1024mA)| 31 (530mA) |                | Read / Write | M707 A0x1d | M708 A0x1d Xn
+| 0x1dh 29 | uint8    | Set/Get Selector cut iRun current | 0 to 63 (aka 0-1024mA)| 31 (530mA) |                           | Read / Write | M707 A0x1d | M708 A0x1d Xn
 | 0x1eh 30 | uint16   | Set/Get Pulley iRun current| 0-31         | 14h 20      | 20->350mA: see TMC2130 current conversion| Read / Write | M707 A0x1e | M708 A0x1e Xn
 | 0x1fh 31 | uint16  |Set/Get Selector iRun current| 0-31         | 1fh 31      | 31->530mA: see TMC2130 current conversion| Read / Write | M707 A0x1f | M708 A0x1f Xn
 | 0x20h 32 | uint16   | Set/Get Idler iRun current | 0-31         | 1fh 31      | 31->530mA: see TMC2130 current conversion| Read / Write | M707 A0x20 | M708 A0x20 Xn
+| 0x21h 33 | uint16   | Current VCC voltage level  | 225-281 | | 225->5V, 281->4V, higher values mean lower voltage and the board would probably die sooner than reporting anything | Read only | M707 A0x21 | N/A
 */
 
 struct RegisterFlags {
@@ -394,6 +396,10 @@ static const RegisterRec registers[] /*PROGMEM*/ = {
         []() -> uint16_t { return mm::motion.CurrentsForAxis(config::Idler).iRun; },
         [](uint16_t d) { mm::motion.SetIRunForAxis(config::Idler, d); },
         1),
+    // 0x21 Current VCC voltage level R
+    RegisterRec(
+        []() -> uint16_t { return mv::vcc.CurrentVCC(); },
+        2),
 };
 
 static constexpr uint8_t registersSize = sizeof(registers) / sizeof(RegisterRec);
