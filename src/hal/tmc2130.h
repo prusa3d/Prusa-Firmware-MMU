@@ -25,7 +25,7 @@ struct MotorParams {
     gpio::GPIO_pin stepPin; ///< step pin
     gpio::GPIO_pin sgPin; ///< StallGuard pin
     config::MRes mRes; ///< microstep resolution
-    int16_t sg_thrs;
+    int8_t sg_thrs;
     uint8_t axis;
 };
 

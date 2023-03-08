@@ -10,7 +10,7 @@ struct AxisSim {
     bool enabled;
     bool homed;
     bool stallGuard;
-    int16_t sg_thrs;
+    int8_t sg_thrs;
     std::deque<pos_t> plannedMoves;
 };
 

@@ -41,7 +41,7 @@ void TriggerStallGuard(Axis axis) {
     axes[axis].stallGuard = true;
 }
 
-void Motion::PlanStallGuardThreshold(Axis axis, int16_t sg_thrs) {
+void Motion::PlanStallGuardThreshold(Axis axis, int8_t sg_thrs) {
     // do nothing for now
     axes[axis].sg_thrs = sg_thrs;
 }

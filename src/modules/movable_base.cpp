@@ -69,15 +69,13 @@ void MovableBase::PerformHomeForward() {
     if (mm::motion.StallGuard(axis)) {
         // we have reached the front end of the axis - first part homed probably ok
         mm::motion.StallGuardReset(axis);
-        if (SGAllowed(true)) {
+        if (StallGuardAllowed(true)) {
             mm::motion.AbortPlannedMoves(axis, true);
             PlanHomingMoveBack();
             state = HomeBack;
         }
     } else if (mm::motion.QueueEmpty(axis)) {
         HomeFailed();
-    } else {
-        UpdateAdaptiveSGTHRS(true);
     }
 }
 
@@ -85,7 +83,7 @@ void MovableBase::PerformHomeBack() {
     if (mm::motion.StallGuard(axis)) {
         // we have reached the back end of the axis - second part homed probably ok
         mm::motion.StallGuardReset(axis);
-        if (SGAllowed(false)) {
+        if (StallGuardAllowed(false)) {
             mm::motion.AbortPlannedMoves(axis, true);
             mm::motion.SetMode(axis, mg::globals.MotorsStealth() ? mm::Stealth : mm::Normal);
             if (!FinishHomingAndPlanMoveToParkPos()) {
@@ -98,8 +96,6 @@ void MovableBase::PerformHomeBack() {
         }
     } else if (mm::motion.QueueEmpty(axis)) {
         HomeFailed();
-    } else {
-        UpdateAdaptiveSGTHRS(false);
     }
 }
 
