@@ -264,15 +264,22 @@ void TMC2130::SetSGTHRS(const MotorParams &params) {
     union SGTHRSU {
         struct __attribute__((packed)) S {
             uint16_t zero;
-            uint16_t sgthrs;
-            constexpr S(uint16_t sgthrs)
+            int8_t sgthrs : 7;
+            uint8_t reserved : 1;
+            uint8_t sfilt : 1;
+            uint8_t reserved1 : 7;
+            constexpr explicit S(int8_t sgthrs)
                 : zero(0)
-                , sgthrs(sgthrs) {}
+                , sgthrs(sgthrs)
+                , reserved(0)
+                , sfilt(0)
+                , reserved1(0) {}
         } s;
         uint32_t dw;
-        constexpr SGTHRSU(uint16_t sgthrs)
+        constexpr explicit SGTHRSU(int8_t sgthrs)
             : s(sgthrs) {}
     };
+    static_assert(sizeof(SGTHRSU) == 4);
     //uint32_t tmc2130_coolConf = (((uint32_t)params.sg_thrs) << 16U);
     WriteRegister(params, Registers::COOLCONF, SGTHRSU(params.sg_thrs).dw);
 }
