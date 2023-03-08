@@ -109,10 +109,12 @@ protected:
     /// @returns true if the measured axis length is within the expected range, false otherwise
     virtual bool FinishHomingAndPlanMoveToParkPos() = 0;
     virtual void FinishMove() = 0;
-
-    /// default implementation is empty
-    virtual void UpdateAdaptiveSGTHRS(bool /*forward*/) {}
-    virtual bool SGAllowed(bool forward) const { return true; }
+    /// @returns true if the StallGuard signal is to be considered while homing.
+    /// It may sound counterintuitive, but due to SG/homing issues on the Idler,
+    /// it needs to avoid processing the SG while rotating over the filament.
+    /// The Idler must consider SG signal only when close to its real end stops.
+    /// Selector considers the SG signal all the time while homing, therefore the default implementation is empty
+    virtual bool StallGuardAllowed(bool forward) const { return true; }
 
     /// Initializes movement of a movable module.
     /// Beware: this operation reinitializes the axis/TMC driver as well (may introduce axis creep as we have seen on the Idler)
