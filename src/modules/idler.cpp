@@ -69,7 +69,7 @@ bool Idler::StallGuardAllowed(bool forward) const {
 }
 
 Idler::OperationResult Idler::Disengage() {
-    if (state == Moving || state == OnHold) {
+    if (state == Moving || IsOnHold()) {
         dbg_logic_P(PSTR("Moving --> Disengage refused"));
         return OperationResult::Refused;
     }
@@ -101,7 +101,7 @@ Idler::OperationResult Idler::Engage(uint8_t slot) {
 }
 
 Idler::OperationResult Idler::PlanMoveInner(uint8_t slot, Operation plannedOp) {
-    if (state == Moving || state == OnHold) {
+    if (state == Moving || IsOnHold()) {
         dbg_logic_P(PSTR("Moving --> Engage refused"));
         return OperationResult::Refused;
     }
@@ -132,6 +132,10 @@ Idler::OperationResult Idler::PlanMoveInner(uint8_t slot, Operation plannedOp) {
 }
 
 bool Idler::Step() {
+    if (IsOnHold()) {
+        return true; // just wait, do nothing!
+    }
+
     if (state != TMCFailed) {
         CheckTMC();
     }
@@ -155,10 +159,7 @@ bool Idler::Step() {
             return false;
         }
         return true;
-    case OnHold:
-        return true; // just wait, do nothing!
     case TMCFailed:
-        dbg_logic_P(PSTR("Idler Failed"));
     default:
         return true;
     }

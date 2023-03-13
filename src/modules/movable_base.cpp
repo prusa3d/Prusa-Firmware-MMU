@@ -8,7 +8,7 @@ namespace motion {
 
 MovableBase::OperationResult MovableBase::PlanHome() {
     InvalidateHoming();
-    if (state == OnHold)
+    if (IsOnHold())
         return OperationResult::Refused;
 
     // switch to normal mode on this axis
@@ -32,7 +32,7 @@ void __attribute__((noinline)) MovableBase::SetCurrents(uint8_t iRun, uint8_t iH
 }
 
 void MovableBase::HoldOn() {
-    state = OnHold;
+    state |= OnHold; // set the on-hold bit
     mm::motion.AbortPlannedMoves(axis);
     // Force turn off motors - prevent overheating and allow servicing during an error state.
     // And don't worry about TMC2130 creep after axis enabled - we'll rehome both axes later when needed.

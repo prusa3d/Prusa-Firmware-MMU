@@ -168,25 +168,25 @@ bool OnHold(uint8_t slot) {
     // now put movables on hold
     logic::CommandBase::HoldIdlerSelector();
 
-    REQUIRE(mi::idler.state == mi::Idler::OnHold);
-    REQUIRE(ms::selector.state == ms::Selector::OnHold);
+    REQUIRE(mi::idler.IsOnHold());
+    REQUIRE(ms::selector.IsOnHold());
 
     // both movables should ignore all attempts to perform moves
     REQUIRE(mi::idler.PlanHome() == mi::Idler::OperationResult::Refused);
-    REQUIRE(mi::idler.state == mi::Idler::OnHold);
+    REQUIRE(mi::idler.IsOnHold());
     REQUIRE(mi::idler.Disengaged());
 
     REQUIRE(ms::selector.PlanHome() == ms::Selector::OperationResult::Refused);
-    REQUIRE(ms::selector.state == ms::Selector::OnHold);
+    REQUIRE(ms::selector.IsOnHold());
 
     REQUIRE(mi::idler.Disengage() == mi::Idler::OperationResult::Refused);
-    REQUIRE(mi::idler.state == mi::Idler::OnHold);
+    REQUIRE(mi::idler.IsOnHold());
     REQUIRE(mi::idler.Engage(slot) == mi::Idler::OperationResult::Refused);
-    REQUIRE(mi::idler.state == mi::Idler::OnHold);
+    REQUIRE(mi::idler.IsOnHold());
     REQUIRE(mi::idler.Disengaged());
 
     REQUIRE(ms::selector.MoveToSlot((slot + 1) % config::toolCount) == ms::Selector::OperationResult::Refused);
-    REQUIRE(ms::selector.state == ms::Selector::OnHold);
+    REQUIRE(ms::selector.IsOnHold());
 
     return true;
 }

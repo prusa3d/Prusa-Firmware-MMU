@@ -13,13 +13,13 @@ public:
     /// Internal states of the state machine
     enum {
         Ready = 0, // intentionally set as zero in order to allow zeroing the Idler structure upon startup -> avoid explicit initialization code
-        Moving,
-        PlannedHome,
-        HomeForward,
-        HomeBack,
-        TMCFailed,
-        HomingFailed,
-        OnHold,
+        Moving = 1,
+        PlannedHome = 2,
+        HomeForward = 3,
+        HomeBack = 4,
+        TMCFailed = 5,
+        HomingFailed = 6,
+        OnHold = 0x80, ///< needs to be a separate bit due to homing recovery infrastructure
     };
 
     /// Operation (Engage/Disengage/MoveToSlot) return values
@@ -78,8 +78,11 @@ public:
     /// Also, disables the axis
     void HoldOn();
 
+    /// @returns true if the movable is on-hold
+    bool IsOnHold() const { return state & OnHold; }
+
     /// Allows the movable to move/home again after begin suspended by HoldOn
-    void Resume() { state = Ready; }
+    void Resume() { state &= ~OnHold; }
 
 #ifndef UNITTEST
 protected:
