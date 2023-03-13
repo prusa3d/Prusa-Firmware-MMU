@@ -56,8 +56,8 @@ static ErrorCode __attribute__((noinline)) AddErrorAxisBit(ErrorCode ec, uint8_t
     return ec;
 }
 
-ErrorCode CheckMovable(mm::MovableBase &m) {
-    switch (m.State()) {
+ErrorCode CheckMovable(const mm::MovableBase &m) {
+    switch (m.State() & (~mm::MovableBase::OnHold)) { // clear the on-hold bit from the state check
     case mm::MovableBase::TMCFailed:
         return AddErrorAxisBit(TMC2130ToErrorCode(m.TMCErrorFlags()), m.Axis());
     case mm::MovableBase::HomingFailed:
@@ -84,12 +84,14 @@ bool CommandBase::WaitForOneModuleErrorRecovery(ErrorCode ec, modules::motion::M
             errorBeforeModuleFailed = error;
             error = ec;
             state = ProgressCode::ERRWaitingForUser; // such a situation always requires user's attention -> let the printer display an error screen
+            HoldIdlerSelector();
         }
 
         // are we already recovering an error - that would mean we got another one
         if (recoveringMovableErrorAxisMask) {
             error = ec;
             state = ProgressCode::ERRWaitingForUser; // such a situation always requires user's attention -> let the printer display an error screen
+            HoldIdlerSelector();
         }
 
         switch (state) {
@@ -99,6 +101,7 @@ bool CommandBase::WaitForOneModuleErrorRecovery(ErrorCode ec, modules::motion::M
                 mui::Event ev = mui::userInput.ConsumeEvent();
                 if (ev == mui::Event::Middle) {
                     recoveringMovableErrorAxisMask |= axisMask;
+                    ResumeIdlerSelector();
                     m.PlanHome(); // force initiate a new homing attempt
                     state = ProgressCode::Homing;
                     error = ErrorCode::RUNNING;

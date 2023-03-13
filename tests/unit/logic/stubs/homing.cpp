@@ -209,7 +209,7 @@ bool SimulateFailedHomeFirstTime(logic::CommandBase &cb) {
             }
         }
 
-        while (ms::selector.State() != mm::MovableBase::HomingFailed) {
+        while (!(ms::selector.State() & mm::MovableBase::OnHold)) {
             main_loop();
             cb.Step();
         }
@@ -250,7 +250,7 @@ bool SimulateFailedHomeSelectorRepeated(logic::CommandBase &cb) {
             }
         }
 
-        while (ms::selector.State() != mm::MovableBase::HomingFailed) {
+        while (!(ms::selector.State() & mm::MovableBase::OnHold)) {
             main_loop();
             cb.Step();
         }

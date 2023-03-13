@@ -434,8 +434,8 @@ void ToolChangeWithFlickeringFINDA(logic::ToolChange &tc, uint8_t fromSlot, uint
         tc.Step();
 
         // now both Idler and Selector are on hold again
-        REQUIRE(mi::idler.state == mi::Idler::OnHold);
-        REQUIRE(ms::selector.state == ms::Selector::OnHold);
+        REQUIRE(mi::idler.IsOnHold());
+        REQUIRE(ms::selector.IsOnHold());
 
         REQUIRE(VerifyState2(tc, mg::FilamentLoadState::AtPulley, mi::idler.IdleSlotIndex(), fromSlot, true, false, toSlot, ml::off, ml::blink0, ErrorCode::FINDA_FLICKERS, ProgressCode::ERRWaitingForUser));
 

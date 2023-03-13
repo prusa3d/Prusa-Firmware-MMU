@@ -89,6 +89,9 @@ Selector::OperationResult Selector::MoveToSlot(uint8_t slot) {
 }
 
 bool Selector::Step() {
+    if (IsOnHold()) {
+        return true; // just wait, do nothing!
+    }
     if (state != TMCFailed) {
         CheckTMC();
     }
@@ -123,10 +126,7 @@ bool Selector::Step() {
             return false;
         }
         return true;
-    case OnHold:
-        return true; // just wait, do nothing!
     case TMCFailed:
-        dbg_logic_P(PSTR("Selector Failed"));
     default:
         return true;
     }
