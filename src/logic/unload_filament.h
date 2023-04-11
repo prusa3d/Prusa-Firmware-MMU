@@ -21,6 +21,8 @@ public:
     /// @returns true if the state machine finished its job, false otherwise
     bool StepInner() override;
 
+    ProgressCode State() const override;
+
 private:
     constexpr static const uint8_t maxRetries = 1;
 

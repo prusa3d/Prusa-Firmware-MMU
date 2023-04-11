@@ -133,4 +133,20 @@ bool UnloadFilament::StepInner() {
     return false;
 }
 
+ProgressCode UnloadFilament::State() const {
+    switch (state) {
+    case ProgressCode::UnloadingToFinda:
+        switch (unl.State()) {
+        case UnloadToFinda::EngagingIdler:
+            return ProgressCode::EngagingIdler;
+        case UnloadToFinda::UnloadingFromFSensor:
+            return ProgressCode::UnloadingFilamentSlowly;
+            // the rest should be reported as UnloadingFilament
+        }
+        [[fallthrough]];
+    default:
+        return state;
+    }
+}
+
 } // namespace logic

@@ -57,7 +57,7 @@ TEST_CASE("unload_to_finda::regular_unload", "[unload_to_finda]") {
     CHECK(mm::axes[mm::Pulley].enabled == true);
 
     // now pulling the filament until finda triggers
-    REQUIRE(ff.State() == logic::UnloadToFinda::WaitingForFINDA);
+    REQUIRE(ff.State() == logic::UnloadToFinda::UnloadingFromFSensor);
     REQUIRE(WhileCondition(ff, std::bind(SimulateUnloadToFINDA, _1, 10, 1000), 1100));
 
     REQUIRE(ff.State() == logic::UnloadToFinda::OK);
@@ -209,7 +209,7 @@ TEST_CASE("unload_to_finda::unload_repeated", "[unload_to_finda]") {
     main_loop();
     ff.Step();
 
-    REQUIRE(ff.State() == logic::UnloadToFinda::UnloadingToFinda);
+    REQUIRE(ff.State() == logic::UnloadToFinda::UnloadingFromFSensor);
     REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::InSelector);
 
     // make arbitrary amount of steps

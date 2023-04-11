@@ -50,5 +50,7 @@ enum class ProgressCode : uint_fast8_t {
     HWTestDisplay, // P35
     ErrHwTestFailed, // P36
 
+    UnloadingFilamentSlowly, // P37
+
     Empty = 0xff // dummy empty state
 };

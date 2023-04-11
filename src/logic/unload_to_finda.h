@@ -15,7 +15,7 @@ struct UnloadToFinda {
     /// internal states of the state machine
     enum {
         EngagingIdler,
-        UnloadingToFinda,
+        UnloadingFromFSensor,
         WaitingForFINDA,
         OK,
         FailedFINDA,
