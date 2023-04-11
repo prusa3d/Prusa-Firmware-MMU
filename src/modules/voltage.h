@@ -4,8 +4,9 @@
 #include <stdint.h>
 #include "../config/config.h"
 
-/// The modules namespace contains models of MMU's components
 namespace modules {
+
+/// Measurement of the CPU's bandgap voltage
 namespace voltage {
 
 /// We are measuring the bandgap voltage, Vb=1.1V

@@ -1,4 +1,4 @@
-///@mainpage Prusa Multi Material Unit for the MK4
+///@mainpage Firmware for the Original Prusa MMU3 Upgrade
 ///@section intro_sec Introduction
 ///
 /// This is the new firmware for the Multi Material Unit (MMU).
@@ -37,69 +37,74 @@
 ///
 ///@dot
 ///digraph architecture {
+///    compound=true;
 ///    node [shape=record, fontname=Helvetica, fontsize=10];
-///    subgraph cluster_main { label="main"
+///    subgraph cluster_main {
+///         label="main";
 ///         main [ URL="main.cpp"];
 ///     }
-///    subgraph cluster_logic { label="logic"
+///    subgraph cluster_logic {
+///         label="logic";
 ///         logic [ URL="\ref logic"];
 ///     }
 ///
-///    subgraph cluster_modules { label="modules"
+///    subgraph cluster_modules {
+///         label="modules";
+///         rank=min;
 ///         buttons [ URL="\ref modules::buttons"];
+///         crc [ URL="\ref modules::crc"];
 ///         debouncer [ URL="\ref modules::debounce"];
 ///         finda [ URL="\ref modules::finda"];
 ///         fsensor [ URL="\ref modules::fsensor"];
 ///         globals [ URL="\ref modules::globals"];
 ///         idler [ URL="\ref modules::idler"];
 ///         leds [ URL="\ref modules::leds"];
-///         selector [ URL="\ref modules::selector"];
 ///         motion [ URL="\ref modules::motion"];
 ///         permanent_storage [ URL="\ref modules::permanent_storage"];
 ///         protocol [ URL="\ref modules::protocol"];
+///         pulley [ URL="\ref modules::pulley"];
+///         selector [ URL="\ref modules::selector"];
+///         serial [ URL="\ref modules::serial"];
 ///         timebase [ URL="\ref modules::time"];
+///         USB [ URL="\ref modules::usb"];
+///         user_input [ URL="\ref modules::user_input"];
+///         voltage [ URL="\ref modules::voltage"];
 ///     }
-///    subgraph cluster_hal { label="hal"
+///    subgraph cluster_hal {
+///         label="hal";
+///         rank=max;
 ///         adc [ URL="\ref hal::adc"];
 ///         cpu [ URL="\ref hal::cpu"];
 ///         eeprom [ URL="\ref hal::eeprom"];
 ///         gpio [ URL="\ref hal::gpio"];
+///         progmem [ URL="\ref hal::progmem"];
 ///         shr16 [ URL="\ref hal::shr16"];
 ///         spi [ URL="\ref hal::spi"];
 ///         timers [ URL="\ref hal::timers"];
 ///         tmc2130 [ URL="\ref hal::tmc2130"];
 ///         usart [ URL="\ref hal::usart"];
 ///         watchdog [ URL="\ref hal::watchdog"];
-///     }
-///    main -> logic [ arrowhead="open" ];
+///    }
+///    main -> logic [ arrowhead="open",ltail=cluster_main,lhead=cluster_logic ];
 ///
-///    logic -> buttons [ arrowhead="open" ];
-///    logic -> finda [ arrowhead="open" ];
-///    logic -> fsensor [ arrowhead="open" ];
-///    logic -> globals [ arrowhead="open" ];
-///    logic -> idler [ arrowhead="open" ];
-///    logic -> leds [ arrowhead="open" ];
-///    logic -> motion [ arrowhead="open" ];
-///    logic -> permanent_storage [ arrowhead="open" ];
-///    logic -> protocol [ arrowhead="open" ];
-///    logic -> selector [ arrowhead="open" ];
-///    logic -> timebase [ arrowhead="open" ];
+///    logic -> selector [ arrowhead="open",ltail=cluster_logic,lhead=cluster_modules ];
 ///
-///    selector -> motion [ arrowhead="open" ];
-///    idler -> motion [ arrowhead="open" ];
 ///    buttons -> debouncer [ arrowhead="open" ];
 ///    finda -> debouncer [ arrowhead="open" ];
 ///    fsensor -> debouncer [ arrowhead="open" ];
+///    idler -> motion [ arrowhead="open" ];
+///    selector -> motion [ arrowhead="open" ];
+///    pulley -> motion [ arrowhead="open" ];
+///    protocol -> crc [ arrowhead="open" ];
+///    protocol -> serial [ arrowhead="open" ];
+///    user_input -> buttons [ arrowhead="open" ];
 ///
-///    buttons -> adc [ arrowhead="open" ];
-///    finda -> adc [ arrowhead="open" ];
-///    fsensor [ arrowhead="open" ];
-///    globals -> permanent_storage [ arrowhead="open" ];
-///    leds -> shr16 [ arrowhead="open" ];
-///    motion -> tmc2130 [ arrowhead="open" ];
-///    permanent_storage -> eeprom [ arrowhead="open" ];
-///    protocol -> usart [ arrowhead="open" ];
-///    timebase -> timers [ arrowhead="open" ];
+///    # beware - these edges are here to force graphvis to order the clusters top-to-bottom
+///    # I was unable to find a better way yet :( ... and no, ranking the clusters didn't help
+///    # if someone knows how to improve the layout, please let me know
+///    buttons -> shr16 [ arrowhead="open",ltail=cluster_modules,lhead=cluster_hal ];
+///    debouncer -> adc [ arrowhead="open",ltail=cluster_modules,lhead=cluster_hal ];
+///    serial -> usart [ arrowhead="open",ltail=cluster_modules,lhead=cluster_hal ];
 ///}
 ///@enddot
 ///
@@ -132,7 +137,7 @@
 /// - Eject filament: detects FINDA_DIDNT_SWITCH_OFF, FINDA_DIDNT_SWITCH_ON
 /// - Load filament: detects FINDA_DIDNT_SWITCH_ON, FSENSOR_DIDNT_SWITCH_ON
 /// - Tool change: detects FINDA_DIDNT_SWITCH_OFF/FINDA_DIDNT_SWITCH_ON, FSENSOR_DIDNT_SWITCH_OFF/FSENSOR_DIDNT_SWITCH_ON
-/// - Load filament: detects FINDA_DIDNT_SWITCH_OFF, FSENSOR_DIDNT_SWITCH_OFF
+/// - Unload filament: detects FINDA_DIDNT_SWITCH_OFF, FSENSOR_DIDNT_SWITCH_OFF
 ///
 ///@subsection algorithmic_ssec Algorithmic errors
 ///
@@ -171,6 +176,8 @@
 /// The usage of stubs at each layer
 ///
 ///@subsection integration_sec Integration tests
+///
+/// TBD, no integration tests level has been introduced yet, because the unit tests cover most of the MMU's functionality.
 ///
 ///@section power_up Powering up the board
 ///
