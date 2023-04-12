@@ -35,22 +35,19 @@ enum class ProgressCode : uint_fast8_t {
     ParkingSelector, // P23
     EjectingFilament, // P24
     RetractingFromFinda, // P25
-
     Homing, // P26
     MovingSelector, // P27
-
     FeedingToFSensor, // P28
+    UnloadingFilamentSlowly, // P29
 
-    HWTestBegin, // P29
-    HWTestIdler, // P30
-    HWTestSelector, // P31
-    HWTestPulley, // P32
-    HWTestCleanup, // P33
-    HWTestExec, // P34
-    HWTestDisplay, // P35
-    ErrHwTestFailed, // P36
-
-    UnloadingFilamentSlowly, // P37
+    HWTestBegin, // P31
+    HWTestIdler, // P31
+    HWTestSelector, // P32
+    HWTestPulley, // P33
+    HWTestCleanup, // P34
+    HWTestExec, // P35
+    HWTestDisplay, // P36
+    ErrHwTestFailed, // P37
 
     Empty = 0xff // dummy empty state
 };
