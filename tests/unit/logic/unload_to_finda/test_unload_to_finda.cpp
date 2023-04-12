@@ -210,7 +210,7 @@ TEST_CASE("unload_to_finda::unload_repeated", "[unload_to_finda]") {
     // but set FSensor correctly
     // In this case it is vital to correctly compute the amount of steps
     // to make the unload state machine restart after the 1st attempt
-    uint32_t unlSteps = 2 + mm::unitToSteps<mm::P_pos_t>(config::defaultBowdenLength + config::feedToFinda + config::filamentMinLoadedToMMU - mg::globals.FSensorUnloadCheck_mm());
+    uint32_t unlSteps = 3 + mm::unitToSteps<mm::P_pos_t>(config::defaultBowdenLength + config::feedToFinda + config::filamentMinLoadedToMMU - mg::globals.FSensorUnloadCheck_mm());
     REQUIRE_FALSE(WhileCondition(
         ff,
         std::bind(SimulateUnloadToFINDA, _1,

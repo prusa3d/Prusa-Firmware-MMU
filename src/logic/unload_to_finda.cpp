@@ -37,15 +37,20 @@ bool UnloadToFinda::Step() {
             unloadStart_mm = mpu::pulley.CurrentPosition_mm();
             // plan both moves to keep the unload smooth
             mpu::pulley.InitAxis();
-            mpu::pulley.PlanMove(-mg::globals.FSensorUnloadCheck_mm(), mg::globals.PulleySlowFeedrate_mm_s());
-            mpu::pulley.PlanMove(-config::defaultBowdenLength - config::feedToFinda - config::filamentMinLoadedToMMU // standard lenght where FINDA is expected to trigger
-                    + mg::globals.FSensorUnloadCheck_mm(), // but subtract the slow unload phase distance
-                mg::globals.PulleyUnloadFeedrate_mm_s());
+            mm::P_pos_t unloadCheck = mm::unitToAxisUnit<mm::P_pos_t>(-mg::globals.FSensorUnloadCheck_mm());
+            mm::P_speed_t pulleyUnloadFR = mm::unitToAxisUnit<mm::P_speed_t>(mg::globals.PulleyUnloadFeedrate_mm_s());
+            mm::P_speed_t pulleyUnloadSlowFR = mm::unitToAxisUnit<mm::P_speed_t>(mg::globals.PulleySlowFeedrate_mm_s());
+            mpu::pulley.PlanMove(unloadCheck, pulleyUnloadSlowFR, pulleyUnloadFR);
+            constexpr mm::P_pos_t distance = mm::unitToAxisUnit<mm::P_pos_t>(-config::defaultBowdenLength - config::feedToFinda - config::filamentMinLoadedToMMU); // standard lenght where FINDA is expected to trigger
+                //+ mg::globals.FSensorUnloadCheck_mm(); // but subtract the slow unload phase distance
+            // damn, this addition is heavy :(
+            //  mpu::pulley.PlanMove(distance + mg::globals.FSensorUnloadCheck_mm(),
+            //      mg::globals.PulleyUnloadFeedrate_mm_s());
+            mpu::pulley.PlanMove(distance - unloadCheck, pulleyUnloadFR);
         }
         return false;
     case UnloadingFromFSensor: {
-        int32_t mpucp = mpu::pulley.CurrentPosition_mm();
-        if ((abs(unloadStart_mm - mpucp) > mm::truncatedUnit(mg::globals.FSensorUnloadCheck_mm()))) {
+        if ((abs(unloadStart_mm - mpu::pulley.CurrentPosition_mm()) > mm::truncatedUnit(mg::globals.FSensorUnloadCheck_mm()))) {
             // passed the slow unload distance, check fsensor
             if (mfs::fsensor.Pressed()) {
                 // fsensor didn't trigger within the first fsensorUnloadCheckDistance mm -> stop pulling, something failed, report an error
