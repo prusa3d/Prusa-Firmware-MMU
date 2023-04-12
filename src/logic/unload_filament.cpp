@@ -28,8 +28,8 @@ bool UnloadFilament::Reset(uint8_t /*param*/) {
     mpu::pulley.InitAxis();
     state = ProgressCode::UnloadingToFinda;
     error = ErrorCode::RUNNING;
-    unl.Reset(maxRetries);
     ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::off);
+    unl.Reset(maxRetries);
     return true;
 }
 

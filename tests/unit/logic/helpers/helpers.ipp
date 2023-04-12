@@ -116,15 +116,18 @@ bool VerifyState(SM &uf, mg::FilamentLoadState fls, uint8_t idlerSlotIndex, uint
     bool findaPressed, bool pulleyEnabled, ml::Mode greenLEDMode, ml::Mode redLEDMode, ErrorCode err, ProgressCode topLevelProgress) {
 
     CHECKED_ELSE(VerifyEnvironmentState(fls, idlerSlotIndex, selectorSlotIndex, findaPressed, pulleyEnabled, greenLEDMode, redLEDMode)) {
+        WARN("VerifyEnvironmentState failed");
         return false;
     }
 
     CHECKED_ELSE(uf.Error() == err) {
+        WARN("uf.Error() != err");
         return false;
     }
     auto tls = uf.TopLevelState();
     CHECKED_ELSE(tls == topLevelProgress) {
-    return false;
+        WARN("tls == topLevelProgress");
+        return false;
     }
     return true;
 }
@@ -181,10 +184,12 @@ bool VerifyState2(SM &uf, mg::FilamentLoadState fls, uint8_t idlerSlotIndex, uin
     }
 
     CHECKED_ELSE(uf.Error() == err) {
-    return false;
+        WARN("uf.Error() != err");
+        return false;
     }
     CHECKED_ELSE(uf.TopLevelState() == topLevelProgress) {
-    return false;
+        WARN("tls == topLevelProgress");
+        return false;
     }
     return true;
 }

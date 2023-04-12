@@ -58,7 +58,10 @@ TEST_CASE("unload_to_finda::regular_unload", "[unload_to_finda]") {
 
     // now pulling the filament until finda triggers
     REQUIRE(ff.State() == logic::UnloadToFinda::UnloadingFromFSensor);
-    REQUIRE(WhileCondition(ff, std::bind(SimulateUnloadToFINDA, _1, 10, 1000), 1100));
+    REQUIRE(WhileCondition(ff, std::bind(SimulateUnloadToFINDA, _1,
+                                   mm::unitToSteps<mm::P_pos_t>(mg::globals.FSensorUnloadCheck_mm()) / 4, // make fsensor trigger roughly in the first 1/4 of the check distance
+                                   mm::unitToSteps<mm::P_pos_t>(config::minimumBowdenLength)),
+        200'000));
 
     REQUIRE(ff.State() == logic::UnloadToFinda::OK);
     REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::InSelector);
@@ -109,11 +112,16 @@ TEST_CASE("unload_to_finda::unload_without_FINDA_trigger", "[unload_to_finda]") 
         5000));
 
     // now pulling the filament until finda triggers
-    REQUIRE(ff.State() == logic::UnloadToFinda::WaitingForFINDA);
+    REQUIRE(ff.State() == logic::UnloadToFinda::UnloadingFromFSensor);
 
     // no changes to FINDA during unload - we'll pretend it never triggers
     // but set FSensor correctly
-    REQUIRE_FALSE(WhileCondition(ff, std::bind(SimulateUnloadToFINDA, _1, 10, 150000), 50000));
+    REQUIRE_FALSE(WhileCondition(ff, std::bind(SimulateUnloadToFINDA, _1,
+                                         mm::unitToSteps<mm::P_pos_t>(mg::globals.FSensorUnloadCheck_mm()) / 4, // make fsensor trigger roughly in the first 1/4 of the check distance
+                                         mm::unitToSteps<mm::P_pos_t>(config::maximumBowdenLength * 2) // set finda trigger beyond the total allowed number of steps (i.e. not trigger)
+                                         ),
+        mm::unitToSteps<mm::P_pos_t>(config::maximumBowdenLength) // limit the number of loops to max bowden length steps
+        ));
 
     REQUIRE(ff.State() == logic::UnloadToFinda::FailedFINDA);
     REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::InSelector);
@@ -150,11 +158,16 @@ TEST_CASE("unload_to_finda::unload_without_FSensor_trigger", "[unload_to_finda]"
         5000));
 
     // now pulling the filament until finda triggers
-    REQUIRE(ff.State() == logic::UnloadToFinda::WaitingForFINDA);
+    REQUIRE(ff.State() == logic::UnloadToFinda::UnloadingFromFSensor);
 
     // no changes to FSensor during unload - we'll pretend it never triggers
     // but set FINDA correctly
-    REQUIRE(WhileCondition(ff, std::bind(SimulateUnloadToFINDA, _1, 150000, 10000), 50000));
+    REQUIRE(WhileCondition(ff, std::bind(SimulateUnloadToFINDA, _1,
+                                   mm::unitToSteps<mm::P_pos_t>(config::maximumBowdenLength * 2), // no changes to FSensor during unload - we'll pretend it never triggers
+                                   mm::unitToSteps<mm::P_pos_t>(config::minimumBowdenLength) // trigger finda roughly at the expected distance (should never reach though)
+                                   ),
+        mm::unitToSteps<mm::P_pos_t>(config::maximumBowdenLength) // limit the number of loops to max bowden length steps
+        ));
 
     REQUIRE(ff.State() == logic::UnloadToFinda::FailedFSensor);
     REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::InSelector);
@@ -191,14 +204,20 @@ TEST_CASE("unload_to_finda::unload_repeated", "[unload_to_finda]") {
         5000));
 
     // now pulling the filament until finda triggers
-    REQUIRE(ff.State() == logic::UnloadToFinda::WaitingForFINDA);
+    REQUIRE(ff.State() == logic::UnloadToFinda::UnloadingFromFSensor);
 
     // no changes to FINDA during unload - we'll pretend it never triggers
     // but set FSensor correctly
     // In this case it is vital to correctly compute the amount of steps
     // to make the unload state machine restart after the 1st attempt
-    uint32_t unlSteps = 1 + mm::unitToSteps<mm::P_pos_t>(config::defaultBowdenLength + config::feedToFinda + config::filamentMinLoadedToMMU);
-    REQUIRE_FALSE(WhileCondition(ff, std::bind(SimulateUnloadToFINDA, _1, 10, 150000), unlSteps));
+    uint32_t unlSteps = 2 + mm::unitToSteps<mm::P_pos_t>(config::defaultBowdenLength + config::feedToFinda + config::filamentMinLoadedToMMU - mg::globals.FSensorUnloadCheck_mm());
+    REQUIRE_FALSE(WhileCondition(
+        ff,
+        std::bind(SimulateUnloadToFINDA, _1,
+            mm::unitToSteps<mm::P_pos_t>(mg::globals.FSensorUnloadCheck_mm()) / 4, // make fsensor trigger roughly in the first 1/4 of the check distance
+            mm::unitToSteps<mm::P_pos_t>(config::maximumBowdenLength * 2) // do not allow finda to trigger within the specified range
+            ),
+        unlSteps));
 
     main_loop();
     ff.Step();
@@ -219,7 +238,9 @@ TEST_CASE("unload_to_finda::unload_repeated", "[unload_to_finda]") {
         ff.Step();
     }
 
-    REQUIRE(ff.State() == logic::UnloadToFinda::WaitingForFINDA);
+    // technically we are in the WaitingForFINDA state, but we want to tell the printer to rotate the E-motor after each unload retry
+    // -> therefore we check for the UnloadingFromFSensor state
+    REQUIRE(ff.State() == logic::UnloadToFinda::UnloadingFromFSensor);
     REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::InSelector);
 
     // now turn FINDA off - shall respond immediately
