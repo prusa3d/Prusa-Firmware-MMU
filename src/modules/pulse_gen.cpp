@@ -89,11 +89,25 @@ void PulseGen::CalculateTrapezoid(block_t *block, steps_t entry_speed, steps_t e
     block->final_rate = final_rate;
 }
 
+#ifdef __AVR__
+/// A pointer to a structure makes GCC use indirect memory addressing.
+/// The onus is on the programmer to check whether direct or indirect addressing is appropriate in each case,
+/// and further to check whether the code compiles to the intended addressing mode.
+/// The following compiler trick will force GCC to use a local pointer instead of the address of a structure.
+/// https://p5r.uk/blog/2008/avr-gcc-optimisations.html
+#define FIX_POINTER(_ptr) __asm__ __volatile__(""           \
+                                               : "=b"(_ptr) \
+                                               : "0"(_ptr))
+#else
+#define FIX_POINTER(_ptr) /* */
+#endif
+
 bool PulseGen::PlanMoveTo(pos_t target, steps_t feed_rate, steps_t end_rate) {
     // Prepare to set up new block
-    if (block_index.full())
+    if (Full())
         return false;
     block_t *block = &block_buffer[block_index.back()];
+    FIX_POINTER(block); // force avr-gcc to understand, that this pointer can be accessed as a local variable, see above
 
     // Bail if this is a zero-length block
     pos_t steps = target - position;
@@ -109,12 +123,12 @@ bool PulseGen::PlanMoveTo(pos_t target, steps_t feed_rate, steps_t end_rate) {
 
     // Acceleration of the segment, in steps/sec^2
     block->acceleration = acceleration;
-
     // Calculate the ratio to 2^24 so that the rate division in Step() can be just a right shift
     constexpr float ratio = (float)(1lu << 24) / (F_CPU / config::stepTimerFrequencyDivider);
     constexpr rate_t mul = 8; // pre-multiply to increase the integer division resolution
+    constexpr rate_t ratio_x_mul = ratio * mul;
     static_assert(!(mul & (mul - 1)), "mul must be a power of two");
-    block->acceleration_rate = block->acceleration * (rate_t)(ratio * mul) / mul;
+    block->acceleration_rate = acceleration * ratio_x_mul / mul;
 
     // Simplified forward jerk: do not handle reversals
     steps_t entry_speed;
