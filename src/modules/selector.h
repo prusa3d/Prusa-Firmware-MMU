@@ -49,6 +49,7 @@ protected:
     virtual void FinishMove() override;
 
 private:
+    int32_t CurrentPosition_mm() const;
 };
 
 /// The one and only instance of Selector in the FW

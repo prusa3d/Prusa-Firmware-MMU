@@ -27,7 +27,7 @@ void Selector::PlanHomingMoveForward() {
 void Selector::PlanHomingMoveBack() {
     // we expect that we are at the front end of the axis, set the expected axis' position
     mm::motion.SetPosition(mm::Selector, 0);
-    axisStart = mm::axisUnitToTruncatedUnit<config::U_mm>(mm::motion.CurPosition<mm::Selector>());
+    axisStart = 0;
     mm::motion.PlanMove<mm::Selector>(mm::unitToAxisUnit<mm::S_pos_t>(config::selectorLimits.lenght * 2),
         mm::unitToAxisUnit<mm::S_speed_t>(mg::globals.SelectorHomingFeedrate_mm_s()));
     dbg_logic_P(PSTR("Plan Homing Selector Back"));
@@ -35,7 +35,7 @@ void Selector::PlanHomingMoveBack() {
 
 bool Selector::FinishHomingAndPlanMoveToParkPos() {
     // check the axis' length
-    if (AxisDistance(mm::axisUnitToTruncatedUnit<config::U_mm>(mm::motion.CurPosition<mm::Selector>())) < (config::selectorLimits.lenght.v - 3)) { //@@TODO is 3mm ok?
+    if (AxisDistance(CurrentPosition_mm()) < (config::selectorLimits.lenght.v - 3)) { //@@TODO is 3mm ok?
         return false; // we couldn't home correctly, we cannot set the Selector's position
     }
 
@@ -52,6 +52,11 @@ bool Selector::FinishHomingAndPlanMoveToParkPos() {
 
 void Selector::FinishMove() {
     mm::motion.Disable(mm::Selector); // turn off selector motor's power every time
+}
+
+// for some reason, the same principle doesn't save code size in the Idler
+int32_t __attribute__((noinline)) Selector::CurrentPosition_mm() const {
+    return mm::axisUnitToTruncatedUnit<config::U_mm>(mm::motion.CurPosition<mm::Selector>());
 }
 
 Selector::OperationResult Selector::MoveToSlot(uint8_t slot) {

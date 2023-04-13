@@ -21,7 +21,7 @@ void Idler::PrepareMoveToPlannedSlot() {
 
 void Idler::PlanHomingMoveForward() {
     mm::motion.SetPosition(mm::Idler, mm::unitToSteps<mm::I_pos_t>(config::IdlerOffsetFromHome));
-    axisStart = mm::axisUnitToTruncatedUnit<config::U_deg>(mm::motion.CurPosition<mm::Idler>());
+    axisStart = mm::axisUnitToTruncatedUnit<config::U_deg>(mm::unitToAxisUnit<mm::I_pos_t>(config::IdlerOffsetFromHome));
     mm::motion.PlanMove<mm::Idler>(mm::unitToAxisUnit<mm::I_pos_t>(config::idlerLimits.lenght * 2),
         mm::unitToAxisUnit<mm::I_speed_t>(mg::globals.IdlerHomingFeedrate_deg_s()));
     dbg_logic_P(PSTR("Plan Homing Idler Forward"));
@@ -30,7 +30,7 @@ void Idler::PlanHomingMoveForward() {
 void Idler::PlanHomingMoveBack() {
     // we expect that we are at the front end of the axis, set the expected axis' position
     mm::motion.SetPosition(mm::Idler, mm::unitToSteps<mm::I_pos_t>(config::idlerLimits.lenght));
-    axisStart = mm::axisUnitToTruncatedUnit<config::U_deg>(mm::motion.CurPosition<mm::Idler>());
+    axisStart = mm::axisUnitToTruncatedUnit<config::U_deg>(mm::unitToAxisUnit<mm::I_pos_t>(config::idlerLimits.lenght));
     mm::motion.PlanMove<mm::Idler>(mm::unitToAxisUnit<mm::I_pos_t>(-config::idlerLimits.lenght * 2),
         mm::unitToAxisUnit<mm::I_speed_t>(mg::globals.IdlerHomingFeedrate_deg_s()));
     dbg_logic_P(PSTR("Plan Homing Idler Back"));
