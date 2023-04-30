@@ -119,23 +119,23 @@ bool __attribute__((noinline)) TMC2130::Init(const MotorParams &params, const Mo
     // this ugly union/bit structure saves 34B over the previous implementation
     union ChopConfU {
         struct __attribute__((packed)) S {
-            uint8_t toff : 4;
-            uint8_t hstrt : 3;
-            uint8_t hend : 4;
-            uint8_t fd : 1;
-            uint8_t disfdcc : 1;
-            uint8_t rndtf : 1;
-            uint8_t chm : 1;
-            uint8_t tbl : 2;
-            uint8_t vsense : 1;
-            uint8_t vhighfs : 1;
-            uint8_t vhighchm : 1;
-            uint8_t sync : 4;
-            uint8_t mres : 4;
-            uint8_t intpol : 1;
-            uint8_t dedge : 1;
-            uint8_t diss2g : 1;
-            uint8_t reserved : 1;
+            uint32_t toff : 4;
+            uint32_t hstrt : 3;
+            uint32_t hend : 4;
+            uint32_t fd : 1;
+            uint32_t disfdcc : 1;
+            uint32_t rndtf : 1;
+            uint32_t chm : 1;
+            uint32_t tbl : 2;
+            uint32_t vsense : 1;
+            uint32_t vhighfs : 1;
+            uint32_t vhighchm : 1;
+            uint32_t sync : 4;
+            uint32_t mres : 4;
+            uint32_t intpol : 1;
+            uint32_t dedge : 1;
+            uint32_t diss2g : 1;
+            uint32_t reserved : 1;
             constexpr S(bool vsense, uint8_t mres)
                 : toff(TOFF_DEFAULT)
                 , hstrt(5)
