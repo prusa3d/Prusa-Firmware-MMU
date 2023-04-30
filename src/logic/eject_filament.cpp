@@ -80,7 +80,7 @@ bool EjectFilament::StepInner() {
             ResumeIdlerSelector();
             switch (error) {
             case ErrorCode::FILAMENT_EJECTED: // the user clicked "Done", we can finish the Eject operation
-                ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::off);
+                ml::leds.SetAllOff();
                 FinishedOK();
                 break;
             case ErrorCode::FINDA_FLICKERS:
