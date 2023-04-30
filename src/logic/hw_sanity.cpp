@@ -97,9 +97,7 @@ bool HWSanity::StepInner() {
         } else {
             state = ProgressCode::HWTestExec;
             // display done, reset LEDs.
-            for (uint8_t i = 0; i < 6; i++) {
-                ml::leds.SetMode(i, ml::off);
-            }
+            ml::leds.SetAllOff();
         }
         [[fallthrough]];
     case ProgressCode::HWTestExec: {
@@ -163,7 +161,7 @@ bool HWSanity::StepInner() {
             ml::leds.SetMode(4, ml::green, ml::off);
             return true;
         } else {
-            ml::leds.SetPairButOffOthers(0, ml::off, ml::off);
+            ml::leds.SetAllOff();
             FinishedOK();
         }
     case ProgressCode::OK:

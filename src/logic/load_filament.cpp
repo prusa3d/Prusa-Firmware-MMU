@@ -64,7 +64,7 @@ void logic::LoadFilament::GoToRetractingFromFinda() {
 
 void logic::LoadFilament::LoadFinishedCorrectly() {
     FinishedOK();
-    ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::off);
+    ml::leds.SetAllOff();
     mpu::pulley.Disable();
 }
 
