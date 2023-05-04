@@ -108,7 +108,7 @@ static constexpr U_mm fsensorUnloadCheckDistance = 40.0_mm;
 static constexpr AxisConfig pulley = {
     .dirOn = false,
     .mRes = MRes_8,
-    .iRun = 20, /// 348mA
+    .iRun = 13, /// 230mA
     .iHold = 0, /// 17mA in SpreadCycle, freewheel in StealthChop
     .stealth = false,
     .stepsPerUnit = (200 * 8 / 19.147274),
@@ -122,10 +122,10 @@ static constexpr PulleyLimits pulleyLimits = {
     .accel = 800.0_mm_s2,
 };
 
-static constexpr U_mm_s pulleyUnloadFeedrate = 120._mm_s;
+static constexpr U_mm_s pulleyUnloadFeedrate = 95._mm_s;
 /// 120mm_s is too much, the printer cannot send the status of fsensor that fast
 /// and false fsensor_not_triggered errors start to occur
-static constexpr U_mm_s pulleyLoadFeedrate = 80._mm_s;
+static constexpr U_mm_s pulleyLoadFeedrate = 95._mm_s;
 static constexpr U_mm_s pulleySlowFeedrate = 20._mm_s;
 /// End: Pulley axis configuration
 
