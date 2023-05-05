@@ -144,11 +144,11 @@
 | ^        | ^        | ^                          | 01h 1        | ^           | stealth                                  | ^            | ^          | ^
 | 0x0bh 11 | uint8    | extra_load_distance        | 00h 0        | 1eh 30      | unit mm                                  | Read / Write | M707 A0x0b | M708 A0x0b Xnn
 | 0x0ch 12 | uint8    | FSensor_unload_check_dist. | 00h 0        | 28h 30      | unit mm                                  | Read / Write | M707 A0x0c | M708 A0x0c Xnn
-| 0x0dh 13 | uint16   | Pulley_unload_feedrate     | 0000h 0      | 0078h 120   | unit mm/s                                | Read / Write | M707 A0x0d | M708 A0x0d Xnnnn
+| 0x0dh 13 | uint16   | Pulley_unload_feedrate     | 0000h 0      | 005fh 95    | unit mm/s                                | Read / Write | M707 A0x0d | M708 A0x0d Xnnnn
 | 0x0eh 14 | uint16   | Pulley_acceleration        | 0000h 0      | 320h 800.0  | unit mm/s²                               | Read (Write) | M707 A0x0e | (M708 A0x0e Xnnnn)
 | 0x0fh 15 | uint16   | Selector_acceleration      | 0000h 0      | 00c8h 200.0 | unit mm/s²                               | Read (Write) | M707 A0x0f | (M708 A0x0f Xnnnn)
 | 0x10h 16 | uint16   | Idler_acceleration         | 0000h 0      | 01f4h 500.0 | unit deg/s²                              | Read (Write) | M707 A0x10 | (M708 A0x10 Xnnnn)
-| 0x11h 17 | uint16   | Pulley_load_feedrate       | 0000h 0      | 0050h 80    | unit mm/s                                | Read / Write | M707 A0x11 | M708 A0x11 Xnnnn
+| 0x11h 17 | uint16   | Pulley_load_feedrate       | 0000h 0      | 005fh 95    | unit mm/s                                | Read / Write | M707 A0x11 | M708 A0x11 Xnnnn
 | 0x12h 18 | uint16   | Selector_nominal_feedrate  | 0000h 0      | 002dh 45    | unit mm/s                                | Read / Write | M707 A0x12 | M708 A0x12 Xnnnn
 | 0x13h 19 | uint16   | Idler_nominal_feedrate     | 0000h 0      | 012ch 300   | unit deg/s                               | Read / Write | M707 A0x13 | M708 A0x13 Xnnnn
 | 0x14h 20 | uint16   | Pulley_slow_feedrate       | 0000h 0      | 0014h 20    | unit mm/s                                | Read / Write | M707 A0x14 | M708 A0x14 Xnnnn
@@ -161,7 +161,7 @@
 | 0x1bh 27 | uint16   | Set/Get_Selector_slot      | 0000h 0      | ffffh 65535 | unit slot [0-4/5] 5=park pos             | Read / Write | M707 A0x1b | M708 A0x1b Xn
 | 0x1ch 28 | uint16   | Set/Get_Idler_slot         | 0000h 0      | ffffh 65535 | unit slot [0-4/5] 5=disengaged           | Read / Write | M707 A0x1c | M708 A0x1c Xn
 | 0x1dh 29 | uint8    | Set/Get Selector cut iRun current | 0 to 63 (aka 0-1024mA)| 31 (530mA) |                           | Read / Write | M707 A0x1d | M708 A0x1d Xn
-| 0x1eh 30 | uint16   | Set/Get Pulley iRun current| 0-31         | 14h 20      | 20->350mA: see TMC2130 current conversion| Read / Write | M707 A0x1e | M708 A0x1e Xn
+| 0x1eh 30 | uint16   | Set/Get Pulley iRun current| 0-31         | 0dh 13      | 13->230mA: see TMC2130 current conversion| Read / Write | M707 A0x1e | M708 A0x1e Xn
 | 0x1fh 31 | uint16  |Set/Get Selector iRun current| 0-31         | 1fh 31      | 31->530mA: see TMC2130 current conversion| Read / Write | M707 A0x1f | M708 A0x1f Xn
 | 0x20h 32 | uint16   | Set/Get Idler iRun current | 0-31         | 1fh 31      | 31->530mA: see TMC2130 current conversion| Read / Write | M707 A0x20 | M708 A0x20 Xn
 | 0x21h 33 | uint16   | Reserved for internal use  | 225          |             | N/A                                      | N/A          | N/A        | N/A
