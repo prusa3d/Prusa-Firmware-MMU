@@ -117,7 +117,7 @@ bool CutFilament::StepInner() {
         break;
     case ProgressCode::PerformingCut:
         if (ms::selector.Slot() == cutSlot) { // this may not be necessary if we want the selector and pulley move at once
-            state = ProgressCode::ReturningSelector;
+            state = ProgressCode::Homing;
             // revert current to Selector's normal value
             mm::motion.InitAxis(mm::Selector, mm::MotorCurrents(config::selector.iRun, config::selector.iHold));
             // revert move speed
@@ -126,8 +126,13 @@ bool CutFilament::StepInner() {
             mpu::pulley.PlanMove(-config::cuttingEdgeRetract, config::pulleySlowFeedrate);
         }
         break;
+    case ProgressCode::Homing:
+        if (ms::selector.HomingValid()) {
+            state = ProgressCode::ReturningSelector;
+        }
+        break;
     case ProgressCode::ReturningSelector:
-        if (ms::selector.HomingValid()) { // selector rehomed
+        if (ms::selector.State() == ms::selector.Ready) {
             FinishedOK();
             ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::on, ml::off);
         }
