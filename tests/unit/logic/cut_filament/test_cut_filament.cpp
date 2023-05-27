@@ -76,13 +76,17 @@ void CutSlot(logic::CutFilament &cf, uint8_t startSlot, uint8_t cutSlot) {
 
     // cutting
     REQUIRE(WhileTopState(cf, ProgressCode::PerformingCut, selectorMoveMaxSteps));
-    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, mi::idler.IdleSlotIndex(), cutSlot, false, true, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::ReturningSelector));
+    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, mi::idler.IdleSlotIndex(), cutSlot, false, true, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::Homing));
 
     // rehoming selector
     SimulateSelectorHoming(cf);
+    REQUIRE(WhileTopState(cf, ProgressCode::Homing, selectorMoveMaxSteps));
+
+    // Return selector to parked position
+    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, mi::idler.IdleSlotIndex(), ms::Selector::IdleSlotIndex(), false, true, cutSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::ReturningSelector));
 
     REQUIRE(WhileTopState(cf, ProgressCode::ReturningSelector, selectorMoveMaxSteps));
-    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, mi::idler.IdleSlotIndex(), ms::Selector::IdleSlotIndex(), false, true, cutSlot, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
+    REQUIRE(VerifyState2(cf, mg::FilamentLoadState::AtPulley, mi::idler.IdleSlotIndex(), cutSlot, false, true, cutSlot, ml::on, ml::off, ErrorCode::OK, ProgressCode::OK));
 }
 
 TEST_CASE("cut_filament::cut0", "[cut_filament]") {
