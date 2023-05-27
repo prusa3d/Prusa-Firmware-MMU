@@ -85,7 +85,7 @@ void HomeIdlerAndSelector() {
     ms::selector.InvalidateHoming();
     logic::NoCommand nc; // just a dummy instance which has an empty Step()
     SimulateIdlerHoming(nc);
-    SimulateSelectorHoming(nc);
+    SimulateSelectorHoming(nc, true);
 }
 
 bool EnsureActiveSlotIndex(uint8_t slot, mg::FilamentLoadState loadState) {
