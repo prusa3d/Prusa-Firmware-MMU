@@ -82,7 +82,10 @@ bool SelectorFailedRetry() {
 
     SimulateSelectorHoming(h);
 
-    REQUIRE(WhileTopState(h, ProgressCode::Homing, 5000));
+    REQUIRE(ms::selector.HomingValid());
+
+    // Wait for the selector to return to the parked position
+    REQUIRE(WhileTopState(h, ProgressCode::Homing, selectorMoveMaxSteps));
 
     REQUIRE(VerifyState(h, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), 0, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
     REQUIRE(mi::idler.HomingValid());

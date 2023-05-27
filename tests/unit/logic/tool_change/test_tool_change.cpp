@@ -513,7 +513,11 @@ void ToolChangeFSENSOR_TOO_EARLY(logic::ToolChange &tc, uint8_t slot) {
         200'000UL));
 
     // still unloading, but Selector can start homing
-    SimulateSelectorHoming(tc);
+
+    // Set waitForParkedPosition to true, since the unload filament statemachine
+    // explicitly waits for (ms::selector.State() == ms::Selector::Ready)
+    SimulateSelectorHoming(tc, true);
+
     // wait for finishing of UnloadingFilament
     WhileTopState(tc, ProgressCode::UnloadingFilament, 5000);
 
