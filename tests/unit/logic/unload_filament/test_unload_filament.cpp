@@ -183,6 +183,10 @@ void FindaDidntTriggerResolveTryAgain(uint8_t slot, logic::UnloadFilament &uf) {
 
     // Assume, the Idler homed (homing is invalidated after pressing the recovery button)
     SimulateIdlerHoming(uf);
+
+    // Wait for the idler homing to become valid, and for the
+    // idler to return to 'Ready' state
+    SimulateIdlerMoveToParkingPosition(uf);
 }
 
 TEST_CASE("unload_filament::finda_didnt_trigger_resolve_try_again", "[unload_filament]") {

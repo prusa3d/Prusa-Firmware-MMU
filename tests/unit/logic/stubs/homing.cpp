@@ -52,7 +52,7 @@ void SimulateIdlerAndSelectorHoming(logic::CommandBase &cb) {
 #else
     // sadly, it looks like we need to separate homing of idler and selector due to electrical reasons
     SimulateIdlerHoming(cb);
-    SimulateSelectorHoming(cb, true);
+    SimulateSelectorHoming(cb);
 #endif
 }
 
@@ -82,7 +82,17 @@ void SimulateIdlerHoming(logic::CommandBase &cb) {
             mm::motion.StallGuardReset(mm::Idler);
         }
     }
+}
 
+void SimulateIdlerWaitForHomingValid(logic::CommandBase &cb) {
+    // Wait for the HomingValid flag to be set
+    while (!mi::idler.HomingValid()) {
+        main_loop();
+        cb.Step();
+    }
+}
+
+void SimulateIdlerMoveToParkingPosition(logic::CommandBase &cb) {
     // now the Idler shall perform a move into their parking positions
     while (mi::idler.State() != mm::MovableBase::Ready) {
         main_loop();
@@ -90,7 +100,7 @@ void SimulateIdlerHoming(logic::CommandBase &cb) {
     }
 }
 
-void SimulateSelectorHoming(logic::CommandBase &cb, bool waitForParkedPosition) {
+void SimulateSelectorHoming(logic::CommandBase &cb) {
     // do 5 steps until we trigger the simulated StallGuard
     for (uint8_t i = 0; i < 5; ++i) {
         main_loop();
@@ -116,22 +126,28 @@ void SimulateSelectorHoming(logic::CommandBase &cb, bool waitForParkedPosition) 
             mm::motion.StallGuardReset(mm::Selector);
         }
     }
+}
 
+void SimulateSelectorWaitForHomingValid(logic::CommandBase &cb) {
     // Wait for the HomingValid flag to be set
     while (!ms::selector.HomingValid()) {
         main_loop();
         cb.Step();
     }
+}
 
-    // Normally the firmware does not wait for the state to turn ready. But it can
-    // be useful to setup test cases. After the selector homing is valid, it will
-    // go to it's last planned position.
-    if (waitForParkedPosition) {
-        // now the Selector shall perform a move into their parking positions
-        while (ms::selector.State() != mm::MovableBase::Ready) {
-            main_loop();
-            cb.Step();
-        }
+void SimulateSelectorWaitForReadyState(logic::CommandBase &cb) {
+    // now the Selector shall perform a move into their parking positions
+    while (ms::selector.State() != mm::MovableBase::Ready) {
+        main_loop();
+        cb.Step();
+    }
+}
+
+void SimulateSelectorAndIdlerWaitForReadyState(logic::CommandBase &cb) {
+    while (ms::selector.State() != ms::Selector::Ready && mi::idler.State() != mi::Idler::Ready) {
+        main_loop();
+        cb.Step();
     }
 }
 

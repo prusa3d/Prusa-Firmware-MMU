@@ -217,7 +217,23 @@ void ToolChangeFailLoadToFindaMiddleBtn(logic::ToolChange &tc, uint8_t toSlot) {
 
     REQUIRE_FALSE(mi::idler.HomingValid());
     REQUIRE_FALSE(ms::selector.HomingValid());
-    SimulateIdlerAndSelectorHoming(tc); // failed load to FINDA = nothing blocking the selector - it can rehome
+
+    // We've entered FeedToFinda state machine
+    REQUIRE(tc.TopLevelState() == ProgressCode::FeedingToFinda);
+
+    // Idler homes first
+    SimulateIdlerHoming(tc);
+    SimulateIdlerMoveToParkingPosition(tc);
+
+    // Now home the selector
+    SimulateSelectorHoming(tc);
+
+    // Wait for Selector to return to the planned slot
+    REQUIRE(WhileCondition(
+        tc, [&](uint32_t) {
+            return tc.feed.State() == tc.feed.EngagingIdler;
+        },
+        selectorMoveMaxSteps));
 
     // @@TODO here is nasty disrepancy - FINDA is not pressed, but we pretend to have something in the Selector.
     //
@@ -331,8 +347,17 @@ void ToolChangeFailFSensorMiddleBtn(logic::ToolChange &tc, uint8_t fromSlot, uin
 
     // make FINDA trigger - Idler will rehome in this step, Selector must remain at its place
     SimulateIdlerHoming(tc);
+
+    REQUIRE_FALSE(mi::idler.HomingValid());
+    REQUIRE_FALSE(ms::selector.HomingValid());
+
+    SimulateIdlerWaitForHomingValid(tc);
+
     REQUIRE(mi::idler.HomingValid());
     REQUIRE_FALSE(ms::selector.HomingValid());
+
+    SimulateIdlerMoveToParkingPosition(tc);
+
     // now trigger the FINDA
     REQUIRE(WhileCondition(tc, std::bind(SimulateFeedToFINDA, _1, 100), 5000));
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, fromSlot, fromSlot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingFilament));
@@ -513,10 +538,14 @@ void ToolChangeFSENSOR_TOO_EARLY(logic::ToolChange &tc, uint8_t slot) {
         200'000UL));
 
     // still unloading, but Selector can start homing
+    SimulateSelectorHoming(tc);
+    SimulateSelectorWaitForHomingValid(tc);
 
-    // Set waitForParkedPosition to true, since the unload filament statemachine
-    // explicitly waits for (ms::selector.State() == ms::Selector::Ready)
-    SimulateSelectorHoming(tc, true);
+    // Make sure we're still in unloading state
+    REQUIRE(tc.TopLevelState() == ProgressCode::UnloadingFilament);
+
+    // The unload filament state machine explicitly waits for (ms::selector.State() == ms::Selector::Ready)
+    SimulateSelectorWaitForReadyState(tc);
 
     // wait for finishing of UnloadingFilament
     WhileTopState(tc, ProgressCode::UnloadingFilament, 5000);
