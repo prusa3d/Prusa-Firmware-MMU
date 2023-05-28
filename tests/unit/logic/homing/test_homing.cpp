@@ -44,10 +44,55 @@ bool SuccessfulHome(uint8_t slot) {
     REQUIRE_FALSE(mi::idler.HomingValid());
     REQUIRE_FALSE(ms::selector.HomingValid());
 
-    SimulateIdlerAndSelectorHoming(h);
+    // Idler homes first
+    SimulateIdlerHoming(h);
 
-    REQUIRE(WhileTopState(h, ProgressCode::Homing, 5000));
+    REQUIRE_FALSE(mi::idler.HomingValid());
+    REQUIRE_FALSE(ms::selector.HomingValid());
+    REQUIRE(h.TopLevelState() == ProgressCode::Homing);
 
+    // Homing becomes valid
+    SimulateIdlerWaitForHomingValid(h);
+
+    REQUIRE(mi::idler.HomingValid());
+    REQUIRE_FALSE(ms::selector.HomingValid());
+    REQUIRE(h.TopLevelState() == ProgressCode::Homing);
+
+    // Idler returns to the parked position, and it's state is now 'Ready'
+    // This will now allow the Selector to home
+    SimulateIdlerMoveToParkingPosition(h);
+
+    REQUIRE(mi::idler.HomingValid());
+    REQUIRE(mi::idler.State() == mm::MovableBase::Ready);
+    REQUIRE_FALSE(ms::selector.HomingValid());
+    REQUIRE(h.TopLevelState() == ProgressCode::Homing);
+
+    // Selector starts homing
+    SimulateSelectorHoming(h);
+
+    REQUIRE(mi::idler.HomingValid());
+    REQUIRE(mi::idler.State() == mm::MovableBase::Ready);
+    REQUIRE_FALSE(ms::selector.HomingValid());
+    REQUIRE(h.TopLevelState() == ProgressCode::Homing);
+
+    // Homing becomes valid
+    SimulateSelectorWaitForHomingValid(h);
+
+    REQUIRE(mi::idler.HomingValid());
+    REQUIRE(mi::idler.State() == mm::MovableBase::Ready);
+    REQUIRE(ms::selector.HomingValid());
+    REQUIRE(h.TopLevelState() == ProgressCode::Homing);
+
+    // If there is a planned move, the selector moves to the parked position
+    // Once at the parked position, it's state becomes 'Ready'
+    SimulateSelectorWaitForReadyState(h);
+
+    REQUIRE(mi::idler.HomingValid());
+    REQUIRE(mi::idler.State() == mm::MovableBase::Ready);
+    REQUIRE(ms::selector.HomingValid());
+    REQUIRE(ms::selector.State() == mm::MovableBase::Ready);
+
+    // 'Homing' should change to 'OK'
     REQUIRE(VerifyState(h, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), slot, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
     REQUIRE(mi::idler.HomingValid());
     REQUIRE(ms::selector.HomingValid());
@@ -84,11 +129,12 @@ bool SelectorFailedRetry() {
     }
 
     SimulateSelectorHoming(h);
+    SimulateSelectorWaitForHomingValid(h);
 
     REQUIRE(ms::selector.HomingValid());
 
     // Wait for the selector to return to the parked position
-    REQUIRE(WhileTopState(h, ProgressCode::Homing, selectorMoveMaxSteps));
+    SimulateSelectorWaitForReadyState(h);
 
     REQUIRE(VerifyState(h, mg::FilamentLoadState::AtPulley, mi::Idler::IdleSlotIndex(), 0, false, false, ml::off, ml::off, ErrorCode::OK, ProgressCode::OK));
     REQUIRE(mi::idler.HomingValid());

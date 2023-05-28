@@ -164,7 +164,6 @@ void FindaDidntTriggerCommonSetup(uint8_t slot, logic::UnloadFilament &uf) {
     REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, false, ml::off, ml::blink0, ErrorCode::FINDA_DIDNT_SWITCH_OFF, ProgressCode::ERRWaitingForUser));
 }
 
-
 void FindaDidntTriggerResolveTryAgain(uint8_t slot, logic::UnloadFilament &uf) {
     // Stage 3 - the user has to do something
     // there are 3 options:
@@ -186,6 +185,10 @@ void FindaDidntTriggerResolveTryAgain(uint8_t slot, logic::UnloadFilament &uf) {
 
     // Assume, the Idler homed (homing is invalidated after pressing the recovery button)
     SimulateIdlerHoming(uf);
+
+    // Wait for the idler homing to become valid, and for the
+    // idler to return to 'Ready' state
+    SimulateIdlerMoveToParkingPosition(uf);
 }
 
 TEST_CASE("unload_filament::finda_didnt_trigger_resolve_try_again", "[unload_filament]") {
