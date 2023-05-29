@@ -1,7 +1,6 @@
 /// @file eject_filament.cpp
 #include "eject_filament.h"
 #include "../modules/buttons.h"
-#include "../modules/finda.h"
 #include "../modules/globals.h"
 #include "../modules/idler.h"
 #include "../modules/leds.h"
