@@ -1,5 +1,4 @@
 #include "catch2/catch_test_macros.hpp"
-#include "catch2/matchers/catch_matchers_vector.hpp"
 
 #include "../../../../src/modules/buttons.h"
 #include "../../../../src/modules/finda.h"
@@ -23,7 +22,6 @@
 
 #include <functional>
 
-using Catch::Matchers::Equals;
 using namespace std::placeholders;
 
 #include "../helpers/helpers.ipp"

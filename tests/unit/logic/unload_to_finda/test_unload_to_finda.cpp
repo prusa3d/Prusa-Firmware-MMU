@@ -1,6 +1,5 @@
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/generators/catch_generators_range.hpp"
-#include "catch2/matchers/catch_matchers_vector.hpp"
 
 #include <functional>
 
@@ -21,7 +20,6 @@
 #include "../stubs/main_loop_stub.h"
 #include "../stubs/stub_motion.h"
 
-using Catch::Matchers::Equals;
 using namespace std::placeholders;
 
 namespace ha = hal::adc;
