@@ -1,8 +1,5 @@
 #include "catch2/catch_test_macros.hpp"
-#include "catch2/matchers/catch_matchers_vector.hpp"
 #include "circular_buffer.h"
-
-using Catch::Matchers::Equals;
 
 TEST_CASE("circular_buffer::basic", "[circular_buffer]") {
 
