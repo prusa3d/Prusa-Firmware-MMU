@@ -35,6 +35,7 @@ bool EjectFilament::Reset(uint8_t param) {
 
 void EjectFilament::MoveSelectorAside() {
     state = ProgressCode::ParkingSelector;
+    error = ErrorCode::RUNNING;
     const uint8_t selectorParkedPos = (slot <= 2) ? 4 : 0;
     if (ms::selector.MoveToSlot(selectorParkedPos) == ms::Selector::OperationResult::Refused) {
         GoToErrDisengagingIdler(ErrorCode::FINDA_FLICKERS);
