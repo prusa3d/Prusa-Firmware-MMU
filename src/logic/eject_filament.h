@@ -40,7 +40,9 @@ public:
 
     ErrorCode Error() const override;
 
+#ifndef UNITTEST
 private:
+#endif
     UnloadFilament unl; ///< a high-level command/operation may be used as a building block of other operations as well
     uint8_t slot;
     void MoveSelectorAside();
