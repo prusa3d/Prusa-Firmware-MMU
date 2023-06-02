@@ -61,15 +61,8 @@ public:
     }
 
     /// @returns number of elements in the buffer
-    /// @@TODO better solution if it exists
     inline index_t count() const {
-        index_t i = tail;
-        index_t c = 0;
-        while (i != head) {
-            i = next(i);
-            ++c;
-        }
-        return c;
+        return head - tail;
     }
 
 protected:
