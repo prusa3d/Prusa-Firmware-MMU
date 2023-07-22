@@ -132,6 +132,54 @@ TEST_CASE("circular_buffer::wrap_around", "[circular_buffer]") {
     }
 }
 
+TEST_CASE("circular_buffer::wrap_around_np2", "[circular_buffer]") {
+
+    // same as above, but using a non-power-of-two size
+    static constexpr auto size = 3;
+    using CB = CircularBuffer<uint8_t, uint8_t, size>;
+
+    // start with an empty buffer
+    CB cb;
+    REQUIRE(cb.empty());
+
+    // test inverse logic
+    REQUIRE(!cb.full());
+
+    // add two elements to shift the internal offset
+    uint8_t v;
+    cb.push(size + 1);
+    cb.pop(v);
+    cb.push(size + 1);
+    cb.pop(v);
+    REQUIRE(cb.empty());
+
+    // loop to test the internal cursor wrap-around logic
+    // the number of loops needs to be equal or greater than the index type
+    for (auto loop = 0; loop != 256; ++loop) {
+        INFO("loop " << loop);
+
+        // ensure we can fill the buffer
+        for (auto i = 0; i != size; ++i) {
+            CHECK(!cb.full());
+            cb.push(i);
+            CHECK(!cb.empty());
+            CHECK(cb.count() == i + 1);
+        }
+        REQUIRE(cb.full());
+        REQUIRE(!cb.empty());
+        REQUIRE(cb.count() == size);
+
+        // retrieve all elements
+        for (auto i = 0; i != size; ++i) {
+            uint8_t v;
+            CHECK(cb.pop(v));
+            CHECK(v == i);
+            CHECK(cb.count() == size - i - 1);
+        }
+        REQUIRE(cb.empty());
+    }
+}
+
 TEST_CASE("circular_buffer::minimal_size", "[circular_buffer]") {
 
     using CB = CircularBuffer<uint8_t, uint8_t, 1>;
