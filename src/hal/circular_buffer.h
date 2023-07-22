@@ -28,9 +28,7 @@ public:
 
     /// @returns true if full
     inline bool full() const {
-        // alternative without wrap-around logic:
-        //   return tail != head && mask(tail) == mask(head);
-        return ((index_t)(head - tail) % (size * 2)) == size;
+        return count() == size;
     }
 
     /// Reset the indexes to empty
@@ -67,13 +65,9 @@ public:
         if constexpr (size_is_power2)
             return head - tail;
         else {
-            index_t i = tail;
-            index_t c = 0;
-            while (i != head) {
-                i = next(i);
-                ++c;
-            }
-            return c;
+            return head >= tail
+                ? (head - tail)
+                : (size * 2 + head) - tail;
         }
     }
 
