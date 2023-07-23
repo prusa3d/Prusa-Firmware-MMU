@@ -255,6 +255,7 @@ void Application::ProcessRequestMsg(const mp::RequestMsg &rq) {
     case mp::RequestMsgCodes::Eject:
     case mp::RequestMsgCodes::Home:
     case mp::RequestMsgCodes::Load:
+    case mp::RequestMsgCodes::Mode:
     case mp::RequestMsgCodes::Tool:
     case mp::RequestMsgCodes::Unload:
         PlanCommand(rq);
