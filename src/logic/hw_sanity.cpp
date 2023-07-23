@@ -1,5 +1,7 @@
 /// @file hw_sanity.cpp
+#include <string.h>
 #include "hw_sanity.h"
+#include "command_base.h"
 #include "../modules/globals.h"
 #include "../modules/motion.h"
 #include "../modules/leds.h"
@@ -26,9 +28,7 @@ bool HWSanity::Reset(uint8_t param) {
     state = ProgressCode::HWTestBegin;
     error = ErrorCode::RUNNING;
     axis = config::Axis::Idler;
-    fault_masks[0] = 0;
-    fault_masks[1] = 0;
-    fault_masks[2] = 0;
+    memset(fault_masks, 0, sizeof(fault_masks));
     return true;
 }
 
@@ -140,20 +140,12 @@ bool HWSanity::StepInner() {
             // error, display it and return the code.
             state = ProgressCode::ErrHwTestFailed;
             error = ErrorCode::MMU_SOLDERING_NEEDS_ATTENTION;
-            uint8_t mask = fault_masks[Axis::Idler];
-            if (mask) {
-                error |= ErrorCode::TMC_IDLER_BIT;
-                SetFaultDisplay(0, mask);
-            }
-            mask = fault_masks[Axis::Pulley];
-            if (mask) {
-                error |= ErrorCode::TMC_PULLEY_BIT;
-                SetFaultDisplay(2, mask);
-            }
-            mask = fault_masks[Axis::Selector];
-            if (mask) {
-                error |= ErrorCode::TMC_SELECTOR_BIT;
-                SetFaultDisplay(1, mask);
+            for (uint8_t axis = 0; axis < 3; axis++) {
+                const uint8_t mask = fault_masks[axis];
+                if (mask) {
+                    error = logic::AddErrorAxisBit(error, axis);
+                    SetFaultDisplay(axis, mask);
+                }
             }
             ml::leds.SetMode(3, ml::red, ml::off);
             ml::leds.SetMode(3, ml::green, ml::off);

@@ -17,6 +17,10 @@ inline ErrorCode &operator|=(ErrorCode &a, ErrorCode b) {
     return a = (ErrorCode)((uint16_t)a | (uint16_t)b);
 }
 
+inline ErrorCode operator<<(ErrorCode a, uint8_t b) {
+    return a = (ErrorCode)((uint16_t)a << (uint16_t)b);
+}
+
 static ErrorCode TMC2130ToErrorCode(const hal::tmc2130::ErrorFlags &ef) {
     ErrorCode e = ErrorCode::RUNNING;
 
@@ -39,21 +43,8 @@ static ErrorCode TMC2130ToErrorCode(const hal::tmc2130::ErrorFlags &ef) {
     return e;
 }
 
-static ErrorCode __attribute__((noinline)) AddErrorAxisBit(ErrorCode ec, uint8_t tmcIndex) {
-    switch (tmcIndex) {
-    case config::Axis::Pulley:
-        ec |= ErrorCode::TMC_PULLEY_BIT;
-        break;
-    case config::Axis::Selector:
-        ec |= ErrorCode::TMC_SELECTOR_BIT;
-        break;
-    case config::Axis::Idler:
-        ec |= ErrorCode::TMC_IDLER_BIT;
-        break;
-    default:
-        break;
-    }
-    return ec;
+ErrorCode __attribute__((noinline)) AddErrorAxisBit(ErrorCode ec, uint8_t axis) {
+    return ec |= (ErrorCode::TMC_PULLEY_BIT << axis);
 }
 
 ErrorCode CheckMovable(const mm::MovableBase &m) {
