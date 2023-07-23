@@ -18,7 +18,7 @@ inline ErrorCode &operator|=(ErrorCode &a, ErrorCode b) {
 }
 
 inline ErrorCode operator<<(ErrorCode a, uint8_t b) {
-    return a = (ErrorCode)((uint16_t)a << (uint16_t)b);
+    return a = (ErrorCode)((uint16_t)a << b);
 }
 
 static ErrorCode TMC2130ToErrorCode(const hal::tmc2130::ErrorFlags &ef) {
