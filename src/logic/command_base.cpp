@@ -44,6 +44,11 @@ static ErrorCode TMC2130ToErrorCode(const hal::tmc2130::ErrorFlags &ef) {
 }
 
 ErrorCode __attribute__((noinline)) AddErrorAxisBit(ErrorCode ec, uint8_t axis) {
+    // From now on, we rely on specific ErrorCode bitmask values - that allowed some important optimizations.
+    // In case someone fiddles with the bits, the build must fail.
+    static_assert((uint16_t)ErrorCode::TMC_PULLEY_BIT == 0x0040);
+    static_assert((uint16_t)ErrorCode::TMC_SELECTOR_BIT == 0x0080);
+    static_assert((uint16_t)ErrorCode::TMC_IDLER_BIT == 0x0100);
     return ec |= (ErrorCode::TMC_PULLEY_BIT << axis);
 }
 
