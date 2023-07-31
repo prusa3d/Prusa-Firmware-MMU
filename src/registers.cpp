@@ -412,7 +412,11 @@ bool ReadRegister(uint8_t address, uint16_t &value) {
     value = 0;
 
     // Get pointer to register at address
+#ifndef UNITTEST
     RegisterRec reg = *static_cast<RegisterRec *>(pgm_read_ptr(registers + address));
+#else
+    RegisterRec reg = registers[address];
+#endif
     if (!reg.flags.rwfuncs) {
         switch (reg.flags.size) {
         case 0:
@@ -445,7 +449,11 @@ bool WriteRegister(uint8_t address, uint16_t value) {
         return false;
     }
 
+#ifndef UNITTEST
     RegisterRec reg = *static_cast<RegisterRec *>(pgm_read_ptr(registers + address));
+#else
+    RegisterRec reg = registers[address];
+#endif
     if (!reg.flags.writable) {
         return false;
     }
