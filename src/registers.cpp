@@ -246,7 +246,7 @@ struct RegisterRec {
 // In this project that's really not an issue since we have half of the RAM empty:
 // Data: 1531 bytes (59.8% Full)
 // But it would be nice to fix that in the future - might be hard to push the compiler to such a construct
-static const RegisterRec registers[] /*PROGMEM*/ = {
+static const RegisterRec registers[] PROGMEM = {
     // 0x00
     RegisterRec(false, &project_major),
     // 0x01
@@ -403,31 +403,35 @@ static const RegisterRec registers[] /*PROGMEM*/ = {
 };
 
 static constexpr uint8_t registersSize = sizeof(registers) / sizeof(RegisterRec);
+static_assert(registersSize == 34);
 
 bool ReadRegister(uint8_t address, uint16_t &value) {
     if (address >= registersSize) {
         return false;
     }
     value = 0;
-    if (!registers[address].flags.rwfuncs) {
-        switch (registers[address].flags.size) {
+
+    // Get pointer to register at address
+    RegisterRec reg = *static_cast<RegisterRec *>(pgm_read_ptr(registers + address));
+    if (!reg.flags.rwfuncs) {
+        switch (reg.flags.size) {
         case 0:
         case 1:
-            value = *static_cast<uint8_t *>(registers[address].A1.addr);
+            value = *static_cast<uint8_t *>(reg.A1.addr);
             break;
         case 2:
-            value = *static_cast<uint16_t *>(registers[address].A1.addr);
+            value = *static_cast<uint16_t *>(reg.A1.addr);
             break;
         default:
             return false;
         }
         return true;
     } else {
-        switch (registers[address].flags.size) {
+        switch (reg.flags.size) {
         case 0:
         case 1:
         case 2:
-            value = registers[address].A1.readFunc();
+            value = reg.A1.readFunc();
             break;
         default:
             return false;
@@ -440,28 +444,30 @@ bool WriteRegister(uint8_t address, uint16_t value) {
     if (address >= registersSize) {
         return false;
     }
-    if (!registers[address].flags.writable) {
+
+    RegisterRec reg = *static_cast<RegisterRec *>(pgm_read_ptr(registers + address));
+    if (!reg.flags.writable) {
         return false;
     }
-    if (!registers[address].flags.rwfuncs) {
-        switch (registers[address].flags.size) {
+    if (!reg.flags.rwfuncs) {
+        switch (reg.flags.size) {
         case 0:
         case 1:
-            *static_cast<uint8_t *>(registers[address].A1.addr) = value;
+            *static_cast<uint8_t *>(reg.A1.addr) = value;
             break;
         case 2:
-            *static_cast<uint16_t *>(registers[address].A1.addr) = value;
+            *static_cast<uint16_t *>(reg.A1.addr) = value;
             break;
         default:
             return false;
         }
         return true;
     } else {
-        switch (registers[address].flags.size) {
+        switch (reg.flags.size) {
         case 0:
         case 1:
         case 2:
-            registers[address].A2.writeFunc(value);
+            reg.A2.writeFunc(value);
             break;
         default:
             return false;
