@@ -168,17 +168,39 @@
 */
 
 struct RegisterFlags {
-    uint8_t writable : 1;
-    uint8_t rwfuncs : 1; // 1: register needs special read and write functions
-    uint8_t size : 2; // 0: 1 bit, 1: 1 byte, 2: 2 bytes
-    constexpr RegisterFlags(bool writable, uint8_t size)
-        : writable(writable)
-        , rwfuncs(0)
-        , size(size) {}
-    constexpr RegisterFlags(bool writable, bool rwfuncs, uint8_t size)
-        : writable(writable)
-        , rwfuncs(rwfuncs)
-        , size(size) {}
+    struct A {
+        uint8_t size : 2; // 0: 1 bit, 1: 1 byte, 2: 2 bytes - keeping size as the lowest 2 bits avoids costly shifts when accessing them
+        uint8_t writable : 1;
+        uint8_t rwfuncs : 1; // 1: register needs special read and write functions
+        constexpr A(uint8_t size, bool writable)
+            : size(size)
+            , writable(writable)
+            , rwfuncs(0) {}
+        constexpr A(uint8_t size, bool writable, bool rwfuncs)
+            : size(size)
+            , writable(writable)
+            , rwfuncs(rwfuncs) {}
+    };
+    union U {
+        A bits;
+        uint8_t b;
+        constexpr U(uint8_t size, bool writable)
+            : bits(size, writable) {}
+        constexpr U(uint8_t size, bool writable, bool rwfuncs)
+            : bits(size, writable, rwfuncs) {}
+        constexpr U(uint8_t b)
+            : b(b) {}
+    } u;
+    constexpr RegisterFlags(uint8_t size, bool writable)
+        : u(size, writable) {}
+    constexpr RegisterFlags(uint8_t size, bool writable, bool rwfuncs)
+        : u(size, writable, rwfuncs) {}
+    constexpr RegisterFlags(uint8_t b)
+        : u(b) {}
+
+    constexpr bool Writable() const { return u.bits.writable; }
+    constexpr bool RWFuncs() const { return u.bits.rwfuncs; }
+    constexpr uint8_t Size() const { return u.bits.size; }
 };
 
 using TReadFunc = uint16_t (*)();
@@ -209,21 +231,21 @@ struct RegisterRec {
 
     template <typename T>
     constexpr RegisterRec(bool writable, T *address)
-        : flags(RegisterFlags(writable, sizeof(T)))
+        : flags(RegisterFlags(sizeof(T), writable))
         , A1((void *)address)
         , A2((void *)nullptr) {}
     constexpr RegisterRec(const TReadFunc &readFunc, uint8_t bytes)
-        : flags(RegisterFlags(false, true, bytes))
+        : flags(RegisterFlags(bytes, false, true))
         , A1(readFunc)
         , A2((void *)nullptr) {}
 
     constexpr RegisterRec(const TReadFunc &readFunc, const TWriteFunc &writeFunc, uint8_t bytes)
-        : flags(RegisterFlags(true, true, bytes))
+        : flags(RegisterFlags(bytes, true, true))
         , A1(readFunc)
         , A2(writeFunc) {}
 
     constexpr RegisterRec()
-        : flags(RegisterFlags(false, false, 1))
+        : flags(RegisterFlags(1, false, false))
         , A1((void *)&dummyZero)
         , A2((void *)nullptr) {}
 };
@@ -413,30 +435,35 @@ bool ReadRegister(uint8_t address, uint16_t &value) {
 
     // Get pointer to register at address
 #ifndef UNITTEST
-    RegisterRec reg = *static_cast<RegisterRec *>(pgm_read_ptr(registers + address));
+    // beware - abusing the knowledge of RegisterRec memory layout to do lpm_reads
+    const uint8_t *addr = reinterpret_cast<const uint8_t *>(registers + address);
+    const RegisterFlags rf(hal::progmem::read_byte(addr));
 #else
-    RegisterRec reg = registers[address];
+    const RegisterRec *reg = registers + address;
+    const RegisterFlags rf = reg->flags;
 #endif
-    if (!reg.flags.rwfuncs) {
-        switch (reg.flags.size) {
+    if (!rf.RWFuncs()) {
+        const uint16_t *varAddr = reinterpret_cast<const uint16_t *>(addr + 1);
+        switch (rf.Size()) {
         case 0:
         case 1:
-            value = *static_cast<uint8_t *>(reg.A1.addr);
+            value = *reinterpret_cast<const uint8_t *>(hal::progmem::read_word(varAddr));
             break;
         case 2:
-            value = *static_cast<uint16_t *>(reg.A1.addr);
+            value = *reinterpret_cast<const uint16_t *>(hal::progmem::read_word(varAddr));
             break;
         default:
             return false;
         }
         return true;
     } else {
-        switch (reg.flags.size) {
+        switch (rf.Size()) {
         case 0:
         case 1:
-        case 2:
-            value = reg.A1.readFunc();
-            break;
+        case 2: {
+            const TReadFunc readFunc = reinterpret_cast<const TReadFunc>(pgm_read_word(addr + 1));
+            value = readFunc();
+        } break;
         default:
             return false;
         }
@@ -450,33 +477,36 @@ bool WriteRegister(uint8_t address, uint16_t value) {
     }
 
 #ifndef UNITTEST
-    RegisterRec reg = *static_cast<RegisterRec *>(pgm_read_ptr(registers + address));
+    const uint8_t *addr = reinterpret_cast<const uint8_t *>(registers + address);
+    const RegisterFlags rf(hal::progmem::read_byte(addr));
 #else
     RegisterRec reg = registers[address];
 #endif
-    if (!reg.flags.writable) {
+    if (!rf.Writable()) {
         return false;
     }
-    if (!reg.flags.rwfuncs) {
-        switch (reg.flags.size) {
+    if (!rf.RWFuncs()) {
+        const uint16_t *varAddr = reinterpret_cast<const uint16_t *>(addr + 3);
+        switch (rf.Size()) {
         case 0:
         case 1:
-            *static_cast<uint8_t *>(reg.A1.addr) = value;
+            *reinterpret_cast<uint8_t *>(hal::progmem::read_word(varAddr)) = value;
             break;
         case 2:
-            *static_cast<uint16_t *>(reg.A1.addr) = value;
+            *reinterpret_cast<uint16_t *>(hal::progmem::read_word(varAddr)) = value;
             break;
         default:
             return false;
         }
         return true;
     } else {
-        switch (reg.flags.size) {
+        switch (rf.Size()) {
         case 0:
         case 1:
-        case 2:
-            reg.A2.writeFunc(value);
-            break;
+        case 2: {
+            const TWriteFunc writeFunc = reinterpret_cast<const TWriteFunc>(pgm_read_word(addr + 3));
+            writeFunc(value);
+        } break;
         default:
             return false;
         }
