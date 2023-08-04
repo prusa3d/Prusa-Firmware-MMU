@@ -56,7 +56,7 @@ private:
 
     uint8_t state;
     uint8_t maxRetries;
-    int32_t feedStart_mm; // intentionally trying to avoid using U_mm because it is a float (resp. long double)
+    int32_t feedStart_mm, feedEnd_mm; // intentionally trying to avoid using U_mm because it is a float (resp. long double)
 };
 
 } // namespace logic

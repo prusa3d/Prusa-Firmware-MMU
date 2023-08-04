@@ -28,11 +28,9 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
     REQUIRE(EnsureActiveSlotIndex(slot, mg::FilamentLoadState::AtPulley));
 
     // reset bowden lenghts in EEPROM
-    InitBowdenLengths();
+    SetMinimalBowdenLength();
     // check bowden lengths
-    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
-        REQUIRE(mps::BowdenLength::Get(mg::globals.ActiveSlot()) == config::minimumBowdenLength.v);
-    }
+    REQUIRE(mps::BowdenLength::Get() == config::minimumBowdenLength.v);
 
     FeedToBondtech fb;
     main_loop();
@@ -64,20 +62,23 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
     REQUIRE(ml::leds.Mode(mg::globals.ActiveSlot(), ml::green) == ml::blink0);
 
     // fast load - no fsensor trigger
+    // performs fast load for config::minimumBowdenLength distance
     REQUIRE(WhileCondition(
         fb,
         [&](uint32_t) { return fb.State() == FeedToBondtech::PushingFilamentFast; },
         mm::unitToSteps<mm::P_pos_t>(config::minimumBowdenLength) + 2));
 
     // slow load - expecting fsensor trigger
+    // This gets interesting with bowden length autotuning - we should trigger at the right step
+    constexpr uint32_t additionalBowdenLengthTrigger = mm::unitToSteps<mm::P_pos_t>(config::defaultBowdenLength - config::minimumBowdenLength);
     REQUIRE(WhileCondition(
         fb,
         [&](uint32_t step) {
-        if( step == 100 ){
+        if( step == additionalBowdenLengthTrigger ){
             mfs::fsensor.ProcessMessage(true);
         }
         return fb.State() == FeedToBondtech::PushingFilamentToFSensor; },
-        1500));
+        additionalBowdenLengthTrigger + 5));
 
     REQUIRE(mfs::fsensor.Pressed());
 
@@ -113,6 +114,12 @@ TEST_CASE("feed_to_bondtech::feed_phase_unlimited", "[feed_to_bondtech]") {
     // state machine finished ok, the green LED should be on
     REQUIRE(fb.State() == FeedToBondtech::OK);
     REQUIRE(ml::leds.LedOn(mg::globals.ActiveSlot(), ml::green));
+
+    // detected bowden length is expected to be 429 in our test scenario
+    uint16_t detectedBowdenLength = mps::BowdenLength::Get();
+    CHECK(detectedBowdenLength == 429);
+    // must be within the specified tolerance of 10mm from the default bowden length
+    REQUIRE(abs(detectedBowdenLength - config::defaultBowdenLength.v) < 10);
 
     REQUIRE(fb.Step() == true); // the automaton finished its work, any consecutive calls to Step must return true
 }

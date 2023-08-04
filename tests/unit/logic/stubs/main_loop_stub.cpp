@@ -165,11 +165,9 @@ void ClearButtons(logic::CommandBase &cb) {
     }
 }
 
-void InitBowdenLengths() {
+void SetMinimalBowdenLength() {
     // reset bowdenLenght in EEPROM
-    for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
-        mps::BowdenLength::Set(slot, config::minimumBowdenLength.v);
-    }
+    mps::BowdenLength::Set(config::minimumBowdenLength.v);
 }
 
 void SetFSensorStateAndDebounce(bool press) {

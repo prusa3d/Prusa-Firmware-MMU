@@ -79,6 +79,8 @@ bool FeedToBondtech::Step() {
         //dbg_logic_P(PSTR("Feed to Bondtech --> Pushing"));
         if (mfs::fsensor.Pressed()) {
             mm::motion.AbortPlannedMoves(); // stop pushing filament
+            // remember the feed distance for later update of bowden length
+            feedEnd_mm = mpu::pulley.CurrentPosition_mm();
             GoToPushToNozzle();
             //        } else if (mm::motion.StallGuard(mm::Pulley)) {
             //            // StallGuard occurred during movement - the filament got stuck
@@ -109,7 +111,7 @@ bool FeedToBondtech::Step() {
             dbg_logic_P(PSTR("Feed to Bondtech --> Idler disengaged"));
             dbg_logic_fP(PSTR("Pulley end steps %u"), mpu::pulley.CurrentPosition_mm());
             state = OK;
-            UpdateBowdenLength(abs(mpu::pulley.CurrentPosition_mm() - feedStart_mm));
+            UpdateBowdenLength(abs(feedEnd_mm - feedStart_mm));
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
         }
         return false;

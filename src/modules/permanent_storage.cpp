@@ -79,12 +79,12 @@ static constexpr bool validBowdenLen(const uint16_t BowdenLength) {
         && BowdenLength <= eepromBowdenLenMaximum);
 }
 
-uint16_t BowdenLength::Get(){
-    uint16_t bl = ee::EEPROM::ReadByte(EEOFFSET(eepromBase->bowdenLengthMM));
+uint16_t BowdenLength::Get() {
+    uint16_t bl = ee::EEPROM::ReadWord(EEOFFSET(eepromBase->bowdenLengthMM));
     return validBowdenLen(bl) ? bl : eepromBowdenLenDefault;
 }
 
-void BowdenLength::Set(uint16_t mm){
+void BowdenLength::Set(uint16_t mm) {
     ee::EEPROM::UpdateWord(EEOFFSET(eepromBase->bowdenLengthMM), mm);
 }
 
