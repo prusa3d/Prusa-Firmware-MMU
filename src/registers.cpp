@@ -167,8 +167,8 @@
 | 0x21h 33 | uint16   | Reserved for internal use  | 225          |             | N/A                                      | N/A          | N/A        | N/A
 */
 
-struct RegisterFlags {
-    struct A {
+struct __attribute__((packed)) RegisterFlags {
+    struct __attribute__((packed)) A {
         uint8_t size : 2; // 0: 1 bit, 1: 1 byte, 2: 2 bytes - keeping size as the lowest 2 bits avoids costly shifts when accessing them
         uint8_t writable : 1;
         uint8_t rwfuncs : 1; // 1: register needs special read and write functions
@@ -181,7 +181,7 @@ struct RegisterFlags {
             , writable(writable)
             , rwfuncs(rwfuncs) {}
     };
-    union U {
+    union __attribute__((packed)) U {
         A bits;
         uint8_t b;
         constexpr U(uint8_t size, bool writable)
@@ -195,7 +195,7 @@ struct RegisterFlags {
         : u(size, writable) {}
     constexpr RegisterFlags(uint8_t size, bool writable, bool rwfuncs)
         : u(size, writable, rwfuncs) {}
-    constexpr RegisterFlags(uint8_t b)
+    explicit constexpr RegisterFlags(uint8_t b)
         : u(b) {}
 
     constexpr bool Writable() const { return u.bits.writable; }
@@ -203,15 +203,17 @@ struct RegisterFlags {
     constexpr uint8_t Size() const { return u.bits.size; }
 };
 
+static_assert(sizeof(RegisterFlags) == 1);
+
 using TReadFunc = uint16_t (*)();
 using TWriteFunc = void (*)(uint16_t);
 
 // dummy zero register common to all empty registers
 static constexpr uint16_t dummyZero = 0;
 
-struct RegisterRec {
+struct __attribute__((packed)) RegisterRec {
     RegisterFlags flags;
-    union U1 {
+    union __attribute__((packed)) U1 {
         void *addr;
         TReadFunc readFunc;
         constexpr explicit U1(const TReadFunc &r)
@@ -220,7 +222,7 @@ struct RegisterRec {
             : addr(a) {}
     } A1;
 
-    union U2 {
+    union __attribute__((packed)) U2 {
         void *addr;
         TWriteFunc writeFunc;
         constexpr explicit U2(const TWriteFunc &w)
@@ -249,6 +251,12 @@ struct RegisterRec {
         , A1((void *)&dummyZero)
         , A2((void *)nullptr) {}
 };
+
+// Make sure the structure is tightly packed - necessary for unit tests.
+static_assert(sizeof(RegisterRec) == sizeof(uint8_t) + sizeof(void *) + sizeof(void *));
+// Beware: the size is expected to be 17B on an x86_64 and it requires the platform to be able to do unaligned reads.
+// That might be a problem when running unit tests on non-x86 platforms.
+// So far, no countermeasures have been taken to tackle this potential issue.
 
 // @@TODO it is nice to see all the supported registers at one spot,
 // however it requires including all bunch of dependencies
@@ -434,39 +442,26 @@ bool ReadRegister(uint8_t address, uint16_t &value) {
     value = 0;
 
     // Get pointer to register at address
-#ifndef UNITTEST
-    // beware - abusing the knowledge of RegisterRec memory layout to do lpm_reads
     const uint8_t *addr = reinterpret_cast<const uint8_t *>(registers + address);
     const RegisterFlags rf(hal::progmem::read_byte(addr));
-#else
-    const RegisterRec *reg = registers + address;
-    const RegisterFlags rf = reg->flags;
-#endif
+    // beware - abusing the knowledge of RegisterRec memory layout to do lpm_reads
+    const void *varAddr = addr + sizeof(RegisterFlags);
     if (!rf.RWFuncs()) {
-        const uint16_t *varAddr = reinterpret_cast<const uint16_t *>(addr + 1);
         switch (rf.Size()) {
         case 0:
         case 1:
-            value = *reinterpret_cast<const uint8_t *>(hal::progmem::read_word(varAddr));
+            value = *hal::progmem::read_ptr<const uint8_t *>(varAddr);
             break;
         case 2:
-            value = *reinterpret_cast<const uint16_t *>(hal::progmem::read_word(varAddr));
+            value = *hal::progmem::read_ptr<const uint16_t *>(varAddr);
             break;
         default:
             return false;
         }
         return true;
     } else {
-        switch (rf.Size()) {
-        case 0:
-        case 1:
-        case 2: {
-            const TReadFunc readFunc = reinterpret_cast<const TReadFunc>(pgm_read_word(addr + 1));
-            value = readFunc();
-        } break;
-        default:
-            return false;
-        }
+        auto readFunc = hal::progmem::read_ptr<const TReadFunc>(varAddr);
+        value = readFunc();
         return true;
     }
 }
@@ -476,40 +471,31 @@ bool WriteRegister(uint8_t address, uint16_t value) {
         return false;
     }
 
-#ifndef UNITTEST
     const uint8_t *addr = reinterpret_cast<const uint8_t *>(registers + address);
     const RegisterFlags rf(hal::progmem::read_byte(addr));
-#else
-    RegisterRec reg = registers[address];
-#endif
+
     if (!rf.Writable()) {
         return false;
     }
+    // beware - abusing the knowledge of RegisterRec memory layout to do lpm_reads
+    // addr offset should be 3 on AVR, but 9 on x86_64, therefore "1 + sizeof(void*)"
+    const void *varAddr = addr + sizeof(RegisterFlags) + sizeof(RegisterRec::A1);
     if (!rf.RWFuncs()) {
-        const uint16_t *varAddr = reinterpret_cast<const uint16_t *>(addr + 3);
         switch (rf.Size()) {
         case 0:
         case 1:
-            *reinterpret_cast<uint8_t *>(hal::progmem::read_word(varAddr)) = value;
+            *hal::progmem::read_ptr<uint8_t *>(varAddr) = value;
             break;
         case 2:
-            *reinterpret_cast<uint16_t *>(hal::progmem::read_word(varAddr)) = value;
+            *hal::progmem::read_ptr<uint16_t *>(varAddr) = value;
             break;
         default:
             return false;
         }
         return true;
     } else {
-        switch (rf.Size()) {
-        case 0:
-        case 1:
-        case 2: {
-            const TWriteFunc writeFunc = reinterpret_cast<const TWriteFunc>(pgm_read_word(addr + 3));
-            writeFunc(value);
-        } break;
-        default:
-            return false;
-        }
+        auto writeFunc = hal::progmem::read_ptr<const TWriteFunc>(varAddr);
+        writeFunc(value);
         return true;
     }
 }
