@@ -46,8 +46,7 @@ static const uint8_t layoutVersion = 0xff;
 // ideally, this would have been a nice constexpr (since it is a compile time constant), but the C++ standard prohibits reinterpret_casts in constexpr
 static eeprom_t *const eepromBase = reinterpret_cast<eeprom_t *>(0); ///< First EEPROM address
 constexpr const uint16_t eepromEmpty = 0xffffU; ///< EEPROM content when erased
-constexpr const uint16_t eepromLengthCorrectionBase = config::defaultBowdenLength.v;
-constexpr const uint16_t eepromBowdenLenDefault = config::defaultBowdenLength.v; ///< Default bowden length (~427 mm)
+constexpr const uint16_t eepromBowdenLenDefault = config::defaultBowdenLength.v; ///< Default bowden length (~360 mm)
 constexpr const uint16_t eepromBowdenLenMinimum = config::minimumBowdenLength.v; ///< Minimum bowden length (~341 mm)
 constexpr const uint16_t eepromBowdenLenMaximum = config::maximumBowdenLength.v; ///< Maximum bowden length (~792 mm)
 
