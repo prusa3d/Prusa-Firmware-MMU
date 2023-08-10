@@ -95,7 +95,7 @@ static constexpr U_mm couplerToBowden = 3.5_mm; /// FINDA Coupler screw to bowde
 // just another piece of PLA (probably having more resistance in the tubes)
 // and we are at least 40mm off! It looks like this really depends on the exact position
 // We'll probably need to check for StallGuard while pushing the filament to avoid ginding the filament
-static constexpr U_mm defaultBowdenLength = 427.0_mm; /// ~427.0_mm - Default Bowden length.
+static constexpr U_mm defaultBowdenLength = 360.0_mm; /// ~360.0_mm - Default Bowden length.
 static constexpr U_mm minimumBowdenLength = 341.0_mm; /// ~341.0_mm - Minimum bowden length.
 static constexpr U_mm maximumBowdenLength = 792.0_mm; /// ~792.0_mm - Maximum bowden length.
 static constexpr U_mm feedToFinda = cuttingEdgeToFindaMidpoint + filamentMinLoadedToMMU;
