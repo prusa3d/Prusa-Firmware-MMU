@@ -111,7 +111,8 @@ TEST_CASE("unload_to_finda::unload_without_FINDA_trigger", "[unload_to_finda]") 
 
     // no changes to FINDA during unload - we'll pretend it never triggers
     // but set FSensor correctly
-    REQUIRE_FALSE(WhileCondition(ff, std::bind(SimulateUnloadToFINDA, _1, 10, 150000), 50000));
+    uint32_t unlSteps = 10 + mm::unitToSteps<mm::P_pos_t>(config::maximumBowdenLength + config::feedToFinda + config::filamentMinLoadedToMMU);
+    REQUIRE_FALSE(WhileCondition(ff, std::bind(SimulateUnloadToFINDA, _1, 10, 150000), unlSteps));
 
     REQUIRE(ff.State() == logic::UnloadToFinda::FailedFINDA);
     REQUIRE(mg::globals.FilamentLoaded() == mg::FilamentLoadState::InSelector);
@@ -195,7 +196,7 @@ TEST_CASE("unload_to_finda::unload_repeated", "[unload_to_finda]") {
     // but set FSensor correctly
     // In this case it is vital to correctly compute the amount of steps
     // to make the unload state machine restart after the 1st attempt
-    uint32_t unlSteps = 1 + mm::unitToSteps<mm::P_pos_t>(config::defaultBowdenLength + config::feedToFinda + config::filamentMinLoadedToMMU);
+    uint32_t unlSteps = 1 + mm::unitToSteps<mm::P_pos_t>(config::maximumBowdenLength + config::feedToFinda + config::filamentMinLoadedToMMU);
     REQUIRE_FALSE(WhileCondition(ff, std::bind(SimulateUnloadToFINDA, _1, 10, 150000), unlSteps));
 
     main_loop();
