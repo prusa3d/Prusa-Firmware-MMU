@@ -165,7 +165,7 @@
 | 0x1fh 31 | uint16  |Set/Get Selector iRun current| 0-31         | 1fh 31      | 31->530mA: see TMC2130 current conversion| Read / Write | M707 A0x1f | M708 A0x1f Xn
 | 0x20h 32 | uint16   | Set/Get Idler iRun current | 0-31         | 1fh 31      | 31->530mA: see TMC2130 current conversion| Read / Write | M707 A0x20 | M708 A0x20 Xn
 | 0x21h 33 | uint16   | Reserved for internal use  | 225          |             | N/A                                      | N/A          | N/A        | N/A
-| 0x22h 34 | uint16   | Bowden length              | 341-792      | 168h 360    | unit mm                                  | Read / Write Persistent | M707 A0x22 | M708 A0x22 Xn
+| 0x22h 34 | uint16   | Bowden length              | 341-1000     | 168h 360    | unit mm                                  | Read / Write Persistent | M707 A0x22 | M708 A0x22 Xn
 */
 
 struct __attribute__((packed)) RegisterFlags {
