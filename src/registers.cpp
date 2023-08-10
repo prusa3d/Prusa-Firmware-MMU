@@ -440,7 +440,7 @@ static const RegisterRec registers[] PROGMEM = {
 };
 
 static constexpr uint8_t registersSize = sizeof(registers) / sizeof(RegisterRec);
-static_assert(registersSize == 34);
+static_assert(registersSize == 35);
 
 bool ReadRegister(uint8_t address, uint16_t &value) {
     if (address >= registersSize) {
