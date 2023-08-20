@@ -28,7 +28,7 @@ ErrorCode AddErrorAxisBit(ErrorCode ec, uint8_t axis);
 /// These tasks report their progress and only one of these tasks is allowed to run at once.
 class CommandBase {
 public:
-    inline CommandBase()
+    inline constexpr CommandBase()
         : state(ProgressCode::OK)
         , error(ErrorCode::OK)
         , deferredErrorCode(ErrorCode::OK)

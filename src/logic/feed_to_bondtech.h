@@ -30,7 +30,7 @@ struct FeedToBondtech {
         //        PulleyStalled
     };
 
-    inline FeedToBondtech()
+    inline constexpr FeedToBondtech()
         : state(OK)
         , maxRetries(1) {}
 
