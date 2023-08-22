@@ -85,11 +85,11 @@ static constexpr U_mm pulleyToCuttingEdge = 33.0_mm; /// 33.0_mm /// Pulley to c
 static constexpr U_mm filamentMinLoadedToMMU = 20.0_mm; /// Limit of retraction.
 static constexpr U_mm ejectFromCuttingEdge = 40.0_mm; /// Eject should ignore FilamentMinLoadedToMMU and retract
 static constexpr U_mm cuttingEdgeRetract = 5.0_mm; /// Cutting retraction distance (filament should be flush with outlet)
-static constexpr U_mm cuttingEdgeToFinda = 18.5_mm; /// Cutting edge to FINDA MMU2 side -1mm tolerance should be ~18.5. FINDA shouldn't trigger here.
+static constexpr U_mm cuttingEdgeToFinda = 18.5_mm; /// Cutting edge to FINDA MMU side -1mm tolerance should be ~18.5. FINDA shouldn't trigger here.
 static constexpr U_mm findaTriggerDistance = 4.5_mm; /// FINDA trigger distance +1.0_mm tolerance.
 static constexpr U_mm cuttingEdgeToFindaMidpoint = 22.85_mm; /// Cutting edge to Midpoint of FINDA should be 22.85_mm.
 static constexpr U_mm findaToCoupler = 12.0_mm; /// FINDA Coupler side to coupler screw.
-static constexpr U_mm couplerToBowden = 3.5_mm; /// FINDA Coupler screw to bowden mmu2s side (in coupling).
+static constexpr U_mm couplerToBowden = 3.5_mm; /// FINDA Coupler screw to bowden mmu side (in coupling).
 
 // Min, max and default bowden length setup
 static constexpr U_mm defaultBowdenLength = 360.0_mm; /// ~360.0_mm - Default Bowden length.
@@ -157,7 +157,7 @@ static constexpr U_mm SelectorOffsetFromMax = 1.0_mm; /// Selector offset from h
 static constexpr U_mm SelectorOffsetFromMin = 75.5_mm; /// Selector offset from home min to slot 0
 
 /// slots 0-4 are the real ones, the 5th is the farthest parking positions
-/// selector.dirOn = true = Home at max: selector hits left side of the MMU2S body
+/// selector.dirOn = true = Home at max: selector hits left side of the MMU body
 /// selector.dirOn = false = Home at min: selector POM nut hit the selector motor
 static constexpr U_mm selectorSlotPositions[toolCount + 1] = {
 
