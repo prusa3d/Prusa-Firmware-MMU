@@ -25,4 +25,4 @@ cmake .. -G Ninja -DCMAKE_TOOLCHAIN_FILE=../cmake/AvrGcc.cmake
 ninja
 ```
 
-It will produce a `MMU2SR_<version>.hex` file.
+It will produce a `MMU3_<version>.hex` file.

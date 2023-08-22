@@ -20,8 +20,8 @@ namespace permanent_storage {
 /// Last byte in EEPROM is reserved for layoutVersion. If some field is repurposed, layoutVersion
 /// needs to be changed to force an EEPROM erase.
 struct eeprom_t {
-    uint8_t eepromLengthCorrection; ///< pre-MMU2 Legacy bowden length correction - not used
-    uint16_t eepromBowdenLen[config::toolCount]; ///< MMU2 Bowden length for each filament - not used
+    uint8_t eepromLengthCorrection; ///< pre-MMU Legacy bowden length correction - not used
+    uint16_t eepromBowdenLen[config::toolCount]; ///< MMU Bowden length for each filament - not used
     uint8_t eepromFilamentStatus[3]; ///< Majority vote status of eepromFilament wear leveling
     uint8_t eepromFilament[800]; ///< Top nibble status, bottom nibble last filament loaded
     uint8_t eepromDriveErrorCountH;

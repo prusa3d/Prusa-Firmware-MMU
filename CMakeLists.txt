@@ -183,7 +183,7 @@ if(CMAKE_CROSSCOMPILING)
     COMMAND ${CMAKE_OBJCOPY} firmware -O binary --gap-fill 0xFF --pad-to 0x00007000 firmware.bin
     COMMAND ${CMAKE_COMMAND} -E cat firmware.bin bootloader.bin > fw_bootloader.bin
     COMMAND ${CMAKE_OBJCOPY} -I binary -O ihex fw_bootloader.bin
-            "MMU2SR_${PROJECT_VERSION}${PROJECT_VERSION_SUFFIX_SHORT}_bootloader.hex"
+            "MMU3_${PROJECT_VERSION}${PROJECT_VERSION_SUFFIX_SHORT}_bootloader.hex"
     BYPRODUCTS bootloader.bin firmware.bin fw_bootloader.bin
     )
 
@@ -212,7 +212,7 @@ if(CMAKE_CROSSCOMPILING)
     POST_BUILD
     COMMAND
       ${CMAKE_COMMAND} -D WORK_DIR=${CMAKE_BINARY_DIR} -D
-      HEX_NAME="MMU2SR_${PROJECT_VERSION}${PROJECT_VERSION_SUFFIX_SHORT}.hex" -P
+      HEX_NAME="MMU3_${PROJECT_VERSION}${PROJECT_VERSION_SUFFIX_SHORT}.hex" -P
       ${CMAKE_SOURCE_DIR}/cmake/HexConcat.cmake DEPENDS firmware.hex
     )
 
