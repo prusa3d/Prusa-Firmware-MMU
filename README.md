@@ -5,6 +5,26 @@ The currently supported models are:
 - Original Prusa MMU3
 - Original Prusa MMU2S
 
+## Introduction
+This is the new firmware for the Multi Material Unit (MMU).
+
+### Motivation
+The key motivation for developing a new firmware structure were as follows:
+
+- adding a possibility of reporting the MMU's state even during running commands - the architecture of the original MM-control-01 project didn't allow to achieve this requirement
+- while being able to report the internal state of the MMU, the printer should be able to describe the error states clearly on its LCD without leaving the user to rely on some blinking LEDs
+- modular design prepared for possible future upgrades
+
+### Firmware architecture
+The whole firmware is composed of simple state machines which run all at once - it is a kind of simple cooperative multi-tasking while not eating up any significant resources by deploying generic task switching solutions like RTOS or similar. The general rule is to avoid waiting inside these state machines, no state machine is allowed to block execution of others. That implies making separate waiting states which only check for some condition to be true before proceeding further.
+
+The firmware is separated into 4 layers:
+
+- HAL is responsible for talking to the physical hardware, in our case an AVR processor and its peripherals, TMC2130 stepper drivers, shift registers etc.
+- modules are the components abstracted of the real hardware and/or connection. A typical example are the buttons, LEDs, Idler, Selector etc.
+- logic layer is the application logic - this layer provides the sequences and logical relations between modules thus forming the behavior of the MMU.
+- main is the top layer, it is responsible for initialization of the whole firmware and performing the main loop, where the stepping of all the automata is located.
+
 ## Getting Started
 
 ### Requirements
