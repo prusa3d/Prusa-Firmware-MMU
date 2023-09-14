@@ -1,5 +1,5 @@
-# Prusa-Firmware-MMU-Private
-This repository includes source code and firmware releases for the Original Prusa Multi Material Upgrade based on 8-bit ATMEL microcontroller.
+# Prusa-Firmware-MMU
+This repository includes source code and firmware releases for the Original Prusa Multi Material Unit based on 8-bit ATMEL microcontroller.
 
 The currently supported models are:
 - Original Prusa MMU3
