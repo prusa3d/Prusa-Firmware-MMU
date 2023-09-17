@@ -55,7 +55,8 @@ if(GCOV_ENABLE)
     COMMAND tar -zcvf Coverage.tar.gz Coverage
             # Cheat and compare a file to itself to check for existence. File-Not-Found is a failure
             # code.
-    COMMAND ../../utils/gcovr.py -r . -e '../../tests' -e '../../lib/Catch2' | tee Summary.txt
+    COMMAND ${PROJECT_SOURCE_DIR}/utils/gcovr.py -r . -e '../../tests' -e '../../lib/Catch2' | tee
+            Summary.txt
     COMMAND ${CMAKE_COMMAND} -E compare_files ${PROJECT_BINARY_DIR}/.ctest-finished
             ${PROJECT_BINARY_DIR}/.ctest-finished
     BYPRODUCTS ${PROJECT_BINARY_DIR}/Summary.txt ${PROJECT_BINARY_DIR}/Coverage.tar.gz

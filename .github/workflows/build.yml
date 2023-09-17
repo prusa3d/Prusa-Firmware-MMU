@@ -56,3 +56,64 @@ jobs:
       with:
         name: Firmware
         path: build/*.hex
+
+  tests:
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+
+    steps:
+
+    # setup base required dependencies
+    - name: Setup dependencies
+      run: |
+          sudo apt-get install gcc g++ cmake ninja-build python3-pyelftools python3-regex python3-polib
+
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - name: Checkout ${{ github.event.pull_request.head.ref }}
+      uses: actions/checkout@v3
+      if: ${{ github.event.pull_request }}
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+        submodules: true
+
+    - name: Checkout ${{ github.event.ref }}
+      uses: actions/checkout@v3
+      if: ${{ !github.event.pull_request }}
+      with:
+        ref: ${{ github.event.ref }}
+        submodules: true
+
+    - name: Cache Dependencies
+      uses: actions/cache@v3.0.11
+      id: cache-pkgs
+      with:
+          path: ".dependencies"
+          key: "build-deps-1_0_0-linux"
+
+    - name: Setup build dependencies
+      run: |
+          ./utils/bootstrap.py
+
+    - name: Cache permissions
+      run: sudo chmod -R 744 .dependencies
+
+    - name: Build
+      run: |
+          mkdir build
+          cd build
+          cmake .. -G Ninja
+          ninja test_coverage_report
+
+    - name: Add PR Comment
+      if: ${{ github.event.pull_request }}
+      uses: mshick/add-pr-comment@v2
+      with:
+        message-path: build/Summary.txt
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3.1.1
+      with:
+        name: Coverage
+        path: build/Coverage
