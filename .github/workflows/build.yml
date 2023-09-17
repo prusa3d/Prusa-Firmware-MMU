@@ -100,20 +100,29 @@ jobs:
       run: sudo chmod -R 744 .dependencies
 
     - name: Build
+      id: tests_run
+      continue-on-error: true
       run: |
           mkdir build
           cd build
           cmake .. -G Ninja
           ninja test_coverage_report
 
-    - name: Add PR Comment
-      if: ${{ github.event.pull_request }}
-      uses: mshick/add-pr-comment@v2
-      with:
-        message-path: build/Summary.txt
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v3.1.1
       with:
         name: Coverage
         path: build/Coverage
+
+    - name: Report failure
+      if: steps.tests_run.outcome == 'failure'
+      run: echo ${{ steps.tests_run.outcome  }} && test -n ""
+
+    # We don't PR comment if the tests failed, because
+    # the report isn't a complete picture...
+    - name: Add PR Comment
+      if: ${{ github.event.pull_request }}
+      uses: mshick/add-pr-comment@v2
+      with:
+        message-path: build/Summary.txt
