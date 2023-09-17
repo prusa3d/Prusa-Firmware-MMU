@@ -632,7 +632,9 @@ def process_gcov_data(data_fname, covdata, source_fname, options):
         elif tmp[0] == '=':
             is_code_statement = True
             uncovered_exceptional.add(lineno)
-        elif tmp[0] in "0123456789" and not segments[0].endswith("*"):
+        elif tmp[0] in "0123456789" and segments[0].endswith("*"):
+            continue
+        elif tmp[0] in "0123456789":
             is_code_statement = True
             covered[lineno] = int(segments[0].strip())
         elif tmp.startswith('branch'):
