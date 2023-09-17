@@ -115,15 +115,13 @@ jobs:
         name: Coverage
         path: build/Coverage
 
-    - name: Report failure
-      if: steps.tests_run.outcome == 'failure'
-      run: echo ${{ steps.tests_run.outcome  }} && test -n ""
-
-    # We don't PR comment if the tests failed, because
-    # the report isn't a complete picture...
     - name: Add PR Comment
       if: ${{ github.event.pull_request }}
       uses: mshick/add-pr-comment@v2
       with:
         message-path: build/Summary.txt
         message-id: "coverage"
+
+    - name: Report failure
+      if: steps.tests_run.outcome == 'failure'
+      run: echo ${{ steps.tests_run.outcome  }} && test -n ""
