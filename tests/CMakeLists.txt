@@ -15,7 +15,7 @@ if(GCOV_ENABLE)
     COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/.ctest-finished
     )
 
-  set(ctest_test_args --timeout 30 --output-on-failure)
+  set(ctest_test_args --timeout 180 --output-on-failure)
 
   include(ProcessorCount)
   ProcessorCount(N)
