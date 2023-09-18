@@ -1,8 +1,11 @@
 name: ci-build
 
 on:
-  - push
-  - pull_request
+  pull_request:
+    branches:
+    - '*'
+  push:
+    branches: [ main, MMU_* ]
 
 jobs:
   build:
