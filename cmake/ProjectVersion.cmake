@@ -62,8 +62,8 @@ function(resolve_version_variables)
     git_head_commit_timestamp(timestamp)
     set(ERRORS "GIT-NOTFOUND" "HEAD-FORMAT-NOTFOUND" "HEAD-HASH-NOTFOUND")
      if(timestamp IN_LIST ERRORS)
-       # git not availibe, set fallback values
-       set(timestamp 1618221861) #2021-04-12 120421
+       # git not available, set fallback values
+       set(timestamp 0)
      endif()
     set(PROJECT_VERSION_TIMESTAMP
         "${timestamp}"
