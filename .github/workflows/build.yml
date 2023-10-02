@@ -118,12 +118,18 @@ jobs:
         name: Coverage
         path: build/Coverage
 
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3.1.1
+      with:
+        name: Summary
+        path: build/Summary.txt
+
     - name: Add PR Comment
       if: ${{ github.event.pull_request }}
       uses: mshick/add-pr-comment@v2
       with:
         message-path: build/Summary.txt
-        message-id: "coverage"
+        message-id: "Summary"
 
     - name: Report failure
       if: steps.tests_run.outcome == 'failure'
