@@ -56,7 +56,7 @@ if(GCOV_ENABLE)
             # Cheat and compare a file to itself to check for existence. File-Not-Found is a failure
             # code.
     COMMAND ${PROJECT_SOURCE_DIR}/utils/gcovr.py -r ${CMAKE_SOURCE_DIR} -e 'tests' -e 'lib/Catch2' |
-            tee Summary.txt
+            tee ${CMAKE_BINARY_DIR}/Summary.txt
     COMMAND ${CMAKE_COMMAND} -E compare_files ${PROJECT_BINARY_DIR}/.ctest-finished
             ${PROJECT_BINARY_DIR}/.ctest-finished
     BYPRODUCTS ${PROJECT_BINARY_DIR}/Summary.txt ${PROJECT_BINARY_DIR}/Coverage.tar.gz
