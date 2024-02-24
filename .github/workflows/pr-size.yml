@@ -18,14 +18,15 @@ jobs:
     # setup base required dependencies
     - name: Setup dependencies
       run: |
+          sudo apt-get update
           sudo apt-get install cmake ninja-build python3-pyelftools python3-regex python3-polib
 
     # build the base branch
     - name: Checkout base
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Cache Dependencies
-      uses: actions/cache@v3.0.11
+      uses: actions/cache@v4.0.0
       id: cache-pkgs
       with:
           path: ".dependencies"
@@ -53,7 +54,7 @@ jobs:
 
     # build the PR branch
     - name: Checkout PR
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         clean: false
         ref: ${{ github.event.pull_request.head.sha }}
