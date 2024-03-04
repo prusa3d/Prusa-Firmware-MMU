@@ -69,7 +69,8 @@ jobs:
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         draft: true
-        files: "build/autopublish/*.hex"
+        files: |
+          "build/autopublish/*.hex"
 
   tests:
     runs-on: ubuntu-latest
