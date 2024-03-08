@@ -159,15 +159,16 @@ set_target_properties(firmware PROPERTIES CXX_STANDARD 17)
 set_target_properties(firmware PROPERTIES INTERPROCEDURAL_OPTIMIZATION True)
 
 if(CMAKE_CROSSCOMPILING)
-  #[[
   # configure linker script
   set(LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/src/avr5.xn)
   target_link_options(firmware PUBLIC -Wl,-T,${LINKER_SCRIPT})
   add_link_dependency(firmware ${LINKER_SCRIPT})
-  #]]
 
   # limit the text section to 28K (32K - 4k reserved for the bootloader)
   target_link_options(firmware PUBLIC -Wl,--defsym=__TEXT_REGION_LENGTH__=28K)
+
+  # place the user_signatures section at the end of the user flash
+  target_link_options(firmware PUBLIC -Wl,--defsym=__USER_SIGNATURE_REGION_LENGTH__=6)
 
   # generate firmware .hex file
   objcopy(firmware "ihex" ".hex")
