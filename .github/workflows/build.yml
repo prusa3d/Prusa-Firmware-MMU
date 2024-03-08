@@ -122,7 +122,7 @@ jobs:
 
     - name: Add PR Comment
       if: ${{ github.event.pull_request }}
-      uses: mshick/add-pr-comment@v2
+      uses: mshick/add-pr-comment@v2.8.2
       with:
         message-path: build/Summary.txt
         message-id: "coverage"

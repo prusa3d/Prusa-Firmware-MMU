@@ -74,6 +74,6 @@ jobs:
           ./build-base/pr-size.sh build-changes build-base build-pr
 
     - name: Add PR Comment
-      uses: mshick/add-pr-comment@v2
+      uses: mshick/add-pr-comment@v2.8.2
       with:
         message-path: build-changes
