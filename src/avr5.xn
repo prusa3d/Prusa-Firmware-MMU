@@ -22,7 +22,8 @@ MEMORY
   fuse      (rw!x) : ORIGIN = 0x820000, LENGTH = __FUSE_REGION_LENGTH__
   lock      (rw!x) : ORIGIN = 0x830000, LENGTH = __LOCK_REGION_LENGTH__
   signature (rw!x) : ORIGIN = 0x840000, LENGTH = __SIGNATURE_REGION_LENGTH__
-  user_signatures (r) : ORIGIN = __TEXT_REGION_ORIGIN__ + __TEXT_REGION_LENGTH__ - __USER_SIGNATURE_REGION_LENGTH__, LENGTH = __USER_SIGNATURE_REGION_LENGTH__
+  user_signatures (rw!x) : ORIGIN = 0x850000, LENGTH = __USER_SIGNATURE_REGION_LENGTH__
+  version (r) : ORIGIN = __TEXT_REGION_ORIGIN__ + __TEXT_REGION_LENGTH__ - __VERSION_REGION_LENGTH__, LENGTH = __VERSION_REGION_LENGTH__
 }
 SECTIONS
 {
@@ -166,6 +167,13 @@ SECTIONS
     KEEP (*(.fini0))
      _etext = . ;
   }  > text
+
+  /* It is placed in .bootloader so that avr-size correctly includes it in the Program size calculation */
+  .bootloader :
+  {
+    KEEP(*(.version*))
+  } > version
+
   .data          :
   {
      PROVIDE (__data_start = .) ;
