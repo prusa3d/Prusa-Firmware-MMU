@@ -167,8 +167,8 @@ if(CMAKE_CROSSCOMPILING)
   # limit the text section to 28K (32K - 4k reserved for the bootloader)
   target_link_options(firmware PUBLIC -Wl,--defsym=__TEXT_REGION_LENGTH__=28K)
 
-  # place the user_signatures section at the end of the user flash
-  target_link_options(firmware PUBLIC -Wl,--defsym=__USER_SIGNATURE_REGION_LENGTH__=6)
+  # place the version information at the end of the app flash
+  target_link_options(firmware PUBLIC -Wl,--defsym=__VERSION_REGION_LENGTH__=6)
 
   # generate firmware .hex file
   objcopy(firmware "ihex" ".hex")
