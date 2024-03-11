@@ -1,7 +1,8 @@
 #include <version.hpp>
 
 
-// Define structure at the end of flash which contains information about the version of the firmware
+// Define structure at a fixed address in flash which contains information about the version of the firmware
+// This structure is read using the bootloader.
 struct Signatures {
     uint8_t project_major;
     uint8_t project_minor;
