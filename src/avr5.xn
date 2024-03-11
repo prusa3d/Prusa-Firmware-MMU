@@ -23,7 +23,6 @@ MEMORY
   lock      (rw!x) : ORIGIN = 0x830000, LENGTH = __LOCK_REGION_LENGTH__
   signature (rw!x) : ORIGIN = 0x840000, LENGTH = __SIGNATURE_REGION_LENGTH__
   user_signatures (rw!x) : ORIGIN = 0x850000, LENGTH = __USER_SIGNATURE_REGION_LENGTH__
-  version (r) : ORIGIN = __TEXT_REGION_ORIGIN__ + __TEXT_REGION_LENGTH__ - __VERSION_REGION_LENGTH__, LENGTH = __VERSION_REGION_LENGTH__
 }
 SECTIONS
 {
@@ -89,6 +88,12 @@ SECTIONS
   {
     *(.vectors)
     KEEP(*(.vectors))
+
+    /* Version information kept in flash at a fixed address after the vectors */
+    . = ALIGN(2);
+    KEEP(*(.version))
+    . = ALIGN(2);
+    
     /* For data that needs to reside in the lower 64k of progmem.  */
      *(.progmem.gcc*)
     /* PR 13812: Placing the trampolines here gives a better chance
@@ -167,13 +172,6 @@ SECTIONS
     KEEP (*(.fini0))
      _etext = . ;
   }  > text
-
-  /* It is placed in .bootloader so that avr-size correctly includes it in the Program size calculation */
-  .bootloader :
-  {
-    KEEP(*(.version*))
-  } > version
-
   .data          :
   {
      PROVIDE (__data_start = .) ;
