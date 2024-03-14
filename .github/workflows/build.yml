@@ -8,7 +8,7 @@ on:
     branches: [ main, MMU_* ]
     tags:
     - "v*"
-    
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -70,7 +70,7 @@ jobs:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         draft: true
         files: |
-          "build/autopublish/*.hex"
+          build/autopublish/*.hex
 
   tests:
     runs-on: ubuntu-latest
