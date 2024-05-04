@@ -25,13 +25,13 @@ USB_ClassInfo_CDC_Device_t VirtualSerial_CDC_Interface = {
             .Address = CDC_TX_EPADDR,
             .Size = CDC_TXRX_EPSIZE,
             .Type = EP_TYPE_BULK,
-            .Banks = 2,
+            .Banks = 1,
         },
         .DataOUTEndpoint = {
             .Address = CDC_RX_EPADDR,
             .Size = CDC_TXRX_EPSIZE,
             .Type = EP_TYPE_BULK,
-            .Banks = 2,
+            .Banks = 1,
         },
         .NotificationEndpoint = {
             .Address = CDC_NOTIFICATION_EPADDR,
@@ -90,6 +90,14 @@ namespace usb {
 CDC cdc;
 
 void CDC::Init() {
+#if defined(USE_STATIC_OPTIONS) && (USE_STATIC_OPTIONS & USB_OPT_MANUAL_PLL)
+#if defined(USB_SERIES_4_AVR)
+	PLLFRQ = ((1 << PLLUSB) | (1 << PDIV3) | (1 << PDIV1));
+#endif
+	USB_PLL_On();
+	while (!(USB_PLL_IsReady()));
+#endif
+
     USB_Init();
 
     /* Create a regular character stream for the interface so that it can be used with the stdio.h functions */
