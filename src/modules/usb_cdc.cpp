@@ -90,6 +90,14 @@ namespace usb {
 CDC cdc;
 
 void CDC::Init() {
+#if defined(USE_STATIC_OPTIONS) && (USE_STATIC_OPTIONS & USB_OPT_MANUAL_PLL)
+#if defined(USB_SERIES_4_AVR)
+	PLLFRQ = ((1 << PLLUSB) | (1 << PDIV3) | (1 << PDIV1));
+#endif
+	USB_PLL_On();
+	while (!(USB_PLL_IsReady()));
+#endif
+
     USB_Init();
 
     /* Create a regular character stream for the interface so that it can be used with the stdio.h functions */
