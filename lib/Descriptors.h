@@ -42,14 +42,14 @@
 #include "lufa/LUFA/Drivers/USB/USB.h"
 
 /* Macros: */
-/** Endpoint address of the CDC device-to-host notification IN endpoint. */
-#define CDC_NOTIFICATION_EPADDR (ENDPOINT_DIR_IN | 2)
-
 /** Endpoint address of the CDC device-to-host data IN endpoint. */
-#define CDC_TX_EPADDR (ENDPOINT_DIR_IN | 3)
+#define CDC_TX_EPADDR (ENDPOINT_DIR_IN | 1)
 
 /** Endpoint address of the CDC host-to-device data OUT endpoint. */
-#define CDC_RX_EPADDR (ENDPOINT_DIR_OUT | 4)
+#define CDC_RX_EPADDR (ENDPOINT_DIR_OUT | 2)
+
+/** Endpoint address of the CDC device-to-host notification IN endpoint. */
+#define CDC_NOTIFICATION_EPADDR (ENDPOINT_DIR_IN | 3)
 
 /** Size in bytes of the CDC device-to-host notification IN endpoint. */
 #define CDC_NOTIFICATION_EPSIZE 8
