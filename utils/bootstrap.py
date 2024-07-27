@@ -19,6 +19,7 @@ import tarfile
 import zipfile
 from argparse import ArgumentParser
 from pathlib import Path
+from tarfile import TarFile
 from urllib.request import urlretrieve
 project_root_dir = Path(__file__).resolve().parent.parent
 dependencies_dir = project_root_dir / '.dependencies'
@@ -99,7 +100,11 @@ def download_and_unzip(url: str, directory: Path):
         obj = tarfile.open(f)
     else:
         obj = zipfile.ZipFile(f, 'r')
-    obj.extractall(path=str(extract_dir))
+
+    if isinstance(obj, TarFile):
+        obj.extractall(path=str(extract_dir), filter='data')
+    else: # Zip file
+        obj.extractall(path=str(extract_dir))
 
     subdir = find_single_subdir(extract_dir)
     shutil.move(str(subdir), str(directory))
