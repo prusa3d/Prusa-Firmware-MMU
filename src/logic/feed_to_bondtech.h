@@ -17,7 +17,7 @@ namespace logic {
 /// To prevent constant EEPROM updates only significant changes are recorded.
 struct FeedToBondtech {
     /// internal states of the state machine
-    enum {
+    enum : uint8_t {
         EngagingIdler,
         PushingFilamentFast,
         PushingFilamentToFSensor,

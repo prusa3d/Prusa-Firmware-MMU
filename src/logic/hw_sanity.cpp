@@ -32,7 +32,7 @@ bool HWSanity::Reset(uint8_t param) {
     return true;
 }
 
-enum pin_bits {
+enum pin_bits : uint8_t {
     BIT_STEP = 0b001,
     BIT_DIR = 0b010,
     BIT_ENA = 0b100,

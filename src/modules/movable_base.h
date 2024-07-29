@@ -11,7 +11,7 @@ namespace motion {
 class MovableBase {
 public:
     /// Internal states of the state machine
-    enum {
+    enum : uint8_t {
         Ready = 0, // intentionally set as zero in order to allow zeroing the Idler structure upon startup -> avoid explicit initialization code
         Moving = 1,
         PlannedHome = 2,

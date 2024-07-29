@@ -13,7 +13,7 @@ namespace logic {
 /// - load/unload to finda
 struct UnloadToFinda {
     /// internal states of the state machine
-    enum {
+    enum : uint8_t {
         EngagingIdler,
         UnloadingToFinda,
         WaitingForFINDA,

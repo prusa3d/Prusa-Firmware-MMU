@@ -68,7 +68,7 @@ public:
     static bool set(uint8_t filament);
 
 private:
-    enum Key {
+    enum Key : uint8_t {
         KeyFront1,
         KeyReverse1,
         KeyFront2,

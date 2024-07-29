@@ -12,7 +12,7 @@ namespace logic {
 /// Leaves the Pulley axis enabled for chaining potential next operations
 struct FeedToFinda {
     /// internal states of the state machine
-    enum {
+    enum : uint8_t {
         EngagingIdler,
         PushingFilament,
         PushingFilamentUnlimited,
