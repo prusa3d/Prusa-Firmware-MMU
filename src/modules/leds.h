@@ -20,7 +20,7 @@ namespace leds {
 
 /// Enum of LED modes
 /// blink0 and blink1 allow for interlaced blinking of LEDs (one is on and the other off)
-enum Mode {
+enum Mode : uint8_t {
     off,
     on,
     blink0, ///< start blinking at even periods
@@ -28,7 +28,7 @@ enum Mode {
 };
 
 /// Enum of LEDs color - green or red
-enum Color {
+enum Color : uint8_t {
     red = 0,
     green = 1
 };

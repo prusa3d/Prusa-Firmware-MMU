@@ -28,7 +28,7 @@ private:
     /// Intentionally not modeled as an enum class
     /// as it would impose additional casts which do not play well with the struct Flags
     /// and would make the code less readable
-    enum State {
+    enum State : uint8_t {
         Waiting = 0,
         Detected,
         WaitForRelease,

@@ -13,7 +13,7 @@ namespace logic {
 /// - leaves idler engaged for chaining operations
 struct RetractFromFinda {
     /// internal states of the state machine
-    enum {
+    enum : uint8_t {
         EngagingIdler,
         UnloadBackToPTFE,
         OK,

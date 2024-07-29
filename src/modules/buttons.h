@@ -20,7 +20,7 @@ private:
 };
 
 /// Enum of buttons - used also as indices in an array of buttons to keep the code size tight.
-enum {
+enum : uint8_t {
     Right = 0,
     Middle,
     Left

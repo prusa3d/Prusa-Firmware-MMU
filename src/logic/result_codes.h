@@ -7,7 +7,7 @@
 /// therefore the error codes have been extracted to one place.
 ///
 /// Please note that currently only LoadFilament can return something else than "OK"
-enum class ResultCode : uint_fast16_t {
+enum class ResultCode : uint_fast8_t {
     OK = 0,
     Cancelled = 1
 };
