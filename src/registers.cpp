@@ -145,9 +145,9 @@
 | 0x0bh 11 | uint8    | extra_load_distance        | 00h 0        | 1eh 30      | unit mm                                  | Read / Write | M707 A0x0b | M708 A0x0b Xnn
 | 0x0ch 12 | uint8    | FSensor_unload_check_dist. | 00h 0        | 28h 30      | unit mm                                  | Read / Write | M707 A0x0c | M708 A0x0c Xnn
 | 0x0dh 13 | uint16   | Pulley_unload_feedrate     | 0000h 0      | 005fh 95    | unit mm/s                                | Read / Write | M707 A0x0d | M708 A0x0d Xnnnn
-| 0x0eh 14 | uint16   | Pulley_acceleration        | 0000h 0      | 320h 800.0  | unit mm/s²                               | Read (Write) | M707 A0x0e | (M708 A0x0e Xnnnn)
-| 0x0fh 15 | uint16   | Selector_acceleration      | 0000h 0      | 00c8h 200.0 | unit mm/s²                               | Read (Write) | M707 A0x0f | (M708 A0x0f Xnnnn)
-| 0x10h 16 | uint16   | Idler_acceleration         | 0000h 0      | 01f4h 500.0 | unit deg/s²                              | Read (Write) | M707 A0x10 | (M708 A0x10 Xnnnn)
+| 0x0eh 14 | uint16   | Pulley_acceleration        | 0000h 0      | 320h 800.0  | unit mm/s²                               | Read only    | M707 A0x0e | N/A
+| 0x0fh 15 | uint16   | Selector_acceleration      | 0000h 0      | 00c8h 200.0 | unit mm/s²                               | Read only    | M707 A0x0f | N/A
+| 0x10h 16 | uint16   | Idler_acceleration         | 0000h 0      | 01f4h 500.0 | unit deg/s²                              | Read only    | M707 A0x10 | N/A
 | 0x11h 17 | uint16   | Pulley_load_feedrate       | 0000h 0      | 005fh 95    | unit mm/s                                | Read / Write | M707 A0x11 | M708 A0x11 Xnnnn
 | 0x12h 18 | uint16   | Selector_nominal_feedrate  | 0000h 0      | 002dh 45    | unit mm/s                                | Read / Write | M707 A0x12 | M708 A0x12 Xnnnn
 | 0x13h 19 | uint16   | Idler_nominal_feedrate     | 0000h 0      | 012ch 300   | unit deg/s                               | Read / Write | M707 A0x13 | M708 A0x13 Xnnnn
