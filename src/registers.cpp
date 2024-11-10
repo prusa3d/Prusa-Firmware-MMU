@@ -274,10 +274,6 @@ static_assert(sizeof(RegisterRec) == sizeof(uint8_t) + sizeof(void *) + sizeof(v
 // sts <modules::globals::globals+0x4>, r24
 // ret
 //
-// @@TODO at the moment we are having problems compiling this array statically into PROGMEM.
-// In this project that's really not an issue since we have half of the RAM empty:
-// Data: 1531 bytes (59.8% Full)
-// But it would be nice to fix that in the future - might be hard to push the compiler to such a construct
 static const RegisterRec registers[] PROGMEM = {
     // 0x00
     RegisterRec(false, &project_major),
