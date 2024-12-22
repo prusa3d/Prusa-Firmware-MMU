@@ -28,6 +28,7 @@ struct AxisConfig {
     uint8_t iHold; ///< holding current
     bool stealth; ///< Default to Stealth mode
     long double stepsPerUnit; ///< steps per unit
+    long double stepsPerUnitReciprocal; ///< reciprocal of step per unit (used to avoid divisions)
     int8_t sg_thrs; /// @todo 7bit two's complement for the sg_thrs
 };
 

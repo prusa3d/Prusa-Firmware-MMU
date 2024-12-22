@@ -115,6 +115,7 @@ static constexpr AxisConfig pulley = {
     .iHold = 0, /// 17mA in SpreadCycle, freewheel in StealthChop
     .stealth = false,
     .stepsPerUnit = (200 * 8 / 19.147274),
+    .stepsPerUnitReciprocal = 1 / ((200 * 8 / 19.147274)),
     .sg_thrs = 8,
 };
 
@@ -140,6 +141,7 @@ static constexpr AxisConfig selector = {
     .iHold = 0, /// 17mA in SpreadCycle, freewheel in StealthChop
     .stealth = false,
     .stepsPerUnit = (200 * 8 / 8.),
+    .stepsPerUnitReciprocal = 1 / ((200 * 8 / 8.)),
     .sg_thrs = 3,
 };
 
@@ -190,6 +192,7 @@ static constexpr AxisConfig idler = {
     .iHold = 5, /// 99mA - parked current
     .stealth = false,
     .stepsPerUnit = (200 * 16 / 360.),
+    .stepsPerUnitReciprocal = 1 / ((200 * 16 / 360.)),
     .sg_thrs = 7,
 };
 
