@@ -135,7 +135,7 @@ jobs:
       if: ${{ github.event.pull_request }}
       uses: mshick/add-pr-comment@v2.8.2
       with:
-        message-path: build/Summary.txt
+        message-path: Summary.txt
         message-id: "coverage"
 
     - name: Report failure
