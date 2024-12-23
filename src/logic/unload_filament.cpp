@@ -77,12 +77,12 @@ bool UnloadFilament::StepInner() {
                 GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_OFF); // signal unloading error
             } else {
                 state = ProgressCode::DisengagingIdler;
-                mi::idler.Disengage();
+                mi::idler.PartiallyDisengage(mg::globals.ActiveSlot());
             }
         }
         return false;
     case ProgressCode::DisengagingIdler:
-        if (mi::idler.Disengaged() && ms::selector.State() == ms::Selector::Ready) {
+        if (mi::idler.PartiallyDisengaged() && ms::selector.State() == ms::Selector::Ready) {
             UnloadFinishedCorrectly();
         }
         return false;

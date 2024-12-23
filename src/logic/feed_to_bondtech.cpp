@@ -86,18 +86,19 @@ bool FeedToBondtech::Step() {
         if (mi::idler.PartiallyDisengaged()) {
             mm::motion.AbortPlannedMoves(mm::Pulley);
             mpu::pulley.Disable();
-            mi::idler.Disengage(); // disengage fully while Pulley is already stopped
-            state = DisengagingIdler;
-        }
-        return false;
-    case DisengagingIdler:
-        if (mi::idler.Disengaged()) {
-            dbg_logic_P(PSTR("Feed to Bondtech --> Idler disengaged"));
-            dbg_logic_fP(PSTR("Pulley end steps %u"), mpu::pulley.CurrentPosition_mm());
-            state = OK;
+            //mi::idler.Disengage(); // disengage fully while Pulley is already stopped
             ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
+            state = OK;
         }
         return false;
+    // case DisengagingIdler:
+    //     if (mi::idler.Disengaged()) {
+    //         dbg_logic_P(PSTR("Feed to Bondtech --> Idler disengaged"));
+    //         dbg_logic_fP(PSTR("Pulley end steps %u"), mpu::pulley.CurrentPosition_mm());
+    //         state = OK;
+    //         ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
+    //     }
+    //     return false;
     case OK:
         dbg_logic_P(PSTR("Feed to Bondtech OK"));
         return true;
