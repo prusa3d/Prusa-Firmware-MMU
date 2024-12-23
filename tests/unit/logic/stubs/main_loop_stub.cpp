@@ -181,10 +181,10 @@ void SimulateErrDisengagingIdler(logic::CommandBase &cb, ErrorCode deferredEC) {
     REQUIRE(WhileCondition(
         cb, [&](uint32_t) {
             if (cb.TopLevelState() == ProgressCode::ERRDisengagingIdler) {
-                REQUIRE(cb.Error() == ErrorCode::RUNNING); // ensure the error gets never set while disengaging the idler
+                REQUIRE((cb.Error() == ErrorCode::RUNNING)); // ensure the error gets never set while disengaging the idler
                 return true;
             } else {
-                REQUIRE(cb.Error() == deferredEC);
+                REQUIRE((cb.Error() == deferredEC));
                 return false;
             }
         },
