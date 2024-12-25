@@ -94,12 +94,13 @@ constexpr AxisUnit<T, A, U> operator*(const long double f, const AxisUnit<T, A, 
 struct AxisScale {
     unit::UnitBase base;
     long double stepsPerUnit;
+    long double stepsPerUnitReciprocal;
 };
 
 static constexpr AxisScale axisScale[config::NUM_AXIS] = {
-    { config::pulleyLimits.base, config::pulley.stepsPerUnit },
-    { config::selectorLimits.base, config::selector.stepsPerUnit },
-    { config::idlerLimits.base, config::idler.stepsPerUnit },
+    { config::pulleyLimits.base, config::pulley.stepsPerUnit, config::pulley.stepsPerUnitReciprocal },
+    { config::selectorLimits.base, config::selector.stepsPerUnit, config::selector.stepsPerUnitReciprocal },
+    { config::idlerLimits.base, config::idler.stepsPerUnit, config::idler.stepsPerUnitReciprocal },
 };
 
 /// Convert a unit::Unit to AxisUnit.
@@ -126,7 +127,7 @@ template <typename U, typename AU, typename T = int32_t>
 static constexpr T axisUnitToTruncatedUnit(AU v, long double mul = 1.) {
     static_assert(AU::unit == U::unit, "incorrect unit type conversion");
     static_assert(U::base == axisScale[AU::axis].base, "incorrect unit base conversion");
-    return { ((T)v.v / (T)(axisScale[AU::axis].stepsPerUnit / mul)) };
+    return { ((T)(v.v * (axisScale[AU::axis].stepsPerUnitReciprocal / mul))) };
 }
 
 /// Truncate an Unit type to an integer (normally int32_t)
