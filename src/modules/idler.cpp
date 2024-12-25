@@ -135,6 +135,7 @@ bool Idler::Step() {
         return false;
     case Ready:
         if (!homingValid && mg::globals.FilamentLoaded() < mg::InFSensor) {
+            // home the Idler only in case we don't have filament loaded in the printer (or at least we think we don't)
             PlanHome();
             return false;
         }
@@ -146,14 +147,8 @@ bool Idler::Step() {
 }
 
 void Idler::Init() {
-    if (mg::globals.FilamentLoaded() < mg::InFSensor) {
-        // home the Idler only in case we don't have filament loaded in the printer (or at least we think we don't)
-        PlanHome();
-    } else {
-        // otherwise assume the Idler is at its idle position (that's where it usually is)
-        mm::motion.SetPosition(mm::Idler, SlotPosition(IdleSlotIndex()).v);
-        InvalidateHoming(); // and plan homing sequence ASAP
-    }
+    // Re-home axis at first opportunity. See 'Ready' state.
+    InvalidateHoming();
 }
 
 } // namespace idler
