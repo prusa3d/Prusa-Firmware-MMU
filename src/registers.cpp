@@ -327,18 +327,27 @@ static const RegisterRec registers[] PROGMEM = {
 
     // 0xe Pulley acceleration [mm/s2] RW
     RegisterRec(
-        []() -> uint16_t { return mm::motion.Acceleration(config::Pulley); },
-        [](uint16_t d) { mm::motion.SetAcceleration(config::Pulley, d); },
+        []() -> uint16_t {
+            mm::steps_t val = mm::motion.Acceleration(config::Pulley);
+            return mm::axisUnitToTruncatedUnit<config::U_mm_s2>( mm::P_accel_t({ val }));
+        },
+        [](uint16_t d) { mm::motion.SetAcceleration(config::Pulley, mm::unitToSteps<mm::P_accel_t>(config::U_mm_s2({ (long double)d }))); },
         2),
     // 0xf Selector acceleration [mm/s2] RW
     RegisterRec(
-        []() -> uint16_t { return mm::motion.Acceleration(config::Selector); },
-        [](uint16_t d) { mm::motion.SetAcceleration(config::Selector, d); },
+        []() -> uint16_t {
+            mm::steps_t val = mm::motion.Acceleration(config::Selector);
+            return mm::axisUnitToTruncatedUnit<config::U_mm_s2>( mm::S_accel_t({ val }));
+        },
+        [](uint16_t d) { (mm::motion.SetAcceleration(config::Selector, mm::unitToSteps<mm::S_accel_t>(config::U_mm_s2({ (long double)d })))); },
         2),
     // 0x10 Idler acceleration [deg/s2] RW
     RegisterRec(
-        []() -> uint16_t { return mm::motion.Acceleration(config::Idler); },
-        [](uint16_t d) { mm::motion.SetAcceleration(config::Idler, d); },
+        []() -> uint16_t {
+            mm::steps_t val = mm::motion.Acceleration(config::Idler);
+            return mm::axisUnitToTruncatedUnit<config::U_deg_s2>( mm::I_accel_t({ val }));
+        },
+        [](uint16_t d) { mm::motion.SetAcceleration(config::Idler, mm::unitToSteps<mm::I_accel_t>(config::U_deg_s2({ (long double)d }))); },
         2),
 
     // 0x11 Pulley load feedrate [mm/s] RW
