@@ -69,27 +69,7 @@ bool Idler::StallGuardAllowed(bool forward) const {
 }
 
 Idler::OperationResult Idler::Disengage() {
-    if (state == Moving || IsOnHold()) {
-        dbg_logic_P(PSTR("Moving --> Disengage refused"));
-        return OperationResult::Refused;
-    }
-    plannedSlot = IdleSlotIndex();
-    plannedMove = Operation::disengage;
-
-    // coordinates invalid, first home, then disengage
-    if (!homingValid) {
-        PlanHome();
-        return OperationResult::Accepted;
-    }
-
-    // already disengaged
-    if (Disengaged()) {
-        dbg_logic_P(PSTR("Idler Disengaged"));
-        return OperationResult::Accepted;
-    }
-
-    // disengaging
-    return InitMovementNoReinitAxis();
+    return PlanMoveInner(IdleSlotIndex(), Operation::disengage);
 }
 
 Idler::OperationResult Idler::PartiallyDisengage(uint8_t slot) {
@@ -114,7 +94,7 @@ Idler::OperationResult Idler::PlanMoveInner(uint8_t slot, Operation plannedOp) {
         return OperationResult::Accepted;
     }
 
-    // coordinates invalid, first home, then engage
+    // coordinates invalid, first home, then engage or disengage
     // The MMU FW only decides to engage the Idler when it is supposed to do something and not while it is idle
     // so rebooting the MMU while the printer is printing (and thus holding the filament by the moving Idler)
     // should not be an issue
@@ -123,7 +103,7 @@ Idler::OperationResult Idler::PlanMoveInner(uint8_t slot, Operation plannedOp) {
         return OperationResult::Accepted;
     }
 
-    // already engaged
+    // already engaged or disengaged
     if (currentlyEngaged == plannedMove) {
         return OperationResult::Accepted;
     }
