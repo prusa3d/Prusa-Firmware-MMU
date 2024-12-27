@@ -84,6 +84,13 @@ void LoadFilamentSuccessful(uint8_t slot, logic::LoadFilament &lf) {
 void LoadFilamentSuccessfulWithRehomeSelector(uint8_t slot, logic::LoadFilament &lf) {
     // Stage 2 - feeding to finda
     // make FINDA switch on
+    // engaging idler
+
+    REQUIRE(WhileCondition(
+        lf,
+        [&](uint32_t) { return !mi::idler.Engaged(); },
+        5000));
+
     REQUIRE(WhileCondition(lf, std::bind(SimulateFeedToFINDA, _1, 100), 5000));
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, slot, slot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::RetractingFromFinda));
 
@@ -175,8 +182,6 @@ void FailedLoadToFindaResolveTryAgain(uint8_t slot, logic::LoadFilament &lf) {
     // Idler's position needs to be ignored as it has started homing after the button press
     REQUIRE(VerifyState(lf, mg::FilamentLoadState::InSelector, config::toolCount, slot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
     ClearButtons(lf);
-
-    SimulateIdlerHoming(lf);
 
     LoadFilamentSuccessfulWithRehomeSelector(slot, lf);
 }
