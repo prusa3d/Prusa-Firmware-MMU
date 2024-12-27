@@ -64,7 +64,7 @@ void Idler::FinishMove() {
 }
 
 bool Idler::StallGuardAllowed(bool forward) const {
-    const uint8_t checkDistance = forward ? 220 : 200;
+    const uint8_t checkDistance = forward ? 200 : 180;
     return AxisDistance(mm::axisUnitToTruncatedUnit<config::U_deg>(mm::motion.CurPosition<mm::Idler>())) > checkDistance;
 }
 
