@@ -8,6 +8,8 @@
 
 #include "../stubs/stub_motion.h"
 
+#include "catch2/catch_test_macros.hpp"
+
 void SimulateIdlerAndSelectorHoming(logic::CommandBase &cb) {
 #if 0
     // do 5 steps until we trigger the simulated StallGuard
@@ -58,6 +60,18 @@ void SimulateIdlerAndSelectorHoming(logic::CommandBase &cb) {
 
 void SimulateIdlerHoming(logic::CommandBase &cb) {
     uint32_t idlerStepsFwd = mm::unitToSteps<mm::I_pos_t>(config::idlerLimits.lenght - 5.0_deg);
+
+    // Sometimes the initial idler state is Ready. Let's wait for the firmware to start
+    // homing.
+    REQUIRE(WhileCondition(
+        cb,
+        [&](uint32_t) { return mi::idler.State() == mm::MovableBase::Ready; },
+        5000));
+
+    // At this point the idler should always be homing forward.
+    REQUIRE((int)mi::idler.State() == (int)mm::MovableBase::HomeForward);
+
+    // Simulate the idler steps in one direction (forward)
     for (uint32_t i = 0; i < idlerStepsFwd; ++i) {
         main_loop();
         cb.Step();
@@ -67,6 +81,8 @@ void SimulateIdlerHoming(logic::CommandBase &cb) {
     main_loop();
     cb.Step();
     mm::motion.StallGuardReset(mm::Idler);
+
+    REQUIRE((int)mi::idler.State() == (int)mm::MovableBase::HomeBack);
 
     // now do a correct amount of steps of each axis towards the other end
     uint32_t idlerSteps = mm::unitToSteps<mm::I_pos_t>(config::idlerLimits.lenght);
@@ -82,6 +98,9 @@ void SimulateIdlerHoming(logic::CommandBase &cb) {
             mm::motion.StallGuardReset(mm::Idler);
         }
     }
+
+    // If the homing has failed, the axis length was too short.
+    REQUIRE(!((mi::idler.State() & mm::MovableBase::HomingFailed) == mm::MovableBase::HomingFailed));
 }
 
 void SimulateIdlerWaitForHomingValid(logic::CommandBase &cb) {
