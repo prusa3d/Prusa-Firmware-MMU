@@ -11,11 +11,6 @@ namespace pulley {
 
 Pulley pulley;
 
-bool __attribute__((noinline)) Pulley::FinishHomingAndPlanMoveToParkPos() {
-    mm::motion.SetPosition(mm::Pulley, 0);
-    return true;
-}
-
 bool Pulley::Step() {
     if (IsOnHold()) {
         return true; // just wait, do nothing!
@@ -28,10 +23,6 @@ bool Pulley::Step() {
     case Moving:
         PerformMove();
         return false;
-    case HomeBack:
-        homingValid = true;
-        FinishHomingAndPlanMoveToParkPos();
-        return true;
     case Ready:
         return true;
     case TMCFailed:
