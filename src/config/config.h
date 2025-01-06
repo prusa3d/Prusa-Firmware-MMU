@@ -201,7 +201,8 @@ static constexpr IdlerLimits idlerLimits = {
 };
 
 static constexpr U_deg IdlerSlotDistance = 40.0_deg; /// Idler distance between two slots
-static constexpr U_deg IdlerOffsetFromHome = 18.0_deg; /// Idler offset from home to slots
+// RCU Test Patch MMU2S : adapted home offset from 18 to 25 deg
+static constexpr U_deg IdlerOffsetFromHome = 25.0_deg; /// Idler offset from home to slots
 
 /// Absolute positions for Idler's slots: 0-4 are the real ones, the 5th index is the idle position
 /// Home ccw with 5th idler bearing facing selector
