@@ -1,3 +1,4 @@
+#include "catch2/catch_test_macros.hpp"
 #include "homing.h"
 #include "main_loop_stub.h"
 
@@ -58,6 +59,18 @@ void SimulateIdlerAndSelectorHoming(logic::CommandBase &cb) {
 
 void SimulateIdlerHoming(logic::CommandBase &cb) {
     uint32_t idlerStepsFwd = mm::unitToSteps<mm::I_pos_t>(config::idlerLimits.lenght - 5.0_deg);
+
+    // Sometimes the initial idler state is Ready. Let's wait for the firmware to start
+    // homing.
+    REQUIRE(WhileCondition(
+        cb,
+        [&](uint32_t) { return mi::idler.State() == mm::MovableBase::Ready; },
+        5000));
+
+    // At this point the idler should always be homing forward.
+    REQUIRE((int)mi::idler.State() == (int)mm::MovableBase::HomeForward);
+
+    // Simulate the idler steps in one direction (forward)
     for (uint32_t i = 0; i < idlerStepsFwd; ++i) {
         main_loop();
         cb.Step();
@@ -67,6 +80,8 @@ void SimulateIdlerHoming(logic::CommandBase &cb) {
     main_loop();
     cb.Step();
     mm::motion.StallGuardReset(mm::Idler);
+
+    REQUIRE((int)mi::idler.State() == (int)mm::MovableBase::HomeBack);
 
     // now do a correct amount of steps of each axis towards the other end
     uint32_t idlerSteps = mm::unitToSteps<mm::I_pos_t>(config::idlerLimits.lenght);
@@ -82,6 +97,9 @@ void SimulateIdlerHoming(logic::CommandBase &cb) {
             mm::motion.StallGuardReset(mm::Idler);
         }
     }
+
+    // If the homing has failed, the axis length was too short.
+    REQUIRE(!((mi::idler.State() & mm::MovableBase::HomingFailed) == mm::MovableBase::HomingFailed));
 }
 
 void SimulateIdlerWaitForHomingValid(logic::CommandBase &cb) {
@@ -185,33 +203,40 @@ bool SimulateFailedHomeSelectorPostfix(logic::CommandBase &cb) {
 }
 
 bool SimulateFailedHomeFirstTime(logic::CommandBase &cb) {
-    if (mi::idler.HomingValid())
-        return false;
-    if (ms::selector.HomingValid())
-        return false;
+    REQUIRE(!mi::idler.HomingValid());
+    REQUIRE(!ms::selector.HomingValid());
+
+    // Idler homing is successful
+    SimulateIdlerHoming(cb);
+    SimulateIdlerWaitForHomingValid(cb);
+
+    // Selector homes once the idler homing is valid.
+    REQUIRE(mi::idler.HomingValid());
+    REQUIRE(!ms::selector.HomingValid());
+
+    // The selector will only rehome once the idler homing is valid. At that moment
+    // the state will change to HomeForward.
+    REQUIRE(WhileCondition(
+        cb,
+        [&](uint32_t) { return ms::selector.State() != mm::MovableBase::HomeForward; },
+        5000));
 
     constexpr uint32_t selectorSteps = mm::unitToSteps<mm::S_pos_t>(config::selectorLimits.lenght) + 1;
     {
         // do 5 steps until we trigger the simulated StallGuard
-        constexpr uint32_t idlerStepsFwd = mm::unitToSteps<mm::I_pos_t>(config::idlerLimits.lenght - 5.0_deg);
-        static_assert(idlerStepsFwd < selectorSteps); // beware, we expect that the Idler homes faster than Selector (less steps)
-        for (uint32_t i = 0; i < idlerStepsFwd; ++i) {
+        for (uint32_t i = 0; i < selectorSteps; ++i) {
             main_loop();
             cb.Step();
         }
 
         mm::TriggerStallGuard(mm::Selector);
-        mm::TriggerStallGuard(mm::Idler);
         main_loop();
         cb.Step();
         mm::motion.StallGuardReset(mm::Selector);
-        mm::motion.StallGuardReset(mm::Idler);
     }
-    // now do a correct amount of steps of each axis towards the other end
-    constexpr uint32_t idlerSteps = mm::unitToSteps<mm::I_pos_t>(config::idlerLimits.lenght);
-    // now do LESS steps than expected to simulate something is blocking the selector
 
-    constexpr uint32_t selectorTriggerShort = std::min(idlerSteps, selectorSteps) / 2;
+    // now do LESS steps than expected to simulate something is blocking the selector
+    constexpr uint32_t selectorTriggerShort = selectorSteps / 2;
     constexpr uint32_t maxSteps = selectorTriggerShort + 1;
     {
         for (uint32_t i = 0; i < maxSteps; ++i) {
@@ -222,17 +247,6 @@ bool SimulateFailedHomeFirstTime(logic::CommandBase &cb) {
                 mm::TriggerStallGuard(mm::Selector);
             } else {
                 mm::motion.StallGuardReset(mm::Selector);
-            }
-        }
-
-        // make sure the Idler finishes its homing procedure (makes further checks much easier)
-        for (uint32_t i = maxSteps; i < idlerSteps + 1; ++i) {
-            main_loop();
-            cb.Step();
-            if (i == idlerSteps) {
-                mm::TriggerStallGuard(mm::Idler);
-            } else {
-                mm::motion.StallGuardReset(mm::Idler);
             }
         }
 
