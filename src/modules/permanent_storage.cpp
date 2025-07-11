@@ -48,7 +48,7 @@ static eeprom_t *const eepromBase = reinterpret_cast<eeprom_t *>(0); ///< First 
 constexpr const uint16_t eepromEmpty = 0xffffU; ///< EEPROM content when erased
 constexpr const uint16_t eepromBowdenLenDefault = config::defaultBowdenLength.v; ///< Default bowden length (~360 mm)
 constexpr const uint16_t eepromBowdenLenMinimum = config::minimumBowdenLength.v; ///< Minimum bowden length (~341 mm)
-constexpr const uint16_t eepromBowdenLenMaximum = config::maximumBowdenLength.v; ///< Maximum bowden length (~1000 mm)
+constexpr const uint16_t eepromBowdenLenMaximum = config::maximumBowdenLength.v; ///< Maximum bowden length (~5000 mm)
 
 namespace ee = hal::eeprom;
 
