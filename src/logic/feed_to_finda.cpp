@@ -44,14 +44,14 @@ bool FeedToFinda::Step() {
             //                mpu::pulley.PlanMove(config::filamentMinLoadedToMMU, config::pulleySlowFeedrate);
             //            }
 
-            mpu::pulley.PlanMove(config::maximumFeedToFinda, config::pulleySlowFeedrate);
+            mpu::pulley.PlanMove(config::maximumFeedToFinda, mg::globals.PulleySlowFeedrate_mm_s());
             if (feedPhaseLimited) {
                 state = PushingFilament;
             } else {
                 state = PushingFilamentUnlimited;
                 // in unlimited move we plan 2 moves at once to make the move "seamless"
                 // one move has already been planned above, this is the second one
-                mpu::pulley.PlanMove(config::maximumFeedToFinda, config::pulleySlowFeedrate);
+                mpu::pulley.PlanMove(config::maximumFeedToFinda, mg::globals.PulleySlowFeedrate_mm_s());
             }
             mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InSelector);
             mui::userInput.Clear(); // remove all buffered events if any just before we wait for some input
@@ -85,7 +85,7 @@ bool FeedToFinda::Step() {
             return true; // return immediately to allow for a seamless planning of another move (like feeding to bondtech)
         } else if (mm::motion.PlannedMoves(mm::Pulley) < 2) {
             // plan another move to make the illusion of unlimited moves
-            mpu::pulley.PlanMove(config::maximumFeedToFinda, config::pulleySlowFeedrate);
+            mpu::pulley.PlanMove(config::maximumFeedToFinda, mg::globals.PulleySlowFeedrate_mm_s());
         }
     }
         return false;
