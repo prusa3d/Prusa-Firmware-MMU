@@ -25,6 +25,11 @@ void UnloadToFinda::Reset(uint8_t maxTries) {
 
 bool UnloadToFinda::Step() {
     switch (state) {
+    // start by engaging the idler into intermediate position
+    // Then, wait for !fsensor.Pressed: that's to speed-up the pull process - unload operation will be started during the purging moves
+    // and as soon as the fsensor turns off, the MMU engages the idler fully and starts pulling.
+    // It will not wait for the extruder to finish the relieve move.
+    // However, such an approach breaks running the MMU on a non-reworked MK4/C1, which hasn't been officially supported, but possible (with some level of uncertainity).
     case EngagingIdler:
         if (mg::globals.FilamentLoaded() >= mg::FilamentLoadState::InSelector) {
             state = UnloadingToFinda;
