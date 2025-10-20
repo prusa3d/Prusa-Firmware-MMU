@@ -12,11 +12,14 @@ namespace logic {
 class UnloadFilament : public CommandBase {
 public:
     inline constexpr UnloadFilament()
-        : CommandBase() {}
+        : CommandBase()
+        , skipDisengagingIdler(false) {}
 
     /// Restart the automaton
     /// @param param is not used, always unloads from the active slot
     bool Reset(uint8_t param) override;
+
+    bool Reset2(uint8_t param);
 
     /// @returns true if the state machine finished its job, false otherwise
     bool StepInner() override;
@@ -32,6 +35,7 @@ private:
     UnloadToFinda unl;
     FeedToFinda feed;
     RetractFromFinda retract;
+    bool skipDisengagingIdler;
 };
 
 /// The one and only instance of UnloadFilament state machine in the FW

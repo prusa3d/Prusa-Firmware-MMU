@@ -28,9 +28,16 @@ bool UnloadFilament::Reset(uint8_t /*param*/) {
     mpu::pulley.InitAxis();
     state = ProgressCode::UnloadingToFinda;
     error = ErrorCode::RUNNING;
+    skipDisengagingIdler = false;
     unl.Reset(maxRetries);
     ml::leds.SetAllOff();
     return true;
+}
+
+bool UnloadFilament::Reset2(uint8_t param) {
+    bool rv = Reset(param);
+    skipDisengagingIdler = true;
+    return rv;
 }
 
 void UnloadFilament::UnloadFinishedCorrectly() {
@@ -77,7 +84,11 @@ bool UnloadFilament::StepInner() {
                 GoToErrDisengagingIdler(ErrorCode::FINDA_DIDNT_SWITCH_OFF); // signal unloading error
             } else {
                 state = ProgressCode::DisengagingIdler;
-                mi::idler.Disengage();
+                if (skipDisengagingIdler && ms::selector.State() == ms::Selector::Ready) {
+                    UnloadFinishedCorrectly(); // skip disengaging the Idler - to be used inside ToolChange to speed up
+                } else {
+                    mi::idler.Disengage();
+                }
             }
         }
         return false;
