@@ -173,35 +173,24 @@ struct __attribute__((packed)) RegisterFlags {
     struct __attribute__((packed)) A {
         uint8_t size : 2; // 0: 1 bit, 1: 1 byte, 2: 2 bytes - keeping size as the lowest 2 bits avoids costly shifts when accessing them
         uint8_t writable : 1;
-        uint8_t rwfuncs : 1; // 1: register needs special read and write functions
         constexpr A(uint8_t size, bool writable)
             : size(size)
-            , writable(writable)
-            , rwfuncs(0) {}
-        constexpr A(uint8_t size, bool writable, bool rwfuncs)
-            : size(size)
-            , writable(writable)
-            , rwfuncs(rwfuncs) {}
+            , writable(writable) {}
     };
     union __attribute__((packed)) U {
         A bits;
         uint8_t b;
         constexpr U(uint8_t size, bool writable)
             : bits(size, writable) {}
-        constexpr U(uint8_t size, bool writable, bool rwfuncs)
-            : bits(size, writable, rwfuncs) {}
         constexpr U(uint8_t b)
             : b(b) {}
     } u;
     constexpr RegisterFlags(uint8_t size, bool writable)
         : u(size, writable) {}
-    constexpr RegisterFlags(uint8_t size, bool writable, bool rwfuncs)
-        : u(size, writable, rwfuncs) {}
     explicit constexpr RegisterFlags(uint8_t b)
         : u(b) {}
 
     constexpr bool Writable() const { return u.bits.writable; }
-    constexpr bool RWFuncs() const { return u.bits.rwfuncs; }
     constexpr uint8_t Size() const { return u.bits.size; }
 };
 
@@ -233,23 +222,18 @@ struct __attribute__((packed)) RegisterRec {
             : addr(a) {}
     } A2;
 
-    template <typename T>
-    constexpr RegisterRec(bool writable, T *address)
-        : flags(RegisterFlags(sizeof(T), writable))
-        , A1((void *)address)
-        , A2((void *)nullptr) {}
     constexpr RegisterRec(const TReadFunc &readFunc, uint8_t bytes)
-        : flags(RegisterFlags(bytes, false, true))
+        : flags(RegisterFlags(bytes, false))
         , A1(readFunc)
         , A2((void *)nullptr) {}
 
     constexpr RegisterRec(const TReadFunc &readFunc, const TWriteFunc &writeFunc, uint8_t bytes)
-        : flags(RegisterFlags(bytes, true, true))
+        : flags(RegisterFlags(bytes, true))
         , A1(readFunc)
         , A2(writeFunc) {}
 
     constexpr RegisterRec()
-        : flags(RegisterFlags(1, false, false))
+        : flags(RegisterFlags(1, false))
         , A1((void *)&dummyZero)
         , A2((void *)nullptr) {}
 };
@@ -276,13 +260,13 @@ static_assert(sizeof(RegisterRec) == sizeof(uint8_t) + sizeof(void *) + sizeof(v
 //
 static const RegisterRec registers[] PROGMEM = {
     // 0x00
-    RegisterRec(false, &project_major),
+    RegisterRec([]() -> uint16_t { return project_major; }, 1),
     // 0x01
-    RegisterRec(false, &project_minor),
+    RegisterRec([]() -> uint16_t { return project_minor; }, 1),
     // 0x02
-    RegisterRec(false, &project_revision),
+    RegisterRec([]() -> uint16_t { return project_revision; }, 2),
     // 0x03
-    RegisterRec(false, &project_build_number),
+    RegisterRec([]() -> uint16_t { return project_build_number; }, 2),
     // 0x04
     RegisterRec( // MMU errors
         []() -> uint16_t { return mg::globals.DriveErrors(); }, // compiles to: <{lambda()#1}::_FUN()>: jmp <modules::permanent_storage::DriveError::get()>
@@ -465,24 +449,9 @@ bool ReadRegister(uint8_t address, uint16_t &value) {
     const RegisterFlags rf(hal::progmem::read_byte(addr));
     // beware - abusing the knowledge of RegisterRec memory layout to do lpm_reads
     const void *varAddr = addr + sizeof(RegisterFlags);
-    if (!rf.RWFuncs()) {
-        switch (rf.Size()) {
-        case 0:
-        case 1:
-            value = *hal::progmem::read_ptr<const uint8_t *>(varAddr);
-            break;
-        case 2:
-            value = *hal::progmem::read_ptr<const uint16_t *>(varAddr);
-            break;
-        default:
-            return false;
-        }
-        return true;
-    } else {
-        auto readFunc = hal::progmem::read_ptr<const TReadFunc>(varAddr);
-        value = readFunc();
-        return true;
-    }
+    auto readFunc = hal::progmem::read_ptr<const TReadFunc>(varAddr);
+    value = readFunc();
+    return true;
 }
 
 bool WriteRegister(uint8_t address, uint16_t value) {
@@ -499,22 +468,7 @@ bool WriteRegister(uint8_t address, uint16_t value) {
     // beware - abusing the knowledge of RegisterRec memory layout to do lpm_reads
     // addr offset should be 3 on AVR, but 9 on x86_64, therefore "1 + sizeof(void*)"
     const void *varAddr = addr + sizeof(RegisterFlags) + sizeof(RegisterRec::A1);
-    if (!rf.RWFuncs()) {
-        switch (rf.Size()) {
-        case 0:
-        case 1:
-            *hal::progmem::read_ptr<uint8_t *>(varAddr) = value;
-            break;
-        case 2:
-            *hal::progmem::read_ptr<uint16_t *>(varAddr) = value;
-            break;
-        default:
-            return false;
-        }
-        return true;
-    } else {
-        auto writeFunc = hal::progmem::read_ptr<const TWriteFunc>(varAddr);
-        writeFunc(value);
-        return true;
-    }
+    auto writeFunc = hal::progmem::read_ptr<const TWriteFunc>(varAddr);
+    writeFunc(value);
+    return true;
 }
