@@ -39,7 +39,7 @@ bool ToolChange::Reset(uint8_t param) {
     if (mg::globals.FilamentLoaded() >= mg::FilamentLoadState::InSelector) {
         dbg_logic_P(PSTR("Filament is loaded --> unload"));
         state = ProgressCode::UnloadingFilament;
-        unl.Reset(mg::globals.ActiveSlot());
+        unl.Reset2(mg::globals.ActiveSlot());
     } else {
         mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::InSelector); // activate the correct slot, feed uses that
         if (feed.Reset(true, false)) {
