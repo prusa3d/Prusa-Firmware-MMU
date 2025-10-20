@@ -94,7 +94,7 @@ bool CutFilament::StepInner() {
     case ProgressCode::PreparingBlade:
         if (ms::selector.Slot() == cutSlot + 1) {
             state = ProgressCode::PushingFilament;
-            mpu::pulley.PlanMove(mg::globals.CutLength() + config::cuttingEdgeRetract, config::pulleySlowFeedrate);
+            mpu::pulley.PlanMove(mg::globals.CutLength() + config::cuttingEdgeRetract, mg::globals.PulleySlowFeedrate_mm_s());
         }
         break;
     case ProgressCode::PushingFilament:
@@ -123,7 +123,7 @@ bool CutFilament::StepInner() {
             // revert move speed
             mg::globals.SetSelectorFeedrate_mm_s(savedSelectorFeedRate_mm_s);
             ms::selector.InvalidateHoming();
-            mpu::pulley.PlanMove(-config::cuttingEdgeRetract, config::pulleySlowFeedrate);
+            mpu::pulley.PlanMove(-config::cuttingEdgeRetract, mg::globals.PulleySlowFeedrate_mm_s());
         }
         break;
     case ProgressCode::Homing:
