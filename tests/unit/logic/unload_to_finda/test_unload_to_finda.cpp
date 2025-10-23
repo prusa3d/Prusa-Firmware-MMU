@@ -44,15 +44,30 @@ TEST_CASE("unload_to_finda::regular_unload", "[unload_to_finda]") {
 
     // it should have instructed the selector and idler to move to slot 1
     // check if the idler and selector have the right command
-    CHECK(mm::AxisNearestTargetPos(mm::Idler) == mi::Idler::SlotPosition(0).v);
+    CHECK(mm::AxisNearestTargetPos(mm::Idler) == mi::Idler::IntermediateSlotPosition(0).v);
     CHECK(mm::AxisNearestTargetPos(mm::Selector) == ms::Selector::SlotPosition(0).v);
 
-    // engaging idler
+    // engaging idler partially
+    REQUIRE(WhileCondition(
+        ff,
+        [&](uint32_t) { return !mi::idler.PartiallyDisengaged(); },
+        5000));
+
+    // turn off fsensor - the printer freed the filament from the gears
+    SetFSensorStateAndDebounce(false);
+
+    // make sure we step ff to handle turned-off fsensor
+    ff.Step();
+
+    REQUIRE(ff.State() == logic::UnloadToFinda::UnloadingToFinda);
+    CHECK(mm::axes[mm::Pulley].enabled == true);
+    CHECK(mm::AxisNearestTargetPos(mm::Idler) == mi::Idler::SlotPosition(0).v);
+
+    // engaging idler fully
     REQUIRE(WhileCondition(
         ff,
         [&](uint32_t) { return !mi::idler.Engaged(); },
         5000));
-    CHECK(mm::axes[mm::Pulley].enabled == true);
 
     // now pulling the filament until finda triggers
     REQUIRE(ff.State() == logic::UnloadToFinda::WaitingForFINDA);
