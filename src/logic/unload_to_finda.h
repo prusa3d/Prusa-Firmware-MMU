@@ -24,7 +24,8 @@ struct UnloadToFinda {
     inline constexpr UnloadToFinda()
         : state(OK)
         , maxTries(3)
-        , unloadStart_mm(0) {}
+        , unloadStart_mm(0)
+        , started_ms(0) {}
 
     /// Restart the automaton
     /// @param maxTries maximum number of retried attempts before reporting a fail
@@ -40,6 +41,7 @@ private:
     uint8_t state;
     uint8_t maxTries;
     int32_t unloadStart_mm; // intentionally trying to avoid using U_mm because it is a float (reps. long double)
+    uint16_t started_ms; // timeout on fsensor turn off
 };
 
 } // namespace logic
