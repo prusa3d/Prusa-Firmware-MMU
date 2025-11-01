@@ -122,6 +122,7 @@ bool Selector::Step() {
         return false;
     case Ready:
         if (!homingValid && mg::globals.FilamentLoaded() < mg::InSelector && (!mf::finda.Pressed())) {
+            // home the Selector only in case we don't have filament loaded (or at least we think we don't)
             PlanHome();
             return false;
         }
@@ -133,14 +134,8 @@ bool Selector::Step() {
 }
 
 void Selector::Init() {
-    if (mg::globals.FilamentLoaded() < mg::FilamentLoadState::InSelector && (!mf::finda.Pressed())) {
-        // home the Selector only in case we don't have filament loaded (or at least we think we don't)
-        PlanHome();
-    } else {
-        // otherwise set selector's position according to know slot positions (and pretend it is correct)
-        mm::motion.SetPosition(mm::Selector, SlotPosition(mg::globals.ActiveSlot()).v);
-        InvalidateHoming(); // and plan homing sequence ASAP
-    }
+    // Re-home axis at first opportunity. See 'Ready' state.
+    InvalidateHoming();
 }
 
 } // namespace selector
