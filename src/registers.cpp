@@ -169,33 +169,6 @@
 | 0x23h 35 | uint8    | Cut length                 | 0-255        | 8           | unit mm                                  | Read / Write | M707 A0x23 | M708 A0x23 Xn
 */
 
-struct __attribute__((packed)) RegisterFlags {
-    struct __attribute__((packed)) A {
-        uint8_t size : 2; // 0: 1 bit, 1: 1 byte, 2: 2 bytes - keeping size as the lowest 2 bits avoids costly shifts when accessing them
-        uint8_t writable : 1;
-        constexpr A(uint8_t size, bool writable)
-            : size(size)
-            , writable(writable) {}
-    };
-    union __attribute__((packed)) U {
-        A bits;
-        uint8_t b;
-        constexpr U(uint8_t size, bool writable)
-            : bits(size, writable) {}
-        constexpr U(uint8_t b)
-            : b(b) {}
-    } u;
-    constexpr RegisterFlags(uint8_t size, bool writable)
-        : u(size, writable) {}
-    explicit constexpr RegisterFlags(uint8_t b)
-        : u(b) {}
-
-    constexpr bool Writable() const { return u.bits.writable; }
-    constexpr uint8_t Size() const { return u.bits.size; }
-};
-
-static_assert(sizeof(RegisterFlags) == 1);
-
 using TReadFunc = uint16_t (*)();
 using TWriteFunc = void (*)(uint16_t);
 
@@ -203,7 +176,6 @@ using TWriteFunc = void (*)(uint16_t);
 static constexpr uint16_t dummyZero = 0;
 
 struct __attribute__((packed)) RegisterRec {
-    RegisterFlags flags;
     union __attribute__((packed)) U1 {
         void *addr;
         TReadFunc readFunc;
@@ -222,24 +194,22 @@ struct __attribute__((packed)) RegisterRec {
             : addr(a) {}
     } A2;
 
-    constexpr RegisterRec(const TReadFunc &readFunc, uint8_t bytes)
-        : flags(RegisterFlags(bytes, false))
-        , A1(readFunc)
+    constexpr RegisterRec(const TReadFunc &readFunc)
+        : A1(readFunc)
         , A2((void *)nullptr) {}
 
-    constexpr RegisterRec(const TReadFunc &readFunc, const TWriteFunc &writeFunc, uint8_t bytes)
-        : flags(RegisterFlags(bytes, true))
-        , A1(readFunc)
+    constexpr RegisterRec(const TReadFunc &readFunc, const TWriteFunc &writeFunc)
+        : A1(readFunc)
         , A2(writeFunc) {}
 
     constexpr RegisterRec()
-        : flags(RegisterFlags(1, false))
-        , A1((void *)&dummyZero)
+        : A1((void *)&dummyZero)
         , A2((void *)nullptr) {}
 };
 
 // Make sure the structure is tightly packed - necessary for unit tests.
-static_assert(sizeof(RegisterRec) == sizeof(uint8_t) + sizeof(void *) + sizeof(void *));
+static_assert(sizeof(RegisterRec) == /*sizeof(uint8_t) +*/ sizeof(void *) + sizeof(void *));
+
 // Beware: the size is expected to be 17B on an x86_64 and it requires the platform to be able to do unaligned reads.
 // That might be a problem when running unit tests on non-x86 platforms.
 // So far, no countermeasures have been taken to tackle this potential issue.
@@ -258,181 +228,157 @@ static_assert(sizeof(RegisterRec) == sizeof(uint8_t) + sizeof(void *) + sizeof(v
 // sts <modules::globals::globals+0x4>, r24
 // ret
 //
+// @@TODO
+// The "ret" instruction actually is a serious overhead since it is present in every lambda function.
+// The only way around is a giant C-style switch which screws up the beauty of this array of registers.
+// But it will save a few bytes.
 static const RegisterRec registers[] PROGMEM = {
     // 0x00
-    RegisterRec([]() -> uint16_t { return project_major; }, 1),
+    RegisterRec([]() -> uint16_t { return project_major; }),
     // 0x01
-    RegisterRec([]() -> uint16_t { return project_minor; }, 1),
+    RegisterRec([]() -> uint16_t { return project_minor; }),
     // 0x02
-    RegisterRec([]() -> uint16_t { return project_revision; }, 2),
+    RegisterRec([]() -> uint16_t { return project_revision; }),
     // 0x03
-    RegisterRec([]() -> uint16_t { return project_build_number; }, 2),
+    RegisterRec([]() -> uint16_t { return project_build_number; }),
     // 0x04
     RegisterRec( // MMU errors
-        []() -> uint16_t { return mg::globals.DriveErrors(); }, // compiles to: <{lambda()#1}::_FUN()>: jmp <modules::permanent_storage::DriveError::get()>
+        []() -> uint16_t { return mg::globals.DriveErrors(); } // compiles to: <{lambda()#1}::_FUN()>: jmp <modules::permanent_storage::DriveError::get()>
         // [](uint16_t) {}, // @@TODO think about setting/clearing the error counter from the outside
-        2),
+        ),
     // 0x05
-    RegisterRec([]() -> uint16_t { return application.CurrentProgressCode(); }, 1),
+    RegisterRec([]() -> uint16_t { return application.CurrentProgressCode(); }),
     // 0x06
-    RegisterRec([]() -> uint16_t { return application.CurrentErrorCode(); }, 2),
+    RegisterRec([]() -> uint16_t { return application.CurrentErrorCode(); }),
     // 0x07 filamentState
     RegisterRec(
         []() -> uint16_t { return mg::globals.FilamentLoaded(); },
-        [](uint16_t v) { return mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), static_cast<mg::FilamentLoadState>(v)); },
-        1),
+        [](uint16_t v) { return mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), static_cast<mg::FilamentLoadState>(v)); }),
     // 0x08 FINDA
     RegisterRec(
-        []() -> uint16_t { return static_cast<uint16_t>(mf::finda.Pressed()); },
-        1),
+        []() -> uint16_t { return static_cast<uint16_t>(mf::finda.Pressed()); }),
     // 09 fsensor
     RegisterRec(
         []() -> uint16_t { return static_cast<uint16_t>(mfs::fsensor.Pressed()); },
-        [](uint16_t v) { return mfs::fsensor.ProcessMessage(v != 0); },
-        1),
+        [](uint16_t v) { return mfs::fsensor.ProcessMessage(v != 0); }),
     // 0xa motor mode (stealth = 1/normal = 0)
-    RegisterRec([]() -> uint16_t { return static_cast<uint16_t>(mg::globals.MotorsStealth()); }, 1),
+    RegisterRec([]() -> uint16_t { return static_cast<uint16_t>(mg::globals.MotorsStealth()); }),
     // 0xb extra load distance after fsensor triggered (30mm default) [mm] RW
     RegisterRec(
         []() -> uint16_t { return mg::globals.FSensorToNozzle_mm().v; },
-        [](uint16_t d) { mg::globals.SetFSensorToNozzle_mm(d); },
-        1),
+        [](uint16_t d) { mg::globals.SetFSensorToNozzle_mm(d); }),
     // 0x0c fsensor unload check distance (40mm default) [mm] RW
     RegisterRec(
         []() -> uint16_t { return mg::globals.FSensorUnloadCheck_mm().v; },
-        [](uint16_t d) { mg::globals.SetFSensorUnloadCheck_mm(d); },
-        1),
+        [](uint16_t d) { mg::globals.SetFSensorUnloadCheck_mm(d); }),
 
     // 0xd 2 Pulley unload feedrate [mm/s] RW
     RegisterRec(
         []() -> uint16_t { return mg::globals.PulleyUnloadFeedrate_mm_s().v; },
-        [](uint16_t d) { mg::globals.SetPulleyUnloadFeedrate_mm_s(d); },
-        2),
+        [](uint16_t d) { mg::globals.SetPulleyUnloadFeedrate_mm_s(d); }),
 
     // 0xe Pulley acceleration [mm/s2] RW
     RegisterRec(
         []() -> uint16_t {
             mm::steps_t val = mm::motion.Acceleration(config::Pulley);
-            return mm::axisUnitToTruncatedUnit<config::U_mm_s2>( mm::P_accel_t({ val }));
+            return mm::axisUnitToTruncatedUnit<config::U_mm_s2>(mm::P_accel_t({ val }));
         },
-        [](uint16_t d) { mm::motion.SetAcceleration(config::Pulley, mm::unitToSteps<mm::P_accel_t>(config::U_mm_s2({ (long double)d }))); },
-        2),
+        [](uint16_t d) { mm::motion.SetAcceleration(config::Pulley, mm::unitToSteps<mm::P_accel_t>(config::U_mm_s2({ (long double)d }))); }),
     // 0xf Selector acceleration [mm/s2] RW
     RegisterRec(
         []() -> uint16_t {
             mm::steps_t val = mm::motion.Acceleration(config::Selector);
-            return mm::axisUnitToTruncatedUnit<config::U_mm_s2>( mm::S_accel_t({ val }));
+            return mm::axisUnitToTruncatedUnit<config::U_mm_s2>(mm::S_accel_t({ val }));
         },
-        [](uint16_t d) { (mm::motion.SetAcceleration(config::Selector, mm::unitToSteps<mm::S_accel_t>(config::U_mm_s2({ (long double)d })))); },
-        2),
+        [](uint16_t d) { (mm::motion.SetAcceleration(config::Selector, mm::unitToSteps<mm::S_accel_t>(config::U_mm_s2({ (long double)d })))); }),
     // 0x10 Idler acceleration [deg/s2] RW
     RegisterRec(
         []() -> uint16_t {
             mm::steps_t val = mm::motion.Acceleration(config::Idler);
-            return mm::axisUnitToTruncatedUnit<config::U_deg_s2>( mm::I_accel_t({ val }));
+            return mm::axisUnitToTruncatedUnit<config::U_deg_s2>(mm::I_accel_t({ val }));
         },
-        [](uint16_t d) { mm::motion.SetAcceleration(config::Idler, mm::unitToSteps<mm::I_accel_t>(config::U_deg_s2({ (long double)d }))); },
-        2),
+        [](uint16_t d) { mm::motion.SetAcceleration(config::Idler, mm::unitToSteps<mm::I_accel_t>(config::U_deg_s2({ (long double)d }))); }),
 
     // 0x11 Pulley load feedrate [mm/s] RW
     RegisterRec(
         []() -> uint16_t { return mg::globals.PulleyLoadFeedrate_mm_s().v; },
-        [](uint16_t d) { mg::globals.SetPulleyLoadFeedrate_mm_s(d); },
-        2),
+        [](uint16_t d) { mg::globals.SetPulleyLoadFeedrate_mm_s(d); }),
     // 0x12 Selector nominal feedrate [mm/s] RW
     RegisterRec(
         []() -> uint16_t { return mg::globals.SelectorFeedrate_mm_s().v; },
-        [](uint16_t d) { mg::globals.SetSelectorFeedrate_mm_s(d); },
-        2),
+        [](uint16_t d) { mg::globals.SetSelectorFeedrate_mm_s(d); }),
     // 0x13 Idler nominal feedrate [deg/s] RW
     RegisterRec(
         []() -> uint16_t { return mg::globals.IdlerFeedrate_deg_s().v; },
-        [](uint16_t d) { mg::globals.SetIdlerFeedrate_deg_s(d); },
-        2),
+        [](uint16_t d) { mg::globals.SetIdlerFeedrate_deg_s(d); }),
 
     // 0x14 Pulley slow load to fsensor feedrate [mm/s] RW
     RegisterRec(
         []() -> uint16_t { return mg::globals.PulleySlowFeedrate_mm_s().v; },
-        [](uint16_t d) { mg::globals.SetPulleySlowFeedrate_mm_s(d); },
-        2),
+        [](uint16_t d) { mg::globals.SetPulleySlowFeedrate_mm_s(d); }),
     // 0x15 Selector homing feedrate [mm/s] RW
     RegisterRec(
         []() -> uint16_t { return mg::globals.SelectorHomingFeedrate_mm_s().v; },
-        [](uint16_t d) { mg::globals.SetSelectorHomingFeedrate_mm_s(d); },
-        2),
+        [](uint16_t d) { mg::globals.SetSelectorHomingFeedrate_mm_s(d); }),
     // 0x16 Idler homing feedrate [deg/s] RW
     RegisterRec(
         []() -> uint16_t { return mg::globals.IdlerHomingFeedrate_deg_s().v; },
-        [](uint16_t d) { mg::globals.SetIdlerHomingFeedrate_deg_s(d); },
-        2),
+        [](uint16_t d) { mg::globals.SetIdlerHomingFeedrate_deg_s(d); }),
 
     // 0x17 Pulley sg_thrs threshold RW
     RegisterRec(
         []() -> uint16_t { return mg::globals.StallGuardThreshold(config::Pulley); },
-        [](uint16_t d) { mg::globals.SetStallGuardThreshold(config::Pulley, d); },
-        1),
+        [](uint16_t d) { mg::globals.SetStallGuardThreshold(config::Pulley, d); }),
     // 0x18 Selector sg_thrs RW
     RegisterRec(
         []() -> uint16_t { return mg::globals.StallGuardThreshold(mm::Axis::Selector); },
-        [](uint16_t d) { mg::globals.SetStallGuardThreshold(mm::Axis::Selector, d); },
-        1),
+        [](uint16_t d) { mg::globals.SetStallGuardThreshold(mm::Axis::Selector, d); }),
     // 0x19 Idler sg_thrs RW
     RegisterRec(
         []() -> uint16_t { return mg::globals.StallGuardThreshold(mm::Axis::Idler); },
-        [](uint16_t d) { mg::globals.SetStallGuardThreshold(mm::Axis::Idler, d); },
-        1),
+        [](uint16_t d) { mg::globals.SetStallGuardThreshold(mm::Axis::Idler, d); }),
 
     // 0x1a Get Pulley position [mm] R
     RegisterRec(
-        []() -> uint16_t { return mpu::pulley.CurrentPosition_mm(); },
-        2),
+        []() -> uint16_t { return mpu::pulley.CurrentPosition_mm(); }),
     // 0x1b Set/Get Selector slot RW
     RegisterRec(
         []() -> uint16_t { return ms::selector.Slot(); },
-        [](uint16_t d) { ms::selector.MoveToSlot(d); },
-        1),
+        [](uint16_t d) { ms::selector.MoveToSlot(d); }),
     // 0x1c Set/Get Idler slot RW
     RegisterRec(
         []() -> uint16_t { return mi::idler.Slot(); },
-        [](uint16_t d) { d >= config::toolCount ? mi::idler.Disengage() : mi::idler.Engage(d); },
-        1),
+        [](uint16_t d) { d >= config::toolCount ? mi::idler.Disengage() : mi::idler.Engage(d); }),
     // 0x1d Set/Get Selector cut iRun current level RW
     RegisterRec(
         []() -> uint16_t { return mg::globals.CutIRunCurrent(); },
-        [](uint16_t d) { mg::globals.SetCutIRunCurrent(d); },
-        1),
+        [](uint16_t d) { mg::globals.SetCutIRunCurrent(d); }),
 
     // 0x1e Get/Set Pulley iRun current RW
     RegisterRec(
         []() -> uint16_t { return mm::motion.CurrentsForAxis(config::Pulley).iRun; },
-        [](uint16_t d) { mm::motion.SetIRunForAxis(config::Pulley, d); },
-        1),
+        [](uint16_t d) { mm::motion.SetIRunForAxis(config::Pulley, d); }),
     // 0x1f Set/Get Selector iRun current RW
     RegisterRec(
         []() -> uint16_t { return mm::motion.CurrentsForAxis(config::Selector).iRun; },
-        [](uint16_t d) { mm::motion.SetIRunForAxis(config::Selector, d); },
-        1),
+        [](uint16_t d) { mm::motion.SetIRunForAxis(config::Selector, d); }),
     // 0x20 Set/Get Idler iRun current RW
     RegisterRec(
         []() -> uint16_t { return mm::motion.CurrentsForAxis(config::Idler).iRun; },
-        [](uint16_t d) { mm::motion.SetIRunForAxis(config::Idler, d); },
-        1),
+        [](uint16_t d) { mm::motion.SetIRunForAxis(config::Idler, d); }),
     // 0x21 Current VCC voltage level R
     RegisterRec(
-        []() -> uint16_t { return 225; /*mv::vcc.CurrentBandgapVoltage();*/ },
-        2),
+        []() -> uint16_t { return 225; /*mv::vcc.CurrentBandgapVoltage();*/ }),
 
     // 0x22 Detected bowden length R
     RegisterRec(
         []() -> uint16_t { return mps::BowdenLength::Get(); },
-        [](uint16_t d) { mps::BowdenLength::Set(d); },
-        2),
+        [](uint16_t d) { mps::BowdenLength::Set(d); }),
 
     // 0x23 Cut length
     RegisterRec(
         []() -> uint16_t { return mg::globals.CutLength().v; },
-        [](uint16_t d) { mg::globals.SetCutLength(d); },
-        2),
+        [](uint16_t d) { mg::globals.SetCutLength(d); }),
 };
 
 static constexpr uint8_t registersSize = sizeof(registers) / sizeof(RegisterRec);
@@ -446,9 +392,9 @@ bool ReadRegister(uint8_t address, uint16_t &value) {
 
     // Get pointer to register at address
     const uint8_t *addr = reinterpret_cast<const uint8_t *>(registers + address);
-    const RegisterFlags rf(hal::progmem::read_byte(addr));
+
     // beware - abusing the knowledge of RegisterRec memory layout to do lpm_reads
-    const void *varAddr = addr + sizeof(RegisterFlags);
+    const void *varAddr = addr;
     auto readFunc = hal::progmem::read_ptr<const TReadFunc>(varAddr);
     value = readFunc();
     return true;
@@ -458,17 +404,15 @@ bool WriteRegister(uint8_t address, uint16_t value) {
     if (address >= registersSize) {
         return false;
     }
-
     const uint8_t *addr = reinterpret_cast<const uint8_t *>(registers + address);
-    const RegisterFlags rf(hal::progmem::read_byte(addr));
 
-    if (!rf.Writable()) {
+    // beware - abusing the knowledge of RegisterRec memory layout to do lpm_reads
+    // addr offset should be 2 on AVR, but 8 on x86_64, therefore "sizeof(void*)"
+    const void *varAddr = addr + sizeof(RegisterRec::A1);
+    auto writeFunc = hal::progmem::read_ptr<const TWriteFunc>(varAddr);
+    if (writeFunc == nullptr) {
         return false;
     }
-    // beware - abusing the knowledge of RegisterRec memory layout to do lpm_reads
-    // addr offset should be 3 on AVR, but 9 on x86_64, therefore "1 + sizeof(void*)"
-    const void *varAddr = addr + sizeof(RegisterFlags) + sizeof(RegisterRec::A1);
-    auto writeFunc = hal::progmem::read_ptr<const TWriteFunc>(varAddr);
     writeFunc(value);
     return true;
 }
