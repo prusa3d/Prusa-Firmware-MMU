@@ -87,7 +87,10 @@ bool UnloadToFinda::Step() {
             // we reached the end of move queue, but the FINDA didn't switch off
             // two possible causes - grinded filament or malfunctioning FINDA
             if (--maxTries) {
-                Reset(maxTries); // try again
+                // Ideally, the Idler shall rehome and then try again.
+                // That would auto-resolve errors caused by slipped or misaligned Idler
+                mi::idler.InvalidateHoming();
+                Reset(maxTries);
             } else {
                 state = FailedFINDA;
             }
