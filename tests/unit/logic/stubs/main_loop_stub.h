@@ -1,6 +1,7 @@
 #pragma once
 #include "../../../../src/logic/command_base.h"
 #include "../../../../src/modules/globals.h"
+#include "../../../../src/modules/idler.h"
 
 extern void main_loop();
 extern void ForceReinitAllAutomata();
@@ -44,3 +45,21 @@ static constexpr uint32_t selectorMoveMaxSteps = 40000UL;
 void HomeIdlerAndSelector();
 
 void SimulateErrDisengagingIdler(logic::CommandBase &cb, ErrorCode deferredEC);
+
+template <typename T>
+bool SimulateEngageIdlerFully(T &cb) {
+    return WhileCondition(
+        cb,
+        [&](uint32_t) { return !mi::idler.Engaged(); },
+        5000);
+}
+
+template <typename T>
+bool SimulateEngageIdlerPartially(T &cb) {
+    return WhileCondition(
+        cb,
+        [&](uint32_t) { return !mi::idler.PartiallyDisengaged(); },
+        5000);
+}
+
+void HomeIdler();
