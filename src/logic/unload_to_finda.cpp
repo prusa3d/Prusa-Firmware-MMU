@@ -48,6 +48,9 @@ bool UnloadToFinda::Step() {
                 mpu::pulley.InitAxis();
                 ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
                 mi::idler.Engage(mg::globals.ActiveSlot());
+
+                //  slow move for the first few millimeters - help the printer relieve the filament while engaging the Idler fully
+                mpu::pulley.PlanMove(-config::fsensorToNozzleAvoidGrindUnload, mg::globals.PulleySlowFeedrate_mm_s(), mg::globals.PulleySlowFeedrate_mm_s());
             } else {
                 state = FailedFINDA;
             }
