@@ -104,6 +104,7 @@ static constexpr U_mm pulleyHelperMove = 10.0_mm; ///< Helper move for Load/Unlo
 static constexpr U_mm cutLength = 8.0_mm;
 static constexpr U_mm fsensorToNozzle = 30.0_mm; ///< ~20mm from MK4's filament sensor through extruder gears into nozzle
 static constexpr U_mm fsensorToNozzleAvoidGrind = 5.0_mm;
+static constexpr U_mm fsensorToNozzleAvoidGrindUnload = 20.0_mm;
 /// Check the state of FSensor after this amount of filament got (hopefully) pulled out while unloading.
 static constexpr U_mm fsensorUnloadCheckDistance = 40.0_mm;
 
