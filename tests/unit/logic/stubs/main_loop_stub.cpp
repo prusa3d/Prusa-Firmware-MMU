@@ -79,19 +79,27 @@ void ForceReinitAllAutomata() {
     mg::globals.Init();
     mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::AtPulley);
 }
+void HomeIdler() {
+    logic::NoCommand nc; // just a dummy instance which has an empty Step()
+    SimulateIdlerHoming(nc);
+    SimulateIdlerWaitForHomingValid(nc);
+    SimulateIdlerMoveToParkingPosition(nc);
+}
+
+void HomeSelector() {
+    logic::NoCommand nc; // just a dummy instance which has an empty Step()
+    SimulateSelectorHoming(nc);
+    SimulateSelectorWaitForHomingValid(nc);
+    SimulateSelectorWaitForReadyState(nc);
+}
 
 void HomeIdlerAndSelector() {
     mi::idler.InvalidateHoming();
     ms::selector.InvalidateHoming();
-    logic::NoCommand nc; // just a dummy instance which has an empty Step()
 
-    SimulateIdlerHoming(nc);
-    SimulateIdlerWaitForHomingValid(nc);
-    SimulateIdlerMoveToParkingPosition(nc);
+    HomeIdler();
 
-    SimulateSelectorHoming(nc);
-    SimulateSelectorWaitForHomingValid(nc);
-    SimulateSelectorWaitForReadyState(nc);
+    HomeSelector();
 }
 
 bool EnsureActiveSlotIndex(uint8_t slot, mg::FilamentLoadState loadState) {
