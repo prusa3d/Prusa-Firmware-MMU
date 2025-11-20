@@ -53,16 +53,10 @@ void RegularUnloadFromSlot04(uint8_t slot, logic::UnloadFilament &uf, uint8_t en
     REQUIRE(VerifyState(uf, (mg::FilamentLoadState)(mg::FilamentLoadState::InNozzle | mg::FilamentLoadState::InSelector),
         entryIdlerSlotIndex, slot, true, true, entryGreenLED, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
 
-    // run the automaton
-    // Stage 1 - unloading to FINDA
-    REQUIRE(WhileCondition(
-        uf,
-        [&](uint32_t step) -> bool {
-        if(step == 100){ // on 100th step make FINDA trigger
-            hal::gpio::WritePin(FINDA_PIN, hal::gpio::Level::low);
-        }
-        return uf.TopLevelState() == ProgressCode::UnloadingToFinda; },
-        50000));
+    REQUIRE(WhileCondition(uf, std::bind(SimulateUnloadToFINDA, _1, 100, 2'000), 200'000));
+
+    main_loop();
+    uf.Step();
 
     // we still think we have filament loaded at this stage
     // idler should have been activated by the underlying automaton
@@ -100,7 +94,7 @@ TEST_CASE("unload_filament::regular_unload_from_slot_0-4", "[unload_filament]") 
     for (uint8_t slot = 0; slot < config::toolCount; ++slot) {
         logic::UnloadFilament uf;
         RegularUnloadFromSlot04Init(slot, uf);
-        RegularUnloadFromSlot04(slot, uf, mi::Idler::IdleSlotIndex(), false, ml::off);
+        RegularUnloadFromSlot04(slot, uf, mi::Idler::IdleSlotIndex(), false, ml::blink0);
     }
 }
 
@@ -130,7 +124,7 @@ void FindaDidntTriggerCommonSetup(uint8_t slot, logic::UnloadFilament &uf) {
     // FINDA triggered off
     // green LED should be off
     // no error so far
-    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InNozzle, mi::Idler::IdleSlotIndex(), slot, true, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InNozzle, mi::Idler::IdleSlotIndex(), slot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
 
     // run the automaton
     // Stage 1 - unloading to FINDA - do NOT let it trigger - keep it pressed, the automaton should finish all moves with the pulley
@@ -177,7 +171,7 @@ void FindaDidntTriggerResolveTryAgain(uint8_t slot, logic::UnloadFilament &uf) {
     // no change in selector's position
     // FINDA still on
     // red LED should blink, green LED should be off
-    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InSelector, mi::Idler::IdleSlotIndex(), slot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
 
     ClearButtons(uf);
 

@@ -328,7 +328,7 @@ void ToolChangeFailFSensor(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSl
     // restart the automaton
     tc.Reset(toSlot);
 
-    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InNozzle, mi::idler.IdleSlotIndex(), fromSlot, true, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingFilament));
+    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InNozzle, mi::idler.IdleSlotIndex(), fromSlot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingFilament));
     // simulate unload to finda but fail the fsensor test
     REQUIRE(WhileCondition(tc, std::bind(SimulateUnloadToFINDA, _1, 500'000, 10'000), 200'000));
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, mi::idler.IdleSlotIndex(), fromSlot, false, false, ml::off, ml::blink0, ErrorCode::FSENSOR_DIDNT_SWITCH_OFF, ProgressCode::UnloadingFilament));
@@ -528,7 +528,7 @@ void ToolChangeFSENSOR_TOO_EARLY(logic::ToolChange &tc, uint8_t slot) {
 
     // make AutoRetry
     PressButtonAndDebounce(tc, mb::Middle, true);
-    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, mi::idler.IdleSlotIndex(), slot, true, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingFilament));
+    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, mi::idler.IdleSlotIndex(), slot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingFilament));
 
     SimulateIdlerHoming(tc);
 
