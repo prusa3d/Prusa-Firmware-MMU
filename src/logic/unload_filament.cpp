@@ -30,7 +30,6 @@ bool UnloadFilament::Reset(uint8_t /*param*/) {
     error = ErrorCode::RUNNING;
     skipDisengagingIdler = false;
     unl.Reset(maxRetries);
-    ml::leds.SetAllOff();
     return true;
 }
 
