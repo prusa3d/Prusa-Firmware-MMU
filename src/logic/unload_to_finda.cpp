@@ -22,6 +22,7 @@ void UnloadToFinda::Reset(uint8_t maxTries) {
         state = EngagingIdler;
         mi::idler.PartiallyDisengage(mg::globals.ActiveSlot()); // basically prepare before the active slot - saves ~1s
         started_ms = mt::timebase.Millis();
+        ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
     }
 }
 
@@ -46,7 +47,6 @@ bool UnloadToFinda::Step() {
             if (mg::globals.FilamentLoaded() >= mg::FilamentLoadState::InSelector) {
                 state = UnloadingToFinda;
                 mpu::pulley.InitAxis();
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
                 mi::idler.Engage(mg::globals.ActiveSlot());
 
                 //  slow move for the first few millimeters - help the printer relieve the filament while engaging the Idler fully

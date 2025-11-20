@@ -51,7 +51,7 @@ void FailingMovableUnload(hal::tmc2130::ErrorFlags ef, ErrorCode ec, config::Axi
     // UnloadFilament starts by engaging the idler (through the UnloadToFinda state machine)
     uf.Reset(0);
 
-    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InNozzle, mi::Idler::IdleSlotIndex(), 0, true, true, ml::off, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
+    REQUIRE(VerifyState(uf, mg::FilamentLoadState::InNozzle, mi::Idler::IdleSlotIndex(), 0, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingToFinda));
 
     REQUIRE(WhileCondition(
         uf,
