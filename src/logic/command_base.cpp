@@ -212,7 +212,7 @@ void CommandBase::ErrDisengagingIdler() {
 void CommandBase::GoToErrDisengagingIdler(ErrorCode deferredEC) {
     state = ProgressCode::ERRDisengagingIdler;
     deferredErrorCode = deferredEC;
-    ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::blink0);
+    ml::leds.ActiveSlotError();
     mi::idler.Disengage();
 }
 

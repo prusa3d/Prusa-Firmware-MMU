@@ -22,7 +22,7 @@ void UnloadToFinda::Reset(uint8_t maxTries) {
         state = EngagingIdler;
         mi::idler.PartiallyDisengage(mg::globals.ActiveSlot()); // basically prepare before the active slot - saves ~1s
         started_ms = mt::timebase.Millis();
-        ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
+        ml::leds.ActiveSlotProcessing();
     }
 }
 
@@ -77,12 +77,12 @@ bool UnloadToFinda::Step() {
             // This scenario should not be tried again - repeating it may cause more damage to filament + potentially more collateral damage
             state = FailedFSensor;
             mm::motion.AbortPlannedMoves(); // stop rotating the pulley
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
+            ml::leds.ActiveSlotDoneEmpty();
         } else if (!mf::finda.Pressed()) {
             // detected end of filament
             state = OK;
             mm::motion.AbortPlannedMoves(); // stop rotating the pulley
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
+            ml::leds.ActiveSlotDoneEmpty();
         } else if (/*tmc2130_read_gstat() &&*/ mm::motion.QueueEmpty()) {
             // we reached the end of move queue, but the FINDA didn't switch off
             // two possible causes - grinded filament or malfunctioning FINDA

@@ -17,7 +17,7 @@ void FeedToBondtech::Reset(uint8_t maxRetries) {
     dbg_logic_P(PSTR("\nFeed to Bondtech\n\n"));
     state = EngagingIdler;
     this->maxRetries = maxRetries;
-    ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
+    ml::leds.ActiveSlotProcessing();
     mi::idler.Engage(mg::globals.ActiveSlot());
 }
 
@@ -95,7 +95,7 @@ bool FeedToBondtech::Step() {
             dbg_logic_P(PSTR("Feed to Bondtech --> Idler disengaged"));
             dbg_logic_fP(PSTR("Pulley end steps %u"), mpu::pulley.CurrentPosition_mm());
             state = OK;
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
+            ml::leds.ActiveSlotDonePrimed();
         }
         return false;
     case OK:

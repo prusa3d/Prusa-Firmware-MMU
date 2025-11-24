@@ -54,20 +54,19 @@ bool ToolChange::Reset(uint8_t param) {
     return true;
 }
 
-void logic::ToolChange::GoToFeedingToBondtech() {
-    ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
+void ToolChange::GoToFeedingToBondtech() {
     james.Reset(3);
     state = ProgressCode::FeedingToBondtech;
     error = ErrorCode::RUNNING;
 }
 
-void logic::ToolChange::ToolChangeFinishedCorrectly() {
-    ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::on, ml::off);
+void ToolChange::ToolChangeFinishedCorrectly() {
+    ml::leds.ActiveSlotDonePrimed();
     mui::userInput.SetPrinterInCharge(false);
     FinishedOK();
 }
 
-void logic::ToolChange::GoToFeedingToFinda() {
+void ToolChange::GoToFeedingToFinda() {
     state = ProgressCode::FeedingToFinda;
     error = ErrorCode::RUNNING;
     mg::globals.SetFilamentLoaded(plannedSlot, mg::FilamentLoadState::AtPulley);
