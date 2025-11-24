@@ -329,10 +329,40 @@ void ToolChangeFailFSensor(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSl
     tc.Reset(toSlot);
 
     REQUIRE(VerifyState(tc, mg::FilamentLoadState::InNozzle, mi::idler.IdleSlotIndex(), fromSlot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingFilament));
-    // simulate unload to finda but fail the fsensor test
-    REQUIRE(WhileCondition(tc, std::bind(SimulateUnloadToFINDA, _1, 500'000, 10'000), 200'000));
-    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, mi::idler.IdleSlotIndex(), fromSlot, false, false, ml::off, ml::blink0, ErrorCode::FSENSOR_DIDNT_SWITCH_OFF, ProgressCode::UnloadingFilament));
+
+    // now simulate unload to finda but fail the fsensor test - that means basically waiting for 4 seconds
+    for (uint32_t ms = 0; ms < 4000; ++ms) {
+        main_loop(); // increments 1ms each run
+        tc.Step();
+    }
+
+    // UnloadFilament.unl finds out, that fsensor didn't turn off in time
+    main_loop();
+    tc.Step();
+
+    // UnloadFilament starts error handling
+    main_loop();
+    tc.Step();
+
+    // wait for the Idler to be disengaged in error state
+    REQUIRE(WhileCondition(
+        tc, [&](uint32_t) {
+            return tc.State() == ProgressCode::ERRDisengagingIdler;
+        },
+        idlerEngageDisengageMaxSteps));
+
+    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InNozzle, mi::idler.IdleSlotIndex(), fromSlot, true, false, ml::off, ml::blink0, ErrorCode::FSENSOR_DIDNT_SWITCH_OFF, ProgressCode::UnloadingFilament));
     REQUIRE(tc.unl.State() == ProgressCode::ERRWaitingForUser);
+}
+
+bool SimulateUnloadFilamentUntilSelectorRehoming(uint32_t step, const logic::ToolChange *tc, uint32_t unloadLengthSteps) {
+    if (step == 20) { // on 20th step make FSensor switch off
+        mfs::fsensor.ProcessMessage(false);
+    } else if (step == unloadLengthSteps) {
+        FINDAOnOff(false);
+    }
+    // end simulation at the DisengagingIdler stage, selector re-homing will take place later
+    return tc->unl.State() != ProgressCode::DisengagingIdler;
 }
 
 void ToolChangeFailFSensorMiddleBtn(logic::ToolChange &tc, uint8_t fromSlot, uint8_t toSlot) {
@@ -343,43 +373,31 @@ void ToolChangeFailFSensorMiddleBtn(logic::ToolChange &tc, uint8_t fromSlot, uin
     REQUIRE_FALSE(mui::userInput.AnyEvent());
     PressButtonAndDebounce(tc, mb::Middle, true);
 
-    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, mi::idler.IdleSlotIndex(), fromSlot, false, false, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingFilament));
-    REQUIRE(tc.unl.State() == ProgressCode::FeedingToFinda); // MMU must find out where the filament is FS is OFF, FINDA is OFF
+    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InNozzle, mi::idler.IdleSlotIndex(), fromSlot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingFilament));
 
     // both movables should have their homing flag invalidated
     REQUIRE_FALSE(mi::idler.HomingValid());
     REQUIRE_FALSE(ms::selector.HomingValid());
 
-    // make FINDA trigger - Idler will rehome in this step, Selector must remain at its place
     SimulateIdlerHoming(tc);
-
-    REQUIRE_FALSE(mi::idler.HomingValid());
-    REQUIRE_FALSE(ms::selector.HomingValid());
-
     SimulateIdlerWaitForHomingValid(tc);
 
     REQUIRE(mi::idler.HomingValid());
     REQUIRE_FALSE(ms::selector.HomingValid());
 
-    SimulateIdlerMoveToParkingPosition(tc);
-
-    // now trigger the FINDA
-    REQUIRE(WhileCondition(tc, std::bind(SimulateFeedToFINDA, _1, 100), 5000));
-    REQUIRE(VerifyState(tc, mg::FilamentLoadState::InSelector, fromSlot, fromSlot, true, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingFilament));
-    REQUIRE(tc.unl.State() == ProgressCode::RetractingFromFinda);
-
-    // make FINDA switch off
-    REQUIRE(WhileCondition(tc, std::bind(SimulateRetractFromFINDA, _1, 100), 5000));
+    // perform a successful unload
+    // During the last stage (DisengagingIdler), the Selector will start re-homing - needs special handling
     REQUIRE(WhileCondition(
-        tc, [&](uint32_t) { return tc.unl.State() == ProgressCode::RetractingFromFinda; }, 50000));
+        tc,
+        std::bind(SimulateUnloadFilamentUntilSelectorRehoming, _1, &tc, mm::unitToSteps<mm::P_pos_t>(config::minimumBowdenLength)),
+        200'000UL));
 
-    // Selector will start rehoming at this stage - that was the error this test was to find
-    REQUIRE(VerifyState(tc, mg::FilamentLoadState::AtPulley, fromSlot, config::toolCount, false, true, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::UnloadingFilament));
-    REQUIRE(tc.unl.State() == ProgressCode::DisengagingIdler);
     SimulateSelectorHoming(tc);
+    SimulateSelectorWaitForHomingValid(tc);
 
-    // Idler has probably engaged meanwhile, ignore its position check
-    REQUIRE(WhileTopState(tc, ProgressCode::UnloadingFilament, 50000));
+    // Selector should be moving to the target slot to accomplish the unload phase
+    REQUIRE(WhileTopState(tc, ProgressCode::UnloadingFilament, 50'000));
+
     REQUIRE(VerifyState2(tc, mg::FilamentLoadState::AtPulley, config::toolCount, fromSlot, false, false, toSlot, ml::blink0, ml::off, ErrorCode::RUNNING, ProgressCode::FeedingToFinda));
 
     // after that, perform a normal load
