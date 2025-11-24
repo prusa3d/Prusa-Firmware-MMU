@@ -61,7 +61,7 @@ bool EjectFilament::StepInner() {
         if (mi::idler.Engaged()) {
             state = ProgressCode::EjectingFilament;
             mpu::pulley.InitAxis();
-            mpu::pulley.PlanMove(config::ejectFromCuttingEdge, config::pulleySlowFeedrate);
+            mpu::pulley.PlanMove(config::ejectFromCuttingEdge, mg::globals.PulleySlowFeedrate_mm_s());
         }
         break;
     case ProgressCode::EjectingFilament:

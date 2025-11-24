@@ -125,7 +125,7 @@ static void setup2() {
 
         // activate the correct LED if filament is present
         if (mg::globals.FilamentLoaded() > mg::FilamentLoadState::AtPulley) {
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
+            ml::leds.ActiveSlotDonePrimed();
         }
     }
 

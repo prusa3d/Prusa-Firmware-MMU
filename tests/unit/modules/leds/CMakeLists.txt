@@ -1,7 +1,13 @@
 # define the test executable
 add_executable(
-  leds_tests ${CMAKE_SOURCE_DIR}/src/modules/leds.cpp ${MODULES_STUBS_DIR}/stub_shr16.cpp
-             ${MODULES_STUBS_DIR}/stub_timebase.cpp test_leds.cpp
+  leds_tests
+  ${CMAKE_SOURCE_DIR}/src/modules/leds.cpp
+  ${CMAKE_SOURCE_DIR}/src/modules/globals.cpp
+  ${CMAKE_SOURCE_DIR}/src/modules/permanent_storage.cpp
+  ${MODULES_STUBS_DIR}/stub_shr16.cpp
+  ${MODULES_STUBS_DIR}/stub_timebase.cpp
+  ${MODULES_STUBS_DIR}/stub_eeprom.cpp
+  test_leds.cpp
   )
 
 # define required search paths

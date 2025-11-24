@@ -17,7 +17,7 @@ void FeedToBondtech::Reset(uint8_t maxRetries) {
     dbg_logic_P(PSTR("\nFeed to Bondtech\n\n"));
     state = EngagingIdler;
     this->maxRetries = maxRetries;
-    ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::blink0);
+    ml::leds.ActiveSlotProcessing();
     mi::idler.Engage(mg::globals.ActiveSlot());
 }
 
@@ -78,7 +78,7 @@ bool FeedToBondtech::Step() {
             mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InNozzle);
             mi::idler.PartiallyDisengage(mg::globals.ActiveSlot());
             // while disengaging the idler, keep on moving with the pulley to avoid grinding while the printer is trying to grab the filament itself
-            mpu::pulley.PlanMove(config::fsensorToNozzleAvoidGrind, config::pulleySlowFeedrate);
+            mpu::pulley.PlanMove(config::fsensorToNozzleAvoidGrind, mg::globals.PulleySlowFeedrate_mm_s());
             state = PartiallyDisengagingIdler;
         }
         return false;
@@ -95,7 +95,7 @@ bool FeedToBondtech::Step() {
             dbg_logic_P(PSTR("Feed to Bondtech --> Idler disengaged"));
             dbg_logic_fP(PSTR("Pulley end steps %u"), mpu::pulley.CurrentPosition_mm());
             state = OK;
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
+            ml::leds.ActiveSlotDonePrimed();
         }
         return false;
     case OK:

@@ -2,6 +2,7 @@
 #include "leds.h"
 #include "../hal/shr16.h"
 #include "timebase.h"
+#include "globals.h"
 
 namespace modules {
 namespace leds {
@@ -66,6 +67,22 @@ void LEDs::SetAllOff() {
         SetMode(i, ml::green, ml::off);
         SetMode(i, ml::red, ml::off);
     }
+}
+
+void LEDs::ActiveSlotProcessing() {
+    SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
+}
+
+void LEDs::ActiveSlotError() {
+    SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::blink0);
+}
+
+void LEDs::ActiveSlotDoneEmpty() {
+    SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::off);
+}
+
+void LEDs::ActiveSlotDonePrimed() {
+    SetPairButOffOthers(mg::globals.ActiveSlot(), ml::on, ml::off);
 }
 
 } // namespace leds

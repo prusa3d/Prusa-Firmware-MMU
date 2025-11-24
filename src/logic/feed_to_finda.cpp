@@ -17,7 +17,7 @@ bool FeedToFinda::Reset(bool feedPhaseLimited, bool haltAtEnd) {
     state = EngagingIdler;
     this->feedPhaseLimited = feedPhaseLimited;
     this->haltAtEnd = haltAtEnd;
-    ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
+    ml::leds.ActiveSlotProcessing();
     if (ms::selector.MoveToSlot(mg::globals.ActiveSlot()) != ms::Selector::OperationResult::Accepted) {
         // We can't get any FINDA readings if the selector is at the wrong spot - move it accordingly if necessary
         // And prevent issuing any commands to the idler in such an error state
@@ -44,14 +44,14 @@ bool FeedToFinda::Step() {
             //                mpu::pulley.PlanMove(config::filamentMinLoadedToMMU, config::pulleySlowFeedrate);
             //            }
 
-            mpu::pulley.PlanMove(config::maximumFeedToFinda, config::pulleySlowFeedrate);
+            mpu::pulley.PlanMove(config::maximumFeedToFinda, mg::globals.PulleySlowFeedrate_mm_s());
             if (feedPhaseLimited) {
                 state = PushingFilament;
             } else {
                 state = PushingFilamentUnlimited;
                 // in unlimited move we plan 2 moves at once to make the move "seamless"
                 // one move has already been planned above, this is the second one
-                mpu::pulley.PlanMove(config::maximumFeedToFinda, config::pulleySlowFeedrate);
+                mpu::pulley.PlanMove(config::maximumFeedToFinda, mg::globals.PulleySlowFeedrate_mm_s());
             }
             mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::InSelector);
             mui::userInput.Clear(); // remove all buffered events if any just before we wait for some input
@@ -68,7 +68,7 @@ bool FeedToFinda::Step() {
             return true; // return immediately to allow for a seamless planning of another move (like feeding to bondtech)
         } else if (mm::motion.QueueEmpty()) { // all moves have been finished and FINDA didn't switch on
             state = Failed;
-            ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::blink0);
+            ml::leds.ActiveSlotError();
         }
     }
         return false;
@@ -85,7 +85,7 @@ bool FeedToFinda::Step() {
             return true; // return immediately to allow for a seamless planning of another move (like feeding to bondtech)
         } else if (mm::motion.PlannedMoves(mm::Pulley) < 2) {
             // plan another move to make the illusion of unlimited moves
-            mpu::pulley.PlanMove(config::maximumFeedToFinda, config::pulleySlowFeedrate);
+            mpu::pulley.PlanMove(config::maximumFeedToFinda, mg::globals.PulleySlowFeedrate_mm_s());
         }
     }
         return false;

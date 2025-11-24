@@ -104,7 +104,7 @@ Idler::OperationResult Idler::PlanMoveInner(uint8_t slot, Operation plannedOp) {
     }
 
     // already engaged or disengaged
-    if (currentlyEngaged == plannedMove) {
+    if (currentlyEngaged == plannedMove && currentSlot == plannedSlot) {
         return OperationResult::Accepted;
     }
 

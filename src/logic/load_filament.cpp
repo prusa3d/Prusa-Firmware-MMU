@@ -50,8 +50,6 @@ void logic::LoadFilament::Reset2(bool feedPhaseLimited) {
     if (!feed.Reset(feedPhaseLimited, true)) {
         // selector refused to move
         GoToErrDisengagingIdler(ErrorCode::FINDA_FLICKERS);
-    } else {
-        ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
     }
 }
 

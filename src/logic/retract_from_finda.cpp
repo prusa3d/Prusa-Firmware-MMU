@@ -13,7 +13,7 @@ namespace logic {
 void RetractFromFinda::Reset() {
     dbg_logic_P(PSTR("\nRetract from FINDA\n\n"));
     state = EngagingIdler;
-    ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
+    ml::leds.ActiveSlotProcessing();
     mi::idler.Engage(mg::globals.ActiveSlot());
 }
 
@@ -33,10 +33,10 @@ bool RetractFromFinda::Step() {
                 state = OK;
                 mg::globals.SetFilamentLoaded(mg::globals.ActiveSlot(), mg::FilamentLoadState::AtPulley);
                 dbg_logic_fP(PSTR("Pulley end steps %u"), mpu::pulley.CurrentPosition_mm());
-                ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::off);
+                ml::leds.ActiveSlotDoneEmpty();
             } else { // FINDA didn't switch off
                 state = Failed;
-                ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::blink0);
+                ml::leds.ActiveSlotError();
             }
         }
         return false;
