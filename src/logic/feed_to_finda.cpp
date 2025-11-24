@@ -17,7 +17,7 @@ bool FeedToFinda::Reset(bool feedPhaseLimited, bool haltAtEnd) {
     state = EngagingIdler;
     this->feedPhaseLimited = feedPhaseLimited;
     this->haltAtEnd = haltAtEnd;
-    ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
+    ml::leds.ActiveSlotProcessing();
     if (ms::selector.MoveToSlot(mg::globals.ActiveSlot()) != ms::Selector::OperationResult::Accepted) {
         // We can't get any FINDA readings if the selector is at the wrong spot - move it accordingly if necessary
         // And prevent issuing any commands to the idler in such an error state
@@ -68,7 +68,7 @@ bool FeedToFinda::Step() {
             return true; // return immediately to allow for a seamless planning of another move (like feeding to bondtech)
         } else if (mm::motion.QueueEmpty()) { // all moves have been finished and FINDA didn't switch on
             state = Failed;
-            ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::off, ml::blink0);
+            ml::leds.ActiveSlotError();
         }
     }
         return false;

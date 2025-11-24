@@ -86,7 +86,7 @@ bool CutFilament::StepInner() {
                 // move selector aside - prepare the blade into active position
                 state = ProgressCode::PreparingBlade;
                 mg::globals.SetFilamentLoaded(cutSlot, mg::FilamentLoadState::AtPulley);
-                ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::blink0, ml::off);
+                ml::leds.ActiveSlotProcessing();
                 MoveSelector(cutSlot + 1);
             }
         }
@@ -134,7 +134,7 @@ bool CutFilament::StepInner() {
     case ProgressCode::ReturningSelector:
         if (ms::selector.State() == ms::selector.Ready) {
             FinishedOK();
-            ml::leds.SetPairButOffOthers(mg::globals.ActiveSlot(), ml::on, ml::off);
+            ml::leds.ActiveSlotDonePrimed();
         }
         break;
     case ProgressCode::OK:
