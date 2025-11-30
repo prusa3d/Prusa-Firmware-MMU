@@ -52,31 +52,31 @@ struct GPIO_pin {
     // No constructor here in order to allow brace-initialization in old
     // gcc versions/standards
     GPIO_TypeDef *const port;
-    const uint8_t pin;
+    const uint8_t pin_mask;
 };
 
 __attribute__((always_inline)) inline void WritePin(const GPIO_pin portPin, Level level) {
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
         if (level == Level::high)
-            portPin.port->PORTx |= (1 << portPin.pin);
+            portPin.port->PORTx |= portPin.pin_mask;
         else
-            portPin.port->PORTx &= ~(1 << portPin.pin);
+            portPin.port->PORTx &= ~portPin.pin_mask;
     }
 }
 
 __attribute__((always_inline)) inline Level ReadPin(const GPIO_pin portPin) {
 #ifdef __AVR__
-    return (Level)((portPin.port->PINx & (1 << portPin.pin)) != 0);
+    return (Level)((portPin.port->PINx & portPin.pin_mask) != 0);
 #else
     // Return the value modified by WritePin
-    return (Level)((portPin.port->PORTx & (1 << portPin.pin)) != 0);
+    return (Level)((portPin.port->PORTx & portPin.pin_mask) != 0);
 #endif
 }
 
 __attribute__((always_inline)) inline void TogglePin(const GPIO_pin portPin) {
 #ifdef __AVR__
     // Optimized path for AVR, resulting in a pin toggle
-    portPin.port->PINx = (1 << portPin.pin);
+    portPin.port->PINx = portPin.pin_mask;
 #else
     WritePin(portPin, (Level)(ReadPin(portPin) != Level::high));
 #endif
@@ -85,9 +85,9 @@ __attribute__((always_inline)) inline void TogglePin(const GPIO_pin portPin) {
 __attribute__((always_inline)) inline void Init(const GPIO_pin portPin, GPIO_InitTypeDef GPIO_Init) {
     if (GPIO_Init.mode == Mode::output) {
         WritePin(portPin, GPIO_Init.level);
-        portPin.port->DDRx |= (1 << portPin.pin);
+        portPin.port->DDRx |= portPin.pin_mask;
     } else {
-        portPin.port->DDRx &= ~(1 << portPin.pin);
+        portPin.port->DDRx &= ~portPin.pin_mask;
         WritePin(portPin, (Level)GPIO_Init.pull);
     }
 }
