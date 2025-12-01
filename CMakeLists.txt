@@ -127,6 +127,9 @@ if(CMAKE_CROSSCOMPILING)
   # split and gc sections
   add_compile_options(-ffunction-sections -fdata-sections)
   add_link_options(-ffunction-sections -fdata-sections -Wl,--gc-sections)
+
+  # Call Prologues/Epilogues to reduce code size
+  add_compile_options(-mcall-prologues)
 else()
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_options(-O0)
