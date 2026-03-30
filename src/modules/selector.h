@@ -15,7 +15,8 @@ namespace mm = modules::motion;
 class Selector : public mm::MovableBase {
 public:
     inline constexpr Selector()
-        : MovableBase(mm::Selector) {}
+        : MovableBase(mm::Selector)
+        , plannedHomeTimer(0) {}
 
     /// Plan move of the selector to a specific filament slot
     /// @param slot index to move to
@@ -49,6 +50,10 @@ protected:
     virtual void FinishMove() override;
 
 private:
+    /// Counts main-loop iterations spent in PlannedHome while waiting for the idler to become HomingValid.
+    /// Guards against indefinite deadlock: if the idler never becomes valid, HomeFailed() fires and the
+    /// WaitForModulesErrorRecovery path surfaces the error to the user.
+    uint16_t plannedHomeTimer;
 };
 
 /// The one and only instance of Selector in the FW

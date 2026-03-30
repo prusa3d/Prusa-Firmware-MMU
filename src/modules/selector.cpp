@@ -21,6 +21,7 @@ void Selector::PrepareMoveToPlannedSlot() {
 
 void Selector::PlanHomingMoveForward() {
     state = PlannedHome;
+    plannedHomeTimer = 0; // reset timeout counter when entering PlannedHome
     dbg_logic_P(PSTR("Plan Homing Selector Forward"));
 }
 
@@ -110,6 +111,13 @@ bool Selector::Step() {
             state = HomeForward;
             mm::motion.PlanMove<mm::Selector>(mm::unitToAxisUnit<mm::S_pos_t>(-config::selectorLimits.lenght * 2),
                 mm::unitToAxisUnit<mm::S_speed_t>(mg::globals.SelectorHomingFeedrate_mm_s()));
+        } else if (++plannedHomeTimer >= 30000U) {
+            // Idler did not become homing-valid within ~30 000 main-loop iterations.
+            // This breaks a potential deadlock where the idler is stuck in a non-error
+            // state (e.g. Ready with homingValid==false) that WaitForModulesErrorRecovery
+            // cannot detect.  HomeFailed() transitions selector to HomingFailed, which IS
+            // detected and surfaces an error screen to the user.
+            HomeFailed();
         }
         return false;
     case HomeForward:
