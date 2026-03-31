@@ -3,7 +3,6 @@
 #include <stdint.h>
 
 namespace logic {
-
 /// @brief Unload to FINDA "small" state machine
 ///
 /// "small" state machines will serve as building blocks for high-level commands/operations
@@ -12,36 +11,42 @@ namespace logic {
 /// - rotate some axis to some fixed direction
 /// - load/unload to finda
 struct UnloadToFinda {
-    /// internal states of the state machine
-    enum : uint8_t {
-        EngagingIdler,
-        UnloadingToFinda,
-        WaitingForFINDA,
-        OK,
-        FailedFINDA,
-        FailedFSensor
-    };
-    inline constexpr UnloadToFinda()
-        : state(OK)
-        , maxTries(3)
-        , unloadStart_mm(0)
-        , started_ms(0) {}
+  /// internal states of the state machine
+  enum : uint8_t {
+    EngagingIdler,
+    MicroPullTry,
+    UnloadingToFinda,
+    WaitingForFINDA,
+    OK,
+    FailedFINDA,
+    FailedFSensor
+  };
 
-    /// Restart the automaton
-    /// @param maxTries maximum number of retried attempts before reporting a fail
-    void Reset(uint8_t maxTries);
+  inline constexpr UnloadToFinda()
+    : state(OK)
+    , maxTries(3)
+    , unloadStart_mm(0)
+    , started_ms(0)
+    , microPullTries(0)
+    , microPullMovePlanned(false) {}
 
-    /// @returns true if the state machine finished its job, false otherwise
-    bool Step();
+  /// Restart the automaton
+  /// @param maxTries maximum number of retried attempts before reporting a fail
+  void Reset(uint8_t maxTries);
 
-    /// @returns internal state of the state machine
-    inline uint8_t State() const { return state; }
+  /// @returns true if the state machine finished its job, false otherwise
+  bool Step();
+
+  /// @returns internal state of the state machine
+  inline uint8_t State() const { return state; }
 
 private:
-    uint8_t state;
-    uint8_t maxTries;
-    int32_t unloadStart_mm; // intentionally trying to avoid using U_mm because it is a float (reps. long double)
-    uint16_t started_ms; // timeout on fsensor turn off
+  uint8_t  state;
+  uint8_t  maxTries;
+  int32_t  unloadStart_mm;     // intentionally trying to avoid using U_mm because it is a float (resp. long double)
+  uint16_t started_ms;         // timeout window while actually waiting for fsensor to turn off
+  uint8_t  microPullTries;     // how many micro-pull attempts have been executed
+  bool     microPullMovePlanned; // whether the 1mm micro-pull move has been queued
 };
 
 } // namespace logic
