@@ -18,9 +18,8 @@ void UnloadToFinda::Reset(uint8_t maxTries) {
     if (!mf::finda.Pressed()) {
         state = OK; // FINDA is already off, we assume the fillament is not there, i.e. already unloaded
     } else {
-        // FINDA is sensing the filament, plan moves to unload it
+        // FINDA is sensing the filament
         state = EngagingIdler;
-        mi::idler.PartiallyDisengage(mg::globals.ActiveSlot()); // basically prepare before the active slot - saves ~1s
         started_ms = mt::timebase.Millis();
         ml::leds.ActiveSlotProcessing();
     }
@@ -28,22 +27,14 @@ void UnloadToFinda::Reset(uint8_t maxTries) {
 
 bool UnloadToFinda::Step() {
     switch (state) {
-    // start by engaging the idler into intermediate position
-    // Then, wait for !fsensor.Pressed: that's to speed-up the pull process - unload operation will be started during the purging moves
-    // and as soon as the fsensor turns off, the MMU engages the idler fully and starts pulling.
-    // It will not wait for the extruder to finish the relieve move.
-    // However, such an approach breaks running the MMU on a non-reworked MK4/C1, which hasn't been officially supported, but possible (with some level of uncertainity).
     case EngagingIdler:
-        if (!mi::idler.PartiallyDisengaged()) { // just waiting for Idler to get into the target intermediate position
-            return false;
-        }
         if (mfs::fsensor.Pressed()) { // still pressed, printer didn't free the filament yet
             if (mt::timebase.Elapsed(started_ms, 4000)) {
                 state = FailedFSensor; // fsensor didn't turn off within 4 seconds, something is seriously wrong
             }
             return false;
         } else {
-            // fsensor is OFF and Idler is partially engaged, engage the Idler fully and pull
+            // fsensor is OFF and engage the Idler fully and pull
             if (mg::globals.FilamentLoaded() >= mg::FilamentLoadState::InSelector) {
                 state = UnloadingToFinda;
                 mpu::pulley.InitAxis();
