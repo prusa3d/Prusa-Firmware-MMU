@@ -25,6 +25,10 @@ public:
     /// @note if(state==OnHold) all attempts to Engage are rejected with OperationResult::Rejected
     OperationResult Engage(uint8_t slot);
 
+    /// Plan partial engaging of the idler
+    /// @returns #OperationResult
+    OperationResult PartiallyEngage(uint8_t slot);
+
     /// Plan disengaging of the idler, i.e. parking the idler
     /// @returns #OperationResult
     /// @note if(state==OnHold) all attempts to Disengage are rejected with OperationResult::Rejected
@@ -44,6 +48,7 @@ public:
     inline bool Engaged() const { return currentlyEngaged == Operation::engage; }
     inline bool Disengaged() const { return currentlyEngaged == Operation::disengage; }
     inline bool PartiallyDisengaged() const { return currentlyEngaged == Operation::intermediate; }
+    inline bool PartiallyEngaged() const { return currentlyEngaged == Operation::intermediateUnload; }
 
     /// @returns predefined positions of individual slots
     static constexpr mm::I_pos_t SlotPosition(uint8_t slot) {
@@ -53,6 +58,11 @@ public:
     /// @returns predefined intermediate positions between individual slots
     static constexpr mm::I_pos_t IntermediateSlotPosition(uint8_t slot) {
         return mm::unitToAxisUnit<mm::I_pos_t>(config::idlerIntermediateSlotPositions[slot]);
+    }
+
+    /// @returns predefined intermediate positions between individual slots (Unload)
+    static constexpr mm::I_pos_t IntermediateUnloadSlotPosition(uint8_t slot) {
+    return mm::unitToAxisUnit<mm::I_pos_t>(config::idlerIntermediateUnloadSlotPositions[slot]);
     }
 
     /// @returns the index of idle position of the idler, usually 5 in case of 0-4 valid indices of filament slots
@@ -76,7 +86,8 @@ private:
     enum class Operation : uint8_t {
         disengage = 0,
         engage = 1,
-        intermediate = 2 ///< planned movement will be to an intermediate position between slots (different array of positions)
+        intermediate = 2, ///< planned movement will be to an intermediate position between slots (different array of positions)
+        intermediateUnload = 3 ///Reduced movement to prevent filament stuck
     };
 
     OperationResult PlanMoveInner(uint8_t slot, Operation plannedOp);

@@ -228,6 +228,16 @@ static constexpr U_deg idlerIntermediateSlotPositions[toolCount + 1] = {
     IdlerOffsetFromHome ///18.0_deg Fully disengaged all slots
 };
 
+/// Intermediate positions for Idler's slots: Unloading version to fix the stuck filament
+static constexpr U_deg idlerIntermediateUnloadSlotPositions[toolCount + 1] = {
+    IdlerOffsetFromHome + 4.25F * IdlerSlotDistance,
+    IdlerOffsetFromHome + 3.25F * IdlerSlotDistance,
+    IdlerOffsetFromHome + 2.25F * IdlerSlotDistance,
+    IdlerOffsetFromHome + 1.25F * IdlerSlotDistance,
+    IdlerOffsetFromHome + 0.25F * IdlerSlotDistance,
+    IdlerOffsetFromHome ///18.0_deg Fully disengaged all slots
+};
+
 static constexpr U_deg idlerParkPositionDelta = -IdlerSlotDistance + 5.0_deg / 2; // TODO verify
 
 static constexpr U_deg_s idlerFeedrate = 300._deg_s;
