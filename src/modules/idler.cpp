@@ -13,9 +13,12 @@ namespace idler {
 Idler idler;
 
 void Idler::PrepareMoveToPlannedSlot() {
-    mm::motion.PlanMoveTo<mm::Idler>(
-        plannedMove == Operation::engage ? SlotPosition(plannedSlot) : IntermediateSlotPosition(plannedSlot),
-        mm::unitToAxisUnit<mm::I_speed_t>(mg::globals.IdlerFeedrate_deg_s()));
+    mm::motion.PlanMoveTo<mm::Idler>(plannedMove == Operation::engage
+        ? SlotPosition(plannedSlot)
+        : plannedMove == Operation::intermediateUnload
+            ? IntermediateUnloadSlotPosition(plannedSlot)
+            : IntermediateSlotPosition(plannedSlot),
+    mm::unitToAxisUnit<mm::I_speed_t>(mg::globals.IdlerFeedrate_deg_s()));
     dbg_logic_fP(PSTR("Prepare Move Idler slot %d"), plannedSlot);
 }
 
@@ -78,6 +81,10 @@ Idler::OperationResult Idler::PartiallyDisengage(uint8_t slot) {
 
 Idler::OperationResult Idler::Engage(uint8_t slot) {
     return PlanMoveInner(slot, Operation::engage);
+}
+
+Idler::OperationResult Idler::PartiallyEngage(uint8_t slot) {
+    return PlanMoveInner(slot, Operation::intermediateUnload);
 }
 
 Idler::OperationResult Idler::PlanMoveInner(uint8_t slot, Operation plannedOp) {
